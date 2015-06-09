@@ -1,0 +1,20 @@
+# gengetopt configuration file
+version "1.0"
+package "awa-server-write-attributes"
+purpose "LWM2M Server Resource Write Attributes Operation"
+
+# Options
+option "verbose"    v "Increase program verbosity" flag off
+option "debug"      d "Increase program verbosity" flag off
+option "ipcAddress" a "Connect to Server IPC Address" string optional default="127.0.0.1" typestr="ADDRESS"
+option "ipcPort"    p "Connect to Server IPC port"    int    optional default="54321"     typestr="PORT"
+option "clientID"   c "Client ID"                     string required                     typestr="ID"
+
+text "\n"
+text "Specify one or more object, object instance and resource paths\n"
+text "with query parameters in the format \"/O/I/R?LINK=VALUE\\&LINK2=VALUE2\", separated by spaces.\n"
+text "For example:\n"
+text "\n"
+text "    /3/0/13?gt=5\n"
+text "    /3/0/13?pmin=2\\&pmax=10\n"
+#text "\n"

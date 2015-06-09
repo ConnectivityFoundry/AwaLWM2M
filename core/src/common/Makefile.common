@@ -1,0 +1,13 @@
+common_src = \
+    lwm2m_list.c \
+    coap_abstraction_contiki.c \
+    lwm2m_debug.c \
+    lwm2m_util.c \
+    lwm2m_object_store.c \
+    lwm2m_definition.c \
+    lwm2m_endpoints.c \
+    lwm2m_tree_node.c \
+    lwm2m_result.c \
+    lwm2m_types.c \
+    lwm2m_attributes.c
+

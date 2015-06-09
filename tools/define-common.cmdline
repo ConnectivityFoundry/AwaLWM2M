@@ -1,0 +1,23 @@
+# This file is appended to awa-client/server-define-base.cmdline
+
+defmode "XML Definition"
+defmode "Cmdline Definition"
+
+# Mode: XML Definition
+modeoption "xmlFile" x "Load XML Definition file" mode="XML Definition" string optional typestr="FILENAME" required
+ 
+# Mode: Cmdline Definition
+modeoption "objectID"        o "Object ID"                      mode="Cmdline Definition" int    required typestr="ID"
+modeoption "objectName"      j "Object name"                    mode="Cmdline Definition" string optional typestr="NAME"
+modeoption "objectMandatory" m "Object is required or optional" mode="Cmdline Definition" flag off
+modeoption "objectInstances" y "Object supports single or multiple instances"
+                                                                mode="Cmdline Definition" enum   optional typestr="TYPE"               values="single","multiple" default="single"
+
+modeoption "resourceID"         r "Resource ID"                 mode="Cmdline Definition" int    optional typestr="ID"    multiple(1-)
+modeoption "resourceName"       n "Resource Name"               mode="Cmdline Definition" string optional typestr="NAME"  multiple(1-)
+modeoption "resourceType"       t "Resource Type"               mode="Cmdline Definition" enum   optional typestr="TYPE"  multiple(1-) values="opaque","integer","float","boolean","string","time","objlink","none" 
+modeoption "resourceInstances"  u "Resource supports single or multiple instances"
+                                                                mode="Cmdline Definition" enum   optional typestr="VALUE" multiple(1-) values="single","multiple" 
+modeoption "resourceRequired"   q "Resource is required or optional" 
+                                                                mode="Cmdline Definition" enum   optional typestr="VALUE" multiple(1-) values="optional","mandatory" 
+modeoption "resourceOperations" k "Resource Operation"          mode="Cmdline Definition" enum   optional typestr="VALUE" multiple(1-) values="r","w","e","rw" 

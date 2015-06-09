@@ -1,0 +1,10 @@
+// Suppress all warnings from gengetopt-generated files:
+*:*/*cmdline.c
+
+// Unsupported functions are probably best ignored:
+unusedFunction:api/src/unsupported.c
+
+// Unused function warnings are occasionally useful, but more often than not annoying.
+// Suppress all unused function warnings for now.
+unusedFunction:*
+

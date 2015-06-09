@@ -1,0 +1,13 @@
+# gengetopt configuration file
+version "1.0"
+package "awa-server-list-clients"
+purpose "LWM2M Server List Clients Operation"
+
+# Options
+option "verbose"    v "Increase program verbosity" flag off
+option "debug"      d "Increase program verbosity" flag off
+option "quiet"      q "Decrease program verbosity" flag off
+option "ipcAddress" a "Connect to Client IPC Address" string optional default="127.0.0.1" typestr="ADDRESS"
+option "ipcPort"    p "Connect to Client IPC port"    int    optional default="54321"     typestr="PORT"
+
+option "objects"    o "Show registered objects"    flag off

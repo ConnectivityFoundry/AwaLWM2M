@@ -1,0 +1,59 @@
+set (test_core_runner_SOURCES
+  main.cc
+  
+  test_lwm2m_core.cc
+  test_object_store_interface.cc
+  test_template.cc
+  test_tlv.cc
+  test_json.cc
+  test_definition_registry.cc
+  test_plaintext.cc
+  test_prettyprint.cc
+  test_lwm2m_types.cc
+  
+  test_lwm2m_tree.cc
+  test_lwm2m_tree_builder.cc
+  unit_support.cc
+  test_object_tree.cc
+  test_xml.cc
+)
+
+set (test_core_runner_INCLUDE_DIRS
+  ${GTEST_INCLUDE_DIR}
+  ${CORE_SRC_DIR}
+  ${CORE_SRC_DIR}/common
+  ${CORE_SRC_DIR}/client
+)
+
+set (test_core_runner_LIBRARIES
+  gtest
+  pthread
+  libcoap_static
+  awa_clientd_static
+  lwm2m_common_static
+)
+
+set (CMAKE_CXX_FLAGS "-Wall -Werror -g -std=c++11")
+
+add_definitions (-DLWM2M_CLIENT)
+
+add_executable (test_core_runner ${test_core_runner_SOURCES})
+target_include_directories (test_core_runner PRIVATE ${test_core_runner_INCLUDE_DIRS})
+target_link_libraries (test_core_runner ${test_core_runner_LIBRARIES})
+target_link_libraries (test_core_runner gcov)
+
+# Testing
+add_custom_command (
+  OUTPUT test_core_runner_out.xml
+  COMMAND test_core_runner --gtest_output=xml:test_core_runner_out.xml
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  VERBATIM
+)
+
+if (RUN_TESTS)
+  # always run test_core_runner
+  add_custom_target (
+    test_core_runner_TARGET ALL
+    DEPENDS test_core_runner_out.xml
+  )
+endif ()

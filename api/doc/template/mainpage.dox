@@ -1,0 +1,8 @@
+/** @mainpage Awa API
+@section overview Overview
+
+The Awa library provides a LWM2M client and server implementation.
+ 
+This documentation covers the APIs provided for an application to interact with the client or server. 
+
+ */

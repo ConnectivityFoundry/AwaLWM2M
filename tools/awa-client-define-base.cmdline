@@ -1,0 +1,12 @@
+# gengetopt configuration file
+version "1.0"
+package "awa-client-define"
+purpose "LWM2M Client Object Definition Operation"
+
+# Options
+option "verbose"    v "Increase program verbosity" flag off
+option "debug"      d "Increase program verbosity" flag off
+option "ipcAddress" a "Connect to Client IPC Address" string optional default="127.0.0.1" typestr="ADDRESS"
+option "ipcPort"    p "Connect to Client IPC port"    int    optional default="12345"     typestr="PORT"
+
+# define-common.cmdline will be appended here:

@@ -1,0 +1,49 @@
+diff --git a/coap_io.c b/coap_io.c
+index 073730d..0539fb8 100644
+--- a/coap_io.c
++++ b/coap_io.c
+@@ -36,6 +36,7 @@
+ #include "debug.h"
+ #include "mem.h"
+ #include "coap_io.h"
++#include "pdu.h"
+ 
+ #ifndef CUSTOM_COAP_NETWORK_ENDPOINT
+ 
+@@ -175,6 +176,7 @@ coap_free_endpoint(coap_endpoint_t *ep) {
+ 
+ #ifndef CUSTOM_COAP_NETWORK_SEND
+ 
++#ifndef HAVE_PKT6INFO
+ /* define struct in6_pktinfo and struct in_pktinfo if not available
+    FIXME: check with configure 
+ */
+@@ -182,13 +184,15 @@ struct in6_pktinfo {
+   struct in6_addr ipi6_addr;	/* src/dst IPv6 address */
+   unsigned int ipi6_ifindex;	/* send/recv interface index */
+ };
++#endif
+ 
++#ifndef HAVE_PKTINFO
+ struct in_pktinfo {
+   int ipi_ifindex;
+   struct in_addr ipi_spec_dst;
+   struct in_addr ipi_addr;
+ };
+-
++#endif
+ #ifdef __GNUC__
+ #define UNUSED_PARAM __attribute__ ((unused))
+ #else /* not a GCC */
+@@ -414,8 +418,9 @@ coap_network_read(coap_endpoint_t *ep, coap_packet_t **packet) {
+ 	memcpy(&(*packet)->dst.addr.sin.sin_addr, 
+ 	       &u.p->ipi_addr, sizeof(struct in_addr));
+ 
+-	(*packet)->src.size = mhdr.msg_namelen;
+-	memcpy(&(*packet)->src.addr.st, mhdr.msg_name, (*packet)->src.size);
++    (*packet)->src.size = mhdr.msg_namelen;
++    // This causes a valgrind overlap error and doesn't seem to be useful either (see line 353)
++    //memcpy(&(*packet)->src.addr.st, mhdr.msg_name, (*packet)->src.size);
+ 
+ 	break;
+       }

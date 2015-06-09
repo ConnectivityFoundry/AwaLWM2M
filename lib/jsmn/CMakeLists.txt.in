@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+add_library (libjsmn_static jsmn.c)
+set_property (TARGET libjsmn_static PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_compile_options (-Wall -O2)
+target_compile_definitions (libjsmn_static PRIVATE -DJSMN_FIRST_CHILD_NEXT_SIBLING)
+set_target_properties (libjsmn_static PROPERTIES OUTPUT_NAME "jsmn")
+target_include_directories (libjsmn_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,0 +1,24 @@
+# gengetopt configuration file
+version "1.0"
+package "awa-server-observe"
+purpose "LWM2M Server Observe Operation"
+
+# Options
+option "verbose"    v "Increase program verbosity" flag off
+option "debug"      d "Increase program verbosity" flag off
+option "quiet"      q "Decrease program verbosity" flag off
+option "ipcAddress" a "Connect to Server IPC Address" string optional default="127.0.0.1" typestr="ADDRESS"
+option "ipcPort"    p "Connect to IPC port"           int    optional default="54321"     typestr="PORT" 
+option "clientID"   c "Client ID"                     string required                     typestr="ID"
+
+option "waitTime"  t "Time to wait for notification"       int optional default="0" typestr="SECONDS"
+option "waitCount" n "Number of notifications to wait for" int optional default="0" typestr="NUMBER"
+
+text "\n"
+text "Specify one or more object, object instance and resource paths\n"
+text "to observe in the format \"/O/I/R/i\", separated by spaces.\n"
+text "For example:\n"
+text "\n"
+text "    /3/0/0\n"
+text "    /3/0/7/1\n"
+text "    /4/0/3 /4/0/6\n"

@@ -1,0 +1,237 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..8f4bed5
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,90 @@
++cmake_minimum_required(VERSION 2.8.2)
++Include (CheckIncludeFile)
++Include (CheckFunctionExists)
++Include (CheckTypeSize)
++set (STDC_HEADERS 1)
++set (PACKAGE_BUGREPORT "")
++set (PACKAGE_NAME "libcoap")
++set (PACKAGE_VERSION "4.1.2")
++set (PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
++set (PACKAGE_TARNAME "${PACKAGE_NAME}")
++set (PACKAGE_URL "")
++#set (AC_APPLE_UNIVERSAL_BUILD 1)
++check_include_file (arpa/inet.h HAVE_ARPA_INET_H)
++check_include_file (assert.h HAVE_ASSERT_H)
++check_function_exists (getaddrinfo HAVE_GETADDRINFO)
++check_include_file (inttypes.h, HAVE_INTTYPES_H)
++set (HAVE_LIBCOAP 0)
++check_include_file (limits.h HAVE_LIMITS_H)
++check_include_file (malloc.h HAVE_MALLOC)
++check_include_file (memory.h HAVE_MEMORY_H)
++check_function_exists (memset HAVE_MEMSET)
++check_include_file (netdb.h HAVE_NETDB_H)
++check_include_file (netinet/in.h HAVE_NETINET_IN_H)
++check_function_exists (select HAVE_SELECT)
++check_function_exists (socket HAVE_SOCKET)
++check_include_file (stdint.h HAVE_STDINT_H)
++check_include_file (stdlib.h HAVE_STDLIB_H)
++check_function_exists (strcasecmp HAVE_STRCASECMP)
++check_include_file (strings.h HAVE_STRINGS_H)
++check_include_file (string.h HAVE_STRING_H)
++check_function_exists (strnlen HAVE_STRNLEN)
++check_function_exists (strrchr HAVE_STRRCHR)
++check_include_file (syslog.h HAVE_SYSLOG_H)
++check_include_file (sys/socket.h HAVE_SYS_SOCKET_H)
++check_include_file (sys/stat.h HAVE_SYS_STAT_H)
++check_include_file (sys/time.h HAVE_SYS_TIME_H)
++check_include_file (sys/types.h HAVE_SYS_TYPES_H)
++check_include_file (sys/unistd.h HAVE_SYS_UNISTD_H)
++check_include_file (time.h HAVE_TIME_H)
++check_include_file (unistd.h HAVE_UNISTD_H)
++
++set (CMAKE_EXTRA_INCLUDE_FILES netinet/in.h)
++check_type_size("struct in_pktinfo" SIZEOF_PKTINFO)
++if (SIZEOF_PKTINFO)
++  set (HAVE_PKTINFO 1)
++else ()
++  set (HAVE_PKTINFO 0)
++endif ()
++
++check_type_size("struct in6_pktinfo" SIZEOF_PKT6INFO)
++if (SIZEOF_PKT6INFO)
++  set (HAVE_PKT6INFO 1)
++else ()
++  set (HAVE_PKT6INFO 0)
++endif ()
++
++set (CMAKE_EXTRA_INCLUDE_FILES)
++
++configure_file (config.h.cmake config.h)
++
++set (libcoap_SOURCES
++  pdu.c
++  net.c
++  debug.c
++  encode.c
++  uri.c
++  coap_list.c
++  resource.c
++  hashkey.c
++  str.c
++  option.c
++  async.c
++  subscribe.c
++  block.c
++  mem.c
++  coap_io.c
++)
++
++add_compile_options (-Wall -g -O2)
++
++add_library (libcoap_static ${libcoap_SOURCES})
++target_compile_definitions (libcoap_static PRIVATE -DWITH_POSIX)
++set_property (TARGET libcoap_static PROPERTY POSITION_INDEPENDENT_CODE ON)
++set_target_properties (libcoap_static PROPERTIES OUTPUT_NAME "coap")
++include_directories (${CMAKE_CURRENT_BINARY_DIR})
++
++# add_subdirectory (examples)
++
++# include CMAKE_CURRENT_BINARY_DIR for libcoap so that users of libcoap headers can find config.h in the build directory
++target_include_directories (libcoap_static INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+diff --git a/config.h.cmake b/config.h.cmake
+new file mode 100644
+index 0000000..eacd771
+--- /dev/null
++++ b/config.h.cmake
+@@ -0,0 +1,134 @@
++
++/* Define if building universal (internal helper macro) */
++#cmakedefine AC_APPLE_UNIVERSAL_BUILD @AC_APPLE_UNIVERSAL_BUILD@
++
++/* Define to 1 if you have the <arpa/inet.h> header file. */
++#cmakedefine HAVE_ARPA_INET_H @HAVE_ARPA_INET_H@
++
++/* Define to 1 if you have the <assert.h> header file. */
++#cmakedefine HAVE_ASSERT_H @HAVE_ASSERT_H@
++
++/* Define to 1 if you have the `getaddrinfo' function. */
++#cmakedefine HAVE_GETADDRINFO @HAVE_GETADDRINFO@
++
++/* Define to 1 if you have the <inttypes.h> header file. */
++#cmakedefine HAVE_INTTYPES_H @HAVE_INTTYPES_H@
++
++/* Define to 1 if you have the `coap' library (-lcoap). */
++#cmakedefine HAVE_LIBCOAP @HAVE_LIBCOAP@
++
++/* Define to 1 if you have the <limits.h> header file. */
++#cmakedefine HAVE_LIMITS_H @HAVE_LIMITS_H@
++
++/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
++   to 0 otherwise. */
++#cmakedefine HAVE_MALLOC @HAVE_MALLOC@
++
++/* Define to 1 if you have the <memory.h> header file. */
++#cmakedefine HAVE_MEMORY_H @HAVE_MEMORY_H@
++
++/* Define to 1 if you have the `memset' function. */
++#cmakedefine HAVE_MEMSET @HAVE_MEMSET@
++
++/* Define to 1 if you have the <netdb.h> header file. */
++#cmakedefine HAVE_NETDB_H @HAVE_NETDB_H@
++
++/* Define to 1 if you have the <netinet/in.h> header file. */
++#cmakedefine HAVE_NETINET_IN_H @HAVE_NETINET_IN_H@
++
++/* Define to 1 if you have the `select' function. */
++#cmakedefine HAVE_SELECT @HAVE_SELECT@
++
++/* Define to 1 if you have the `socket' function. */
++#cmakedefine HAVE_SOCKET @HAVE_SOCKET@
++
++/* Define to 1 if you have the <stdint.h> header file. */
++#cmakedefine HAVE_STDINT_H @HAVE_STDINT_H@
++
++/* Define to 1 if you have the <stdlib.h> header file. */
++#cmakedefine HAVE_STDLIB_H @HAVE_STDLIB_H@
++
++/* Define to 1 if you have the `strcasecmp' function. */
++#cmakedefine HAVE_STRCASECMP @HAVE_STRCASECMP@
++
++/* Define to 1 if you have the <strings.h> header file. */
++#cmakedefine HAVE_STRINGS_H @HAVE_STRINGS_H@
++
++/* Define to 1 if you have the <string.h> header file. */
++#cmakedefine HAVE_STRING_H @HAVE_STRING_H@
++
++/* Define to 1 if you have the `strnlen' function. */
++#cmakedefine HAVE_STRNLEN @HAVE_STRNLEN@
++
++/* Define to 1 if you have the `strrchr' function. */
++#cmakedefine HAVE_STRRCHR @HAVE_STRRCHR@
++
++/* Define to 1 if you have the <syslog.h> header file. */
++#cmakedefine HAVE_SYSLOG_H @HAVE_SYSLOG_H@
++
++/* Define to 1 if you have the <sys/socket.h> header file. */
++#cmakedefine HAVE_SYS_SOCKET_H @HAVE_SYS_SOCKET_H@
++
++/* Define to 1 if you have the <sys/stat.h> header file. */
++#cmakedefine HAVE_SYS_STAT_H @HAVE_SYS_STAT_H@
++
++/* Define to 1 if you have the <sys/time.h> header file. */
++#cmakedefine HAVE_SYS_TIME_H @HAVE_SYS_TIME_H@
++
++/* Define to 1 if you have the <sys/types.h> header file. */
++#cmakedefine HAVE_SYS_TYPES_H @HAVE_SYS_TYPES_H@
++
++/* Define to 1 if you have the <sys/unistd.h> header file. */
++#cmakedefine HAVE_SYS_UNISTD_H @HAVE_SYS_UNISTD_H@
++
++/* Define to 1 if you have the <time.h> header file. */
++#cmakedefine HAVE_TIME_H @HAVE_TIME_H@
++
++/* Define to 1 if you have the <unistd.h> header file. */
++#cmakedefine HAVE_UNISTD_H @HAVE_UNISTD_H@
++
++#cmakedefine HAVE_PKTINFO @HAVE_PKTINFO@
++#cmakedefine HAVE_PKT6INFO @HAVE_PKT6INFO@
++
++/* Define to the address where bug reports for this package should be sent. */
++#define PACKAGE_BUGREPORT ""
++
++/* Define to the full name of this package. */
++#define PACKAGE_NAME "libcoap"
++
++/* Define to the full name and version of this package. */
++#define PACKAGE_STRING "libcoap 4.1.2"
++
++/* Define to the one symbol short name of this package. */
++#define PACKAGE_TARNAME "libcoap"
++
++/* Define to the home page for this package. */
++#define PACKAGE_URL ""
++
++/* Define to the version of this package. */
++#define PACKAGE_VERSION "4.1.2"
++
++/* Define to 1 if you have the ANSI C header files. */
++#cmakedefine STDC_HEADERS @STDC_HEADERS@
++
++/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
++   significant byte first (like Motorola and SPARC, unlike Intel). */
++#if defined AC_APPLE_UNIVERSAL_BUILD
++# if defined __BIG_ENDIAN__
++#  define WORDS_BIGENDIAN 1
++# endif
++#else
++# ifndef WORDS_BIGENDIAN
++/* #  undef WORDS_BIGENDIAN */
++# endif
++#endif
++
++/* Define to rpl_malloc if the replacement function should be used. */
++/* #cmakedefine malloc */
++
++/* Define to `unsigned int' if <sys/types.h> does not define. */
++/* #cmakedefine size_t */
++
++/* Define to `int' if <sys/types.h> does not define. */
++/* #cmakedefine ssize_t */
++
+

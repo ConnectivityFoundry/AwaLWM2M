@@ -1,0 +1,6 @@
+Awa-html
+html
+*.o
+*.a
+latex
+*.pdf

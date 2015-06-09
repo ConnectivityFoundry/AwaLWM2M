@@ -1,0 +1,26 @@
+# gengetopt configuration file
+version "1.0"
+package "awa-server-write"
+purpose "LWM2M Server Resource Write Operation"
+
+# Options
+option "verbose"    v "Increase program verbosity" flag off
+option "debug"      d "Increase program verbosity" flag off
+option "ipcAddress" a "Connect to Server IPC Address" string optional default="127.0.0.1" typestr="ADDRESS"
+option "ipcPort"    p "Connect to Server IPC port"    int    optional default="54321"     typestr="PORT"
+option "clientID"   c "Client ID"                     string required                     typestr="ID"
+option "create"     o "Create a new Object Instance or Optional Resource"
+                                                      string optional multiple(0-)
+
+text "\n"
+text "Specify one or more object, object instance and resource paths\n"
+text "and values in the format \"/O/I/R/i=VALUE\", separated by spaces.\n"
+text "For example:\n"
+text "\n"
+text "    /3/0/0=Imagination\n"
+text "    /3/0/7/1=4200\n"
+text "    /4/0/3=3 /4/0/6=7\n"
+#text "\n"
+#text "Multiple resource instances can be set together with the format:\n"
+#text "    /3/0/6=0:3800,1:4800,4:1700\n"
+#text " (enclose values containing , and : characters in single or double quotes)\n"

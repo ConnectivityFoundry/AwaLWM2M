@@ -1,0 +1,19 @@
+client_src = \
+  lwm2m_registration.c \
+  lwm2m_bootstrap.c \
+  lwm2m_connectivity_object.c \
+  lwm2m_security_object.c \
+  lwm2m_device_object.c \
+  lwm2m_location_object.c \
+  lwm2m_firmware_object.c \
+  lwm2m_client_core.c \
+  lwm2m_acl_object.c \
+  lwm2m_server_object.c \
+  lwm2m_serdes.c \
+  lwm2m_tlv.c \
+  lwm2m_opaque.c \
+  lwm2m_plaintext.c \
+  lwm2m_prettyprint.c \
+  lwm2m_tree_builder.c \
+  lwm2m_object_tree.c \
+  lwm2m_observers.c 
