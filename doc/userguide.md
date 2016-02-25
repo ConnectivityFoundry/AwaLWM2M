@@ -10,6 +10,9 @@ This document is aimed at application developers who are using the Awa Lightweig
 
 Developers who aim to contribute to the Awa LightweightM2M project are referred to the [developer guide](developer_guide.md).
 
+----
+
+
 
 ### Contents.
 
