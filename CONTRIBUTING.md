@@ -3,7 +3,7 @@
 
 ----
 
-## Contributing Guide
+## Contributing guide.
 
 ### Reporting issues and bugs.
 
@@ -14,19 +14,19 @@ If you discover a bug, or find an issue or area that you feel needs improvement:
 * Click the "New Issue" button.  
 
 
-When making your report, be as clear and concise as possible. Ude the following list as a guide:
+When making your report, be as clear and concise as possible. Use the following list as a guide:
 
 
 
-* Describe the problem. 
+* Describe the issue, and why you believe it's a problem. 
 
-* Awa LWM2M Version or commit id.
+* Include the Awa LWM2M version or commit id.
 
-* Environment details (OS/distribution etc).
+* Describe environment details (OS/distribution etc).
 
-* Reproduciblity or issue frequency.
+* How often the issue occurs.
 
-* Steps taken to uncover or reproduce the issue (if any).
+* Steps to take to uncover or reproduce the issue (if any).
 
 * Expected behaviour.
 
