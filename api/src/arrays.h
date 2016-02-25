@@ -36,14 +36,14 @@ typedef struct _AwaArrayIterator AwaArrayIterator;
 typedef struct _ArrayItem ArrayItem;
 
 AwaArray * AwaArray_New(void);
-void AwaArray_Free(AwaArray ** array);
+void AwaArray_Free(AwaArray ** array, AwaResourceType resourceType);
 ArrayItem * Array_SetValue(AwaArray * array, AwaArrayIndex index, void * value, size_t valueLength);
 void * Array_GetValue(const AwaArray * array, AwaArrayIndex index);
 ArrayItem * Array_GetArrayItem(const AwaArray * array, AwaArrayIndex index);
 int Array_GetValueLength(const AwaArray * array, AwaArrayIndex index);
-void Array_DeleteItem(AwaArray * array, AwaArrayIndex index);
+void Array_DeleteItem(AwaArray * array, AwaArrayIndex index, AwaResourceType resourceType);
 size_t Array_GetValueCount(const AwaArray * array);
-int Array_Compare(AwaArray * array1, AwaArray * array2);
+int Array_Compare(AwaArray * array1, AwaArray * array2, AwaResourceType resourceType);
 
 AwaArrayIterator * ArrayIterator_New(const AwaArray * array);
 bool ArrayIterator_Next(AwaArrayIterator * iterator);

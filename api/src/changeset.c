@@ -307,9 +307,19 @@ AwaError AwaChangeSet_GetValueAsTimePointer(const AwaChangeSet * changeSet, cons
     return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Time, sizeof(AwaTime));
 }
 
+AwaError AwaChangeSet_GetValueAsObjectLinkPointer(const AwaChangeSet * changeSet, const char * path, const AwaObjectLink ** value)
+{
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_ObjectLink, sizeof(AwaObjectLink));
+}
+
+AwaError AwaChangeSet_GetValueAsOpaquePointer(const AwaChangeSet * changeSet, const char * path, const AwaOpaque ** value)
+{
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Opaque, sizeof(AwaOpaque));
+}
+
 AwaError AwaChangeSet_GetValueAsOpaque(const AwaChangeSet * changeSet, const char * path, AwaOpaque * value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)&value->Data, &value->Size, AwaResourceType_Opaque, -1);
+    return ResponseCommon_GetValueAsOpaque(changeSet->ResponseCommon, path, value);
 }
 
 AwaError AwaChangeSet_GetValueAsObjectLink(const AwaChangeSet * changeSet, const char * path, AwaObjectLink * value)

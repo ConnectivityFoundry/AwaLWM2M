@@ -35,7 +35,7 @@ AwaBooleanArray * AwaBooleanArray_New(void)
 
 void AwaBooleanArray_Free(AwaBooleanArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_BooleanArray);
 }
 
 void AwaBooleanArray_SetValue(AwaBooleanArray * array, AwaArrayIndex index, AwaBoolean value)
@@ -45,7 +45,7 @@ void AwaBooleanArray_SetValue(AwaBooleanArray * array, AwaArrayIndex index, AwaB
 
 void AwaBooleanArray_DeleteValue(AwaBooleanArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_BooleanArray);
 }
 
 AwaBoolean AwaBooleanArray_GetValue(const AwaBooleanArray * array, AwaArrayIndex index)

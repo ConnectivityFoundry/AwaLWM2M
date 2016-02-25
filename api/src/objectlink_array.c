@@ -35,7 +35,7 @@ AwaObjectLinkArray * AwaObjectLinkArray_New(void)
 
 void AwaObjectLinkArray_Free(AwaObjectLinkArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_ObjectLinkArray);
 }
 
 void AwaObjectLinkArray_SetValue(AwaObjectLinkArray * array, AwaArrayIndex index, AwaObjectLink value)
@@ -45,7 +45,7 @@ void AwaObjectLinkArray_SetValue(AwaObjectLinkArray * array, AwaArrayIndex index
 
 void AwaObjectLinkArray_DeleteValue(AwaObjectLinkArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_ObjectLinkArray);
 }
 
 AwaObjectLink AwaObjectLinkArray_GetValue(const AwaObjectLinkArray * array, AwaArrayIndex index)

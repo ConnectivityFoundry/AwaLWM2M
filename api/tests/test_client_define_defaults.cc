@@ -344,7 +344,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaStringArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_StringArray));
 
     AwaStringArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -389,7 +389,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaIntegerArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_IntegerArray));
 
     AwaIntegerArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -434,7 +434,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaFloatArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_FloatArray));
 
     AwaFloatArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -479,7 +479,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaBooleanArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_BooleanArray));
 
     AwaBooleanArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -527,7 +527,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaOpaqueArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_OpaqueArray));
 
     AwaOpaqueArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -572,7 +572,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     const AwaTimeArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_TimeArray));
 
     AwaTimeArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);
@@ -618,7 +618,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, DISABLED_AwaClient_get_default_value_
     const AwaObjectLinkArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_ObjectLinkArray));
 
     AwaObjectLinkArray_Free(&expected);
     AwaClientGetOperation_Free(&getOperation);

@@ -35,7 +35,7 @@ AwaTimeArray * AwaTimeArray_New(void)
 
 void AwaTimeArray_Free(AwaTimeArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_TimeArray);
 }
 
 void AwaTimeArray_SetValue(AwaTimeArray * array, AwaArrayIndex index, AwaTime value)
@@ -45,7 +45,7 @@ void AwaTimeArray_SetValue(AwaTimeArray * array, AwaArrayIndex index, AwaTime va
 
 void AwaTimeArray_DeleteValue(AwaTimeArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_TimeArray);
 }
 
 AwaTime AwaTimeArray_GetValue(const AwaTimeArray * array, AwaArrayIndex index)

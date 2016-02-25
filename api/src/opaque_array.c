@@ -36,34 +36,62 @@ AwaOpaqueArray * AwaOpaqueArray_New(void)
 
 void AwaOpaqueArray_Free(AwaOpaqueArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_OpaqueArray);
 }
 
 void AwaOpaqueArray_SetValue(AwaOpaqueArray * array, AwaArrayIndex index, AwaOpaque value)
 {
-    Array_SetValue((AwaArray *)array, index, value.Data, value.Size);
+    if (array != NULL)
+    {
+        if (((value.Data != NULL) && (value.Size > 0)) || ((value.Data == NULL) && (value.Size == 0)))
+        {
+            AwaOpaque copy;
+            memset(&copy, 0, sizeof(copy));
+            copy.Size = value.Size;
+            if (copy.Size > 0)
+            {
+                copy.Data = malloc(copy.Size);
+                memcpy(copy.Data, value.Data, value.Size);
+            }
+
+            Array_SetValue((AwaArray *)array, index, (void *)&copy, sizeof(copy));
+        }
+        else
+        {
+            if (value.Data != NULL)
+            {
+                LogError("AwaOpaque value is not NULL but has a length of zero");
+            }
+            else
+            {
+                LogError("AwaOpaque value is NULL but has a non-zero length");
+            }
+        }
+    }
+    else
+    {
+        LogError("AwaOpaqueArray is NULL");
+    }
 }
 
 void AwaOpaqueArray_DeleteValue(AwaOpaqueArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_OpaqueArray);
 }
 
 AwaOpaque AwaOpaqueArray_GetValue(const AwaOpaqueArray * array, AwaArrayIndex index)
 {
     AwaOpaque value;
-    void * valuePtr;
-    int valueLen;
+
+    void * valuePtr = Array_GetValue((const AwaArray *)array, index);
 
     memset(&value, 0, sizeof(AwaOpaque));
 
-    valuePtr = Array_GetValue((const AwaArray *)array, index);
-    valueLen = Array_GetValueLength((const AwaArray *)array, index);
-
-    if (valuePtr)
+    if (valuePtr != NULL)
     {
-        value.Data = valuePtr;
-        value.Size = valueLen;
+        AwaOpaque * storedOpaque = (AwaOpaque * )valuePtr;
+        value.Data = storedOpaque->Data;
+        value.Size = storedOpaque->Size;
     }
 
     return value;
@@ -103,15 +131,15 @@ AwaOpaque AwaOpaqueArrayIterator_GetValue(const AwaOpaqueArrayIterator * iterato
 {
     AwaOpaque value;
 
-    void * data = ArrayIterator_GetValue((const AwaArrayIterator *)iterator);
-    int len = ArrayIterator_GetValueLength((const AwaArrayIterator *)iterator);
+    void * valuePtr = ArrayIterator_GetValue((const AwaArrayIterator *)iterator);
 
     memset(&value, 0, sizeof(AwaOpaque));
 
-    if (data)
+    if (valuePtr != NULL)
     {
-        value.Data = data;
-        value.Size = len;
+        AwaOpaque * storedOpaque = (AwaOpaque * )valuePtr;
+        value.Data = storedOpaque->Data;
+        value.Size = storedOpaque->Size;
     }
 
     return value;

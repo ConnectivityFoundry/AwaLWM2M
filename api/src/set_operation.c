@@ -281,6 +281,13 @@ static AwaError ClientSetOperation_AddValues(AwaClientSetOperation * operation, 
             void * value = ArrayIterator_GetValue(iterator);
             size_t length = ArrayIterator_GetValueLength(iterator);
 
+            if (type == AwaResourceType_OpaqueArray)
+            {
+                AwaOpaque * opaque = value;
+                value = opaque->Data;
+                length = opaque->Size;
+            }
+
             LogDebug("Adding value %p", value);
 
             if (value)
@@ -288,7 +295,7 @@ static AwaError ClientSetOperation_AddValues(AwaClientSetOperation * operation, 
                 result = ClientSetOperation_AddValue(operation, path, index, value, length, type);
                 if (result != AwaError_Success)
                 {
-                    LogError("Unabled to add array resource Instance");
+                    LogError("Unable to add array resource Instance");
                     break;
                 }
             }

@@ -308,7 +308,7 @@ AwaError ResponseCommon_BuildValues(ResponseCommon * response)
                                     }
                                     else
                                     {
-                                        result = LogErrorWithEnum(AwaError_Internal, "Could not create value for path %s", path);
+                                        // No value is fine - occurs in operations where we only expect path results in the response.
                                     }
 
                                 }
@@ -375,14 +375,16 @@ AwaError ResponseCommon_BuildPathResults(ResponseCommon * response)
                                 Map_Put(response->PathResults, path, pathResult);
                                 result = AwaError_Success;
                             }
-                            else
+                            else if (currentNode == currentLeafNode)
                             {
                                 PathResult_Free(&pathResult);
-                                if (currentNode == currentLeafNode)
-                                {
-                                    result = LogErrorWithEnum(AwaError_Internal, "A pathResult already exists for %s\n", path);
-                                    goto error;
-                                }
+                                result = LogErrorWithEnum(AwaError_Internal, "A pathResult already exists for %s\n", path);
+                                goto error;
+                            }
+                            else
+                            {
+                                // Already added parent node
+                                PathResult_Free(&pathResult);
                             }
                         }
                         else
@@ -609,6 +611,20 @@ AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, co
     {
         value->ObjectID = storedObjectLink->ObjectID;
         value->ObjectInstanceID = storedObjectLink->ObjectInstanceID;
+    }
+    return result;
+}
+
+AwaError ResponseCommon_GetValueAsOpaque(const ResponseCommon * response, const char * path, AwaOpaque * value)
+{
+    AwaOpaque * storedOpaque;
+
+    AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedOpaque, NULL, AwaResourceType_Opaque, sizeof(*value));
+
+    if (result == AwaError_Success)
+    {
+        value->Data = storedOpaque->Data;
+        value->Size = storedOpaque->Size;
     }
     return result;
 }

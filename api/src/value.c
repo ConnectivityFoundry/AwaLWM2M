@@ -45,11 +45,10 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
     {
         TreeNode valueNode;
 
-        valueNode = Xml_Find(rootNode, "Value");
-
-        if (valueNode != NULL)
+        if (!(type >= AwaResourceType_FirstArrayType && type <= AwaResourceType_LastArrayType))
         {
-            if (!(type >= AwaResourceType_FirstArrayType && type <= AwaResourceType_LastArrayType))
+            valueNode = Xml_Find(rootNode, "Value");
+            if (valueNode != NULL)
             {
                 value = Awa_MemAlloc(sizeof(*value));
                 if (value != NULL)
@@ -81,6 +80,23 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                     free(dataValue);
                                     break;
                                 }
+                                case AwaResourceType_None:  // no break
+                                case AwaResourceType_Opaque:
+                                {
+                                    AwaOpaque * opaque = Awa_MemAlloc(sizeof(*opaque));
+                                    opaque->Data = NULL;
+                                    opaque->Size = dataLength;
+                                    if (dataLength > 0)
+                                    {
+                                        opaque->Data = Awa_MemAlloc(dataLength);
+                                        memcpy(opaque->Data, dataValue, dataLength);
+                                    }
+                                    value->Length = sizeof(*opaque);
+                                    value->Data = (void *)opaque;
+                                    free(dataValue);
+                                    break;
+                                }
+
                                 default:
                                     value->Length = dataLength;
                                     value->Data = dataValue;
@@ -107,7 +123,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
             }
             else
             {
-                LogErrorWithEnum(AwaError_TypeMismatch, "value is not multiple instance");
+                // No value is fine - occurs in operations where we only expect path results in the response.
             }
         }
         else
@@ -146,8 +162,15 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                 }
                                 case AwaResourceType_OpaqueArray:
                                 {
-                                    // Allow empty opaque values
-                                    Array_SetValue(array, index, dataLength > 0 ? dataValue : NULL, dataLength);
+                                    AwaOpaque opaque;
+                                    opaque.Data = NULL;
+                                    opaque.Size = dataLength;
+                                    if (dataLength > 0)
+                                    {
+                                        opaque.Data = Awa_MemAlloc(dataLength);
+                                        memcpy(opaque.Data, dataValue, dataLength);
+                                    }
+                                    Array_SetValue(array, index, (void *)&opaque, sizeof(opaque));
                                     break;
                                 }
                                 default:
@@ -159,14 +182,14 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                         else
                         {
                             LogErrorWithEnum(AwaError_Internal, "resource instance failed to decode");
-                            AwaArray_Free(&array);
+                            AwaArray_Free(&array, type);
                             break;
                         }
                     }
                     else
                     {
                         LogErrorWithEnum(AwaError_Internal, "invalid resource instance");
-                        AwaArray_Free(&array);
+                        AwaArray_Free(&array, type);
                         break;
                     }
                 }
@@ -207,10 +230,16 @@ void Value_Free(Value ** value)
         LogFree("Value", *value);
         if (((*value)->Type >= AwaResourceType_FirstArrayType) && ( (*value)->Type <= AwaResourceType_LastArrayType))
         {
-            AwaArray_Free((AwaArray **)&((*value)->Data));
+            AwaArray_Free((AwaArray **)&((*value)->Data), (*value)->Type);
         }
         else
         {
+            if ((*value)->Type == AwaResourceType_Opaque)
+            {
+                AwaOpaque * opaque = (AwaOpaque * )((*value)->Data);
+                free(opaque->Data);
+            }
+
             free((*value)->Data);
             (*value)->Data = NULL;
         }

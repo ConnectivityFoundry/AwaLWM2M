@@ -122,7 +122,7 @@ static Lwm2mTreeNode * SingleDefaultValueToTreeNode(uint8_t * defaultValue, uint
     return resourceNode;
 }
 
-static Lwm2mTreeNode * ArrayDefaultValueToTreeNode(AwaArray * array)
+static Lwm2mTreeNode * ArrayDefaultValueToTreeNode(AwaArray * array, AwaResourceType resourceType)
 {
     Lwm2mTreeNode * resourceNode = NULL;
 
@@ -134,8 +134,20 @@ static Lwm2mTreeNode * ArrayDefaultValueToTreeNode(AwaArray * array)
 
         while (ArrayIterator_Next(iterator))
         {
-            uint8_t * defaultValue = ArrayIterator_GetValue(iterator);
-            uint16_t defaultValueLength = ArrayIterator_GetValueLength(iterator);
+            uint8_t * defaultValue = NULL;
+            uint16_t defaultValueLength = 0;
+            if (resourceType == AwaResourceType_OpaqueArray)
+            {
+                AwaOpaque * opaque = ArrayIterator_GetValue(iterator);
+                defaultValue = opaque->Data;
+                defaultValueLength = opaque->Size;
+            }
+            else
+            {
+                defaultValue = ArrayIterator_GetValue(iterator);
+                defaultValueLength = ArrayIterator_GetValueLength(iterator);
+            }
+
             int resourceInstanceID = ArrayIterator_GetIndex(iterator);
 
             Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
@@ -161,7 +173,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsString(AwaObjectDefinition *
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsStringArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaStringArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_StringArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_StringArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_StringArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsInteger(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaInteger defaultValue)
@@ -171,7 +183,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsInteger(AwaObjectDefinition 
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsIntegerArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaIntegerArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_IntegerArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_IntegerArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_IntegerArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsFloat(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaFloat defaultValue)
@@ -181,7 +193,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsFloat(AwaObjectDefinition * 
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsFloatArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaFloatArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_FloatArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_FloatArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_FloatArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsBoolean(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaBoolean defaultValue)
@@ -191,7 +203,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsBoolean(AwaObjectDefinition 
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsBooleanArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaBooleanArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_BooleanArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_BooleanArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_BooleanArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsOpaque(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaOpaque defaultValue)
@@ -201,7 +213,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsOpaque(AwaObjectDefinition *
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaOpaqueArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_OpaqueArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_OpaqueArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_OpaqueArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsTime(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaTime defaultValue)
@@ -211,7 +223,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsTime(AwaObjectDefinition * o
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsTimeArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaTimeArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_TimeArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_TimeArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_TimeArray));
 }
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsObjectLink(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, bool isMandatory, AwaResourceOperations operations, AwaObjectLink defaultValue)
@@ -221,7 +233,7 @@ AwaError AwaObjectDefinition_AddResourceDefinitionAsObjectLink(AwaObjectDefiniti
 
 AwaError AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(AwaObjectDefinition * objectDefinition, AwaResourceID resourceID, const char * resourceName, int minimumInstances, int maximumInstances, AwaResourceOperations operations, const AwaObjectLinkArray * defaultArray)
 {
-    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_ObjectLinkArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray));
+    return ObjectDefinition_AddResourceDefinition(objectDefinition, AwaResourceType_ObjectLinkArray, resourceID, resourceName, minimumInstances, maximumInstances, operations, ArrayDefaultValueToTreeNode((AwaArray *)defaultArray, AwaResourceType_ObjectLinkArray));
 }
 
 AwaObjectID AwaObjectDefinition_GetID(const AwaObjectDefinition * objectDefinition)

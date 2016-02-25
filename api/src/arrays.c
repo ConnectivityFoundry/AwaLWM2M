@@ -72,30 +72,35 @@ void Array_FreeItemValue(ArrayItem * valueItem)
     valueItem->Value = NULL;
 }
 
-void Array_FreeItem(ArrayItem * valueItem)
+void Array_FreeItem(ArrayItem * valueItem, AwaResourceType resourceType)
 {
+    if (resourceType == AwaResourceType_OpaqueArray)
+    {
+        AwaOpaque * opaque = (AwaOpaque *)valueItem->Value;
+        Awa_MemSafeFree(opaque->Data);
+        LogFree("AwaArray.OpaqueData", opaque->Data);
+    }
     Array_FreeItemValue(valueItem);
     Awa_MemSafeFree(valueItem);
     LogFree("AwaArray.Item", valueItem);
 }
 
-void Array_Free(struct ListHead * ValueList)
+void Array_Free(struct ListHead * ValueList, AwaResourceType resourceType)
 {
-
     struct ListHead * current, * next;
     ListForEachSafe(current, next, ValueList)
     {
         ArrayItem * valueItem = ListEntry(current, ArrayItem, List);
         ListRemove(current);
-        Array_FreeItem(valueItem);
+        Array_FreeItem(valueItem, resourceType);
     }
 }
 
-void AwaArray_Free(AwaArray ** array)
+void AwaArray_Free(AwaArray ** array, AwaResourceType resourceType)
 {
     if ((array != NULL) && (*array != NULL))
     {
-        Array_Free(&(*array)->ValueList);
+        Array_Free(&(*array)->ValueList, resourceType);
         LogFree("AwaArray", *array);
         Awa_MemSafeFree(*array);
         *array = NULL;
@@ -165,9 +170,7 @@ ArrayItem * Array_SetValue(AwaArray * array, AwaArrayIndex index, void * value, 
 
     if (array != NULL)
     {
-        // allow the special case of value is NULL, length is zero for Opaque items.
-        if ((value != NULL && valueLength != 0) ||
-            (value == NULL && valueLength == 0))
+        if (value != NULL && valueLength != 0)
         {
             item = Array_GetArrayItem(array, index);
 
@@ -182,7 +185,6 @@ ArrayItem * Array_SetValue(AwaArray * array, AwaArrayIndex index, void * value, 
 
             if (item)
             {
-                // Value may be NULL, but only if ValueLength is zero
                 item->Value = Awa_MemAlloc(valueLength);
                 if (item->Value)
                 {
@@ -294,7 +296,7 @@ int Array_GetValueLength(const AwaArray * array, AwaArrayIndex index)
     return valueLength;
 }
 
-void Array_DeleteItem(AwaArray * array, AwaArrayIndex index)
+void Array_DeleteItem(AwaArray * array, AwaArrayIndex index, AwaResourceType resourceType)
 {
     if (array != NULL)
     {
@@ -303,7 +305,7 @@ void Array_DeleteItem(AwaArray * array, AwaArrayIndex index)
         if (item != NULL)
         {
             ListRemove(&item->List);
-            Array_FreeItem(item);
+            Array_FreeItem(item, resourceType);
         }
         else
         {
@@ -332,7 +334,7 @@ size_t Array_GetValueCount(const AwaArray * array)
     return count;
 }
 
-int Array_Compare(AwaArray * array1, AwaArray * array2)
+int Array_Compare(AwaArray * array1, AwaArray * array2, AwaResourceType resourceType)
 {
     int result = 0;
     AwaArrayIterator * iterator1 = ArrayIterator_New(array1);
@@ -355,10 +357,23 @@ int Array_Compare(AwaArray * array1, AwaArray * array2)
             result = -1;
             goto end;
         }
-        if (memcmp(ArrayIterator_GetValue(iterator1),ArrayIterator_GetValue(iterator2), ArrayIterator_GetValueLength(iterator1)) != 0)
+        if (resourceType == AwaResourceType_OpaqueArray)
         {
-            result = -1;
-            goto end;
+            AwaOpaque * opaque1 = (AwaOpaque *)ArrayIterator_GetValue(iterator1);
+            AwaOpaque * opaque2 = (AwaOpaque *)ArrayIterator_GetValue(iterator2);
+            if ((opaque1->Size != opaque2->Size) || (memcmp(opaque1->Data, opaque2->Data, opaque1->Size) != 0))
+            {
+                result = -1;
+                goto end;
+            }
+        }
+        else
+        {
+            if (memcmp(ArrayIterator_GetValue(iterator1),ArrayIterator_GetValue(iterator2), ArrayIterator_GetValueLength(iterator1)) != 0)
+            {
+                result = -1;
+                goto end;
+            }
         }
     }
     if (ArrayIterator_Next(iterator2))

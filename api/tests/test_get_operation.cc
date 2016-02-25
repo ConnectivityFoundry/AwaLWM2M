@@ -582,8 +582,9 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
     detail::TestGetResource data = GetParam();
     const AwaClientGetResponse * getResponse = data.UseResponse ? this->getResponse_ : NULL;
     void * value = NULL;
-    AwaObjectLink objectLink = {0, 0};
-    AwaOpaque opaque = {NULL, 0};
+
+    AwaObjectLink receivedObjectLink = {0, 0};
+    AwaOpaque receivedOpaque = {NULL, 0};
 
     switch(data.type)
     {
@@ -600,17 +601,15 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
         ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsBooleanPointer(getResponse, data.path, (const AwaBoolean **)&value));
         break;
     case AwaResourceType_Opaque:
-    {
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsOpaque(getResponse, data.path, &opaque));
-        value = &opaque;
+        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsOpaque(getResponse, data.path, &receivedOpaque));
+        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsOpaquePointer(getResponse, data.path, (const AwaOpaque **)&value));
         break;
-    }
     case AwaResourceType_Time:
         ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsTimePointer(getResponse, data.path, (const AwaTime **)&value));
         break;
     case AwaResourceType_ObjectLink:
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsObjectLink(getResponse, data.path, &objectLink));
-        value = &objectLink;
+        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsObjectLink(getResponse, data.path, &receivedObjectLink));
+        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValueAsObjectLinkPointer(getResponse, data.path, (const AwaObjectLink **)&value));
         break;
     default:
         ASSERT_TRUE(false);
@@ -630,9 +629,12 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
             case AwaResourceType_Opaque:
             {
                 AwaOpaque * expectedOpaque = (AwaOpaque *) data.expectedValue;
-                AwaOpaque * receivedOpaque = (AwaOpaque *) value;
-                ASSERT_EQ(expectedOpaque->Size, receivedOpaque->Size);
-                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque->Data, expectedOpaque->Size));
+                AwaOpaque * receivedOpaquePointer = (AwaOpaque *) value;
+
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaquePointer->Size);
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaque.Size);
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaquePointer->Data, expectedOpaque->Size));
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque.Data, receivedOpaque.Size));
                 break;
             }
             case AwaResourceType_Integer:
@@ -650,8 +652,9 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
             case AwaResourceType_ObjectLink:
             {
                 const AwaObjectLink * expectedObjectLink = static_cast<const AwaObjectLink *>(data.expectedValue);
-                const AwaObjectLink * receivedObjectLink = static_cast<AwaObjectLink *>(value);
-                ASSERT_EQ(0, memcmp(expectedObjectLink, receivedObjectLink, sizeof(AwaObjectLink)));
+                const AwaObjectLink * receivedObjectLinkPointer = static_cast<AwaObjectLink *>(value);
+                ASSERT_EQ(0, memcmp(expectedObjectLink, receivedObjectLinkPointer, sizeof(AwaObjectLink)));
+                ASSERT_EQ(0, memcmp(expectedObjectLink, &receivedObjectLink, sizeof(AwaObjectLink)));
                 break;
             }
             default:
@@ -1003,7 +1006,7 @@ protected:
             AwaFloatArray_SetValue(expectedFloatArray_, i, i*2.5);
             AwaBooleanArray_SetValue(expectedBooleanArray_, i, i%2==0);
 
-            static char dummyOpaqueData[] = {'a',0,'x','\0', (char)i};
+            static char dummyOpaqueData[] = {(char)i, 'a',0,'x','\0', (char)i};
 
             AwaOpaque opaqueValue = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
 
@@ -1148,7 +1151,7 @@ TEST_P(TestGetValueArray, TestGetValueArrayInstantiation)
     ASSERT_TRUE((data.expectedResult == AwaError_Success) == (array != NULL));
     if (array != NULL)
     {
-        ASSERT_EQ(0, Array_Compare(expectedArray, array));
+        ASSERT_EQ(0, Array_Compare(expectedArray, array, data.type));
     }
 }
 
