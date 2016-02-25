@@ -375,10 +375,14 @@ AwaError ResponseCommon_BuildPathResults(ResponseCommon * response)
                                 Map_Put(response->PathResults, path, pathResult);
                                 result = AwaError_Success;
                             }
-                            else if (currentNode == currentLeafNode)
+                            else
                             {
-                                result = LogErrorWithEnum(AwaError_Internal, "A pathResult already exists for %s\n", path);
-                                goto error;
+                                PathResult_Free(&pathResult);
+                                if (currentNode == currentLeafNode)
+                                {
+                                    result = LogErrorWithEnum(AwaError_Internal, "A pathResult already exists for %s\n", path);
+                                    goto error;
+                                }
                             }
                         }
                         else
