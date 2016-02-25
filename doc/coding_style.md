@@ -65,7 +65,7 @@ typedef struct
 **Notes.** 
 
 * A structure type definition doesn't usually need both a structure name and typedef name (a struct name is not given in the above example). One possible exception to this rule is where the typedef name is declaring a structure-pointer type.  
-* The use of suffix *_e* in enums is not preferred. 
+* The use of suffix *_e* in enums is discouraged. 
 * To avoid namespace problems in 'C' each value should be prefixed by the enum name. For example:
 ````
 typedef enum
@@ -142,7 +142,7 @@ AwaString GetNextEntryFromProcessingQueue()
 }
  ````
  
-### Good/Bad coding Practise.
+### Good coding practise.
 * Ideally functions should have a single exit point. The use of multiple return points is dangerous and makes it harder to read the code. Always consider what will happen if someone needs to append code to your function.
 
 * Where possible definitions should be used rather than raw values, e.g. use *AllocMessageBuf(MAX_MESSAGE_SIZE)* rather than  *AllocMessagBuf(1024)*. This ensures that all code sharing the same defined value will still work if the 'magic' value is updated.
