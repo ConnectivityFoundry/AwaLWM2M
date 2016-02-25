@@ -20,7 +20,6 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-
 #include <poll.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -69,6 +68,7 @@ typedef struct
     char * EndPointName;
     char * BootStrap;
     char * Logfile;
+    int AddressFamily;
     const char * FactoryBootstrapInformation;
 } Options;
 
@@ -173,8 +173,9 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("LWM2M client - version %s\n", version);
     Lwm2m_Info("LWM2M client - Local CoAP port %d\n", options->CoapPort);
     Lwm2m_Info("LWM2M client - Local IPC port %d\n", options->IpcPort);
+    Lwm2m_Info("LWM2M client - Using IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
-    CoapInfo * coap = coap_Init("0.0.0.0", options->CoapPort, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
@@ -267,6 +268,7 @@ static void PrintUsage(void)
 
     printf("Options:\n");
     printf("  --port, -p          : Local port number for CoAP communications\n");
+    printf("  --addressFamily     : Address family for network interface. 4 for IPv4, 6 for IPv6\n");
     printf("  --ipcPort, -i       : port number for IPC communications\n");
     printf("  --endPointName, -e  : client end point name\n");
     printf("  --bootstrap, -b     : bootstrap server URI\n");
@@ -290,6 +292,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
         static struct option longOptions[] = 
         {
             {"port",             required_argument, 0, 'p'},
+            {"addressFamily",    required_argument, 0, 'a'},
             {"ipcPort",          required_argument, 0, 'i'},
             {"bootstrap",        required_argument, 0, 'b'},
             {"endPointName",     required_argument, 0, 'e'},
@@ -301,7 +304,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {0,                  0,                 0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "p:i:b:e:vhl:df:", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "p:a:i:b:e:vhl:df:", longOptions, &optionIndex);
         if (c == -1)
         {
             break;
@@ -311,6 +314,9 @@ static int ParseOptions(int argc, char ** argv, Options * options)
         {
             case 'p':
                 options->CoapPort = atoi(optarg);
+                break;
+            case 'a':
+                options->AddressFamily = atoi(optarg) == 4 ? AF_INET : AF_INET6;
                 break;
             case 'i':
                 options->IpcPort = atoi(optarg);
@@ -362,6 +368,7 @@ int main(int argc, char ** argv)
         .BootStrap = NULL,
         .EndPointName = "imagination1",
         .Logfile = NULL,
+        .AddressFamily = AF_INET,
         .FactoryBootstrapInformation = NULL,
     };
 
