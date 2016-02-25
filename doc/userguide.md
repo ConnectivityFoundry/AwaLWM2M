@@ -6,9 +6,9 @@
 
 ## User guide.
 
-This document is aimed at application developers who are using the Awa LightweightM2M libraries and tools as a foundation or enhancement to, their own M2M applications.
+This document is aimed at application developers who are using the Awa LightweightM2M libraries and tools as a foundation, or enhancement of their own M2M applications.
 
-Developers who aim to contribute to the Awa LightweightM2M project are referred to the [developer guide](developer_guide.md).
+Developers who aim to contribute to the Awa LightweightM2M project are referred to the [contributor guide](../CONTRIBUTING.md) and the [developer guide](developer_guide.md).
 
 ----
 
@@ -196,13 +196,14 @@ Example on how to interconnect all the daemons locally...
 ### Awa client tools examples.
 
 
-### Awa server tools examples.
+### Awa server tools examples.  
 
 
 ----
+----
 
+## Using the LWM2M client.
 
-### How to use the LWM2M client.
 
 ### Connecting the gateway client to the gateway LWM2M server.
 ````
@@ -211,7 +212,7 @@ $ build/core/src/server/awa_serverd --verbose
 $ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
 ````
 
-### Awa_API.
+### The Awa_API.
 
 The Awa API provides a way for applications to communicate with the LWM2M client and server daemons via the IPC interface.  
 The client API header file can be found in "include/Awa/client.h".  
@@ -253,7 +254,7 @@ Most tools take one or more PATH parameters, specified in the format:
 
 For tools that write data, values can be specified with the format: ````PATH=VALUE````
 
-## Creating a new object definition.
+### Creating a new object definition.
 
 An *object* is a collection of individual *resources* bundled together under a single identifier, along with some extra attributes that describe the nature of the object (listed below). Numerous standard objects are pre-defined within the LWM2M model but additional custom objects may also be defined as needed. Custom objects are created by registering the new object definition with the daemon. The *add-definition* tool is used to perform this operation. Note that an object definition does not result in an object instance. Creation of an object instance is a separate process. Resource manipulation is only possible on object instances. 
 
@@ -292,7 +293,7 @@ Example. Define TestObject2 as ObjectID 1000, with a single mandatory instance, 
 
 ### Discovering a device's object and resource definitions.
 
-The *awa-client-explore* tool can be used to discover the objects and resources that have been defined on the LWM2M server. The tool will also list the objects and object-resources that are currently defined within the client daemon.
+The *awa-client-explore* tool is used to discover the objects and resources that have been defined on the LWM2M server. The tool will also list the objects and object-resources that are currently defined within the client daemon.
 
 Example: ````./awa-client-explore ````
 
@@ -528,4 +529,3 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 
 ----
 ----
-
