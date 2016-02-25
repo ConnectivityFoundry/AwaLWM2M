@@ -1,5 +1,5 @@
 
-![](doc/img.png)
+![](img.png)
 
 ----
 
@@ -8,6 +8,11 @@
 
 
 ## Coding style guide.
+
+It's important to that coding style remains consistent throughout the project to ensure that all contributors and project administrators are able to easily decipher code blocks, comments, syntax etc. 
+always consider that another contributor may one day continue to build on your submissions. Make it easy for them by adopting the style outlined below.
+
+### General layout.
 
 The sample code below illustrates the preferred use of indentation, bracing and white space:
 
@@ -88,11 +93,11 @@ Bitfields also have a code size and performance overhead due to the need to be p
 
 Structure field names should use Pascal casing (e.g. ThisPerson.Age).
 
-### Header Files.
+### Header files.
 
 All public functions, variables and definitions must be declared in a header file. Most .c modules should have a corresponding .h file to be included (both within the module and elsewhere). It is poor form to make the compiler try to guess how to resolve undeclared function calls in other modules.
 
-## Commenting.
+### Code commenting.
 Single line comments should use *//*. For example:
 ````
 void MyFunction(void)
@@ -137,7 +142,7 @@ AwaString GetNextEntryFromProcessingQueue()
 }
  ````
  
-### Good/Bad Coding Practise.
+### Good/Bad coding Practise.
 * Ideally functions should have a single exit point. The use of multiple return points is dangerous and makes it harder to read the code. Always consider what will happen if someone needs to append code to your function.
 
 * Where possible definitions should be used rather than raw values, e.g. use *AllocMessageBuf(MAX_MESSAGE_SIZE)* rather than  *AllocMessagBuf(1024)*. This ensures that all code sharing the same defined value will still work if the 'magic' value is updated.
