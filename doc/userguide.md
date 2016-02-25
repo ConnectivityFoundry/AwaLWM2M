@@ -89,7 +89,6 @@ Currently the IPC interface is implemented as a simple UDP channel, with an asso
 
 ### The Awa server daemon.
 
-
 Usage: ````awa_serverd [options] ````
 
 | options | description |
@@ -195,373 +194,330 @@ Example on how to interconnect all the daemons locally...
 ----
 
 
-## LWM2M Client Usage.
+### How to use the LWM2M client.
 
-### Connecting the Gateway client to the Gateway LWM2M server.
+### Connecting the gateway client to the gateway LWM2M server.
+````
+$ build/core/src/bootstrap/awa_bootstrapd --verbose --port 15685
+$ build/core/src/server/awa_serverd --verbose
+$ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
+````
 
-    $ build/core/src/bootstrap/awa_bootstrapd --verbose --port 15685
-    $ build/core/src/server/awa_serverd --verbose
-    $ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
+### Awa_API.
 
-## Awa_API.
+The Awa API provides a way for applications to communicate with the LWM2M client and server daemons via the IPC interface.  
+The client API header file can be found in "include/Awa/client.h".  
+The server API header file can be found in "include/Awa/server.h".
+Both server and client APIs are implemented in the *libawa* library.   Applications may be linked against the either the static library *libawa.a* or the shared library *libawa.so*.
 
- The Awa API provides a method for applications to communicate with the LWM2M Client and Server daemons via the IPC interface.
+Useful examples can be found in the *api/example* folder. The tools directory contains a number of useful tools. These are built with the daemons, by default.
 
- The Client API header file can be found in "include/Awa/client.h".
+## Awa client API tools.
 
- The Server API header file can be found in "include/Awa/server.h".
+Several command-line tools are available for user interaction with the LWM2M daemon. These tools support simple operations, such as defining a custom object type, setting a resource value, retrieving a resource value, and waiting for a resource to change or be executed. They interact with the LWM2M daemon via the SDK and IPC channel, and are applications that interact with the daemon locally.
 
- Both server and client APIs are implemented within the libawa library. Applications can be linked against the either the static library "libawa.a" or shared library "libawa.so".
+Note that these are *not* LWM2M Protocol tools - they do not issue LWM2M operations.
 
- The api/example directory contains a number of usage examples.
+### Common options.
 
- The tools directory contains a number of useful tools. These are built with the daemons, by default.
+Common options include:
 
-## Awa Client API tools.
+| options | description |
+|-----|-----|
+| -h, --help | Print help and exit |  
+| -V, --version | Print version and exit |  
+| -v, --verbose | Increase program verbosity (shows more run-time information) |  
+| -d, --debug | Increase program verbosity (shows a lot of run-time information) |  
+| -a, --ipcAddress=ADDRESS | Connect to client daemon at address (default=`127.0.0.1') |  
+| -p, --ipcPort=PORT | Connect to IPC port (default=`12345') |
 
- A number of command-line tools are provided for user interaction with the LWM2M daemon. These tools provide simple operations such as defining a custom object type, setting a resource value, retrieving a resource value, and waiting for a resource to change or be executed. They interact with the LWM2M daemon via the SDK and IPC channel, and are applications that interact with the daemon locally.
+*--ipcAddress* is used to specify the IP address of the client daemon to connect to.  
+*--ipcPort* is used to specify the IPC port that the tool uses to communicate with the daemon. Both the daemon and the tool must use the same port. Changing the port allows users to run multiple instances of the client daemon on the same host.
 
- Note that these are *not* LWM2M Protocol tools - they do not issue LWM2M operations.
+Most tools take one or more PATH parameters, specified in the format:
 
-### Common Options.
+| parameter | description |
+|-----|-----|
+| /O | specifies the object ID for operations on entire object types. |
+| /O/I | specifies the object ID and object instance ID for operations on specific object instances. |
+| /O/I/R | specifies the object ID, object instance ID, and resource ID for operations on specific resources. |  
+| /O/I/R/i | specifies the object ID, object instance ID, resource ID and resource instance ID for operations on specific resource instances. |
 
- Each tool accepts the --help option to display all supported options. Common options include:
+For tools that write data, values can be specified with the format: ````PATH=VALUE````
 
-    -h, --help                 Print help and exit
-    -V, --version              Print version and exit
-    -v, --verbose              Increase program verbosity (shows more run-time information)
-    -d, --debug                Increase program verbosity (shows a lot of run-time information)
-    -a, --ipcAddress=ADDRESS   Connect to client daemon at address (default=`127.0.0.1')
-    -p, --ipcPort=PORT         Connect to IPC port (default=`12345')
+## Creating a new object definition.
 
- --ipcAddress is used to specify the IP address of the client daemon to connect to.
+An *object* is a collection of individual *resources* bundled together under a single identifier, along with some extra attributes that describe the nature of the object (listed below). Numerous standard objects are pre-defined within the LWM2M model but additional custom objects may also be defined as needed. Custom objects are created by registering the new object definition with the daemon. The *add-definition* tool is used to perform this operation. Note that an object definition does not result in an object instance. Creation of an object instance is a separate process. Resource manipulation is only possible on object instances. 
 
- --ipcPort is used to specify the IPC port that the tool uses to communicate with the daemon. Both the daemon and the tool must use the same port. Changing the port allows users to run multiple instances of the client daemon on the same host.
+**NOTE: A custom object must be defined for both the client *and* server daemons. Use the *awa-server-add-definition* tool to define a custom object with the server.**
 
- Most tools take one or more PATH parameters, specified in the format:
+Firstly the object itself is defined by providing an ID, descriptive name, mandatory or optional flag (to determine whether the device must provide at least one instance), and whether the object supports single or multiple instances.
 
-    /O       - specifies the object ID for operations on entire object types.
-    /O/I     - specifies the object ID and object instance ID for operations on specific object instances.
-    /O/I/R   - specifies the object ID, object instance ID, and resource ID for operations on specific resources.
-    /O/I/R/i - specifies the object ID, object instance ID, resource ID and resource instance ID for operations on specific resource instances.
+| object attribute | description |
+|-----|-----|
+| -o, --objectID=ID | Object ID |  
+| -j, --objectName=NAME | Object name |  
+| -m, --objectMandatory | Object is required or optional  (default=off) |  
+| -y, --objectInstances=TYPE | Object supports single or multiple instances (possible values: *single* (default) or  *multiple*) |  
 
- For tools that write data, values can be specified with the format:
+Secondly, each resource in the object is specified by a sequence of resource options:
 
-    PATH=VALUE
+| resource option | description |
+|-----|-----|
+| -r, --resourceID=ID |  Resource ID |  
+| -n, --resourceName=NAME | Resource name |  
+| -t, --resourceType=TYPE | Resource type ( possible values: *opaque, integer, float, boolean, string, time, objectlink, none*) | 
+| -u, --resourceInstances=VALUE | Resource supports single or multiple instances (possible values: *single, multiple*) |  
+| -q, --resourceRequired=VALUE | Resource is required or optional  (possible values: *optional, mandatory*) |  
+| -k, --resourceOperations=VALUE | Resource operation  (possible values: *r, w, e, rw, rwe*) |  
 
-## Defining a New Object definition.
+**Note. For each *--resourceID* option, all other resource options must be specified.**
 
- To create a custom object, the object definition must be registered with the daemon.  The *add-definition* tool can be used to perform this operation.
+Example. Define TestObject2 as ObjectID 1000, with a single mandatory instance, and three resources:
+````
+./awa-client-define \
+ --objectID=1000 --objectName=TestObject2 --objectMandatory --objectInstances=single \
+ --resourceID=0 --resourceName=Resource0 --resourceType=string  --resourceInstances=single --resourceRequired=mandatory --resourceOperations=rw \
+ --resourceID=1 --resourceName=Resource1 --resourceType=integer --resourceInstances=single --resourceRequired=mandatory --resourceOperations=rw \
+ --resourceID=2 --resourceName=Resource2 --resourceType=none    --resourceInstances=single --resourceRequired=optiona   --resourceOperations=e
+````
 
- **NOTE: Any custom objects must be defined for both the Client and Server daemon - use the awa-server-add-definition tool to define a custom object with the server**
+### Discovering a device's object and resource definitions.
 
- First, the object itself is defined by providing an ID, descriptive name, mandatory or optional flag (to determine whether the device must provide at least one instance), and whether the object supports single or multiple instances.
+The *awa-client-explore* tool can be used to discover the objects and resources that have been defined on the LWM2M server. The tool will also list the objects and object-resources that are currently defined within the client daemon.
 
-    -o, --objectID=ID             Object ID
-    -j, --objectName=NAME         Object name
-    -m, --objectMandatory         Object is required or optional  (default=off)
-    -y, --objectInstances=TYPE    Object supports single or multiple instances
-                                    (possible values="single", "multiple"
-                                    default=`single')
+Example: ````./awa-client-explore ````
 
- Then each resource is specified by a sequence of resource options:
+### Setting resource values.
 
-    -r, --resourceID=ID           Resource ID
-    -n, --resourceName=NAME       Resource Name
-    -t, --resourceType=TYPE       Resource Type  (possible values="opaque",
-                                    "integer", "float", "boolean",
-                                    "string", "time", "objectlink",
-                                    "none")
-    -u, --resourceInstances=VALUE Resource supports single or multiple instances
-                                    (possible values="single", "multiple")
-    -q, --resourceRequired=VALUE  Resource is required or optional  (possible
-                                    values="optional", "mandatory")
-    -k, --resourceOperations=VALUE
-                                  Resource Operation  (possible values="r",
-                                    "w", "e", "rw", "rwe")
+The *awa-client-set* tool can be used to set the value of a resource.
 
- For each --resourceID option, all other resource options must be specified.
+Mandatory resources always exist provided that the parent *object instance* exists, thus before the value of any resource can be set, the object instance must first be created. Before an *optional resource* can be set, this resource must first be created.
 
- For example, to define TestObject2 as ObjectID 1000, with a single mandatory instance, and three resources:
+Example. Consider the case where object /1000 has been defined but no instances have been created. The following can be used to create instance 0 of object 1000: ````./awa-client-set --create /1000/0 ````
 
-    ./awa-client-define \
-     --objectID=1000 --objectName=TestObject2 --objectMandatory --objectInstances=single \
-     --resourceID=0 --resourceName=Resource0 --resourceType=string  --resourceInstances=single --resourceRequired=mandatory --resourceOperations=rw \
-     --resourceID=1 --resourceName=Resource1 --resourceType=integer --resourceInstances=single --resourceRequired=mandatory --resourceOperations=rw \
-     --resourceID=2 --resourceName=Resource2 --resourceType=none    --resourceInstances=single --resourceRequired=optiona   --resourceOperations=e
+Any mandatory resources associated with the object instance will also be instantiated with default values, but any resources defined as optional must be created explicitly before they can be set.
 
- Alternatively, an XML Definition file can be used to define a custom object - however this is not yet supported.
+For example, to create an instance of the optional resource 0 within instance 0 of object 1000: ````./awa-client-set --create /1000/0/0 ````
 
-## Discovering a Device's Object and Resource Definitions.
+Because no value is specified for the new resource instance, it will be created and populated with its default value.
 
-You can discover the objects and resources that have been defined on the LWM2M server.  The *awa-client-explore* tool can be used to perform this operation. The tool will list the objects and object-resources that are currently defined within the client daemon.
+Once the resource has been created, its value can be set.
 
-For example:
+For example, to set the value of resource 0 (which is of type string), within object instance 0 of object 1000, to the value *Happy*:
 
-    ./awa-client-explore
+````./awa-client-set /1000/0/0=Happy ````
 
-## Set a Resource Value.
+**Note that it is not possible to set the value of a resource that is of type *None*.**
 
- To set the value of a resource, the *awa-client-set* tool can be used.
+A specific resource instance of a multi-instance resource can be set with: ````./awa-client-set /1000/0/1/7=Seventh ````
 
- Mandatory resources should always exist provided the object instance exists. However before the value of any resource can be set, the object instance must first be created. And before an optional resource can be set, this resource must first be created.
+Multiple set operations can be combined on the command line:
+ 
+ ````./awa-client-set --create /1000/0 /1000/0/0=Happy /1000/0/1/7=Seventh ````
 
- For example, consider the case where object /1000 has been defined but no instances have been created. The following
- command can be used to create instance 0 of object 1000:
+### Retrieving a resource value.
 
-    ./awa-client-set --create /1000/0
+The *awa-client-get* tool is used to retrieve the value of a client object resource and display it on the console.
 
- Any resources defined as optional must also be created before they can be set.
+For example, to retrieve and display the value of resource 0, within instance 0 of object 1000: ````./awa-client-get /1000/0/0 ````
 
- For example:
+Multiple resources can be retrieved: ````./awa-client-get /1000/0/1 /1000/0/5 ````
 
-    ./awa-client-set --create /1000/0/0
+Entire object instances can be retrieved:  ````./awa-client-get /1000/0 ````
 
- In the case where no value is specified the resource will be created and populated with the default values.
+All object instances for an object ID can also be retrieved: ````./awa-client-get /1000 ````
 
- Once the resource has been created, the value of the resource can be set.
+If the resource specified is a multiple-instance resource, all instances will be retrieved. Individual instances can be displayed by specifying the resource instance index:  ````./awa-client-get /1000/0/5/1 /1000/0/5/2 ````
 
- For example, to set the value of resource 0 (of type string), within object instance 0 of object 1000, to the value "Happy":
+The *--quiet/-q* option can be used to suppress the display of any extra information.
 
-    ./awa-client-set /1000/0/0=Happy
+## Subscribing to a change of resource value.
 
- Note that it is not possible to set the value of a resource that is of type None.
+In some cases it may be important for a script to block until the value of a resource changes, or for an LWM2M resource execute operation to complete. The *awa-client-subscribe* tool can be used to act as a listener.
 
- A specific resource instance of a multi-instance resource can be set with:
+The *awa-client-subscribe* tool will display notifications whenever the value of the target resource or object instance changes, or when a target resource receives an execute operation. When a notification arrives, the details will be printed to the console.
 
-    ./awa-client-set /1000/0/1/7=Seventh
+Note that *awa-client-subscribe* is *not* the same a LWM2M *Observe* operation. This tool is listening to the local resource hosted by the client daemon.
 
- Multiple set operations can be combined on the command line:
+For example, to listen for a change to resource 200 within instance 0 of object 1000: ````./awa-client-subscribe /1000/0/200 ````
 
-    ./awa-client-set --create /1000/0 /1000/0/0=Happy /1000/0/1/7=Seventh
+To listen for a change to any resource within instance 0 of object 1000: ````./awa-client-subscribe /1000/0 ````
 
-## Get a Resource Value.
+Listening for an LWM2M Execute operation is also possible, however the target object instance and resource must be fully specified. For example, to wait on resource 4, which is an executable resource of instance 0 of object 3: ````./awa-client-subscribe /3/0/4 ````
 
- To retrieve the value of a resource and display it on the console, the *awa-client-get* tool can be used.
+By default, *awa-client-subscribe* will wait indefinitely, displaying each notification as it arrives. With the time and count options, *awaclient-subscribe* can terminate after a number of notifications, or an elapsed period of time.
 
- For example, to fetch and display the value of resource 0, within instance 0 of object 1000:
+| option | description |
+|-----|-----|
+| -t, --waitTime=SECONDS | Time to wait for notification  (default=`0') |  
+| -c, --waitCount=NUMBER | Number of notifications to wait for  (default=`0') | 
 
-    ./awa-client-get /1000/0/0
 
- Multiple resources can be fetched:
+For example, to wait for no longer than 60 seconds for a single notification: ````./awa-client-subscribe /3/0/4 --waitTime=60 --waitCount=1 ````
 
-    ./awa-client-get /1000/0/1 /1000/0/5
+Multiple paths can be combined on the command line: ````./awa-client-subscribe /3/0/4 /3/0/5 /4 ````
 
- Entire object instances can be fetched:
+### Deleting a resource.
 
-    ./awa-client-get /1000/0
+To delete an object or resource instance from the client, use the *awa-client-delete* tool.  
+For example, to delete all object instances of object type 1000: ````./awa-client-delete /1000 ````
 
- All object instances for an object ID can be fetched:
+To delete the object instance of object type 1000 with ID 0: ````./awa-client-delete /1000/0 ````
 
-    ./awa-client-get /1000
+To delete the resource with ID 5 from instance 0 of object ID 1000: ````./awa-client-delete /1000/0/5 ````
 
- If the resource specified is a multiple-instance resource, all instances will be retrieved. Individual instances can be displayed by specifying the resource instance index:
+Unlike the *awa-server-delete* tool, this tool can modify the client's data structures directly, so is not limited by LWM2M Delete rules.
 
-    ./awa-client-get /1000/0/5/1 /1000/0/5/2
+### Awa Server API tools.
 
- The --quiet/-q option can be used to suppress the extra information displayed.
+Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
 
-## Subscribe to a Change to a Resource.
+Server tools often require a target client ID to be specified:
 
- It may be important for a script to block until the value of a resource changes, or an LWM2M Execute operation is performed on an resource that supports the execute operation. For this purpose, the *awa-client-subscribe* tool can be used.
+| option | description |
+|-----|-----|
+| -c, --clientID=ID | ClientID is the client endpoint name used by the client when registering with the LWM2M server. |
 
- This tool will display notifications whenever the target resource or object instance changes, or a target resource receives an Execute operation. When such a notification arrives, it will print details in the console.
 
- Note that this is **not** equivalent to a LWM2M Observe operation. This tool is observing the local resource hosted by the client daemon.
-
- For example, to wait for a change to resource 200 within instance 0 of object 1000:
-
-    ./awa-client-subscribe /1000/0/200
-
- To wait for a change to any resource within instance 0 of object 1000:
-
-    ./awa-client-subscribe /1000/0
-
- Waiting for an LWM2M Execute operation is also possible, however a specific object instance and resource must be specified. For example, to wait on resource 4, which is an executable resource of instance 0 of object 3:
-
-    ./awa-client-subscribe /3/0/4
-
- By default, *awa-client-subscribe* will wait indefinitely, displaying each notification as it arrives. With the time and count options, *awaclient-subscribe* can terminate after a number of notifications, or an elapsed period of time.
-
-    -t, --waitTime=SECONDS     Time to wait for notification  (default=`0')
-    -c, --waitCount=NUMBER     Number of notifications to wait for  (default=`0')
-
- For example, to wait for no longer than 60 seconds for a single notification:
-
-    ./awa-client-subscribe /3/0/4 --waitTime=60 --waitCount=1
-
- Multiple paths can be combined on the command line:
-
-    ./awa-client-subscribe /3/0/4 /3/0/5 /4
-
-## Delete a Resource.
-
- To delete a resource from the client, the *awa-client-delete* tool can be used.
-
- For example, to delete all object instances of object type 1000:
-
-    ./awa-client-delete /1000
-
- To delete the object instance of object type 1000 with ID 0:
-
-    ./awa-client-delete /1000/0
-
- To delete the resource with ID 5 from instance 0 of object ID 1000:
-
-    ./awa-client-delete /1000/0/5
-
- Unlike the *awa-server-delete* tool, this tool can modify the client's data structures directly, so is not limited by LWM2M Delete rules.
-
-## Awa Server API Tools.
-
- Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
-
- Server tools often require a target client ID to be specified:
-
-     -c, --clientID=ID          ClientID
-
- This ID is the client endpoint name used by the client when registering with the LWM2M server.
-
-## List Registered Clients.
+### Listing registered clients.
 
  The *awa-server-list-clients* tool can be used to list all clients currently registered with the LWM2M server daemon:
 
-    ./awa-server-list-clients
+````./awa-server-list-clients ````
 
- The --clientID/-c option is not required. Each client endpoint name is displayed, one per line.
+The *--clientID/-c* option is not required. Each client endpoint name is displayed, one per line.
 
- If --verbose/-v is specified, the output shows the number of registered clients, and their client endpoint names:
+If *--verbose/-v* is specified, the output shows the number of registered clients, and their client endpoint names:
 
-    ./awa-server-list-clients --verbose
-    2 Registered Clients:
+For eaxmple: ````./awa-server-list-clients --verbose ````
+    
+Returns:
+````
+1 imagination1
+2 chris
+````
 
-      1 imagination1
-      2 chris
+The option *--objects/-o* can be specified to retrieve and display the objects and object instances currently registered with the LWM2M server in the format ````<ObjectID>```` or ````<ObjectID/InstanceID>````. 
 
- The option --objects/-o can be specified to retrieve and display the objects and object instances currently registered with the LWM2M server, for example:
+For example: ````./awa-server-list-clients --objects ````  
+Returns
+````
+1 imagination1 <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
+````
 
-    ./awa-server-list-clients --objects
-      1 imagination1 <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
+### Creating a new object definition on the server.
 
- The syntax is <ObjectID> or <ObjectID/InstanceID>.
+The *awa-server-define* tool is used to define custom objects on the server. To use a custom object, the object definition must be registered with the server daemon. The *awa-server-define* tool has identical functionality to *awa-client-define*, described earlier.
 
+### Writing a value to a resource on a registered client.
 
-## Define a New Object Definition.
+The *awa-server-write* tool is used to write the value of a resource on a registered client.
 
- To use a custom object, the object definition must be registered with the server daemon. The *awa-server-define* tool can be used to perform this operation.
+For example, to set the value of resource 0 (of type string) on the client "imagination1", within instance 0 of object 1000, to the value *Happy*:
 
- The *awa-server-define* tool has identical functionality to the *awa-client-define* tool, outlined in the section above.
+````./awa-server-write --clientID=imagination1 /1000/0/0=Happy ````
 
-## Write a Resource Value on a Registered Client.
+Note that it is not possible to set the value of a resource that is of type *None*.
 
- To write the value of a resource on a registered client, the *awa-server-write* tool can be used.
+A multi-instance resource can be set by specifying the resource instances:
 
- For example, to set the value of resource 0 (of type string) on the client "imagination1", within instance 0 of object 1000, to the value "Happy":
+````./awa-server-write --clientID=imagination1 /1000/0/5/1=123 /1000/0/5/2=456````
 
-    ./awa-server-write --clientID=imagination1 /1000/0/0=Happy
+To create a new instance of an object on a connected client, the *--create* option can be used. 
+When an instance is created, any default values provided in the object definition are used.
 
- Note that it is not possible to set the value of a resource that is of type None.
+For example, to create instance 1 of object 1000 on the client *imagination1*:
 
- A multi-instance resource can be set by specifying the resource instances:
+````./awa-server-write --clientID=imagination1 --create /1000/1 ````
 
-    ./awa-server-write --clientID=imagination1 /1000/0/5/1=123 /1000/0/5/2=456
+To create a new instance with the next available object instance ID:
 
- To create a new instance of an object on a connected client, the --create option can be used. When an instance is created, any default values provided in the object definition are used.
+````./awa-server-write --clientID=imagination1 --create /1000 ````
 
- For example, to create instance 1 of object 1000 on the client "imagination1":
+The ID of the newly created object instance is displayed.
 
-    ./awa-server-write --clientID=imagination1 --create /1000/1
+ **Note: Create functionality is not yet supported.**
 
- To create a new instance with the next available object instance ID:
+### Reading a resource value from a registered client.
 
-    ./awa-server-write --clientID=imagination1 --create /1000
+The *awa-server-read* tool is used to retrieve the value of a resource and display it on the console. For example, to display the value of resource 0, within instance 0 of object 1000:
 
- The ID of the newly created object instance is displayed.
+````./awa-server-read --clientID=imagination1 /1000/0/0 ````
 
- **Note: Create functionality is not yet supported**
+Multiple resources and object instances can be read using:
 
-## Read a Resource Value from a Registered Client.
+````./awa-server-read -c imagination1 /1000/0/2 /1000/0/3 /1000/1 /1001 ````
 
- To retrieve the value of a resource and display it on the console, the *awa-server-read* tool can be used.
+### Deleting an object instance from a registered client.
 
- For example, to display the value of resource 0, within instance 0 of object 1000:
+The *awa-server-delete* tool is used to delete an instance of an object from a connected client. For example, to delete object 1000, instance 0 from the client "imagination1":
 
-    ./awa-server-read --clientID=imagination1 /1000/0/0
+````./awa-server-delete --clientID=imagination1 /1000/0 ````
 
- Multiple resources and object instances can be read:
+**Note.** Due to LWM2M protocol restrictions it is not possible to delete individual resources, resource instances, or entire objects.
 
-    ./awa-server-read -c imagination1 /1000/0/2 /1000/0/3 /1000/1 /1001
+### Observing a resource on a registered client.
 
-## Delete an Object Instance from a Registered Client.
+In some cases a script may be required to block until the value of a resource changes on a specific client. For this purpose, the *awa-server-observe* tool is provided to display notifications whenever the target resource or object instance changes. 
 
- To delete an instance of an object from a connected client, the *awa-server-delete* tool can be used.
+When a notification arrives, the details will be printed to the console, which is the functional equivalent of a LWM2M *Observe* operation.
 
- For example, to delete object 1000, instance 0 from the client "imagination1":
+For example, to wait for a change to resource 200 within instance 0 of object 1000:
 
-    ./awa-server-delete --clientID=imagination1 /1000/0
+````./awa-server-observe --clientID imagination1 /1000/0/200 ````
 
- It is not possible to delete individual resources, resource instances, or entire objects due to LWM2M protocol restrictions.
+To wait for a change to any resource within instance 0 of object 1000:
 
-## Observe a Resource on a Registered Client.
+````./awa-server-observe --clientID imagination1 /1000/0 ````
 
- It may be important for a script to block until the value of a resource changes on a specific client. For this purpose, the *awa-server-observe* tool can be used.
+By default, *awa-server-observe* will wait indefinitely, displaying each notification as it arrives, but by using the time and count options, *awa-server-observe* can terminate after a number of notifications, or an elapsed period of time.
 
- This tool will display notifications whenever the target resource or object instance changes. When such a notification arrives, it will print details in the console.
+| option | description |
+|-----|-----|
+| -t, --waitTime=SECONDS | Time to wait for notification  (default=`0') |  
+| -c, --waitCount=NUMBER | Number of notifications to wait for  (default=`0') |  
 
- This is equivalent to a LWM2M Observe operation. This tool is observing the resources stored by a remote client.
+For example, to wait for no longer than 60 seconds for a single notification:
 
- For example, to wait for a change to resource 200 within instance 0 of object 1000:
+````./awa-server-observe --clientID imagination1 --waitTime=60 --waitCount=1 /1000/0/200 ````
 
-    ./awa-server-observe --clientID imagination1 /1000/0/200
+Observe attributes that affect the way notifications are generated can be changed with the *awa-server-write-attributes* tool.
 
- To wait for a change to any resource within instance 0 of object 1000:
+### Executing a resource on a registered client.
 
-    ./awa-server-observe --clientID imagination1 /1000/0
+The *awa-server-execute* tool is used to initiate an *execute* operation on a resource that supports it.
 
- By default, *awa-server-observe* will wait indefinitely, displaying each notification as it arrives. With the time and count options, *awa-server-observe* can terminate after a number of notifications, or an elapsed period of time.
+For example, to initiate execution of object 1000, instance 0, resource 4 on the client "imagination1":
 
-    -t, --waitTime=SECONDS     Time to wait for notification  (default=`0')
-    -c, --waitCount=NUMBER     Number of notifications to wait for  (default=`0')
+````./awa-server-execute --clientID imagination1 /1000/0/4 ````
 
- For example, to wait for no longer than 60 seconds for a single notification:
+Multiple operations can be initiated by applying multiple paths:
 
-    ./awa-server-observe --clientID imagination1 --waitTime=60 --waitCount=1 /1000/0/200
+````./awa-server-execute --clientID imagination1 /1000/0/4 /1000/0/5 ````
 
- Observe attributes that affect the way notifications are generated can be changed with the *awa-server-write-attributes* tool.
+Opaque data can be supplied as an argument to the execute operation by piping into the process via the *--stdin* option:
 
-## Execute a Resource on a Registered Client.
+````./awa-server-execute --stdin --clientID imagination1 /1000/0/4 < mydata ````
 
- To initiate an Execute operation on a resource that supports the execute operation, the *awa-server-execute* tool can be used.
+**Note that data supplied will be piped to all of the stated execute targets.**
 
- For example, to initiate execution of object 1000, instance 0, resource 4 on the client "imagination1":
+Execute operations on an object, an object instance or a resource instance are not possible.
 
-    ./awa-server-execute --clientID imagination1 /1000/0/4
+### Write attribute values of a resource or object instance on a registered client.
 
- Multiple operations can be initiated with multiple paths:
+The *awa-server-write-attributes* tool is used to change the value of attributes associated with a client's resource or object instance.
 
-    ./awa-server-execute --clientID imagination1 /1000/0/4 /1000/0/5
+For example, to set the *pmin* value of object 1000, instance 0, resource 4 on the client "imagination1" to 5 seconds:
 
- Opaque data can be supplied as an argument to the execute operation by piping into the process via the --stdin option:
+````./awa-server-write_attributes --clientID imagination1 /1000/0/4\?pmin=5 ````
 
-    ./awa-server-execute --stdin --clientID imagination1 /1000/0/4 < mydata
+Multiple attribute values can be set with the same call. For example, to set the *pmin* attribute of object 1000, instance 0 on the client "imagination1" to 5 seconds, and *pmax* to 100 for the same object instance:
 
- Note that data supplied is provided to all execute targets.
+````./awa-server-write_attributes --clientID imagination1 /1000/0\?pmin=5\&pmax=100 ````
 
- It is not possible to initiate an execute operation on an object, an object instance or a resource instance.
+Note that the *?* and *&* characters will need to be escaped for most shells.
 
- It is not possible to initiate an execute operation on a resource that does not support the execute operation.
-
-## Write Attributes of a Resource or Object Instance on a Registered Client.
-
- To change the value of attributes associated with a client's resource or object instance, the *awa-server-write-attributes* tool can be used.
-
- For example, to set the pmin value of object 1000, instance 0, resource 4 on the client "imagination1" to 5 seconds:
-
-    ./awa-server-write_attributes --clientID imagination1 /1000/0/4\?pmin=5
-
- For example, to set the pmin attribute of object 1000, instance 0 on the client "imagination1" to 5 seconds, and pmax to 100 for the same object instance:
-
-    ./awa-server-write_attributes --clientID imagination1 /1000/0\?pmin=5\&pmax=100
-
- Note that the ? and & characters need to be escaped for most shells.
+----
+----
 
