@@ -10,7 +10,6 @@ make clean
 rm -rf lib/libcoap/config.h   # still needed?
 rm -rf lwm2m*.tgz
 rm .build_x86 -rf
-rm -rf tests/lwm2m_ipc/nosetests.xml
 rm -rf tools/tools_tests.xml
 
 # Build for x86 and run valgrind check
