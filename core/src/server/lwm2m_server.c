@@ -20,7 +20,6 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-
 #include <poll.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -292,7 +291,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {0,               0,                 0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "a:c:f:p:i:m:vdl:h", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "a:e:f:p:i:m:vdl:h", longOptions, &optionIndex);
         if (c == -1)
         {
             break;
