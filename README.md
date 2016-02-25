@@ -1,5 +1,5 @@
 
-![Imagination Technologies Limited logo](doc/img.png)
+![Imagination Technologies Limited logo](img.png)
 
 ----
 
@@ -28,20 +28,16 @@ The easiest way to get started with Awa LWM2M is on a Linux PC.  The following i
 
 Firstly, to obtain a copy of the Awa LWM2M source code:
 
- 1. Sign up for a Github account
+ * Sign up for a Github account
 
- 2. Install Git
 
-```
-     sudo apt-get install git 
-```
+ * Install Git  ```` sudo apt-get install git ````
 
- 3. Clone the repository 
-```
-     git clone https://github.com/FlowM2M/AwaLWM2M.git
-``` 
 
-Further instructions can be found in the [Getting started guide](doc/starters_guide.md).
+ * Clone the repository ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ```` 
+
+
+Further instructions can be found in the [Getting started guide](starters_guide.md).
 
 ----
 
