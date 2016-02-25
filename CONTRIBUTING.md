@@ -60,7 +60,7 @@ Awa LWM2M requires contributors to accept the Developer Certificate of Origin (D
 The sign-off is a single line at the end of your commit comment which certifies that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
 
-Certifying your contribution verifies that for your current submission the following statement is true:
+Certifying your contribution asserts that for your current submission the following statement is true:
 
 
 
