@@ -24,15 +24,15 @@ When making your report, be as clear and concise as possible. Use the following 
 
 * Describe environment details (OS/distribution etc).
 
-* How often the issue occurs.
+* State how often the issue has occurred.
 
-* Steps to take to uncover or reproduce the issue (if any).
+* Describe the steps to take to uncover or reproduce the issue (if any).
 
 * Expected behaviour.
 
 * Actual behaviour.
 
-* Any addition Infomation, log output etc.
+* Any additional infomation, log output etc.
 
 
 ### Branching model.
