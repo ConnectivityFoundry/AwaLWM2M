@@ -383,7 +383,8 @@ AwaError ResponseCommon_BuildPathResults(ResponseCommon * response)
                                     result = LogErrorWithEnum(AwaError_Internal, "A pathResult already exists for %s\n", path);
                                     goto error;
                                 }
-                            }                        }
+                            }
+                        }
                         else
                         {
                             result = LogErrorWithEnum(AwaError_Internal, "Could not create pathResult for %s", path);
