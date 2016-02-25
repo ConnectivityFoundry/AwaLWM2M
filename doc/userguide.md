@@ -1,5 +1,5 @@
 
-![](doc/img.png)
+![](img.png)
 ----
 
 # Awa LightweightM2M. 
