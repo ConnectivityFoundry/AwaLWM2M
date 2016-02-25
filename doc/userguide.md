@@ -6,6 +6,11 @@
 
 ## User guide.
 
+This document is aimed at application developers who are using the Awa LightweightM2M libraries and tools as a foundation or enhancement to, their own M2M applications.
+
+Developers who aim to contribute to the Awa LightweightM2M project are referred to the [developer guide](developer_guide.md).
+
+
 ### Contents.
 
 * [Introduction.](userguide.md#introduction)  
