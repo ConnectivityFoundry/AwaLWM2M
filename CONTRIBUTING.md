@@ -3,9 +3,10 @@
 
 ----
 
-## Contributing guide.
+## Contributor guide.
 
-### Reporting issues and bugs.
+
+## Reporting issues and bugs.
 
 If you discover a bug, or find an issue or area that you feel needs improvement:
 
@@ -35,6 +36,12 @@ When making your report, be as clear and concise as possible. Use the following 
 * Any additional infomation, log output etc.
 
 
+----
+
+
+## Developer submissions.
+
+
 ### Branching model.
 
 All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.
@@ -53,6 +60,34 @@ Configure your user name to be used by git:
 The Awa LWM2M coding style guidelines can be found in the [Coding style guide](doc/coding_style.md).
 
 
+
+### Commit messages.
+
+For the commit message, the following rules apply:
+
+ * The first line should be a brief summary of the patch.
+ * Leave a blank line after the summary.
+ * Provide a detailed description of the change.
+ * Leave a blank line after the description.
+ * If the patch relates to an issue, add a line with 'Ref: ISSUE_ID'.
+ * Add a Gerrit 'Change-id' line.
+ * Add a Git 'Signed-off-by' line using ````git commit -s```` or ````git commit --sign-off```` (see *Signing your work* below).
+
+ Example:
+
+    Adds a new example feature xyz
+
+    This patch adds example feature xyz. This feature merely acts
+    as an example of how to commit something to the project.
+    For real features this would contain some text
+    describing in detail what the new feature actually does.
+
+    Ref: AWA-2131
+    Change-Id: Id564ab1230913abf88123dff193b1231b1
+    Signed-off-by: User Name <user.name@email.com>
+
+
+
 ### Signing your work.
 
 Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) (from developercertificate.org).
@@ -60,7 +95,7 @@ Awa LWM2M requires contributors to accept the Developer Certificate of Origin (D
 The sign-off is a single line at the end of your commit comment which certifies that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
 
-Certifying your contribution asserts that for your current submission the following statement is true:
+Certifying your contribution asserts that *for the current submission* the following statement is true:
 
 
 
@@ -117,32 +152,8 @@ If you set-up your user.name and user.email via git config, you can sign your co
 git commit --signoff
 ````
 
+----
 
-### Commit messages.
-
-For the commit message, the following rules apply:
-
- * The first line should be a brief summary of the patch.
- * Leave a blank line after the summary.
- * Provide a detailed description of the change.
- * Leave a blank line after the description.
- * If the patch relates to an issue, add a line with 'Ref: ISSUE_ID'.
- * Add a Gerrit 'Change-id' line.
- * Add a Git 'Signed-off-by' line (using `git commit -s` or `git commit --sign-off`).
-
- Example:
-
-    Adds a new example feature xyz
-
-    This patch adds example feature xyz. This feature merely acts
-    as an example of how to commit something to the project.
-    For real features this would contain some text
-    describing in detail what the new feature actually does.
-
-    Ref: AWA-2131
-    Change-Id: Id564ab1230913abf88123dff193b1231b1
-    Signed-off-by: User Name <user.name@email.com>
-
-
+----
 
 
