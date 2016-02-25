@@ -5,35 +5,40 @@
 
 ## Contributing Guide
 
-### Reporting a bug.
+### Reporting issues and bugs.
 
-So you have found a bug, or just generally an area which can be improved and wish to report it.
+If you discover a bug, or find an issue or area that you feel needs improvement:
 
-Navigate to the "Issues" tab on the project github page https://github.com/FlowM2M/AwaLWM2M/issues and click the "New Issue" button.
+* Navigate to the "Issues" tab on the project github page https://github.com/FlowM2M/AwaLWM2M/issues  
 
-When reporting your bug, please try and be as descriptive as possible. consider adding the following information.
+* Click the "New Issue" button.  
 
-```
-Description of the problem:
 
-Awa LWM2M Version or commit id:
+When making your report, be as clear and concise as possible. Ude the following list as a guide:
 
-Environment details (OS/Distribution etc):
 
-Reproduciblity/Frequency:
 
-Steps to Reproduce/What you were doing when the bug occured:
+* Describe the problem. 
 
-Excepted Result:
+* Awa LWM2M Version or commit id.
 
-Actual Result:
+* Environment details (OS/distribution etc).
 
-Addition Infomation (log output etc)
-```
+* Reproduciblity or issue frequency.
+
+* Steps taken to uncover or reproduce the issue (if any).
+
+* Expected behaviour.
+
+* Actual behaviour.
+
+* Any addition Infomation, log output etc.
+
 
 ### Branching model.
 
 All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.
+
 
 ### Setting up your development machine.
 
@@ -42,17 +47,22 @@ Configure your user name to be used by git:
     $ git config --global user.name "FirstName LastName"
     $ git config --global user.email "email@email.com"
 
+
 ### Coding style.
 
-The Awa LWM2M coding style guidelines can be found in the [Coding style guide](doc/coding_style.md)
+The Awa LWM2M coding style guidelines can be found in the [Coding style guide](doc/coding_style.md).
+
 
 ### Signing your work.
 
-Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) (from developercertificate.org)
+Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) (from developercertificate.org).
 
-The sign-off is a single line at the end of your commit comment which certifies that you wrote the supplied code or otherwise have the right to pass it on the code as open-source.
+The sign-off is a single line at the end of your commit comment which certifies that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
-It's pretty simple: if you can certify the following:
+
+Certifying your contribution verifies that for your current submission the following statement is true:
+
+
 
 ```
 Developer Certificate of Origin
@@ -92,17 +102,21 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
-Then you just add the following line to every git commit message to indicate that you accept the DCO:
 
-```
+To certify your submission just add the following line to *every* git commit message to indicate that you accept the above DCO:
+
+
+````
 Signed-off-by: User Name <user.name@email.com>
-```
 
-If you set-up your user.name and user.email via git config, you can sign your commit automatically with git commit like so:
+````
 
-```
+If you set-up your user.name and user.email via git config, you can sign your commit automatically with git commit:
+
+````
 git commit --signoff
-```
+````
+
 
 ### Commit messages.
 
