@@ -16,7 +16,6 @@ rm -rf lib/libcoap/config.h   # still needed?
 rm -rf lwm2m*.tgz
 rm .build_openwrt -rf
 rm .build_x86 -rf
-rm -rf tests/lwm2m_ipc/nosetests.xml
 rm -rf tools/tools_tests.xml
 
 # Build for OpenWRT
@@ -29,13 +28,6 @@ mkdir .build_x86
 # Build for x86 and run test cases
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON"
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON" tests
-
-# Python LWM2M tests
-(cd tests
-  # don't stop build on failure:
-  (cd lwm2m && BUILD_DIR=../../.build_x86 ./auto_run_lwm2m_server_testcases || true)
-  (cd lwm2m && BUILD_DIR=../../.build_x86 ./auto_run_lwm2m_client_testcases || true)
-)
 
 # parse coverage results
 (cd .build_x86;
