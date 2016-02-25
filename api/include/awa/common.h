@@ -911,6 +911,8 @@ AwaError AwaChangeSet_GetValueAsIntegerPointer   (const AwaChangeSet * changeSet
 AwaError AwaChangeSet_GetValueAsFloatPointer     (const AwaChangeSet * changeSet, const char * path, const AwaFloat ** value);
 AwaError AwaChangeSet_GetValueAsBooleanPointer   (const AwaChangeSet * changeSet, const char * path, const AwaBoolean ** value);
 AwaError AwaChangeSet_GetValueAsTimePointer      (const AwaChangeSet * changeSet, const char * path, const AwaTime ** value);
+AwaError AwaChangeSet_GetValueAsObjectLinkPointer(const AwaChangeSet * changeSet, const char * path, const AwaObjectLink ** value);
+AwaError AwaChangeSet_GetValueAsOpaquePointer    (const AwaChangeSet * changeSet, const char * path, const AwaOpaque ** value);
 /** @} */
 
 /**

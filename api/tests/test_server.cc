@@ -105,7 +105,7 @@ TEST_F(TestServer, AwaServer_read_default_value_from_created_custom_object_insta
     const AwaIntegerArray * value = NULL;
     ASSERT_EQ(AwaError_Success, AwaServerReadResponse_GetValuesAsIntegerArrayPointer(readResponse, "/10000/0/0", &value));
     ASSERT_TRUE(NULL != value);
-    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value));
+    EXPECT_EQ(0, Array_Compare((AwaArray *)expected, (AwaArray *)value, AwaResourceType_IntegerArray));
 
     AwaIntegerArray_Free(&expected);
     AwaServerReadOperation_Free(&readOperation);

@@ -36,7 +36,7 @@ AwaIntegerArray * AwaIntegerArray_New(void)
 
 void AwaIntegerArray_Free(AwaIntegerArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_IntegerArray);
 }
 
 void AwaIntegerArray_SetValue(AwaIntegerArray * array, AwaArrayIndex index, AwaInteger value)
@@ -46,7 +46,7 @@ void AwaIntegerArray_SetValue(AwaIntegerArray * array, AwaArrayIndex index, AwaI
 
 void AwaIntegerArray_DeleteValue(AwaIntegerArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_IntegerArray);
 }
 
 AwaInteger AwaIntegerArray_GetValue(const AwaIntegerArray * array, AwaArrayIndex index)

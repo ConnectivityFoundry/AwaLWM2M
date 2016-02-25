@@ -35,7 +35,7 @@ AwaStringArray * AwaStringArray_New(void)
 
 void AwaStringArray_Free(AwaStringArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_StringArray);
 }
 
 void AwaStringArray_SetValueAsCString(AwaStringArray * array, AwaArrayIndex index, const char * value)
@@ -45,7 +45,7 @@ void AwaStringArray_SetValueAsCString(AwaStringArray * array, AwaArrayIndex inde
 
 void AwaStringArray_DeleteValue(AwaStringArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_StringArray);
 }
 
 const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaArrayIndex index)

@@ -36,7 +36,7 @@ AwaFloatArray * AwaFloatArray_New(void)
 
 void AwaFloatArray_Free(AwaFloatArray ** array)
 {
-    AwaArray_Free((AwaArray **)array);
+    AwaArray_Free((AwaArray **)array, AwaResourceType_FloatArray);
 }
 
 void AwaFloatArray_SetValue(AwaFloatArray * array, AwaArrayIndex index, AwaFloat value)
@@ -46,7 +46,7 @@ void AwaFloatArray_SetValue(AwaFloatArray * array, AwaArrayIndex index, AwaFloat
 
 void AwaFloatArray_DeleteValue(AwaFloatArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index);
+    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_FloatArray);
 }
 
 AwaFloat AwaFloatArray_GetValue(const AwaFloatArray * array, AwaArrayIndex index)

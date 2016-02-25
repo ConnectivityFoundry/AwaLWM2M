@@ -505,6 +505,9 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
     const AwaServerReadResponse * readResponse = data.UseResponse ? this->readResponse_ : NULL;
     void * value = NULL;
 
+    AwaObjectLink receivedObjectLink = {0, 0};
+    AwaOpaque receivedOpaque = {NULL, 0};
+
     switch(data.type)
     {
     case AwaResourceType_String:
@@ -520,30 +523,19 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
         ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, data.path, (const AwaBoolean **)&value));
         break;
     case AwaResourceType_Opaque:
-    {
-        value = Awa_MemAlloc(sizeof(AwaOpaque));
-        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsOpaque(readResponse, data.path, (AwaOpaque *)value));
+        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsOpaque(readResponse, data.path, &receivedOpaque));
+        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsOpaquePointer(readResponse, data.path, (const AwaOpaque **)&value));
         break;
-    }
     case AwaResourceType_Time:
         ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsTimePointer(readResponse, data.path, (const AwaTime **)&value));
         break;
     case AwaResourceType_ObjectLink:
-        value = Awa_MemAlloc(sizeof(AwaObjectLink));
-        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsObjectLink(readResponse, data.path, (AwaObjectLink *)value));
+        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsObjectLink(readResponse, data.path, &receivedObjectLink));
+        ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsObjectLinkPointer(readResponse, data.path, (const AwaObjectLink **)&value));
         break;
     default:
         ASSERT_TRUE(false);
         break;
-    }
-
-    if (data.type == AwaResourceType_Opaque || data.type == AwaResourceType_ObjectLink)
-    {
-        if (data.expectedResult != AwaError_Success && data.expectedValue == NULL)
-        {
-            Awa_MemSafeFree(value);
-            value = NULL;
-        }
     }
 
     if (data.expectedResult == AwaError_Success)
@@ -559,9 +551,12 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
             case AwaResourceType_Opaque:
             {
                 AwaOpaque * expectedOpaque = (AwaOpaque *) data.expectedValue;
-                AwaOpaque * receivedOpaque = (AwaOpaque *) value;
-                ASSERT_EQ(expectedOpaque->Size, receivedOpaque->Size);
-                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque->Data, expectedOpaque->Size));
+                AwaOpaque * receivedOpaquePointer = (AwaOpaque *) value;
+
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaquePointer->Size);
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaque.Size);
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaquePointer->Data, receivedOpaquePointer->Size));
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque.Data, expectedOpaque->Size));
                 break;
             }
             case AwaResourceType_Integer:
@@ -577,18 +572,17 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
                 ASSERT_EQ(*static_cast<const AwaTime *>(data.expectedValue), *static_cast<AwaTime *>(value));
                 break;
             case AwaResourceType_ObjectLink:
-                ASSERT_EQ(0, memcmp(static_cast<const AwaObjectLink *>(data.expectedValue), static_cast<AwaObjectLink *>(value), sizeof(AwaObjectLink)));
+            {
+                const AwaObjectLink * expectedObjectLink = static_cast<const AwaObjectLink *>(data.expectedValue);
+                const AwaObjectLink * receivedObjectLinkPointer = static_cast<const AwaObjectLink *>(value);
+                ASSERT_EQ(0, memcmp(expectedObjectLink, receivedObjectLinkPointer, sizeof(AwaObjectLink)));
+                ASSERT_EQ(0, memcmp(expectedObjectLink, &receivedObjectLink, sizeof(AwaObjectLink)));
                 break;
+            }
             default:
                 ASSERT_TRUE(false);
                 break;
         }
-    }
-
-    if (data.type == AwaResourceType_Opaque || data.type == AwaResourceType_ObjectLink)
-    {
-        Awa_MemSafeFree(value);
-        value = NULL;
     }
 }
 
@@ -1086,7 +1080,7 @@ TEST_P(TestReadValueArray, TestReadValueArrayInstantiation)
     ASSERT_TRUE((data.expectedResult == AwaError_Success) == (array != NULL));
     if (array != NULL)
     {
-        ASSERT_EQ(0, Array_Compare(expectedArray, array));
+        ASSERT_EQ(0, Array_Compare(expectedArray, array, data.type));
     }
 }
 

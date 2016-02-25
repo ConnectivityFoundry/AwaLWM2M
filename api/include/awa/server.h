@@ -641,11 +641,13 @@ bool AwaServerReadResponse_HasValue(const AwaServerReadResponse * response, cons
  * @return AwaError_PathInvalid if the specified path is invalid or does not correspond to a resource path.
  * @{
  */
-AwaError AwaServerReadResponse_GetValueAsCStringPointer   (const AwaServerReadResponse * response, const char * path, const char ** value);
-AwaError AwaServerReadResponse_GetValueAsIntegerPointer   (const AwaServerReadResponse * response, const char * path, const AwaInteger ** value);
-AwaError AwaServerReadResponse_GetValueAsFloatPointer     (const AwaServerReadResponse * response, const char * path, const AwaFloat ** value);
-AwaError AwaServerReadResponse_GetValueAsBooleanPointer   (const AwaServerReadResponse * response, const char * path, const AwaBoolean ** value);
-AwaError AwaServerReadResponse_GetValueAsTimePointer      (const AwaServerReadResponse * response, const char * path, const AwaTime ** value);
+AwaError AwaServerReadResponse_GetValueAsCStringPointer    (const AwaServerReadResponse * response, const char * path, const char ** value);
+AwaError AwaServerReadResponse_GetValueAsIntegerPointer    (const AwaServerReadResponse * response, const char * path, const AwaInteger ** value);
+AwaError AwaServerReadResponse_GetValueAsFloatPointer      (const AwaServerReadResponse * response, const char * path, const AwaFloat ** value);
+AwaError AwaServerReadResponse_GetValueAsBooleanPointer    (const AwaServerReadResponse * response, const char * path, const AwaBoolean ** value);
+AwaError AwaServerReadResponse_GetValueAsTimePointer       (const AwaServerReadResponse * response, const char * path, const AwaTime ** value);
+AwaError AwaServerReadResponse_GetValueAsObjectLinkPointer(const AwaServerReadResponse * response, const char * path, const AwaObjectLink ** value);
+AwaError AwaServerReadResponse_GetValueAsOpaquePointer    (const AwaServerReadResponse * response, const char * path, const AwaOpaque ** value);
 /** @} */
 
 /**
@@ -663,7 +665,7 @@ AwaError AwaServerReadResponse_GetValueAsTimePointer      (const AwaServerReadRe
  * @return AwaError_OperationInvalid if the specified operation is invalid or NULL.
  * @return AwaError_PathInvalid if the specified path is invalid or does not correspond to a resource path.
  */
-AwaError AwaServerReadResponse_GetValueAsOpaque    (const AwaServerReadResponse * response, const char * path, AwaOpaque * value);
+AwaError AwaServerReadResponse_GetValueAsOpaque(const AwaServerReadResponse * response, const char * path, AwaOpaque * value);
 
 /**
  * @brief Retrieve an object link resource's value from a Read Response. The resource is identified by the path.

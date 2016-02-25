@@ -490,6 +490,8 @@ AwaError AwaClientGetResponse_GetValueAsIntegerPointer   (const AwaClientGetResp
 AwaError AwaClientGetResponse_GetValueAsFloatPointer     (const AwaClientGetResponse * response, const char * path, const AwaFloat ** value);
 AwaError AwaClientGetResponse_GetValueAsBooleanPointer   (const AwaClientGetResponse * response, const char * path, const AwaBoolean ** value);
 AwaError AwaClientGetResponse_GetValueAsTimePointer      (const AwaClientGetResponse * response, const char * path, const AwaTime ** value);
+AwaError AwaClientGetResponse_GetValueAsObjectLinkPointer(const AwaClientGetResponse * response, const char * path, const AwaObjectLink ** value);
+AwaError AwaClientGetResponse_GetValueAsOpaquePointer    (const AwaClientGetResponse * response, const char * path, const AwaOpaque ** value);
 /** @} */
 
 /**

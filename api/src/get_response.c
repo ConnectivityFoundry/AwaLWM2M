@@ -106,13 +106,25 @@ AwaError AwaClientGetResponse_GetValueAsBooleanPointer(const AwaClientGetRespons
 AwaError AwaClientGetResponse_GetValueAsOpaque(const AwaClientGetResponse * response, const char * path, AwaOpaque * value)
 {
     // AwaClientGetResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)&value->Data, &value->Size, AwaResourceType_Opaque, -1);
+    return ResponseCommon_GetValueAsOpaque((const ResponseCommon *)response, path, value);
 }
 
 AwaError AwaClientGetResponse_GetValueAsObjectLink(const AwaClientGetResponse * response, const char * path, AwaObjectLink * value)
 {
     // AwaClientGetResponse is an alias for ResponseCommon
     return ResponseCommon_GetValueAsObjectLink((const ResponseCommon *)response, path, value);
+}
+
+AwaError AwaClientGetResponse_GetValueAsObjectLinkPointer(const AwaClientGetResponse * response, const char * path, const AwaObjectLink ** value)
+{
+    // AwaClientGetResponse is an alias for ResponseCommon
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_ObjectLink, sizeof(AwaObjectLink));
+}
+
+AwaError AwaClientGetResponse_GetValueAsOpaquePointer    (const AwaClientGetResponse * response, const char * path, const AwaOpaque ** value)
+{
+    // AwaClientGetResponse is an alias for ResponseCommon
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Opaque, sizeof(AwaOpaque));
 }
 
 AwaError AwaClientGetResponse_GetValuesAsStringArrayPointer(const AwaClientGetResponse * response, const char * path, const AwaStringArray ** valueArray)

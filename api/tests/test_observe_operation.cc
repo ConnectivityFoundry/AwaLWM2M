@@ -1458,6 +1458,8 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             void * value = NULL;
+            AwaObjectLink receivedObjectLink = {0, 0};
+            AwaOpaque receivedOpaque = {NULL, 0};
 
             count ++;
 
@@ -1478,30 +1480,19 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
                     ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsBooleanPointer(changeSet, data.path, (const AwaBoolean **)&value));
                     break;
                 case AwaResourceType_Opaque:
-                {
-                    value = Awa_MemAlloc(sizeof(AwaOpaque));
-                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsOpaque(changeSet, data.path, (AwaOpaque *)value));
+                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsOpaque(changeSet, data.path, &receivedOpaque));
+                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsOpaquePointer(changeSet, data.path, (const AwaOpaque **)&value));
                     break;
-                }
                 case AwaResourceType_Time:
                     ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsTimePointer(changeSet, data.path, (const AwaTime **)&value));
                     break;
                 case AwaResourceType_ObjectLink:
-                    value = Awa_MemAlloc(sizeof(AwaObjectLink));
-                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsObjectLink(changeSet, data.path, (AwaObjectLink *)value));
+                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsObjectLink(changeSet, data.path, &receivedObjectLink));
+                    ASSERT_EQ(data.expectedResult, AwaChangeSet_GetValueAsObjectLinkPointer(changeSet, data.path, (const AwaObjectLink **)&value));
                     break;
                 default:
                     ASSERT_TRUE(false);
                     break;
-            }
-
-            if (data.type == AwaResourceType_Opaque || data.type == AwaResourceType_ObjectLink)
-            {
-                if (data.expectedResult != AwaError_Success && data.expectedValue == NULL)
-                {
-                    Awa_MemSafeFree(value);
-                    value = NULL;
-                }
             }
 
             if (data.expectedResult == AwaError_Success)
@@ -1521,9 +1512,11 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
                     case AwaResourceType_Opaque:
                     {
                         AwaOpaque * expectedOpaque = (AwaOpaque *) expected;
-                        AwaOpaque * receivedOpaque = (AwaOpaque *) value;
-                        ASSERT_EQ(expectedOpaque->Size, receivedOpaque->Size);
-                        ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque->Data, expectedOpaque->Size));
+                        AwaOpaque * receivedOpaquePointer = (AwaOpaque *) value;
+                        ASSERT_EQ(expectedOpaque->Size, receivedOpaquePointer->Size);
+                        ASSERT_EQ(expectedOpaque->Size, receivedOpaque.Size);
+                        ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaquePointer->Data, expectedOpaque->Size));
+                        ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque.Data, receivedOpaque.Size));
                         break;
                     }
                     case AwaResourceType_Integer:
@@ -1539,20 +1532,18 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
                         ASSERT_EQ(*static_cast<const AwaTime *>(expected), *static_cast<AwaTime *>(value));
                         break;
                     case AwaResourceType_ObjectLink:
-                        ASSERT_EQ(0, memcmp(static_cast<const AwaObjectLink *>(expected), static_cast<AwaObjectLink *>(value), sizeof(AwaObjectLink)));
+                    {
+                        const AwaObjectLink * expectedObjectLink = static_cast<const AwaObjectLink *>(expected);
+                        const AwaObjectLink * receivedObjectLinkPointer = static_cast<AwaObjectLink *>(value);
+                        ASSERT_EQ(0, memcmp(expectedObjectLink, receivedObjectLinkPointer, sizeof(AwaObjectLink)));
+                        ASSERT_EQ(0, memcmp(expectedObjectLink, &receivedObjectLink, sizeof(AwaObjectLink)));
                         break;
+                    }
                     default:
                         ASSERT_TRUE(false);
                         break;
                 }
             }
-
-            if (data.type == AwaResourceType_Opaque || data.type == AwaResourceType_ObjectLink)
-            {
-                Awa_MemSafeFree(value);
-                value = NULL;
-            }
-
         }
         void TestBody() {}
     };
