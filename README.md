@@ -1,5 +1,5 @@
 
-![Imagination Technologies Limited logo](img.png)
+![Imagination Technologies Limited logo](doc/img.png)
 
 ----
 
@@ -31,10 +31,10 @@ Firstly, to obtain a copy of the Awa LWM2M source code:
  * Sign up for a Github account
 
 
- * Install Git  ```` sudo apt-get install git ````
+ * Install Git:  ```` sudo apt-get install git ````
 
 
- * Clone the repository ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ```` 
+ * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ```` 
 
 
 Further instructions can be found in the [Getting started guide](starters_guide.md).
@@ -56,17 +56,11 @@ Awa LWM2M documentation is available both at a general level (project informatio
 
 The Awa API documentation is available as a Doxygen presentation which is generated via the following process.
  
-  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html)
+  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html): ```` sudo apt-get install doxygen````
 
-```
-    sudo apt-get install doxygen
-```
+  2. Generate the documentation: ```` make docs````
 
-  2. Generate the documentation
-```
-    make docs
-```
-  The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
+The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
 
 For convenience you can also find the latest version of this documentation [here]()
 
