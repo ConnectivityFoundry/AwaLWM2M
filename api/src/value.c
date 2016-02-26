@@ -234,7 +234,7 @@ void Value_Free(Value ** value)
         }
         else
         {
-            if ((*value)->Type == AwaResourceType_Opaque)
+            if ((*value)->Type == AwaResourceType_Opaque || (*value)->Type == AwaResourceType_None)
             {
                 AwaOpaque * opaque = (AwaOpaque * )((*value)->Data);
                 free(opaque->Data);
