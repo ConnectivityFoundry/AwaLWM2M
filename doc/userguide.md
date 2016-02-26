@@ -16,7 +16,8 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 
 ### Contents.
 
-* [Introduction.](userguide.md#introduction)  
+* [Introduction.](userguide.md#introduction) 
+* [The LWM2M object model.](userguide.md#the-lwm2m-object-model) 
 * [The LWM2M client.](userguide.md#the-lwm2m-client)  
     * [The Awa client daemon](userguide.md#the-awa-client-daemon)  
 * [The LWM2M server.](userguide.md#the-lwm2m-server)  
