@@ -63,6 +63,8 @@ In the case where a single instance of an object and resource exists the address
 
 Semantic addressing allows resources to be written to directly: ````1000/0/1/2='this value"````
 
+----
+
 
 ### The LWM2M client.
 
@@ -108,11 +110,8 @@ Example:
 ```` awa_clientd --port 6000 --endPointName client1 --bootstrap coap://0.0.0.0:2134 ````
 
 
-### Awa client daemon tools.
-
-should this be here?
-
 ----
+
 
 ### The LWM2M server.
 
@@ -145,6 +144,9 @@ Usage: ````awa_serverd [options] ````
 Example: ````awa_serverd --interface eth0 --addressFamily 4 --port 5683 ````
 
 For examples of how to use the LWM2M server with the LWM2M client see the *LWM2M client usage* section below.
+
+
+----
 
 
 ### The LWM2M Bootstrap server.
