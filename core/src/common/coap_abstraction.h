@@ -41,7 +41,7 @@ typedef struct
 {
     int type;
     void * ctxt;
-    AddressType * addr;
+    AddressType addr;
     const char * path;
     const char * query;
     const char * token;

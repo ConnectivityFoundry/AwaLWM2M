@@ -66,7 +66,7 @@ typedef struct
     TransactionCallback Callback;
     NotificationFreeCallback NotificationFreeCallback;
     coap_tid_t TransactionID;
-    coap_address_t * Address;
+    AddressType Address;
     void * Context;
     char * Path;
 } TransactionType;
@@ -80,8 +80,7 @@ typedef struct
     char * Path;
     void * Context;
     NotificationFreeCallback FreeCallback;
-    coap_address_t * Address;
-
+    AddressType * Address;
 } NotificationHandler;
 
 static struct ListHead transactionCallbackList;
@@ -116,6 +115,12 @@ int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
     return result;
 }
 
+static void coap_CoapAddressTypeToAddressType(coap_address_t * coapAddress, AddressType * addressType)
+{
+    addressType->Size = coapAddress->size;
+    memcpy(&addressType->Addr.St, &coapAddress->addr.st, sizeof(addressType->Addr.St));
+}
+
 /* Notification handler, used by the server to map a callback to a token in a notification packet
  * this is not required on the client, as the client can simply use the object store
  */
@@ -134,7 +139,7 @@ static NotificationHandler * lookup_NotificationHandler(char * token, int tokenL
 }
 
 static int create_NotificationHandler(char * token, int tokenLength, void * context, char * path, TransactionCallback callback,
-                                      NotificationFreeCallback freeCallback, coap_address_t * address)
+                                      NotificationFreeCallback freeCallback, AddressType * address)
 {
     int result = -1;
     NotificationHandler * notify = malloc(sizeof(NotificationHandler));
@@ -203,7 +208,7 @@ static int create_Transaction(coap_tid_t transactionID, coap_address_t * address
     transaction->Context = context;
     transaction->Callback = transactionCallback;
     transaction->NotificationFreeCallback = notificationFreeCallback;
-    transaction->Address = address;
+    coap_CoapAddressTypeToAddressType(address, &transaction->Address);
     transaction->Path = strdup(path);
 
     ListAdd(&transaction->List, &transactionCallbackList);
@@ -226,7 +231,7 @@ static void HandleGetRequest(void * context, coap_address_t * addr, const char *
     CoapRequest coapRequest = {
         .type = COAP_GET_REQUEST, 
         .ctxt = context, 
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = NULL,
@@ -241,6 +246,8 @@ static void HandleGetRequest(void * context, coap_address_t * addr, const char *
         .responseContentLen = sizeof(responseContent),
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     Lwm2m_Debug("COAP_REQUEST_GET: path %s, query %s contentType %d, request->length %d\n", path, query, contentType, request->length);
 
@@ -268,7 +275,7 @@ static void HandleObserveRequest(void * context, coap_address_t * addr, const ch
     CoapRequest coapRequest = {
         .type = COAP_OBSERVE_REQUEST,
         .ctxt = context,
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = request->hdr->token,
@@ -283,6 +290,8 @@ static void HandleObserveRequest(void * context, coap_address_t * addr, const ch
         .responseContentLen = sizeof(responseContent),
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     Lwm2m_Debug("COAP_REQUEST_OBSERVE: path %s, query %s, contentType %d, request->length %d\n", path, query, contentType, request->length);
 
@@ -314,7 +323,7 @@ static void HandleCancelObserveRequest(void * context, coap_address_t * addr, co
     CoapRequest coapRequest = {
         .type = COAP_CANCEL_OBSERVE_REQUEST,
         .ctxt = context,
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = request->hdr->token,
@@ -329,6 +338,8 @@ static void HandleCancelObserveRequest(void * context, coap_address_t * addr, co
         .responseContentLen = sizeof(responseContent),
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     Lwm2m_Debug("COAP_REQUEST_CANCEL_OBSERVE: path %s, query %s contentType %d, request->length %d\n", path, query, contentType, request->length);
 
@@ -360,7 +371,7 @@ static void HandlePutRequest(void * context, coap_address_t * addr, const char *
     CoapRequest coapRequest = {
         .type = COAP_PUT_REQUEST,
         .ctxt = context,
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = request->hdr->token,
@@ -375,6 +386,8 @@ static void HandlePutRequest(void * context, coap_address_t * addr, const char *
         .responseContentLen = 0,
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     if (coap_get_data(request, &requestLength, &requestData))
     {
@@ -406,7 +419,7 @@ static void HandlePostRequest(void * context, coap_address_t * addr, const char 
     CoapRequest coapRequest = {
         .type = COAP_POST_REQUEST,
         .ctxt = context,
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = request->hdr->token,
@@ -423,6 +436,8 @@ static void HandlePostRequest(void * context, coap_address_t * addr, const char 
         .responseLocationLen = sizeof(responseLocation),
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     if (coap_get_data(request, &requestLength, &requestData))
     {
@@ -464,7 +479,7 @@ static void HandleDeleteRequest(void * context, coap_address_t * addr, const cha
     CoapRequest coapRequest = {
         .type = COAP_DELETE_REQUEST,
         .ctxt = context,
-        .addr = (AddressType *)addr,
+        .addr = { 0 },
         .path = path,
         .query = query,
         .token = request->hdr->token,
@@ -477,6 +492,8 @@ static void HandleDeleteRequest(void * context, coap_address_t * addr, const cha
         .responseContentLen = 0,
         .responseCode = 500,
     };
+
+    coap_CoapAddressTypeToAddressType(addr, &coapRequest.addr);
 
     Lwm2m_Debug("COAP_REQUEST_DELETE: path %s, query %s request->length %d\n", path, query, request->length);
 
@@ -675,7 +692,7 @@ void coap_ResponseHandler(struct coap_context_t * ctx,
                     // if we have established an observation, then create a new observer
                     if (!lookup_NotificationHandler(received->hdr->token, received->hdr->token_length))
                     {
-                        create_NotificationHandler(received->hdr->token, received->hdr->token_length, transaction->Context, responsePath, transaction->Callback, transaction->NotificationFreeCallback, transaction->Address);
+                        create_NotificationHandler(received->hdr->token, received->hdr->token_length, transaction->Context, responsePath, transaction->Callback, transaction->NotificationFreeCallback, &transaction->Address);
                     }
                 }
                 else
@@ -691,7 +708,8 @@ void coap_ResponseHandler(struct coap_context_t * ctx,
 
             if (transaction != NULL)
             {
-                transaction->Callback(transaction->Context, (AddressType *)transaction->Address, responsePath, COAP_OPTION_TO_RESPONSE_CODE(received->hdr->code), contentType, databuf, len);
+                Lwm2m_Debug("Calling transaction callback\n");
+                transaction->Callback(transaction->Context, &transaction->Address, responsePath, COAP_OPTION_TO_RESPONSE_CODE(received->hdr->code), contentType, databuf, len);
                 remove_Transaction(transaction);
             }
         }
@@ -709,7 +727,7 @@ void coap_ResponseHandler(struct coap_context_t * ctx,
                     Lwm2m_Error("Failed to read data from unsolicited response message for %d\n", id);
                 }
 
-                notify->Callback(notify->Context, (AddressType *)remote, notify->Path, COAP_OPTION_TO_RESPONSE_CODE(received->hdr->code), contentType, databuf, len);
+                notify->Callback(notify->Context, notify->Address, notify->Path, COAP_OPTION_TO_RESPONSE_CODE(received->hdr->code), contentType, databuf, len);
             }
         }
     }
@@ -836,7 +854,7 @@ void coap_Process(void)
             if (tid == COAP_INVALID_TID)
             {
                 Lwm2m_Error("Transaction Timed out\n");
-                transaction->Callback(transaction->Context, (AddressType *)transaction->Address, NULL, 503, ContentType_None, NULL, 0);
+                transaction->Callback(transaction->Context, &transaction->Address, NULL, 503, ContentType_None, NULL, 0);
 
                 remove_Transaction(transaction);
             }
