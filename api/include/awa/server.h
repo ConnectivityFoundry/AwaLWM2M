@@ -646,8 +646,8 @@ AwaError AwaServerReadResponse_GetValueAsIntegerPointer    (const AwaServerReadR
 AwaError AwaServerReadResponse_GetValueAsFloatPointer      (const AwaServerReadResponse * response, const char * path, const AwaFloat ** value);
 AwaError AwaServerReadResponse_GetValueAsBooleanPointer    (const AwaServerReadResponse * response, const char * path, const AwaBoolean ** value);
 AwaError AwaServerReadResponse_GetValueAsTimePointer       (const AwaServerReadResponse * response, const char * path, const AwaTime ** value);
-AwaError AwaServerReadResponse_GetValueAsObjectLinkPointer(const AwaServerReadResponse * response, const char * path, const AwaObjectLink ** value);
-AwaError AwaServerReadResponse_GetValueAsOpaquePointer    (const AwaServerReadResponse * response, const char * path, const AwaOpaque ** value);
+AwaError AwaServerReadResponse_GetValueAsObjectLinkPointer (const AwaServerReadResponse * response, const char * path, const AwaObjectLink ** value);
+AwaError AwaServerReadResponse_GetValueAsOpaquePointer     (const AwaServerReadResponse * response, const char * path, const AwaOpaque ** value);
 /** @} */
 
 /**
