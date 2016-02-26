@@ -33,6 +33,7 @@
 
 typedef struct
 {
+    AddressType Address;
     TransactionCallback Callback;
     void * Context;
     bool TransactionUsed;
@@ -67,11 +68,6 @@ static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ voi
        .responseCode = 400,
     };
 
-    // copy address from src buffer
-    AddressType addr;
-    memcpy(&addr.Addr, &UIP_IP_BUF->srcipaddr, sizeof(uip_ipaddr_t));
-    addr.Port = uip_ntohs(UIP_UDP_BUF->srcport);
-
     payloadLen = REST.get_request_payload(request, &payload);
 
     if ((urlLen = REST.get_url(request, &url)))
@@ -88,7 +84,7 @@ static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ voi
 
         CoapRequest coapRequest = {
             .ctxt = context,
-            .addr = &addr,
+            .addr = { 0 },
             .path = uriBuf,
             .query = query,
             .token = request->token,
@@ -96,6 +92,9 @@ static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ voi
             .requestContent = payload,
             .requestContentLen = payloadLen,
         };
+
+        memcpy(&coapRequest.addr.Addr, &UIP_IP_BUF->srcipaddr, sizeof(uip_ipaddr_t));
+        coapRequest.addr.Port = uip_ntohs(UIP_UDP_BUF->srcport);
 
         switch(method)
         {
@@ -390,7 +389,7 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
             coap_get_header_content_format(response, &ContentType);
             int payloadLen = coap_get_payload(response, (const uint8_t **)&payload);
 
-            transaction->Callback(transaction->Context, NULL, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code), ContentType, payload, payloadLen);
+            transaction->Callback(transaction->Context, &transaction->Address, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code), ContentType, payload, payloadLen);
         }
         else
         {
@@ -442,6 +441,8 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
         CurrentTransaction[CurrentTransactionIndex].Context = context;
         CurrentTransaction[CurrentTransactionIndex].TransactionUsed = true;
         CurrentTransaction[CurrentTransactionIndex].TransactionPtr = transaction;
+        memcpy(&CurrentTransaction[CurrentTransactionIndex].Address.Addr, remote_ipaddr, sizeof(uip_ipaddr_t));
+        CurrentTransaction[CurrentTransactionIndex].Address.Port = uip_htons(remote_port);
 
         transaction->callback_data = &CurrentTransaction[CurrentTransactionIndex];
 
