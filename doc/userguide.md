@@ -35,7 +35,12 @@ A bootstrap server daemon is also provided that implements the LWM2M bootstrappi
 
 ### The LWM2M object model.
 
+----
+
 ![LWM2M object model](LWM2M_object_referencing.png)
+
+----
+
 
 LWM2M is based on an object model such that:
 * An object is defined to reresent a device or client application (the LWM2M client), or a LWM2M device management function. 
