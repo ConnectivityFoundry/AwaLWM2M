@@ -75,7 +75,7 @@ For convenience you can also find the latest version of this documentation [here
 
 We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality, to improving documentation and bug reporting - it's all good. 
 
-Find out more in the [contributing guide](CONTRIBUTING.md).
+Find out more in the [contributor guide](CONTRIBUTING.md).
 
 ### Credits.
 

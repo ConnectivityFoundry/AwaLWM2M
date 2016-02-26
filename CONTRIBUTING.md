@@ -75,6 +75,8 @@ For the commit message, the following rules apply:
 
  Example:
 
+````
+
     Adds a new example feature xyz
 
     This patch adds example feature xyz. This feature merely acts
@@ -85,6 +87,8 @@ For the commit message, the following rules apply:
     Ref: AWA-2131
     Change-Id: Id564ab1230913abf88123dff193b1231b1
     Signed-off-by: User Name <user.name@email.com>
+
+````
 
 
 
