@@ -57,7 +57,7 @@ Configure your user name to be used by git:
 
 ### Coding style.
 
-The Awa LWM2M coding style guidelines can be found in the [Coding style guide](doc/coding_style.md).
+The Awa LWM2M coding style guidelines can be found in the [coding style guide](doc/coding_style.md).
 
 
 
