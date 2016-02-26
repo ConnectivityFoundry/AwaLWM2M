@@ -134,7 +134,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
         return 0;
     }
 
-    return endPoint->Handler(request->type, request->ctxt, request->addr, request->path, request->query,
+    return endPoint->Handler(request->type, request->ctxt, &request->addr, request->path, request->query,
                              request->token, request->tokenLength, request->contentType, request->requestContent,
                              request->requestContentLen, &response->responseContentType, response->responseContent,
                              &response->responseContentLen, &response->responseCode);

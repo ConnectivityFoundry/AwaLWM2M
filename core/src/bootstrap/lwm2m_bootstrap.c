@@ -191,7 +191,7 @@ void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
         // kick start sending bootstrap with callback
         if (bootStrapQueue[i].ObjectID == 0 && bootStrapQueue[i].ObjectInstanceID == -1)
         {
-            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], NULL, NULL, Lwm2mResult_Success, 0, NULL, 0);
+            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, Lwm2mResult_Success, 0, NULL, 0);
         }
     }
 }

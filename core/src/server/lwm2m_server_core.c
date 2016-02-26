@@ -85,7 +85,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     ResourceEndPoint * endPoint = Lwm2mCore_FindResourceEndPoint(&context->EndPointList, request->path);
     if (endPoint != NULL)
     {
-        result = endPoint->Handler(request->type, request->ctxt, request->addr, request->path, request->query,
+        result = endPoint->Handler(request->type, request->ctxt, &request->addr, request->path, request->query,
                  request->token, request->tokenLength, request->contentType, request->requestContent,
                  request->requestContentLen, &response->responseContentType, response->responseContent,
                  &response->responseContentLen, &response->responseCode);
