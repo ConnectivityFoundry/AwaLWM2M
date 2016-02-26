@@ -33,13 +33,11 @@ The easiest way to get started with Awa LWM2M is on a Linux PC.  The following i
 
 Firstly, to obtain a copy of the Awa LWM2M source code:
 
- * Sign up for a Github account
+ * Sign up for a Github account  
 
+ * Install Git:  ```` sudo apt-get install git ````  
 
- * Install Git:  ```` sudo apt-get install git ````
-
-
- * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ```` 
+ * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ````   
 
 
 Further instructions can be found in the [Getting started guide](starters_guide.md).
@@ -52,10 +50,10 @@ Awa LWM2M documentation is available both at a general level (project informatio
 
 #### General documentation.
 
-* For build instructions see the [Getting started guide](doc/starters_guide.md)
-* Examples of how to use the tools can be found in the  [User guide](doc/userguide.md) 
-* For developers, an overview of the system can be found in the [Developer guide](doc/developer_guide.md)
-* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.
+* For build instructions see the [Getting started guide](doc/starters_guide.md).  
+* Examples of how to use the tools can be found in the  [User guide](doc/userguide.md). 
+* For developers, an overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
+* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
 
 #### API guide.
 
@@ -73,7 +71,7 @@ For convenience you can also find the latest version of this documentation [here
 
 ### Contributing.
 
-We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality, to improving documentation and bug reporting - it's all good. 
+We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality to improving documentation and bug reporting - it's all good. 
 
 Find out more in the [contributor guide](CONTRIBUTING.md).
 
@@ -91,9 +89,9 @@ We would also like to acknowledge and thank the authors of the following project
 
 ### License information.
 
-* All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE)
-* LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license
-* Jsmn by Serge A. Zaitsev is licensed under the MIT license
+* All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE).  
+* LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license.  
+* Jsmn by Serge A. Zaitsev is licensed under the MIT license.  
 
 ----
 
