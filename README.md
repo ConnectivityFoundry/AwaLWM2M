@@ -48,7 +48,7 @@ Further instructions can be found in the [Getting started guide](starters_guide.
 
 ### Documentation.
 
-Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
+Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
 
 #### General documentation.
 
@@ -67,7 +67,7 @@ The Awa API documentation is available as a Doxygen presentation which is genera
 
 The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
 
-For convenience you can also find the latest version of this documentation [here]()
+For convenience you can also find the latest version of this documentation [here]().
 
 ----
 
@@ -75,7 +75,7 @@ For convenience you can also find the latest version of this documentation [here
 
 We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality, to improving documentation and bug reporting - it's all good. 
 
-Find out more in the [Contributing guide](CONTRIBUTING.md).
+Find out more in the [contributing guide](CONTRIBUTING.md).
 
 ### Credits.
 
