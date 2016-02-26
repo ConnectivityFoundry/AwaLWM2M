@@ -206,19 +206,19 @@ DisableTimeout=86400
 NotificationStoringWhenDisabledOrOffline=true
 ````
 
- * ServerURI specifies the address and port of the LWM2M server to which clients will be directed.  
- * SecurityMode is not yet supported.  
- * PublicKey is not supported.  
- * SecretKey is not supported.  
- * ServerID specifies the numerical ID of the LWM2M server used to associate security and server objects on the LWM2M client.  
- * HoldOffTime is not yet supported.  
- * ShortServerID specifies the numerical ID of the LWM2M server used to associate Security and Server objects on the LWM2M client.  
+ * *ServerURI* specifies the address and port of the LWM2M server to which clients will be directed.  
+ * *SecurityMode* is not yet supported.  
+ * *PublicKey* is not supported.  
+ * *SecretKey* is not supported.  
+ * *ServerID* specifies the numerical ID of the LWM2M server used to associate security and server objects on the LWM2M client.  
+ * *HoldOffTime* is not yet supported.  
+ * *ShortServerID* specifies the numerical ID of the LWM2M server used to associate Security and Server objects on the LWM2M client.  
  * Binding specifies the supported LWM2M binding modes for this server. Only "U" (UDP, non-queuing) is currently supported.  
- * LifeTime specifies the minimum time (in seconds) that the server will wait after receiving a registration or update from the client before terminating that registration.  
- * DefaultMinimumPeriod specifies the default minimum period of observations.  
- * DefaultMaximumPeriod specifies the default maximum period of observations, -1 represents an indefinite period.    
- * DisableTimeout is not supported.  
- * NotificationStoringWhenDisabledOrOffline is not supported.  
+ * *LifeTime* specifies the minimum time (in seconds) that the server will wait after receiving a registration or update from the client before terminating that registration.  
+ * *DefaultMinimumPeriod* specifies the default minimum period of observations.  
+ * *DefaultMaximumPeriod* specifies the default maximum period of observations, -1 represents an indefinite period.    
+ * *DisableTimeout* is not supported.  
+ * *NotificationStoringWhenDisabledOrOffline* is not supported.  
 
 ----
 
