@@ -94,9 +94,9 @@ For the commit message, the following rules apply:
 
 ### Signing your work.
 
-Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) (from developercertificate.org).
+Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) from developercertificate.org.
 
-The sign-off is a single line at the end of your commit comment which certifies that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
+The sign-off is a single line at the end of your commit comment to certify that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
 
 Certifying your contribution asserts that *for the current submission* the following statement is true:
