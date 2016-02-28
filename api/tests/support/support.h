@@ -561,6 +561,42 @@ protected:
         this->Disconnect();
         TestServerAndClientWithSession::TearDown();
     }
+
+    void WaitForClientDefinition(int objectID)
+    {
+        bool found = false;
+        int maxOperations = 30;
+
+        char objectPath[32];
+        sprintf(objectPath, "/%d", objectID);
+
+        printf("Waiting for %s\n", objectPath);
+
+        while (!found && maxOperations-- > 0)
+        {
+            AwaServerListClientsOperation * listClientsOperation = AwaServerListClientsOperation_New(server_session_);
+            AwaServerListClientsOperation_Perform(listClientsOperation, defaults::timeout);
+            const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(listClientsOperation, global::clientEndpointName);
+
+            AwaRegisteredEntityIterator * iterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(response);
+
+            while (AwaRegisteredEntityIterator_Next(iterator))
+            {
+                //Lwm2m_Debug("Waiting for server to know client knows about object 1000...");
+                const char * path = AwaRegisteredEntityIterator_GetPath(iterator);
+
+                if (strstr(path, objectPath) != NULL) {
+                    // contains
+                    printf("FOUND %s\n", path);
+                    found = true;
+                }
+            }
+            AwaRegisteredEntityIterator_Free(&iterator);
+            AwaServerListClientsOperation_Free(&listClientsOperation);
+            sleep(1);
+        }
+        ASSERT_TRUE(found);
+    }
 };
 
 class TestServerAndClientWithConnectedSessionWithDummyObjects  : public TestServerAndClientWithConnectedSession

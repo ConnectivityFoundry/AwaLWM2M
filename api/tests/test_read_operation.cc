@@ -14,12 +14,15 @@
 #include "support/support.h"
 #include "utils.h"
 #include "memalloc.h"
+#include "support/definition.h"
 
 namespace Awa {
 
 class TestReadOperation : public TestServerBase {};
 
 class TestReadOperationWithConnectedSession : public TestServerAndClientWithConnectedSession {};
+
+class TestReadOperationWithConnectedServerAndClientSession : public TestServerAndClientWithConnectedSession {};
 
 TEST_F(TestReadOperationWithConnectedSession, AwaServerReadOperation_New_returns_valid_operation_and_free_works)
 {
@@ -258,6 +261,42 @@ TEST_F(TestReadOperationWithConnectedSession, AwaServerReadOperation_Perform_han
     ASSERT_TRUE(NULL != readResponse);
     ASSERT_TRUE(AwaServerReadResponse_ContainsPath(readResponse, "/3/0/1"));
 
+    AwaServerReadOperation_Free(&readOperation);
+}
+
+TEST_F(TestReadOperationWithConnectedServerAndClientSession, AwaServerReadOperation_Perform_handles_Read_only_resource)
+{
+    // should fail - resource is write only.
+
+    ObjectDescription object = { 1000, "Object1000", 0, 1, {
+            ResourceDescription(0, "Resource0", AwaResourceType_Time, 0, 1, AwaResourceOperations_WriteOnly),
+        }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client
+    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(clientSet != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(clientSet, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    AwaClientSetOperation_Free(&clientSet);
+
+    AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
+    ASSERT_TRUE(NULL != readOperation);
+
+    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Response, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+
+    const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
+    ASSERT_TRUE(NULL != readResponse);
+    EXPECT_TRUE(AwaServerReadResponse_ContainsPath(readResponse, "/1000/0/0"));
+
+    const AwaPathResult * pathResult = AwaServerReadResponse_GetPathResult(readResponse, "/1000/0/0");
+    EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
+    EXPECT_EQ(AwaLWM2MError_MethodNotAllowed, AwaPathResult_GetLWM2MError(pathResult));
     AwaServerReadOperation_Free(&readOperation);
 }
 

@@ -164,9 +164,9 @@ class AwaTest(common.SpawnDaemonsTestCase):
 
     def __init__(self, *args, **kwargs):
         super(AwaTest, self).__init__(*args, **kwargs)
-        common.setConfigurationClass(DefaultTestConfiguration)
 
     def setUp(self):
+        common.setConfigurationClass(DefaultTestConfiguration)
         super(AwaTest, self).setUp()
         self.define_fixture_objects()
 
@@ -211,6 +211,8 @@ class AwaTest(common.SpawnDaemonsTestCase):
                     CustomResource("Resource206", 206, "objlink", "multiple", "optional", "rw"),
             )),
         )
+        
+        print "Creating custom objects"
 
         # FIXME: define tool can currently only define individual objects
         for obj in customObjects:
@@ -218,16 +220,15 @@ class AwaTest(common.SpawnDaemonsTestCase):
             result = test_awa_server_define.server_define(self.config, *params)
             self.assertEqual(0, result.code)
 
-            params = create_define_command((obj,))
-            result = test_awa_client_define.client_define(self.config, *params)
-            self.assertEqual(0, result.code)
-
-            # create our objects and optional object instances
-            createCommand = ["--create /%d" % (obj.ID,)]
-            for resource in obj.resources:
-                createCommand += ["--create /%d/0/%d" % (obj.ID, resource.ID)]
-            result = test_awa_client_set.client_set(self.config, " ".join(createCommand))
-            self.assertEqual(0, result.code)
+            if self.config.spawnClientDaemon is True:
+                result = test_awa_client_define.client_define(self.config, *params)
+                self.assertEqual(0, result.code)
+                # create our objects and optional object instances
+                createCommand = ["--create /%d" % (obj.ID,)]
+                for resource in obj.resources:
+                    createCommand += ["--create /%d/0/%d" % (obj.ID, resource.ID)]
+                result = test_awa_client_set.client_set(self.config, " ".join(createCommand))
+                self.assertEqual(0, result.code)
 
 
 # avoid circular dependencies

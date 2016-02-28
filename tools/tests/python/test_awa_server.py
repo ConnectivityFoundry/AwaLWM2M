@@ -11,15 +11,15 @@ from collections import namedtuple
 import tools_common
 from tools_common import CustomObject
 from tools_common import CustomResource
-from tools_common import client_define
-from tools_common import server_create
-from tools_common import server_define
-from tools_common import server_delete
-from tools_common import server_execute
-from tools_common import server_list_clients
-from tools_common import server_observe
-from tools_common import server_read
-from tools_common import server_write
+from test_awa_client_define import client_define
+from test_awa_server_define import server_define
+from test_awa_server_delete import server_delete
+from test_awa_server_execute import server_execute
+from test_awa_server_execute import server_execute_stdin
+from test_awa_server_list_clients import server_list_clients
+from test_awa_server_observe import server_observe
+from test_awa_server_read import server_read
+from test_awa_server_write import server_write
 
 class TestServer(tools_common.AwaTest):
 
@@ -34,7 +34,7 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
-        expectedStdout = "    Timezone[3/0/15]: abc\n"
+        expectedStdout = "Device[/3/0]:\n    Timezone[/3/0/15]: abc\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -46,7 +46,7 @@ class TestServer(tools_common.AwaTest):
     def test_read_write_single_resource_string(self):
         # test that a single string resource can be set and retrieved
         manufacturer = "ACME Corp."
-        expectedStdout = "    Resource100[1000/0/100]: %s\n" % (manufacturer,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource100[/1000/0/100]: %s\n" % (manufacturer,)
         expectedStderr = ""
         expectedCode = 0
 
@@ -61,11 +61,11 @@ class TestServer(tools_common.AwaTest):
     def test_read_write_single_resource_integer(self):
         # test that a single integer resource can be set and retrieved
         value = 3
-        expectedStdout = "    Resource101[1000/0/101]: %d\n" % (value,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource101[/1000/0/101]: %d\n" % (value,)
         expectedStderr = ""
         expectedCode = 0
 
-        result = server_write(self.config, "--verbose /1000/0/101=%i" % (value,))
+        result = server_write(self.config, "--verbose /1000/0/101=%d" % (value,))
         self.assertEqual(expectedCode, result.code)
 
         result = server_read(self.config, "/1000/0/101")
@@ -76,7 +76,7 @@ class TestServer(tools_common.AwaTest):
     def test_read_write_single_resource_float(self):
         # test that a single float resource can be set and retrieved
         value = 3.5
-        expectedStdout = "    Resource102[1000/0/102]: %f\n" % (value,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource102[/1000/0/102]: %.1f\n" % (value,)
         expectedStderr = ""
         expectedCode = 0
 
@@ -92,17 +92,17 @@ class TestServer(tools_common.AwaTest):
         # test that a single boolean resource can be set and retrieved
         value = True
 
-        expectedStdout = "Write /1000/0/103/0 <- True\n"
+        expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
 
-        result = server_write(self.config, "--verbose /1000/0/103=%r" % (value,))
+        result = server_write(self.config, "/1000/0/103=%r" % (value,))
 
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "    Resource103[1000/0/103]: %r\n" % (value,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource103[/1000/0/103]: %r\n" % (value,)
 
         result = server_read(self.config, "/1000/0/103")
         self.assertEqual(expectedStdout, result.stdout)
@@ -123,7 +123,7 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "    Resource103[1000/0/103]: %r\n" % (value,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource103[/1000/0/103]: %r\n" % (value,)
 
         result = server_read(self.config, "/1000/0/103")
         self.assertEqual(expectedStdout, result.stdout)
@@ -143,7 +143,7 @@ class TestServer(tools_common.AwaTest):
             self.assertEqual(expectedStderr, result.stderr)
             self.assertEqual(expectedCode, result.code)
 
-            expectedStdout = "    Resource103[1000/0/103]: %r\n" % (bool(value),)
+            expectedStdout = "Object1000[/1000/0]:\n    Resource103[/1000/0/103]: %r\n" % (bool(value),)
             #print "Boolean expectedStdout: %s" % (expectedStdout,)
             result = server_read(self.config, "/1000/0/103")
             self.assertEqual(expectedStdout, result.stdout)
@@ -153,7 +153,7 @@ class TestServer(tools_common.AwaTest):
     def test_read_write_single_resource_time(self):
         # test that a single time resource (64 bit integer) can be set and retrieved
         value = 1442972971
-        expectedStdout = "    Resource104[1000/0/104]: %d\n" % (value,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource104[/1000/0/104]: %d\n" % (value,)
         expectedStderr = ""
         expectedCode = 0
 
@@ -165,11 +165,10 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-    @unittest.skip("Objlink type not supported")
     def test_read_write_single_resource_objlink(self):
         # test that a single object link resource can be set and retrieved
         link = "/3/0"
-        expectedStdout = "    Resource106[1000/0/106]: ObjectLink[%s]\n" % (link.strip('/').replace('/', ':'))
+        expectedStdout = "Object1000[/1000/0]:\n    Resource106[/1000/0/106]: ObjectLink[%s]\n" % (link.strip('/').replace('/', ':'))
         expectedStderr = ""
         expectedCode = 0
 
@@ -184,45 +183,56 @@ class TestServer(tools_common.AwaTest):
     def test_write_single_resource_none(self):
         # test that a single none resource (executable) cannot be set
         value = 12345
-        expectedStdout = "FlowDeviceMgmt_Pull failed : (-2) The requested resource/instance/object does not exist\n"
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "Resource /1000/0/107 is of type None and cannot be set\n"
+        expectedCode = 1
 
         result = server_write(self.config, "/1000/0/107=%d" % (value,))
+        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_read_single_resource_none(self):
         # test that a single none resource (executable) cannot be retrieved
-        expectedStdout = "FlowDeviceMgmtServer_Read failed : (-11) Request Failed\n"
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "AwaServerReadOperation_Perform failed\nFailed to read from path /1000/0/107: AwaLWM2MError_BadRequest\n"
+        expectedCode = 1
 
         result = server_read(self.config, "/1000/0/107")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_read_write_multiple_resources_same_instance(self):
         # test that multiple resources from the same instance can be set and retrieved with a single command
         timezone = "ACME Corp."
         currentTime = 123456789
-        expectedStdout = \
-"""    Timezone[3/0/15]: %s
-    CurrentTime[3/0/13]: %d
-""" % (timezone, currentTime)
-        expectedStderr = ""
-        expectedCode = 0
 
-        server_write(self.config,
+        result = server_write(self.config,
                      "/3/0/15=\"%s\"" % (timezone,),
                      "/3/0/13=%d" % (currentTime,))
+        
+        self.assertEqual("", result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertEqual(0, result.code)
 
-        result = server_read(self.config, "/3/0/15", "/3/0/13")
-
-        self.assertEqual(expectedStdout, result.stdout)
+        expectedStdout = "Device[/3/0]:\n    Timezone[/3/0/15]: %s\n"% (timezone, )
+        expectedStderr = ""
+        expectedCode = 0
+        #result = server_read(self.config, "/3/0/15", "/3/0/13")
+        result = server_read(self.config, "/3/0/15")
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
+        self.assertEqual(expectedCode, result.code)
+        
+        expectedStdout = "Device[/3/0]:\n    CurrentTime[/3/0/13]: %s\n"% (currentTime, )
+        
+        result = server_read(self.config, "/3/0/13")
+        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
+    @unittest.skip("Write/Read on different object instances in a single request is not supported")
     def test_read_write_multiple_resources_different_instances(self):
         # test that multiple resources from different instances can be set and retrieved with a single command
         timezone = "ACME Corp."
@@ -254,7 +264,7 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "    Resource101[1000/0/101]: 12345\n"
+        expectedStdout = "Object1000[/1000/0]:\n    Resource101[/1000/0/101]: 12345\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -272,7 +282,7 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "    Resource101[1000/0/101]: 0\n"
+        expectedStdout = "Object1000[/1000/0]:\n    Resource101[/1000/0/101]: 0\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -292,7 +302,7 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "    Resource100[1000/0/100]: abc\n"
+        expectedStdout = "Object1000[/1000/0]:\n    Resource100[/1000/0/100]: abc\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -310,13 +320,13 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "FlowDeviceMgmtServer_Read failed : (-11) Request Failed\n"
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "AwaServerReadOperation_Perform failed\nFailed to read from path /1000/0/100: AwaLWM2MError_NotFound\n"
+        expectedCode = 1
 
         result = server_read(self.config, "/1000/0/100")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_set_multiple_instances_on_single_instance_object(self):
@@ -330,31 +340,22 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
-        expectedStdout = "FlowDeviceMgmtServer_Write failed : (-11) Request Failed\n" # AwaError_IDInvalid?
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "AwaServerWriteOperation_Perform failed\nFailed to write to path /1000/1/100: AwaLWM2MError_MethodNotAllowed\n"
+        expectedCode = 1
 
         result = server_write(self.config, "/1000/1/100=abc")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_set_multiple_instances_on_single_instance_resource(self):
         #test that we can't set multiple resource instances on a single instance resource
         expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStderr = "Error: resource /1000/0/100 is not an array; do not specify a resource instance ID\n"
+        expectedCode = 1
 
         result = server_write(self.config, "/1000/0/100/0=abc")
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-        expectedStdout = "FlowDeviceMgmtServer_Write failed : (-11) Request Failed\n" # AwaError_IDInvalid?
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = server_write(self.config, "/1000/0/100/1=abc")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
@@ -374,17 +375,24 @@ class TestServer(tools_common.AwaTest):
         result = server_define(self.config, *params)
         self.assertEqual(0, result.code)
 
-        result = server_write(self.config, "/1001/0/100=abc")
+        result = server_write(self.config, "--create /1001/0")
+        self.assertEqual("", result.stderr)
+        self.assertEqual("", result.stdout)
         self.assertEqual(0, result.code)
 
-        expectedStdout = "FlowDeviceMgmtServer_Read failed : (-11) Request Failed\n"
-        expectedStderr = ""
-        expectedCode = 0
+        result = server_write(self.config, "/1001/0/100=abc")
+        self.assertEqual("", result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertEqual(0, result.code)
+        
+        expectedStdout = ""
+        expectedStderr = "AwaServerReadOperation_Perform failed\nFailed to read from path /1001/0/100: AwaLWM2MError_MethodNotAllowed\n"
+        expectedCode = 1
 
         # attempt to read a write only object, should fail
         result = server_read(self.config, "/1001/0/100")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_write_read_only_resource(self):
@@ -401,14 +409,14 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(0, result.code)
 
         # FlowDeviceMgmtServer_Write failed : (-11) The requested operation is not permitted\n
-        expectedStdout = "FlowDeviceMgmtServer_Write failed : (-11) Request Failed\n"
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "AwaServerWriteOperation_Perform failed\nFailed to write to path /1001/0/100: AwaLWM2MError_MethodNotAllowed\n"
+        expectedCode = 1
 
         # set a read only object
         result = server_write(self.config, "/1001/0/100=abc")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
     def test_delete_custom_object_instance(self):
@@ -446,15 +454,16 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
-        expectedStdout = "FlowDeviceMgmtServer_Read failed : (-11) Request Failed\n"
-        expectedStderr = ""
-        expectedCode = 0
+        expectedStdout = ""
+        expectedStderr = "AwaServerReadOperation_Perform failed\nFailed to read from path /1000/0/100: AwaLWM2MError_NotFound\n"
+        expectedCode = 1
 
         result = server_read(self.config, "/1000/0/100")
-        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode,   result.code)
 
+    @unittest.skip("Cannot execute multiple resources in a single command")
     def test_execute_multiple_resources(self):
         # test we can execute multiple executable resources with one command
         expectedStdout = ""
@@ -476,146 +485,3 @@ class TestServer(tools_common.AwaTest):
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-
-    def test_observe_resource_single_change(self):
-        # test that we can observe to a single change of value on a specified resource
-
-        # open server observe subprocess. Only wait for a single change to the resource
-        port = self.config.serverIpcPort
-        clientEndpointName = self.config.clientEndpointName
-        observeProcess = tools_common.run_non_blocking(tools_common.SERVER_OBSERVE,
-                                                    "--verbose --ipcPort %i --clientID %s --waitCount 1 --waitTime 5 /3/0/15" % (port, clientEndpointName))
-
-        # wait for observe process to start up
-        self.assertEqual(observeProcess.stdout.readline(), "Observe /3/0/15\n")
-        self.assertEqual(observeProcess.stdout.readline(), "Waiting for 1 notifications over 5 seconds:\n")
-
-        # do write command
-        expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = server_write(self.config, "/3/0/15=abc")
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-        # read observe output
-        expectedStdout = "Notify 1:\n    Timezone[3/0/15]: abc\nClean up\n"
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = tools_common.non_blocking_get_run_result(observeProcess)
-
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-    def test_observe_multiple_resources_single_change(self):
-        # test that we can observe to a single change of value on
-        # one of the multiple resources specified
-
-        # open client observe subprocess. Only wait for a single change to one of the resources
-        port = self.config.serverIpcPort
-        clientEndpointName = self.config.clientEndpointName
-        observeProcess = tools_common.run_non_blocking(tools_common.SERVER_OBSERVE,
-                                                    "--verbose --ipcPort %i --clientID %s --waitCount 1 --waitTime 5 /3/0/14 /3/0/15" % (port, clientEndpointName))
-
-        # wait for observe process to start up
-        self.assertEqual("Observe /3/0/14\n", observeProcess.stdout.readline())
-        self.assertEqual("Observe /3/0/15\n", observeProcess.stdout.readline())
-        self.assertEqual("Waiting for 1 notifications over 5 seconds:\n", observeProcess.stdout.readline())
-
-        # do set command and expect notifications from the observe subprocess
-        expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
-
-        # set the first resource
-        result = server_write(self.config, "/3/0/14=abc")
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-        expectedStdout = "Notify 1:\n    UTCOffset[3/0/14]: abc\nClean up\nClean up\n"
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = tools_common.non_blocking_get_run_result(observeProcess)
-
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-    def test_observe_multiple_resources_single_change_2(self):
-        # test that we can observe to a single change of value on
-        # one of the multiple resources specified
-
-        # open client observe subprocess. Only wait for a single change to one of the resources
-        port = self.config.serverIpcPort
-        clientEndpointName = self.config.clientEndpointName
-        observeProcess = tools_common.run_non_blocking(tools_common.SERVER_OBSERVE,
-                                                    "--verbose --ipcPort %i --clientID %s --waitCount 1 --waitTime 5 /3/0/14 /3/0/15" % (port, clientEndpointName))
-
-        # wait for observe process to start up
-        self.assertEqual("Observe /3/0/14\n", observeProcess.stdout.readline())
-        self.assertEqual("Observe /3/0/15\n", observeProcess.stdout.readline())
-        self.assertEqual("Waiting for 1 notifications over 5 seconds:\n", observeProcess.stdout.readline())
-
-        # do set command and expect notifications from the observe subprocess
-        expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
-
-        # set the second resource
-        result = server_write(self.config, "/3/0/15=1234")
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-        expectedStdout = "Notify 1:\n    Timezone[3/0/15]: 1234\nClean up\nClean up\n"
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = tools_common.non_blocking_get_run_result(observeProcess)
-
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)
-
-    @unittest.skip("Currently unstable - TODO")
-    def test_observe_resource_multiple_changes(self):
-        # test that we can observe to multiple changes of value on a specified resource
-        num_changes = 5
-        # open client observe subprocess. Wait for 5 changes to the resource
-        port = self.config.serverIpcPort
-        clientEndpointName = self.config.clientEndpointName
-        observeProcess = tools_common.run_non_blocking(tools_common.SERVER_OBSERVE,
-                                                    "--verbose --ipcPort %i --clientID %s --waitCount %i --waitTime 5 /3/0/0" % (port, clientEndpointName, num_changes))
-
-        # wait for observe process to start up
-        self.assertEqual(observeProcess.stdout.readline(), "Observe /3/0/0\n")
-        self.assertEqual(observeProcess.stdout.readline(), "Waiting for 5 notifications over 5 seconds:\n")
-
-        # do get command
-        expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
-
-        for i in range(num_changes):
-            result = server_write(self.config, "/3/0/0=%i" % (i,))
-            self.assertEqual(expectedStdout, result.stdout)
-            self.assertEqual(expectedStderr, result.stderr)
-            self.assertEqual(expectedCode, result.code)
-            #time.sleep(0.5) # give time for observe tool to notice change
-
-        # read observe output
-        expectedStdout = "Notify 1:\n    Manufacturer[3/0/0]: 0\nNotify 2:\n    Manufacturer[3/0/0]: 1\nNotify 3:\n    Manufacturer[3/0/0]: 2\nNotify 4:\n    Manufacturer[3/0/0]: 3\nNotify 5:\n    Manufacturer[3/0/0]: 4\nClean up\n"
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = tools_common.non_blocking_get_run_result(observeProcess)
-
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode, result.code)

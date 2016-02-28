@@ -14,17 +14,16 @@ class TestListSingleClient(tools_common.AwaTest):
     def test_list_clients_no_args_one_client(self):
         # test that we should be able to list a single client's
         # endpoint name when only that one is connected
-        expectedStdout = "  1 TestClient \n"
+        expectedStdout = "Client: TestClient\n\n"
         expectedStderr = ""
         expectedCode = 0
+        result = server_list_clients(self.config)
+        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
+        self.assertEqual(expectedCode, result.code)
 
-        code, stdout, stderr = server_list_clients(self.config)
-        self.assertEqual(expectedStdout, stdout)
-        self.assertEqual(expectedStderr, stderr)
-        self.assertEqual(expectedCode, code)
 
-
-class TestListNoClients(tools_common.AwaTest):
+class TestListNoClients(common.SpawnDaemonsTestCase):
 
     def setUp(self):
         common.setConfigurationClass(tools_common.NoClientTestConfiguration)
@@ -37,10 +36,10 @@ class TestListNoClients(tools_common.AwaTest):
         expectedStderr = ""
         expectedCode = 0
 
-        code, stdout, stderr = server_list_clients(self.config)
-        self.assertEqual(expectedStdout, stdout)
-        self.assertEqual(expectedStderr, stderr)
-        self.assertEqual(expectedCode, code)
+        result = server_list_clients(self.config)
+        self.assertEqual(expectedStdout, result.stdout)
+        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedCode, result.code)
 
 
 class TestListClientsBasic(tools_common.BasicTestCase):
