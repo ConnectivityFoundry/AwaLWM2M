@@ -1,4 +1,5 @@
 
+
 ![](img.png)
 ----
 
@@ -20,8 +21,11 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 * [The LWM2M object model.](userguide.md#the-lwm2m-object-model) 
 * [The LWM2M client.](userguide.md#the-lwm2m-client)  
     * [The Awa client daemon](userguide.md#the-awa-client-daemon)  
+    * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
+    * [Awa client API tools.](userguide.md#awa-client-api-tools)
 * [The LWM2M server.](userguide.md#the-lwm2m-server)  
-    * [The Awa server daemon](userguide.md#the-awa-server-daemon)  
+    * [The Awa server daemon](userguide.md#the-awa-server-daemon) 
+    * [Awa Server API tools.](userguide.md#awa-server-api-tools)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
     * [The Awa bootstrap server daemon](userguide.md#the-awa-bootstrap-server-daemon)  
 
@@ -223,21 +227,6 @@ NotificationStoringWhenDisabledOrOffline=true
 ----
 
 
-### Awa client, server and bootstrap example.
-
-### Daemon setup.
-
-Example on how to interconnect all the daemons locally...
-
-
-### Awa client tools examples.
-
-
-### Awa server tools examples.  
-
-
-----
-----
 
 ## Using the LWM2M client.
 
@@ -378,7 +367,7 @@ If the resource specified is a multiple-instance resource, all instances will be
 
 The *--quiet/-q* option can be used to suppress the display of any extra information.
 
-## Subscribing to a change of resource value.
+### Subscribing to a change of resource value.
 
 In some cases it may be important for a script to block until the value of a resource changes, or for an LWM2M resource execute operation to complete. The *awa-client-subscribe* tool can be used to act as a listener.
 
@@ -392,7 +381,7 @@ To listen for a change to any resource within instance 0 of object 1000: ````./a
 
 Listening for an LWM2M Execute operation is also possible, however the target object instance and resource must be fully specified. For example, to wait on resource 4, which is an executable resource of instance 0 of object 3: ````./awa-client-subscribe /3/0/4 ````
 
-By default, *awa-client-subscribe* will wait indefinitely, displaying each notification as it arrives. With the time and count options, *awaclient-subscribe* can terminate after a number of notifications, or an elapsed period of time.
+By default, *awa-client-subscribe* will wait indefinitely, displaying each notification as it arrives. With the time and count options, *awa_client-subscribe* can terminate after a number of notifications, or an elapsed period of time.
 
 | option | description |
 |-----|-----|
@@ -415,7 +404,7 @@ To delete the resource with ID 5 from instance 0 of object ID 1000: ````./awa-cl
 
 Unlike the *awa-server-delete* tool, this tool can modify the client's data structures directly, so is not limited by LWM2M Delete rules.
 
-### Awa Server API tools.
+## Awa Server API tools.
 
 Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
 
@@ -546,7 +535,7 @@ Opaque data can be supplied as an argument to the execute operation by piping in
 
 ````./awa-server-execute --stdin --clientID imagination1 /1000/0/4 < mydata ````
 
-**Note that data supplied will be piped to all of the stated execute targets.**
+**Note that the data supplied will be piped to all of the stated execute targets.**
 
 Execute operations on an object, an object instance or a resource instance are not possible.
 
@@ -566,4 +555,3 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 
 ----
 ----
-
