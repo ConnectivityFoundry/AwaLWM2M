@@ -6,8 +6,9 @@ purpose "Perform unit tests"
 option "clientIpcPort" c "External LWM2M Client IPC Port" int optional typestr="PORT"
 option "serverIpcPort" s "External LWM2M Server IPC Port" int optional typestr="PORT"
 
-option "clientLocalCoapPort" - "External LWM2M Client local CoAP Port" int optional typestr="PORT"
-option "serverCoapPort" - "External LWM2M Server CoAP Port" int optional typestr="PORT"
+option "clientLocalCoapPort"     - "External LWM2M Client local CoAP Port"     int optional typestr="PORT"
+option "serverCoapPort"          - "External LWM2M Server CoAP Port"           int optional typestr="PORT"
+option "bootstrapServerCoapPort" - "External LWM2M Bootstrap Server CoAP Port" int optional typestr="PORT"
 
 option "logLevel" - "Awa API Log Level" int optional typestr="LEVEL"
 

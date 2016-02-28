@@ -57,7 +57,7 @@ typedef struct
     int IpcPort;
     bool Verbose;
     bool Daemonise;
-    char * Logfile;
+    char * LogFile;
     char * IPAddress;
     char * InterfaceName;
     int AddressFamily;
@@ -67,6 +67,8 @@ typedef struct
 static FILE * logFile = NULL;
 static const char * version = VERSION;  // from Makefile
 static volatile int quit = 0;
+
+static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
 {
@@ -127,24 +129,29 @@ static int Lwm2mServer_Start(Options * options)
     signal(SIGTERM, Lwm2m_CtrlCSignalHandler);
 
     // open log files here
-    if (options->Logfile != NULL)
+    if (options->LogFile != NULL)
     {
         errno = 0;
-        logFile = fopen(options->Logfile, "at");
+        logFile = fopen(options->LogFile, "at");
         if (logFile != NULL)
         {
             Lwm2m_SetOutput(logFile);
 
+            // redirect stdout
             dup2(fileno(logFile), STDOUT_FILENO);
         }
         else
         {
-            Lwm2m_Error("Failed to open log file %s: %s\n", options->Logfile, strerror(errno));
+            Lwm2m_Error("Failed to open log file %s: %s\n", options->LogFile, strerror(errno));
         }
     }
 
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     Lwm2m_PrintBanner();
+    if (options->Verbose)
+    {
+        PrintOptions(options);
+    }
     Lwm2m_Info("LWM2M server - version %s\n", version);
     Lwm2m_Info("LWM2M server - CoAP port %d\n", options->CoapPort);
     Lwm2m_Info("LWM2M server - IPC port %d\n", options->IpcPort);
@@ -163,7 +170,8 @@ static int Lwm2mServer_Start(Options * options)
     {
         if (Lwm2mCore_GetIPAddressFromInterface(options->InterfaceName, options->AddressFamily, ipAddress, sizeof(ipAddress)) != 0)
         {
-            return -1;
+            result = 1;
+            goto error_close_log;
         }
         Lwm2m_Info("LWM2M server - Interface Address %s\n", ipAddress);
     }
@@ -176,13 +184,12 @@ static int Lwm2mServer_Start(Options * options)
     if (coap == NULL)
     {
         printf("Unable to map address to network interface\n");
-        if (logFile)
-            fclose(logFile);
-        return 0;
+        result = 1;
+        goto error_close_log;
     }
     Lwm2mContextType * context = Lwm2mCore_Init(NULL, options->ContentType);  // NULL, don't map coap with objectStore
 
-    // must happen after coap Init.
+    // must happen after coap_Init()
     Lwm2m_RegisterObjectTypes(context);
 
     // listen for UDP packets on port 12345 for now.
@@ -190,14 +197,14 @@ static int Lwm2mServer_Start(Options * options)
     if (xmlFd < 0)
     {
         result = 1;
-        goto error;
+        goto error_destroy;
     }
     xmlif_RegisterHandlers();
 
     // wait for messages on both the "IPC" and coap interfaces
     while (!quit)
     {
-        int result;
+        int loop_result;
         struct pollfd fds[2];
         int nfds = 2;
         int timeout;
@@ -210,16 +217,18 @@ static int Lwm2mServer_Start(Options * options)
 
         timeout = Lwm2mCore_Process(context);
 
-        result = poll(fds, nfds, timeout);
+        loop_result = poll(fds, nfds, timeout);
 
-        if (result < 0)
+        if (loop_result < 0)
         {
             if (errno == EINTR)
+            {
                 continue;
+            }
             perror("poll:");
             break;
         }
-        else if (result > 0)
+        else if (loop_result > 0)
         {
             if (fds[0].revents == POLLIN)
             {
@@ -233,13 +242,13 @@ static int Lwm2mServer_Start(Options * options)
         coap_Process();
     }
 
-    Lwm2m_Info("Server exiting\n");
-
+error_destroy:
     xmlif_destroy(xmlFd);
-error:
     Lwm2mCore_Destroy(context);
     coap_Destroy();
 
+error_close_log:
+    Lwm2m_Info("Server exiting\n");
     if (logFile != NULL)
     {
         fclose(logFile);
@@ -269,6 +278,20 @@ static void PrintUsage(void)
     printf("Example:\n");
     printf("    awa_serverd --interface eth0 --addressFamily 4 --port 5683\n");
 
+}
+
+static void PrintOptions(const Options * options)
+{
+    printf("Options provided:\n");
+    printf("  IPAddress      (--ip)             : %s\n", options->IPAddress);
+    printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName);
+    printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily);
+    printf("  CoapPort       (--port)           : %d\n", options->CoapPort);
+    printf("  IpcPort        (--ipcPort)        : %d\n", options->IpcPort);
+    printf("  ContentType    (--content)        : %d\n", options->ContentType);
+    printf("  Daemonise      (--daemonise)      : %d\n", options->Daemonise);
+    printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
+    printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
 }
 
 static int ParseOptions(int argc, char ** argv, Options * options)
@@ -325,7 +348,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 options->Verbose = true;
                 break;
             case 'l':
-                options->Logfile = optarg;
+                options->LogFile = optarg;
                 break;
             case 'h':
             default:
@@ -345,7 +368,7 @@ int main(int argc, char ** argv)
         .IpcPort = DEFAULT_IPC_PORT,
         .Verbose = false,
         .Daemonise = false,
-        .Logfile = NULL,
+        .LogFile = NULL,
         .IPAddress = DEFAULT_IP_ADDRESS,
         .InterfaceName = NULL,
         .AddressFamily = AF_INET,

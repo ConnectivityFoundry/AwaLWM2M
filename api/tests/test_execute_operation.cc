@@ -170,7 +170,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, DISABLED_AwaServerExecuteOperat
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_valid_operation)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -184,7 +184,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perfo
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_valid_operation_with_payload)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -226,7 +226,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, DISABLED_AwaServerExecuteOperat
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_honours_timeout)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerSession * session = AwaServerSession_New();
@@ -289,7 +289,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetRe
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetResponse_handles_null_clientID)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -322,7 +322,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetRe
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetResponse_handles_reusing_operation)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     //Test we can call AwaServerExecuteOperation_GetResponse twice and reuse the same operation
@@ -357,7 +357,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_null_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -373,7 +373,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_valid_resource_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -389,7 +389,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_missing_resource_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -410,7 +410,7 @@ TEST_F(TestExecuteOperation, AwaServerExecuteResponse_NewPathIterator_handles_nu
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_NewPathIterator_handles_valid_response)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
@@ -512,7 +512,7 @@ TEST_F(TestExecuteOperationWithConnectedSessionNoClient, AwaServerExecuteOperati
 TEST_F(TestExecuteOperationWithConnectedSessionNoClient, AwaServerExecuteOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * operation = AwaServerExecuteOperation_New(session_);
@@ -535,7 +535,7 @@ TEST_F(TestExecuteOperationWithConnectedSessionNoClient, DISABLED_AwaServerExecu
     // DISABLED because we don't support multiple ClientIDs in a single Execute operation at present.
 
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerExecuteOperation * operation = AwaServerExecuteOperation_New(session_);

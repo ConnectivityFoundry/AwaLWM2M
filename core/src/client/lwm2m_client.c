@@ -67,7 +67,7 @@ typedef struct
     bool Daemonise;
     char * EndPointName;
     char * BootStrap;
-    char * Logfile;
+    char * LogFile;
     int AddressFamily;
     const char * FactoryBootstrapFile;
 } Options;
@@ -77,6 +77,7 @@ static FILE * logFile = NULL;
 static const char * version = VERSION; // from Makefile
 static volatile int quit = 0;
 
+static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
 {
@@ -152,24 +153,29 @@ static int Lwm2mClient_Start(Options * options)
 
     signal(SIGTERM, Lwm2m_CtrlCSignalHandler);
 
-    if (options->Logfile)
+    if (options->LogFile)
     {
         errno = 0;
-        logFile = fopen(options->Logfile, "at");
+        logFile = fopen(options->LogFile, "at");
         if (logFile != NULL)
         {
             Lwm2m_SetOutput(logFile);
+
             // redirect stdout
             dup2(fileno(logFile), STDOUT_FILENO);
         }
         else
         {
-            Lwm2m_Error("Failed to open log file %s: %s\n", options->Logfile, strerror(errno));
+            Lwm2m_Error("Failed to open log file %s: %s\n", options->LogFile, strerror(errno));
         }
     }
 
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     Lwm2m_PrintBanner();
+    if (options->Verbose)
+    {
+        PrintOptions(options);
+    }
     Lwm2m_Info("LWM2M client - version %s\n", version);
     Lwm2m_Info("LWM2M client - Local CoAP port %d\n", options->CoapPort);
     Lwm2m_Info("LWM2M client - Local IPC port %d\n", options->IpcPort);
@@ -180,7 +186,7 @@ static int Lwm2mClient_Start(Options * options)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
         result = 1;
-        goto error;
+        goto error_close_log;
     }
 
     // if required read the bootstrap information from a file
@@ -212,14 +218,13 @@ static int Lwm2mClient_Start(Options * options)
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
 
-
     // Listen for UDP packets on IPC port
     int xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
     {
         Lwm2m_Error("Failed to initialise XML interface on port %d\n", options->IpcPort);
         result = 1;
-        goto error;
+        goto error_core;
     }
 
     xmlif_RegisterHandlers();
@@ -227,7 +232,7 @@ static int Lwm2mClient_Start(Options * options)
     // Wait for messages on both the "IPC" and CoAP interfaces
     while (!quit)
     {
-        int result;
+        int loop_result;
         struct pollfd fds[2];
         int nfds = 2;
         int timeout;
@@ -240,8 +245,8 @@ static int Lwm2mClient_Start(Options * options)
 
         timeout = Lwm2mCore_Process(context);
 
-        result = poll(fds, nfds, timeout);
-        if (result < 0)
+        loop_result = poll(fds, nfds, timeout);
+        if (loop_result < 0)
         {
             if (errno == EINTR)
             {
@@ -250,7 +255,7 @@ static int Lwm2mClient_Start(Options * options)
             perror("poll:");
             break;
         }
-        else if (result > 0)
+        else if (loop_result > 0)
         {
             if (fds[0].revents == POLLIN)
             {
@@ -261,23 +266,23 @@ static int Lwm2mClient_Start(Options * options)
                 xmlif_process(fds[1].fd);
             }
         }
-
         coap_Process();
     }
 
-    Lwm2m_Info("Client exiting\n");
-
     xmlif_DestroyExecuteHandlers();
     xmlif_destroy(xmlFd);
-error:
+error_core:
     Lwm2mCore_Destroy(context);
 error_coap:
     coap_Destroy();
 
+error_close_log:
+    Lwm2m_Info("Client exiting\n");
     if (logFile)
     {
         fclose(logFile);
     }
+
     return result;
 }
 
@@ -302,6 +307,20 @@ static void PrintUsage(void)
 
     printf("Example:\n");
     printf("    awa_clientd --port 6000 --endPointName client1 --bootstrap coap://[::1]:2134\n\n");
+}
+
+static void PrintOptions(const Options * options)
+{
+    printf("Options provided:\n");
+    printf("  CoapPort             (--port)             : %d\n", options->CoapPort);
+    printf("  IpcPort              (--ipcPort)          : %d\n", options->IpcPort);
+    printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
+    printf("  Daemonise            (--daemonise)        : %d\n", options->Daemonise);
+    printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName);
+    printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap);
+    printf("  LogFile              (--logFile)          : %s\n", options->LogFile);
+    printf("  AddressFamily        (--addressFamily)    : %d\n", options->AddressFamily);
+    printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile);
 }
 
 static int ParseOptions(int argc, char ** argv, Options * options)
@@ -349,7 +368,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 options->EndPointName = optarg;
                 break;
             case 'l':
-                options->Logfile = optarg;
+                options->LogFile = optarg;
                 break;
             case 'd':
                 options->Daemonise = true;
@@ -388,7 +407,7 @@ int main(int argc, char ** argv)
         .Daemonise = false,
         .BootStrap = NULL,
         .EndPointName = "imagination1",
-        .Logfile = NULL,
+        .LogFile = NULL,
         .AddressFamily = AF_INET,
         .FactoryBootstrapFile = NULL,
     };

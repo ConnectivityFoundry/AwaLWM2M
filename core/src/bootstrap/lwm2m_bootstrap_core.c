@@ -158,7 +158,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
                              &response->responseContentLen, &response->responseCode);
 }
 
-// Initalise the LWM2M core, setup any callbacks, initalise CoAP etc
+// Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap)
 {
     Lwm2mContextType * context = &Lwm2mContext;
@@ -191,6 +191,8 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
 
 void Lwm2mCore_Destroy(Lwm2mContextType * context)
 {
+    Lwm2mEndPoint_DestroyEndPointList(&context->EndPointList);
     ObjectStore_Destroy(context->Store);
+    DefinitionRegistry_Destroy(context->Definitions);
 }
 

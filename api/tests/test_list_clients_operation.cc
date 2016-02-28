@@ -116,7 +116,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_one_client)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -138,7 +138,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_Perform_honours_timeout)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde * horde_ = new LWM2MClientDaemonHorde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerSession * session = AwaServerSession_New();
@@ -163,7 +163,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_multiple_clients)
 {
     // start a client horde and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "IMG123", "TestClient1", "TestClient2", "Imagination0" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "IMG123", "TestClient1", "TestClient2", "Imagination0" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -219,7 +219,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_matching_clientID)
 {
     // start a client horde and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -231,7 +231,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_matching_clientID_multiple_times)
 {
     // start a client horde and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -262,7 +262,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsRespons
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsResponse_NewRegisteredEntityIterator_handles_valid_response)
 {
     // start a client horde and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);

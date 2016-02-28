@@ -33,12 +33,14 @@ GTEST_API_ int main(int argc, char **argv) {
     std::cout << "Using Client local CoAP Port: " << Awa::global::clientLocalCoapPort << std::endl;
     Awa::global::serverCoapPort = ai.serverCoapPort_given ? ai.serverCoapPort_arg : Awa::defaults::serverCoapPort;
     std::cout << "Using Server CoAP Port: " << Awa::global::serverCoapPort << std::endl;
+    Awa::global::bootstrapServerCoapPort = ai.bootstrapServerCoapPort_given ? ai.bootstrapServerCoapPort_arg : Awa::defaults::bootstrapServerCoapPort;
+    std::cout << "Using Bootstrap Server CoAP Port: " << Awa::global::bootstrapServerCoapPort << std::endl;
 
     Awa::global::coapClientPath = ai.coapClientPath_arg;
     Awa::global::clientDaemonPath = ai.clientDaemonPath_arg;
     Awa::global::serverDaemonPath = ai.serverDaemonPath_arg;
-    Awa::global::bootstrapDaemonPath = ai.bootstrapDaemonPath_arg;
-    Awa::global::bootstrapConfig = ai.bootstrapConfig_arg;
+    Awa::global::bootstrapServerDaemonPath = ai.bootstrapDaemonPath_arg;
+    Awa::global::bootstrapServerConfig = ai.bootstrapConfig_arg;
 
     auto result = RUN_ALL_TESTS();
     cmdline_parser_free(&ai);

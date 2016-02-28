@@ -401,7 +401,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -424,7 +424,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // DISABLED because we don't support multiple ClientIDs in a single Delete operation at present.
 
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -478,7 +478,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_GetResponse_handles_matching_clientID)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -498,7 +498,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteRes
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteResponse_NewPathIterator_handles_single_path_response)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -526,7 +526,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // NOTE: DISABLED because we don't support multiple paths per operation, presently.
 
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -561,7 +561,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_success)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     // now try to Delete the mandatory resource:
@@ -583,7 +583,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_mandatory_instance)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     // now try to Delete the mandatory resource:
@@ -606,7 +606,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_resource)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     // now try to Delete the mandatory resource:

@@ -104,7 +104,7 @@ TEST_F(TestClientSession, AwaClientSession_Connect_handles_null_session)
 TEST_F(TestClientSession, AwaClientSession_Connect_with_default_IPC)
 {
     // Start a client daemon on the expected default IPC port
-    LWM2MClientDaemon daemon_;
+    AwaClientDaemon daemon_;
     daemon_.SetIpcPort(IPC_DEFAULT_CLIENT_PORT);
     ASSERT_TRUE(daemon_.Start(""));
 

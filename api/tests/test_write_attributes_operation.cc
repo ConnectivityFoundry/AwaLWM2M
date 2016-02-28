@@ -125,7 +125,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, DISABLED_AwaServerWrite
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_handles_valid_operation_single_attribute)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -140,7 +140,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_handles_valid_operation_multiple_attributes)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -156,7 +156,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_handles_setting_invalid_pmin_pmax)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -172,7 +172,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_handles_setting_valid_pmin_pmax)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -188,7 +188,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_handles_invalid_operation_no_attributes)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -228,7 +228,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_honours_timeout)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerSession * session = AwaServerSession_New();
@@ -281,7 +281,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_GetResponse_handles_null_clientID)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -314,7 +314,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_GetResponse_handles_reusing_operation)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     //Test we can call AwaServerWriteAttributesOperation_GetResponse twice and reuse the same operation
@@ -349,7 +349,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesResponse_ContainsPath_handles_null_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -365,7 +365,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesResponse_ContainsPath_handles_valid_resource_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -381,7 +381,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesResponse_ContainsPath_handles_missing_resource_path)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -402,7 +402,7 @@ TEST_F(TestWriteAttributesOperation, AwaServerWriteAttributesResponse_NewPathIte
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesResponse_NewPathIterator_handles_valid_response)
 {
     // start a client
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -500,7 +500,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, AwaServerWriteA
 TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, AwaServerWriteAttributesOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
@@ -523,7 +523,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, DISABLED_AwaSer
     // DISABLED because we don't support multiple ClientIDs in a single WriteAttributes operation at present.
 
     // start a client and wait for them to register with the server
-    LWM2MClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
