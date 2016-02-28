@@ -5,6 +5,7 @@ add_subdirectory (examples)
 
 if (BUILD_TESTS)
   add_subdirectory (tests)
+  add_subdirectory (tests-static)
 endif ()
 
 install (DIRECTORY include/awa

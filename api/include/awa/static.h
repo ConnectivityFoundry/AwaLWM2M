@@ -37,6 +37,15 @@ typedef enum
     AwaOperation_ExecuteResource,
 } AwaOperation;
 
+
+typedef enum
+{
+    AwaAccess_Read,
+    AwaAccess_ReadWrite,
+    AwaAccess_Write,
+    AwaAccess_Execute,
+} AwaAccess;
+
 typedef struct _AwaStaticClient AwaStaticClient;
 
 typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
@@ -49,7 +58,7 @@ typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation ope
 int AwaStaticClient_Process(AwaStaticClient * core);
 
 //Initialisation functions
-AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
+//AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName);
 AwaError AwaStaticClient_SetCOAPPort(AwaStaticClient * client, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
@@ -67,17 +76,17 @@ AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * o
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * objectName,
                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                       uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                       uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                        AwaStaticClientHandler handler);
 
 AwaError AwaStaticClient_RegisterResourceWithUniformData(AwaStaticClient * client, const char * objectName,
                                                            AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                           uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                           uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                            void * dataPointer, size_t dataElementSize, size_t dataStepSize);
 
 AwaError AwaStaticClient_RegisterResourceWithArbitraryData(AwaStaticClient * client, const char * objectName,
                                                              AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                             uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                             uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                              void * dataPointers[], size_t dataElementSize);
 
 void * AwaStaticClient_GetResourceInstancePointer(AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID);
