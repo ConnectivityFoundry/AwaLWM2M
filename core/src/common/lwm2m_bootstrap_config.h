@@ -24,11 +24,42 @@
 #ifndef BOOTSTRAP_INFORMATION_H
 #define BOOTSTRAP_INFORMATION_H
 
-#include "lwm2m_core.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct
+{
+    char ServerURI[255];
+    bool Bootstrap;
+    int SecurityMode ;
+    char PublicKey[255];
+    char SecretKey[255];
+    int ServerID;
+    int HoldOffTime;
+} Lwm2mSecurityInfo;
+
+typedef struct
+{
+    int ShortServerID;
+    int LifeTime;
+    int MinPeriod;
+    int MaxPeriod;
+    //char * Disable;
+    int DisableTimeout;
+    bool Notification;
+    char Binding[10];
+    //char * UpdateTrigger;
+} Lwm2mServerInfo;
+
+struct _BootstrapInfo
+{
+    Lwm2mSecurityInfo SecurityInfo;
+    Lwm2mServerInfo ServerInfo;
+};
 
 // Opaque container for bootstrap information
 typedef struct _BootstrapInfo BootstrapInfo;
@@ -41,9 +72,6 @@ void BootstrapInformation_Dump(const BootstrapInfo * bootstrapInfo);
 
 // Free the memory previously allocated by BootstrapInformation_ReadConfigFile()
 void BootstrapInformation_DeleteBootstrapInfo(const BootstrapInfo * bootstrapInfo);
-
-// Write bootstrap information to ObjectStore. Return 0 on success.
-int BootstrapInformation_WriteToObjectStore(Lwm2mContextType * context, const BootstrapInfo * bootstrapInfo);
 
 #ifdef __cplusplus
 }

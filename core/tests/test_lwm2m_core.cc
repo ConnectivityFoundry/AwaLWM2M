@@ -17,7 +17,7 @@
 
 class Lwm2mCoreTestSuite : public testing::Test
 {
-  void SetUp() { context = Lwm2mCore_Init(NULL, (char *)"123456", NULL); }
+  void SetUp() { context = Lwm2mCore_Init(NULL, (char *)"123456"); }
   void TearDown() { Lwm2mCore_Destroy(context); }
 protected:
   Lwm2mContextType * context;

@@ -17,7 +17,7 @@
 
 class Lwm2mTreeBuilderTestSuite : public testing::Test
 {
-    void SetUp() { context = Lwm2mCore_Init(NULL, NULL, NULL); }
+    void SetUp() { context = Lwm2mCore_Init(NULL, NULL); }
     void TearDown() { Lwm2mCore_Destroy(context); }
 
 protected:

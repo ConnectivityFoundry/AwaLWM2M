@@ -41,6 +41,7 @@
 #ifdef LWM2M_CLIENT
 #include "lwm2m_object_tree.h"
 #include "lwm2m_result.h"
+#include "lwm2m_bootstrap_config.h"
 #endif
 
 #ifdef __cplusplus
@@ -48,6 +49,8 @@ extern "C" {
 #endif
 
 #ifdef LWM2M_CLIENT
+#define MAX_ENDPOINT_NAME_LENGTH 128
+
 typedef enum
 {
     Lwm2mBootStrapState_NotBootStrapped,
@@ -106,15 +109,14 @@ typedef struct
     DefinitionRegistry * Definitions;         // Storage for object/resource definitions.
     ResourceEndPointList EndPointList;        // CoaP endpoints.
     CoapInfo * Coap;                          // CoAP library context information
-    char EndPointName[128];                   // Client EndPoint name
-    const char * FactoryBootstrapInformation; // Path of file containing bootstrap information, or NULL
+    char EndPointName[MAX_ENDPOINT_NAME_LENGTH];  // Client EndPoint name
+    bool UseFactoryBootstrap;                 // Factory bootstrap information has been loaded from file.
     struct ListHead observerList;
 } Lwm2mContextType;
 
 // Default handlers for objects and resources. these write directly to the object store
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
-
 #else
 
 typedef struct
@@ -132,7 +134,10 @@ typedef struct
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 #ifdef LWM2M_CLIENT
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName, const char * factoryBootstrapInformation);
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
+
+void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation);
+
 #elif defined(LWM2M_SERVER)
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType);
 #else

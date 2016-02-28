@@ -98,33 +98,11 @@ static bool Lwm2m_BootStrapFromSmartCard(Lwm2mContextType * context)
     return false;
 }
 
-// Attempt to retrieve the bootstrap information from factory configuration file
 static bool Lwm2m_BootStrapFromFactory(Lwm2mContextType * context)
 {
-    bool rc = false;
+    Lwm2m_Debug("Lwm2m_BootstrapFromFactory: %s\n", context->UseFactoryBootstrap ? "True" : "False");
 
-#ifndef CONTIKI
-    Lwm2m_Debug("Lwm2m_BootstrapFromFactory: %s\n", context->FactoryBootstrapInformation != NULL ? context->FactoryBootstrapInformation : "Skipped");
-
-    if (context->FactoryBootstrapInformation != NULL)
-    {
-        const BootstrapInfo * bootstrapInfo = BootstrapInformation_ReadConfigFile(context->FactoryBootstrapInformation);
-        if (bootstrapInfo == NULL || BootstrapInformation_WriteToObjectStore(context, bootstrapInfo) != 0)
-        {
-            Lwm2m_Error("Factory Bootstrap failed\n");
-            Lwm2m_Error("EXITING\n");
-            exit(1);
-        }
-        else
-        {
-            Lwm2m_Info("Factory Bootstrap from %s\n", context->FactoryBootstrapInformation);
-            BootstrapInformation_Dump(bootstrapInfo);
-            rc = true;
-        }
-        BootstrapInformation_DeleteBootstrapInfo(bootstrapInfo);
-    }
-#endif
-    return rc;
+    return context->UseFactoryBootstrap;
 }
 
 // Handler called when the server posts a "finished" message to /bs

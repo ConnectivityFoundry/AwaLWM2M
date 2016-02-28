@@ -69,7 +69,7 @@ typedef struct
     char * BootStrap;
     char * Logfile;
     int AddressFamily;
-    const char * FactoryBootstrapInformation;
+    const char * FactoryBootstrapFile;
 } Options;
 
 
@@ -183,10 +183,27 @@ static int Lwm2mClient_Start(Options * options)
         goto error;
     }
 
-    Lwm2mContextType * context = Lwm2mCore_Init(coap, options->EndPointName, options->FactoryBootstrapInformation);
+    // if required read the bootstrap information from a file
+    const BootstrapInfo * factoryBootstrapInfo;
+    if (options->FactoryBootstrapFile != NULL)
+    {
+        factoryBootstrapInfo = BootstrapInformation_ReadConfigFile(options->FactoryBootstrapFile);
+    }
+    else
+    {
+        factoryBootstrapInfo = NULL;
+    }
+
+    Lwm2mContextType * context = Lwm2mCore_Init(coap, options->EndPointName);
 
     // Must happen after coap_Init().
     RegisterObjects(context, options);
+
+    Lwm2mCore_SetFactoryBootstrap(context, factoryBootstrapInfo);
+
+    // bootstrap information has been loaded, no need to hang onto this anymore
+    BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
+
 
     // Listen for UDP packets on IPC port
     int xmlFd = xmlif_init(context, options->IpcPort);
@@ -337,7 +354,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 options->Verbose = true;
                 break;
             case 'f':
-                options->FactoryBootstrapInformation = optarg;
+                options->FactoryBootstrapFile = optarg;
                 break;
             case 'h':
             default:
@@ -347,7 +364,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
     }
 
     // Check to see if at least one bootstrap option is specified
-    if ((options->BootStrap == NULL) && (options->FactoryBootstrapInformation == NULL))
+    if ((options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
     {
         printf("Error: please specify a bootstrap option (--bootstrap or --factoryBootstrap)\n\n");
         PrintUsage();
@@ -369,7 +386,7 @@ int main(int argc, char ** argv)
         .EndPointName = "imagination1",
         .Logfile = NULL,
         .AddressFamily = AF_INET,
-        .FactoryBootstrapInformation = NULL,
+        .FactoryBootstrapFile = NULL,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)
