@@ -21,20 +21,21 @@
 ************************************************************************************************************************/
 
 
-#ifndef AWA_STATIC_CLIENT_H
-#define AWA_STATIC_CLIENT_H
+#ifndef AWA_STATIC_H
+#define AWA_STATIC_H
 
 #include "awa/common.h"
 #include "awa/error.h"
 
-//DO NOT USE - DRAFT
-#error "Do not use this header - draft"
-
-typedef struct
+typedef enum
 {
-    void * applicationContext;
-    Lwm2mContextType * context;
-} _AwaStaticClient;
+    AwaOperation_CreateObjectInstance,
+    AwaOperation_DeleteObjectInstance,
+    AwaOperation_WriteResourceInstance,
+    AwaOperation_ReadResourceInstance,
+    AwaOperation_DeleteResource,
+    AwaOperation_ExecuteResource,
+} AwaOperation;
 
 typedef struct _AwaStaticClient AwaStaticClient;
 
@@ -54,7 +55,8 @@ AwaError AwaStaticClient_SetCOAPPort(AwaStaticClient * client, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
 
-AwaStaticClient * AwaStaticClient_Init();
+AwaStaticClient * AwaStaticClient_New();
+AwaError AwaStaticClient_Init(AwaStaticClient * client);
 
 AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                                      uint16_t minimumInstances, uint16_t maximumInstances,
