@@ -59,14 +59,17 @@ tool_tests tools_tests:
 
 # gtest runners
 TEST_SRC_BIN:=$(BUILD_DIR)/core/tests/test_core_runner
+TEST_STATIC_API_BIN:=$(BUILD_DIR)/api/tests-static/test_static_api_runner
 TEST_API_BIN:=$(BUILD_DIR)/api/tests/test_api_runner
 TEST_TOOLS_BIN:=$(BUILD_DIR)/tools/tests/gtest/test_tools_runner
 
 $(TEST_SRC_BIN): all
+$(TEST_STATIC_API_BIN): all
 $(TEST_API_BIN): all
 $(TEST_TOOLS_BIN): all
 
 TEST_SRC_XML:=$(TEST_SRC_BIN)_out.xml
+TEST_STATIC_API_XML:=$(TEST_STATIC_API_BIN)_out.xml
 TEST_API_XML:=$(TEST_API_BIN)_out.xml
 TEST_TOOLS_XML:=$(TEST_TOOLS_BIN)_out.xml
 
@@ -89,9 +92,10 @@ TEST_PATHS=--clientDaemonPath=$(LWM2M_CLIENTD_BIN) \
 
 .PHONY: gtest_tests
 gtest_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
-	$(TEST_SRC_BIN)   $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_SRC_XML)"   $(TEST_PATHS)
-	$(TEST_API_BIN)   $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_API_XML)"   $(TEST_PATHS)
-	$(TEST_TOOLS_BIN) $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_TOOLS_XML)" $(TEST_PATHS)
+	$(TEST_SRC_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_SRC_XML)"        $(TEST_PATHS)
+	$(TEST_STATIC_API_BIN) $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_STATIC_API_XML)" $(TEST_PATHS)
+	$(TEST_API_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_API_XML)"        $(TEST_PATHS)
+	$(TEST_TOOLS_BIN)      $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_TOOLS_XML)"      $(TEST_PATHS)
 
 .PHONY: gdb_tests
 gdb_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
