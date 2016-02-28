@@ -24,7 +24,15 @@
 
 AwaStaticClient * AwaStaticClient_New()
 {
-    _AwaStaticClient * client = (_AwaStaticClient *)malloc(sizeof(*client));
+    AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
     return client;
 }
 
+void AwaStaticClient_Free(AwaStaticClient ** client)
+{
+    if(client != NULL && *client != NULL)
+    {
+        free(*client);
+        *client = NULL;
+    }
+}

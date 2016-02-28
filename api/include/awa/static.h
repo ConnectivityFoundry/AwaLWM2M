@@ -27,6 +27,10 @@
 #include "awa/common.h"
 #include "awa/error.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
     AwaOperation_CreateObjectInstance,
@@ -66,6 +70,7 @@ AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client,
 
 AwaStaticClient * AwaStaticClient_New();
 AwaError AwaStaticClient_Init(AwaStaticClient * client);
+void AwaStaticClient_Free(AwaStaticClient ** client);
 
 AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                                      uint16_t minimumInstances, uint16_t maximumInstances,
@@ -97,5 +102,8 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
 AwaError AwaStaticClient_ObjectInstanceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* AWA_STATIC_CLIENT_H */

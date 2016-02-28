@@ -25,10 +25,11 @@
 #define _AWA_STATIC_H_
 
 #include "awa/static.h"
+#include "lwm2m_core.h"
 
-typedef struct
+struct _AwaStaticClient
 {
     Lwm2mContextType * context;
-} _AwaStaticClient;
+};
 
 #endif /* STATIC_H_ */

@@ -9,9 +9,15 @@ class TestStaticClient : public testing::Test
 
 };
 
-TEST_F(TestStaticClient, AwaStaticClient_test)
+TEST_F(TestStaticClient, AwaStaticClient_New_Free)
 {
-    ASSERT_TRUE(2 != 1);
+    AwaStaticClient * client = AwaStaticClient_New();
+
+    ASSERT_TRUE(client != NULL);
+
+    AwaStaticClient_Free(&client);
+
+    ASSERT_TRUE(client == NULL);
 }
 
 } // namespace AwaStatic
