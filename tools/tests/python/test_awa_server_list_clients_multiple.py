@@ -15,12 +15,13 @@ class TestSpawnMultipleClients(unittest.TestCase):
     """TestCase class that spawns LWM2M Server and multiple Client daemons before each test, then kills them afterwards."""
 
     NUM_CLIENTS = 5
-
+    
     def setUp(self):
         self.config = config.Config(tools_common.DefaultTestConfiguration)
 
         # start server first
         self._serverDaemon = overlord.LWM2MServerDaemon(self.config.serverIpcPort,
+                                                        self.config.serverAddress,
                                                         self.config.serverCoapPort,
                                                         self.config.serverLogFile)
         self._serverDaemon.spawn()
@@ -64,7 +65,7 @@ class TestListMultipleClients(TestSpawnMultipleClients):
 
     def test_list_clients_no_args_multiple_clients(self):
         # test that if we run 5 clients, the server can list them all
-        expectedStdout = "  1 TestClient0 \n  2 TestClient1 \n  3 TestClient2 \n  4 TestClient3 \n  5 TestClient4 \n"
+        expectedStdout = "Client: TestClient0\n\nClient: TestClient1\n\nClient: TestClient2\n\nClient: TestClient3\n\nClient: TestClient4\n\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -75,7 +76,7 @@ class TestListMultipleClients(TestSpawnMultipleClients):
 
     def test_list_clients_object_values(self):
         # test that if we run 5 clients, the server can list each client and their values
-        expectedStdout = "  1 TestClient0 <0/1>,<1/1>,<2/0>,<3/0>,<4/0>,<7>,<5>,<6>\n  2 TestClient1 <0/1>,<1/1>,<2/0>,<3/0>,<4/0>,<7>,<5>,<6>\n  3 TestClient2 <0/1>,<1/1>,<2/0>,<3/0>,<4/0>,<7>,<5>,<6>\n  4 TestClient3 <0/1>,<1/1>,<2/0>,<3/0>,<4/0>,<7>,<5>,<6>\n  5 TestClient4 <0/1>,<1/1>,<2/0>,<3/0>,<4/0>,<7>,<5>,<6>\n"
+        expectedStdout = "Client: TestClient0\n  /1/0     LWM2MServer\n  /2/0     LWM2MAccessControl\n  /2/1     LWM2MAccessControl\n  /2/2     LWM2MAccessControl\n  /2/3     LWM2MAccessControl\n  /3/0     Device\n  /4/0     ConnectivityMonitoring\n  /7       ConnectivityStatistics\n  /5/0     FirmwareUpdate\n  /6/0     Location\n\nClient: TestClient1\n  /1/0     LWM2MServer\n  /2/0     LWM2MAccessControl\n  /2/1     LWM2MAccessControl\n  /2/2     LWM2MAccessControl\n  /2/3     LWM2MAccessControl\n  /3/0     Device\n  /4/0     ConnectivityMonitoring\n  /7       ConnectivityStatistics\n  /5/0     FirmwareUpdate\n  /6/0     Location\n\nClient: TestClient2\n  /1/0     LWM2MServer\n  /2/0     LWM2MAccessControl\n  /2/1     LWM2MAccessControl\n  /2/2     LWM2MAccessControl\n  /2/3     LWM2MAccessControl\n  /3/0     Device\n  /4/0     ConnectivityMonitoring\n  /7       ConnectivityStatistics\n  /5/0     FirmwareUpdate\n  /6/0     Location\n\nClient: TestClient3\n  /1/0     LWM2MServer\n  /2/0     LWM2MAccessControl\n  /2/1     LWM2MAccessControl\n  /2/2     LWM2MAccessControl\n  /2/3     LWM2MAccessControl\n  /3/0     Device\n  /4/0     ConnectivityMonitoring\n  /7       ConnectivityStatistics\n  /5/0     FirmwareUpdate\n  /6/0     Location\n\nClient: TestClient4\n  /1/0     LWM2MServer\n  /2/0     LWM2MAccessControl\n  /2/1     LWM2MAccessControl\n  /2/2     LWM2MAccessControl\n  /2/3     LWM2MAccessControl\n  /3/0     Device\n  /4/0     ConnectivityMonitoring\n  /7       ConnectivityStatistics\n  /5/0     FirmwareUpdate\n  /6/0     Location\n\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -99,7 +100,7 @@ class TestListClientsAfterClientDisconnect(TestSpawnMultipleClients):
             print "Failed to kill self._clientDaemons[0]"
             pass
 
-        expectedStdout = "  1 TestClient1 \n  2 TestClient2 \n  3 TestClient3 \n  4 TestClient4 \n"
+        expectedStdout = "Client: TestClient1\n\nClient: TestClient2\n\nClient: TestClient3\n\nClient: TestClient4\n\n"
         expectedStderr = ""
         expectedCode = 0
 

@@ -22,46 +22,7 @@ class TestWriteOperationWithServerDaemon : public TestServerWithDaemonBase {};
 
 
 class TestWriteOperationWithConnectedSession : public TestServerWithConnectedSession {};
-class TestWriteOperationWithConnectedServerAndClientSession : public TestServerAndClientWithConnectedSession
-{
-protected:
-    void WaitForClientDefinition(int objectID)
-    {
-        bool found = false;
-        int maxOperations = 30;
-
-        char objectPath[32];
-        sprintf(objectPath, "/%d", objectID);
-
-        printf("Waiting for %s\n", objectPath);
-
-        while (!found && maxOperations-- > 0)
-        {
-            AwaServerListClientsOperation * listClientsOperation = AwaServerListClientsOperation_New(server_session_);
-            AwaServerListClientsOperation_Perform(listClientsOperation, defaults::timeout);
-            const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(listClientsOperation, global::clientEndpointName);
-
-            AwaRegisteredEntityIterator * iterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(response);
-
-            while (AwaRegisteredEntityIterator_Next(iterator))
-            {
-                //Lwm2m_Debug("Waiting for server to know client knows about object 1000...");
-                const char * path = AwaRegisteredEntityIterator_GetPath(iterator);
-
-                if (strstr(path, objectPath) != NULL) {
-                    // contains
-                    printf("FOUND %s\n", path);
-                    found = true;
-                }
-            }
-            AwaRegisteredEntityIterator_Free(&iterator);
-            AwaServerListClientsOperation_Free(&listClientsOperation);
-            sleep(1);
-        }
-        ASSERT_TRUE(found);
-    }
-
-};
+class TestWriteOperationWithConnectedServerAndClientSession : public TestServerAndClientWithConnectedSession {};
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_New_returns_valid_operation_and_free_works)
 {
@@ -251,6 +212,32 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
     EXPECT_EQ(AwaLWM2MError_MethodNotAllowed, AwaPathResult_GetLWM2MError(pathResult));
 
+    AwaServerWriteOperation_Free(&writeOperation);
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_handles_write_only_resource)
+{
+    // should succeed - resource is writable.
+
+    ObjectDescription object = { 1000, "Object1000", 0, 1, {
+            ResourceDescription(0, "Resource0", AwaResourceType_Time, 0, 1, AwaResourceOperations_WriteOnly),
+        }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client
+    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(clientSet != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    AwaClientSetOperation_Free(&clientSet);
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
+    AwaTime value = 123456789;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 

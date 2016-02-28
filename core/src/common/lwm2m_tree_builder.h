@@ -34,12 +34,13 @@ extern "C" {
 #include "lwm2m_tree_node.h"
 #include "lwm2m_core.h"
 #include "lwm2m_request_origin.h"
+#include "lwm2m_result.h"
 
-int TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength);
-int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID);
-int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
+Lwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength);
+Lwm2mResult TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID);
+Lwm2mResult TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
-int TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
+Lwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                        ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 #ifdef __cplusplus

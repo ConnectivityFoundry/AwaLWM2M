@@ -1081,7 +1081,7 @@ static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequenc
     matches = sscanf(OirToUri(key), "%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
     Lwm2mTreeNode * dest;
-    if (TreeBuilder_CreateTreeFromOIR(&dest, context, origin, oir, matches) == 0)
+    if (TreeBuilder_CreateTreeFromOIR(&dest, context, origin, oir, matches) == Lwm2mResult_Success)
     {
         char payload[1024];
         int payloadLen = Lwm2mCore_SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
@@ -1108,6 +1108,7 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
     *responseContentType = ContentType_None;
+    Lwm2mResult result = Lwm2mResult_Unspecified;
 
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
@@ -1123,7 +1124,7 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
         if (Lwm2mCore_Observe(context, addr, token, tokenLength, oir[0], oir[1], oir[2], contentType, Lwm2m_HandleNotification, NULL) != -1)
         {
             Lwm2mTreeNode * root;
-            if (TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches) == 0)
+            if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
             {
                 len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
             }
@@ -1131,7 +1132,7 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
         }
 
         *responseContentLen = (len >= 0) ? len : 0;
-        *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : Lwm2mResult_NotFound;
+        *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : result;
     }
     else
     {
@@ -1151,6 +1152,7 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
     int oir[3] = { -1, -1, -1 };
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
+    Lwm2mResult result = Lwm2mResult_Unspecified;
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     if (matches > 0)
@@ -1160,7 +1162,7 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
 
         // Perform "GET", to return clientID in content.
         Lwm2mTreeNode * root;
-        if (TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches) == 0)
+        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
         {
             len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
@@ -1174,7 +1176,7 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
         else
         {
             *responseContentLen = 0;
-            *responseCode = Lwm2mResult_NotFound;
+            *responseCode = result;
         }
     }
     else
@@ -1198,6 +1200,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
 
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
+    Lwm2mResult result = Lwm2mResult_Unspecified;
 
     if (acceptContentType == ContentType_ApplicationLinkFormat)
     {
@@ -1207,7 +1210,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
     {
         Lwm2m_Debug("Read\n");
         Lwm2mTreeNode * root;
-        if (TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches) == 0)
+        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
         {
             len = Lwm2mCore_SerialiseOIR(root, acceptContentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
@@ -1220,7 +1223,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
     }
 
     *responseContentLen = (len < 0) ? 0 : len;
-    *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : Lwm2mResult_NotFound;
+    *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : result;
     return 0;
 }
 

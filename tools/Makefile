@@ -64,12 +64,17 @@ TEST_FILES:= \
   test_awa_client_explore.py \
   test_awa_client_delete.py \
   test_awa_client.py \
+  test_awa_server_list_clients.py \
+  test_awa_server_list_clients_multiple.py \
   test_awa_server_observe.py \
   test_awa_server_read.py \
   test_awa_server_write.py \
   test_awa_server_delete.py \
   test_awa_server_execute.py \
-  test_awa_server_write_attributes.py
+  test_awa_server_write_attributes.py \
+  test_awa_server.py \
+  test_awa_client_server_interaction.py
+# test_awa_server_discover.py
 
 .PHONY: tests
 tests:

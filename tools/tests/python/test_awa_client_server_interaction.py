@@ -32,11 +32,13 @@ class TestClientServer(tools_common.AwaTest):
     def test_server_write_client_get_single_resource(self):
         # test that a single resource can be written on the server and retrieved on the client
         manufacturer = "ACME Corp."
-        expectedStdout = "    Resource100[1000/0/100]: %s\n" % (manufacturer,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource100[/1000/0/100]: %s\n" % (manufacturer,)
         expectedStderr = ""
         expectedCode = 0
 
         result = server_write(self.config, "/1000/0/100=\"%s\"" % (manufacturer,))
+        self.assertEqual("", result.stderr)
+        self.assertEqual("", result.stdout)
         self.assertEqual(0, result.code)
 
         result = client_get(self.config, "/1000/0/100")
@@ -50,8 +52,9 @@ class TestClientServer(tools_common.AwaTest):
         timezone = "ACME Corp."
         currentTime = 123456789
         expectedStdout = \
-"""    Timezone[3/0/15]: %s
-    CurrentTime[3/0/13]: %d
+"""Device[/3/0]:
+    Timezone[/3/0/15]: %s
+    CurrentTime[/3/0/13]: %d
 """ % (timezone, currentTime)
         expectedStderr = ""
         expectedCode = 0
@@ -65,20 +68,48 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode, result.code)
 
+    @unittest.skip("Multiple writes in a single request are not supported")
+    def test_server_write_client_get_multiple_resources_different_instances_single_write(self):
+        # test that multiple resources from the different instances can be set on
+        # the server and retrieved on the client with single commands
+        timezone = "ACME Corp."
+        modelNumber = "1234567890"
+        expectedStdout = \
+"""Device[/3/0]:
+    Timezone[/3/0/15]: %s
+Object1000[/1000/0]:
+    Resource100[/1000/0/100]: %s
+""" % (timezone, modelNumber)
+        expectedStderr = ""
+        expectedCode = 0
 
+        result = server_write(self.config, "/3/0/15=\"%s\"" % (timezone,), "/1000/0/100=\"%s\"" % (modelNumber,))
+        self.assertEqual(0, result.code)
+
+        result = client_get(self.config, "/3/0/15", "/1000/0/100")
+        self.assertEqual(expectedStdout, result.stdout)
+        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedCode, result.code)
+        
     def test_server_write_client_get_multiple_resources_different_instances(self):
         # test that multiple resources from the different instances can be set on
         # the server and retrieved on the client with single commands
         timezone = "ACME Corp."
         modelNumber = "1234567890"
         expectedStdout = \
-"""    Timezone[3/0/15]: %s
-    Resource100[1000/0/100]: %s
+"""Device[/3/0]:
+    Timezone[/3/0/15]: %s
+Object1000[/1000/0]:
+    Resource100[/1000/0/100]: %s
 """ % (timezone, modelNumber)
         expectedStderr = ""
         expectedCode = 0
 
-        server_write(self.config, "/3/0/15=\"%s\"" % (timezone,), "/1000/0/100=\"%s\"" % (modelNumber,))
+        result = server_write(self.config, "/3/0/15=\"%s\"" % (timezone,))
+        self.assertEqual(0, result.code)
+        
+        result = server_write(self.config, "/1000/0/100=\"%s\"" % (modelNumber,))
+        self.assertEqual(0, result.code)
 
         result = client_get(self.config, "/3/0/15", "/1000/0/100")
         self.assertEqual(expectedStdout, result.stdout)
@@ -88,7 +119,7 @@ class TestClientServer(tools_common.AwaTest):
     def test_client_set_server_read_single_resource(self):
         # test that a single resource can be written on the client and retrieved on the server
         manufacturer = "ACME Corp."
-        expectedStdout = "    Resource100[1000/0/100]: %s\n" % (manufacturer,)
+        expectedStdout = "Object1000[/1000/0]:\n    Resource100[/1000/0/100]: %s\n" % (manufacturer,)
         expectedStderr = ""
         expectedCode = 0
 
@@ -100,30 +131,32 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
+    @unittest.skip("Reading multiple resources in single request is currently unsupported")
     def test_client_set_server_read_multiple_resources_same_instance(self):
         # test that multiple resources from the same instance can be set on
         # the client and retrieved on the server with single commands
         manufacturer = "ACME Corp."
-        modelNumber = "1234567890"
         memoryFree = 55
+        temperature = 24.6
         expectedStdout = \
-"""    Manufacturer[3/0/0]: %s
-    ModelNumber[3/0/1]: %s
-    MemoryFree[3/0/10]: %d
-""" % (manufacturer, modelNumber, memoryFree)
+"""    Manufacturer[1000/0/100]: %s
+    ModelNumber[1000/0/101]: %s
+    MemoryFree[1000/0/102]: %d
+""" % (manufacturer, memoryFree, temperature)
         expectedStderr = ""
         expectedCode = 0
 
-        client_set(self.config, "/3/0/0=\"%s\"" % (manufacturer,),
-                     "/3/0/1=\"%s\"" % (modelNumber,),
-                     "/3/0/10=%d" % (memoryFree,))
-
-        result = server_read(self.config, "/3/0/0", "/3/0/1", "/3/0/10")
-        self.assertEqual(expectedStdout, result.stdout)
+        result = client_set(self.config, "/1000/0/100=\"%s\"" % (manufacturer,),
+                     "/1000/0/101=\"%d\"" % (memoryFree,),
+                     "/1000/0/102=%f" % (temperature,))
+        
+        result = server_read(self.config, "/1000/0/100", "/1000/0/101", "/1000/0/102")
         self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedCode, result.code)
 
-    def test_client_set_server_read_multiple_resources_different_instances(self):
+    @unittest.skip("Multiple reads in single operation currently unsupported")
+    def test_client_set_server_read_multiple_resources_different_instances_single_read_operation(self):
         # test that multiple resources from the different instances can be set on
         # the client and retrieved on the server with single commands
         manufacturer = "ACME Corp."
@@ -135,7 +168,10 @@ class TestClientServer(tools_common.AwaTest):
         expectedStderr = ""
         expectedCode = 0
 
-        client_set(self.config, "/3/0/0=\"%s\"" % (manufacturer,), "/1000/0/100=\"%s\"" % (modelNumber,))
+        result = client_set(self.config, "/3/0/0=\"%s\"" % (manufacturer,), "/1000/0/100=\"%s\"" % (modelNumber,))
+        self.assertEqual("", result.stdout)
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.code)
 
         result = server_read(self.config, "/3/0/0", "/1000/0/100")
         self.assertEqual(expectedStdout, result.stdout)
@@ -147,25 +183,27 @@ class TestClientServer(tools_common.AwaTest):
         # when that resource is executed by the server
 
         # open client subscribe subprocess. Only wait for a single execute of the resource
+        port = self.config.clientIpcPort
         subscribeProcess = tools_common.run_non_blocking(tools_common.CLIENT_SUBSCRIBE,
-                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/4" % (self.config.clientIpcPort,))
+                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/4" % (port,))
 
         # wait for subscribe process to start up
-        self.assertEqual(subscribeProcess.stdout.readline(), "Subscribe /3/0/4 Execute\n")
-        self.assertEqual(subscribeProcess.stdout.readline(), "Waiting for 1 notifications:\n")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session IPC configured for UDP: address 127.0.0.1, port %d" % (port,))
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session connected")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Subscribe /3/0/4 Execute\n")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Waiting for 1 notifications:\n")
 
-        # do execute command
-        expectedStdout = "Execute /3/0/4\n"
+        # test we can execute a resource, specifying no payload
+        expectedStdout = "Target /3/0/4 executed successfully\n"
         expectedStderr = ""
         expectedCode = 0
-
-        result = server_execute(self.config, "--verbose /3/0/4")
+        result = server_execute(self.config, "/3/0/4")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
         # read subscribe output
-        expectedStdout = "Execute 1:\n    Reboot[3/0/4]: \nNO DATA\nUnsubscribe /3/0/4\n"
+        expectedStdout = "Execute 1:\nNO DATA\nSession disconnected\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -180,15 +218,18 @@ class TestClientServer(tools_common.AwaTest):
         # when that resource is executed by the server. Payload should be printed on the client
 
         # open client subscribe subprocess. Only wait for a single execute of the resource
+        port = self.config.clientIpcPort
         subscribeProcess = tools_common.run_non_blocking(tools_common.CLIENT_SUBSCRIBE,
-                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/4" % (self.config.clientIpcPort,))
+                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/4" % (port,))
 
         # wait for subscribe process to start up
-        self.assertEqual(subscribeProcess.stdout.readline(), "Subscribe /3/0/4 Execute\n")
-        self.assertEqual(subscribeProcess.stdout.readline(), "Waiting for 1 notifications:\n")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session IPC configured for UDP: address 127.0.0.1, port %d" % (port,))
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session connected")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Subscribe /3/0/4 Execute\n")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Waiting for 1 notifications:\n")
 
         # test we can execute a resource, specifying a payload of data
-        expectedStdout = ""
+        expectedStdout = "Target /3/0/4 executed successfully\n"
         expectedStderr = ""
         expectedCode = 0
         inputText = "QmFzZTY0IGlzIGEgZ2VuZXJpYyB0ZXJtIGZvciB"
@@ -197,8 +238,12 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
+        hexBytes = ""
+        for c in inputText:
+            hexBytes += c.encode("hex") + " "
+
         # read subscribe output
-        expectedStdout = "Execute 1:\n    Reboot[3/0/4]: \nDATA: length 39, QmFzZTY0IGlzIGEgZ2VuZXJpYyB0ZXJtIGZvciB\nUnsubscribe /3/0/4\n"
+        expectedStdout = "Execute 1:\nDATA: length 39, payload: [" + hexBytes +"]\nSession disconnected\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -207,52 +252,26 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-
+    
+    @unittest.skip("Multiple executions in a single request is currently supported")
     def test_client_subscribe_resource_server_multiple_execute_with_payload(self):
-        # test that the client can subscribe to an executable resource and receive a notification
-        # when that resource is executed by the server. Payload should be printed on the client
-
-        # open client subscribe subprocess. Only wait for a single execute of the resource
-        subscribeProcess = tools_common.run_non_blocking(tools_common.CLIENT_SUBSCRIBE,
-                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/4" % (self.config.clientIpcPort,))
-
-        # wait for subscribe process to start up
-        self.assertEqual(subscribeProcess.stdout.readline(), "Subscribe /3/0/4 Execute\n")
-        self.assertEqual(subscribeProcess.stdout.readline(), "Waiting for 1 notifications:\n")
-
-        # test we can execute a resource, specifying a payload of data
-        expectedStdout = ""
-        expectedStderr = ""
-        expectedCode = 0
-        inputText = "QmFzZTY0IGlzIGEgZ2VuZXJpYyB0ZXJtIGZvciB"
-        result = server_execute_stdin(self.config, inputText, "/3/0/4 /3/0/4")
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode,   result.code)
-
-        # read subscribe output
-        expectedStdout = "Execute 1:\n    Reboot[3/0/4]: \nDATA: length 39, QmFzZTY0IGlzIGEgZ2VuZXJpYyB0ZXJtIGZvciB\nUnsubscribe /3/0/4\n"
-        expectedStderr = ""
-        expectedCode = 0
-
-        result = tools_common.non_blocking_get_run_result(subscribeProcess)
-
-        self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode,   result.code)
+        self.assertTrue(False)
 
     def test_client_subscribe_resource_server_write(self):
         # test that the client can subscribe to a resource and receive a notification
         # when that resource is changed by the server through the write function
 
         # open client subscribe subprocess. Only wait for a single execute of the resource
+        port = self.config.clientIpcPort
         subscribeProcess = tools_common.run_non_blocking(tools_common.CLIENT_SUBSCRIBE,
-                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/15" % (self.config.clientIpcPort,))
+                                                    "--verbose --ipcPort %i --waitCount 1 /3/0/15" % (port,))
 
         # wait for subscribe process to start up
-        self.assertEqual(subscribeProcess.stdout.readline(), "Subscribe /3/0/15 Change\n")
-        self.assertEqual(subscribeProcess.stdout.readline(), "Waiting for 1 notifications:\n")
-
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session IPC configured for UDP: address 127.0.0.1, port %d" % (port,))
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Session connected")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Subscribe /3/0/15 Change\n")
+        self.assertEqual(tools_common.strip_prefix(subscribeProcess.stdout.readline()), "Waiting for 1 notifications:\n")
+        
         # do write command
         expectedStdout = ""
         expectedStderr = ""
@@ -264,7 +283,7 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedCode,   result.code)
 
         # read subscribe output
-        expectedStdout = "Notify 1:\n    Timezone[3/0/15]: abc\nUnsubscribe /3/0/15\n"
+        expectedStdout = "Notify 1:\nChanged: /3/0/15 Resource Modified:\nDevice[/3/0]:\n    Timezone[/3/0/15]: abc\nSession disconnected\n"
         expectedStderr = ""
         expectedCode = 0
 
@@ -285,8 +304,12 @@ class TestClientServer(tools_common.AwaTest):
                                                     "--verbose --ipcPort %i --clientID %s --waitCount 1 /3/0/1" % (port, clientEndpointName))
 
         # wait for observe process to start up
-        self.assertEqual(observeProcess.stdout.readline(), "Observe /3/0/1\n")
-        self.assertEqual(observeProcess.stdout.readline(), "Waiting for 1 notifications:\n")
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Session IPC configured for UDP: address 127.0.0.1, port %d" % (port,))
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Session connected")
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Observe /3/0/1\n")
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Waiting for 1 notifications:\n")
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Notify 0 from clientID TestClient:\n")
+        self.assertEqual(tools_common.strip_prefix(observeProcess.stdout.readline()), "Changed: /3/0/1 Resource Modified:\n")
 
         # do set command
         expectedStdout = ""
@@ -299,7 +322,7 @@ class TestClientServer(tools_common.AwaTest):
         self.assertEqual(expectedCode,   result.code)
 
         # read subscribe output
-        expectedStdout = "Notify 1:\n    ModelNumber[3/0/1]: abc\nClean up\n"
+        expectedStdout = "Device[/3/0]:\n    ModelNumber[/3/0/1]: Awa Client\nNotify 1 from clientID TestClient:\nChanged: /3/0/1 Resource Modified:\nDevice[/3/0]:\n    ModelNumber[/3/0/1]: abc\nSession disconnected\n"
         expectedStderr = ""
         expectedCode = 0
 

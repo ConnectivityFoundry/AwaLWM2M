@@ -733,7 +733,7 @@ TEST_F(TlvTestSuite, test_multiple_instance_resource)
 
     Lwm2mTreeNode * dest;
     int OIR[] = {14};
-    ASSERT_EQ(0, TreeBuilder_CreateTreeFromOIR(&dest, context, Lwm2mRequestOrigin_Client, OIR, 1));
+    ASSERT_EQ(Lwm2mResult_Success, TreeBuilder_CreateTreeFromOIR(&dest, context, Lwm2mRequestOrigin_Client, OIR, 1));
 
     uint8_t buffer[512];
     // Note: sometimes the encoding order of the last 3 bytes switches position with the previous 3 bytes

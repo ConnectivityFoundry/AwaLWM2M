@@ -86,6 +86,7 @@ static void ListClients(const AwaServerSession * session, bool showObjectDetails
             AwaClientIterator * clientIterator = AwaServerListClientsOperation_NewClientIterator(operation);
             if (clientIterator != NULL)
             {
+                int numConnectedClients = 0;
                 while (AwaClientIterator_Next(clientIterator))
                 {
                     const char * clientID = AwaClientIterator_GetClientID(clientIterator);
@@ -103,8 +104,13 @@ static void ListClients(const AwaServerSession * session, bool showObjectDetails
                         ListClientObjects(session, operation, clientID, quiet);
                     }
                     printf("\n");
+                    ++numConnectedClients;
                 }
                 AwaClientIterator_Free(&clientIterator);
+                if ((!quiet) && (numConnectedClients == 0))
+                {
+                    printf("No clients connected.\n");
+                }
             }
             else
             {
