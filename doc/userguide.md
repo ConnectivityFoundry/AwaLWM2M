@@ -20,15 +20,29 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 * [Introduction.](userguide.md#introduction) 
 * [The LWM2M object model.](userguide.md#the-lwm2m-object-model) 
 * [The LWM2M client.](userguide.md#the-lwm2m-client)  
-    * [The Awa client daemon](userguide.md#the-awa-client-daemon)  
+    * [The Awa client daemon.](userguide.md#the-awa-client-daemon)  
     * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
-    * [Awa client API tools.](userguide.md#awa-client-api-tools)
+    * [The Awa_API.](userguide.md#the-awa-api)
+        * [API options.](userguide.md#common-options)
+        * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
+        * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
+        * [Setting resource values.](userguide.md#setting-resource-values)
+        * [Retrieving a resource value.](userguide.md#retrieving-a-resource-value)
+        * [Subscribing to a change of resource value.](userguide.md#subscribing-to-a-change-of-resource-value)
+        * [Deleting a resource.](userguide.md#deleting-a-resource)
 * [The LWM2M server.](userguide.md#the-lwm2m-server)  
-    * [The Awa server daemon](userguide.md#the-awa-server-daemon) 
-    * [Awa Server API tools.](userguide.md#awa-server-api-tools)
+    * [The Awa server daemon.](userguide.md#the-awa-server-daemon) 
+    * [Awa server API tools.](userguide.md#awa-server-api-tools)
+        * [Listing registered clients.](userguide.md#listing-registered-clients)
+        * [Creating a server object definition.](userguide.md#creating-a-server-object-definition)
+        * [Writing a value to a resource on a registered client.](userguide.md#writing-a-value-to-a-resource-on-a-registered-client)
+        * [Reading a resource value from a registered client.](userguide.md#reading-a-resource-value-from-a-registered-client)
+        * [Deleting an object instance from a registered client.](userguide.md#deleting-an-object-instance-from-a-registered-client)
+        * [Observing a resource on a registered client.](userguide.md#observing-a-resource-on-a-registered-client)
+        * [Executing a resource on a registered client.](userguide.md#executing-a-resource-on-a-registered-client)
+        * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
     * [The Awa bootstrap server daemon](userguide.md#the-awa-bootstrap-server-daemon)  
-
 
 ----
 
@@ -441,7 +455,7 @@ Returns
 1 imagination1 <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
 ````
 
-### Creating a new object definition on the server.
+### Creating a server object definition.
 
 The *awa-server-define* tool is used to define custom objects on the server. To use a custom object, the object definition must be registered with the server daemon. The *awa-server-define* tool has identical functionality to *awa-client-define*, described earlier.
 
@@ -555,3 +569,4 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 
 ----
 ----
+
