@@ -355,7 +355,7 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
     char RegisterLocation[128] = {0};
 
     ListRemove(&client->list);
-    DestroyObjectList(Lwm2mCore_GetClientList(context));
+    DestroyObjectList(&client->ObjectList);
 
     sprintf(RegisterLocation, "/rd/%d", client->Location);
     Lwm2mCore_RemoveResourceEndPoint(context, RegisterLocation);
