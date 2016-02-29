@@ -24,7 +24,7 @@ Running the tests with [*Valgrind*](http://valgrind.org/docs/manual/quick-start.
 
 Examples:
 
-**Note:** replace *TestSuite.TestName* with the test suite and test you wish to run.
+**Note.** Replace *TestSuite.TestName* with the test suite and test you want to run.
 
 To run a single test:
 ````
@@ -73,7 +73,7 @@ $ make tests
 
 Google Test (gtest) is used to write C++ tests against core and API code. These can be run separately with:
 ````
-    $ make gtest_tests
+$ make gtest_tests
 ````
 
 Individual tests can be run by specifying them on the command line as an argument to TEST_FILTER:
