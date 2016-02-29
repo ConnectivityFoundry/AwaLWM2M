@@ -11,7 +11,7 @@ set (awa_clientd_SOURCES
   lwm2m_client_xml_handlers.c
   lwm2m_client_core.c
   lwm2m_client.c
-  awa_static.c
+  lwm2m_static.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_interface.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
   ${CORE_SRC_DIR}/common/lwm2m_bootstrap_config.c

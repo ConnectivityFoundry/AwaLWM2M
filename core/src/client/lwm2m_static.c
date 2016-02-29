@@ -20,16 +20,19 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include "lwm2m_static.h"
 
-#ifndef _AWA_STATIC_H_
-#define _AWA_STATIC_H_
-
-#include "awa/static.h"
-#include "lwm2m_core.h"
-
-struct _AwaStaticClient
+AwaStaticClient * AwaStaticClient_New()
 {
-    Lwm2mContextType * context;
-};
+    AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
+    return client;
+}
 
-#endif /* STATIC_H_ */
+void AwaStaticClient_Free(AwaStaticClient ** client)
+{
+    if(client != NULL && *client != NULL)
+    {
+        free(*client);
+        *client = NULL;
+    }
+}
