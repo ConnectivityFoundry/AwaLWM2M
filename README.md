@@ -40,7 +40,7 @@ Firstly, to obtain a copy of the Awa LWM2M source code:
  * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ````   
 
 
-Further instructions can be found in the [Getting started guide](starters_guide.md).
+Further information can be found in the [Getting started guide](doc/starters_guide.md).
 
 ----
 
