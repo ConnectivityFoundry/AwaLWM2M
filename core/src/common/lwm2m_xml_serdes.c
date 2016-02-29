@@ -350,7 +350,7 @@ Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, const T
     Lwm2mTreeNode_SetCreateFlag(objectNode, Xml_Find(xmlObjectNode, "Create"));
     Lwm2mTreeNode_SetID(objectNode, objectID);
 
-    ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
+    ObjectDefinition * definition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(context), objectID);
     if (definition != NULL)
     {
         Lwm2mTreeNode_SetDefinition(objectNode, definition);
@@ -404,7 +404,7 @@ Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, const T
                     Lwm2mTreeNode_SetCreateFlag(resourceNode, createOptionalResource);
                     Lwm2mTreeNode_AddChild(objectInstanceNode, resourceNode);
 
-                    ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+                    ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
                     if (resourceDefinition != NULL)
                     {
                         Lwm2mTreeNode_SetDefinition(resourceNode, resourceDefinition);

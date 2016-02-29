@@ -216,7 +216,7 @@ static int Bootstrap_Start(Options * options)
     }
 
     coap_Destroy();
-    ObjectStore_Destroy(context->Store);
+    Lwm2mCore_Destroy(context);
     return 0;
 }
 

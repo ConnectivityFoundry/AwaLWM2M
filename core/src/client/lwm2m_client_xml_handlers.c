@@ -512,7 +512,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     char buffer[MAXBUFLEN];
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
-    response = xmlif_GenerateConnectResponse(context->Definitions);
+    response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // Create a default response if necessary
     if (response == NULL)
@@ -619,7 +619,7 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     char * dataValue = NULL;
     char * buffer = NULL;
 
-    ResourceTypeType dataType = Definition_GetResourceType(context->Definitions, objectID, resourceID);
+    ResourceTypeType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
     if (dataType != ResourceTypeEnum_TypeNone)
     {
         // Determine buffer size required to read entire resource instance contents
@@ -680,7 +680,7 @@ error:
 static AwaError AddResourceToGetResponse(Lwm2mContextType * context, int objectID, int instanceID, int resourceID, TreeNode responseResourceNode, int idRangeStart, int idRangeEndExclusive)
 {
     AwaError result = AwaError_Success;
-    if (Definition_IsTypeMultiInstance(context->Definitions, objectID, resourceID))
+    if (Definition_IsTypeMultiInstance(Lwm2mCore_GetDefinitions(context), objectID, resourceID))
     {
         int resourceInstanceID = -1;
         while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, objectID, instanceID, resourceID, resourceInstanceID)) != -1)
@@ -1044,7 +1044,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                         if (key.ResourceID != -1)
                         {
                             ResourceDefinition * resFormat = NULL;
-                            resFormat = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, key.ResourceID);
+                            resFormat = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, key.ResourceID);
                             if (resFormat != NULL)
                             {
                                  // Cancel SubscribeToExecute or SubscribeToChange
@@ -1154,7 +1154,7 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
                 TreeNode resourceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceID);
                 TreeNode_AddChild(resource, resourceIDnode);
 
-                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, resourceID);
+                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, resourceID);
 
                 if (IS_MULTIPLE_INSTANCE(resourceDefinition))
                 {

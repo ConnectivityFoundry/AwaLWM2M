@@ -21,34 +21,21 @@
 ************************************************************************************************************************/
 
 
-#ifndef BOOTSTRAP_INFORMATION_H
-#define BOOTSTRAP_INFORMATION_H
+#ifndef LWM2M_CONTEXT_H
+#define LWM2M_CONTEXT_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "lwm2m_context.h"
+#include <string.h>
+#include <assert.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Opaque container for bootstrap information
-typedef struct _BootstrapInfo BootstrapInfo;
-
-// Load bootstrap information from local filesystem into holding structures. Return allocated pointer to BootstrapInfo struct on success, NULL on error.
-const BootstrapInfo * BootstrapInformation_ReadConfigFile(const char * configFile);
-
-// Print bootstrap information to stdout
-void BootstrapInformation_Dump(const BootstrapInfo * bootstrapInfo);
-
-// Free the memory previously allocated by BootstrapInformation_ReadConfigFile()
-void BootstrapInformation_DeleteBootstrapInfo(const BootstrapInfo * bootstrapInfo);
-
-int BootstrapInformation_Apply(Lwm2mContextType * context, const BootstrapInfo * bootstrapInfo);
+typedef struct _Lwm2mContextType Lwm2mContextType;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // BOOTSTRAP_INFORMATION_H
+#endif // LWM2M_CONTEXT_H

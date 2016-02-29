@@ -254,7 +254,7 @@ static void Lwm2m_HandleDeregisterResponse(void * ctxt, AddressType* address, co
 void Lwm2m_SetUpdateRegistration(Lwm2mContextType * context)
 {
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
 
@@ -280,7 +280,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
     int failedCount = 0;
     int serverCount = 0;
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
         serverCount++;
@@ -313,9 +313,9 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
 
             case Lwm2mRegistrationState_Registered:
 
-                if (context->BootStrapState == Lwm2mBootStrapState_CheckExisting)
+                if (Lwm2mCore_GetBootstrapState(context) == Lwm2mBootStrapState_CheckExisting)
                 {
-                    context->BootStrapState = Lwm2mBootStrapState_BootStrapped;
+                    Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
                 }
 
                 // Registered, update the LifeTime and send an update request if required
@@ -378,7 +378,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
     // bootstrap all over again.
     if (failedCount == serverCount)
     {
-        if (context->BootStrapState == Lwm2mBootStrapState_CheckExisting)
+        if (Lwm2mCore_GetBootstrapState(context) == Lwm2mBootStrapState_CheckExisting)
         {
             if (serverCount == 0)
             {
@@ -388,11 +388,11 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
             {
                 Lwm2m_Warning("Bootstrap from existing server entry failed\n");
             }
-            context->BootStrapState = Lwm2mBootStrapState_ClientHoldOff;
+            Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_ClientHoldOff);
         }
         else
         {
-            context->BootStrapState = Lwm2mBootStrapState_NotBootStrapped;
+            Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_NotBootStrapped);
         }
     }
     return 0;

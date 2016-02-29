@@ -30,7 +30,7 @@ TEST_F(PlainTextTestSuite, test_serialise_string)
 {
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
@@ -57,7 +57,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_string)
 {
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
@@ -66,7 +66,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_string)
 
     Lwm2mTreeNode * dest;
     SerdesContext serdesContext;
-    int result = PTDeserialiseResource(&serdesContext, &dest, context->Definitions, 0, 0, 0, (const uint8_t * )expected, strlen(expected));
+    int result = PTDeserialiseResource(&serdesContext, &dest, Lwm2mCore_GetDefinitions(context), 0, 0, 0, (const uint8_t * )expected, strlen(expected));
 
     Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(dest);
 
@@ -86,7 +86,7 @@ TEST_F(PlainTextTestSuite, test_serialise_float)
 
     double expected = 0.12345;
 
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeFloat, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, &expected, sizeof(expected));
@@ -113,7 +113,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_float)
     double expected = 0.12345;
     char buffer[512];
     snprintf(buffer,sizeof(buffer),"%lf",expected);
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeFloat, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, &expected, sizeof(expected));
@@ -121,7 +121,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_float)
 
     Lwm2mTreeNode * dest;
     SerdesContext serdesContext;
-    int result = PTDeserialiseResource(&serdesContext, &dest, context->Definitions, 0, 0, 0, (const uint8_t * )buffer, strlen(buffer));
+    int result = PTDeserialiseResource(&serdesContext, &dest, Lwm2mCore_GetDefinitions(context), 0, 0, 0, (const uint8_t * )buffer, strlen(buffer));
 
     Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(dest);
 

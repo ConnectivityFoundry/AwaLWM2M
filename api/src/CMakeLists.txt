@@ -71,6 +71,7 @@ set (Awa_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_debug.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_node.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
+  lwm2m_context.c
 )
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -D_GNU_SOURCE")
@@ -91,6 +92,7 @@ add_library (Awa_object OBJECT ${Awa_SOURCES})
 target_include_directories (Awa_object PUBLIC ${API_INCLUDE_DIR})
 target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR})
 target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR}/common)
+target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR}/client)
 target_include_directories (Awa_object PRIVATE ${LIB_XML_INCLUDE_DIR})
 target_include_directories (Awa_object PRIVATE ${LIB_B64_INCLUDE_DIR})
 set_property (TARGET Awa_object PROPERTY POSITION_INDEPENDENT_CODE ON)

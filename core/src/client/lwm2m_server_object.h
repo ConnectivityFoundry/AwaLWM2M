@@ -33,6 +33,27 @@ extern "C" {
 #include <stdint.h>
 
 #include "lwm2m_core.h"
+#include "lwm2m_registration.h"
+
+typedef struct
+{
+    struct ListHead list;
+    int ServerObjectInstanceID;
+    char Location[128];
+    Lwm2mRegistrationState RegistrationState;
+    uint32_t LastUpdate;
+    int Attempts;
+    bool UpdateRegistration;
+
+    int LifeTime;
+    int ShortServerID;
+    int DefaultMinimumPeriod;
+    int DefaultMaximumPeriod;
+    int DisableTimeout;
+    bool NotificationStoring;
+    char Binding[4];  // maximum "UQS" + '\0'
+
+} Lwm2mServerType;
 
 
 void Lwm2m_RegisterServerObject(Lwm2mContextType * context);

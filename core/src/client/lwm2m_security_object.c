@@ -115,7 +115,7 @@ static void DestroySecurityObjects(struct ListHead * securityObjectList)
 static LWM2MSecurityInfo * GetSecurityInfo(Lwm2mContextType * context, ObjectInstanceIDType objectInstanceID)
 {
     struct ListHead * current;
-    ListForEach(current, &context->SecurityObjectList)
+    ListForEach(current, Lwm2mCore_GetSecurityObjectList(context))
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(current, LWM2MSecurityInfo, list);
         if (securityInfo->objectInstanceID == objectInstanceID)
@@ -129,7 +129,7 @@ static LWM2MSecurityInfo * GetSecurityInfo(Lwm2mContextType * context, ObjectIns
 static LWM2MSecurityInfo * GetSecurityInfoForShortServerID(Lwm2mContextType * context, int shortServerID)
 {
     struct ListHead * current;
-    ListForEach(current, &context->SecurityObjectList)
+    ListForEach(current, Lwm2mCore_GetSecurityObjectList(context))
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(current, LWM2MSecurityInfo, list);
         if (securityInfo->ShortServerID == shortServerID)
@@ -150,7 +150,7 @@ static LWM2MSecurityInfo * AddSecurityInfo(Lwm2mContextType * context, ObjectIns
         {
             memset(new, 0, sizeof(LWM2MSecurityInfo));
             new->objectInstanceID = objectInstanceID;
-            ListAdd(&new->list, &context->SecurityObjectList);
+            ListAdd(&new->list, Lwm2mCore_GetSecurityObjectList(context));
         }
         else
         {
@@ -529,7 +529,7 @@ static LWM2MSecurityInfo * GetSecurityInfoForAddress(Lwm2mContextType * context,
 {
     LWM2MSecurityInfo * info = NULL;
     struct ListHead * current;
-    ListForEach(current, &context->SecurityObjectList)
+    ListForEach(current, Lwm2mCore_GetSecurityObjectList(context))
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(current, LWM2MSecurityInfo, list);
         if (Lwm2mCore_CompareAddresses(address, &securityInfo->address) == 0)

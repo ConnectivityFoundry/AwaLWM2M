@@ -29,7 +29,7 @@ TEST_F(Lwm2mTreeBuilderTestSuite, test_build_resource_node)
     const char * expected = "coap://bootstrap.example.com:5684/";
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)expected, strlen(expected));

@@ -31,13 +31,13 @@
 #include "lwm2m_endpoints.h"
 #include "coap_abstraction.h"
 
-int Lwm2mCore_InitEndPointList(ResourceEndPointList * endPointList)
+int Lwm2mEndPoint_InitEndPointList(ResourceEndPointList * endPointList)
 {
     ListInit(&endPointList->EndPoint);
     return 0;
 }
 
-int Lwm2mCore_DestroyEndPointList(ResourceEndPointList * endPointList)
+int Lwm2mEndPoint_DestroyEndPointList(ResourceEndPointList * endPointList)
 {
     struct ListHead * i, *n;
     ListForEachSafe(i, n, &endPointList->EndPoint)
@@ -59,7 +59,7 @@ int Lwm2mCore_DestroyEndPointList(ResourceEndPointList * endPointList)
  * if /3/0/1 is supplied, first checks /3/0/1 exists if not checks for /3/0
  * if that doesn't exist checks for /3
  */
-ResourceEndPoint * Lwm2mCore_FindResourceEndPointAncestors(ResourceEndPointList * endPointList, const char * path)
+ResourceEndPoint * Lwm2mEndPoint_FindResourceEndPointAncestors(ResourceEndPointList * endPointList, const char * path)
 {
     char * element = strdup(path);
 
@@ -90,7 +90,7 @@ ResourceEndPoint * Lwm2mCore_FindResourceEndPointAncestors(ResourceEndPointList 
     return NULL;
 }
 
-ResourceEndPoint * Lwm2mCore_FindResourceEndPoint(ResourceEndPointList * endPointList, const char * path)
+ResourceEndPoint * Lwm2mEndPoint_FindResourceEndPoint(ResourceEndPointList * endPointList, const char * path)
 {
     struct ListHead * i;
     ListForEach(i, &endPointList->EndPoint)
@@ -104,10 +104,10 @@ ResourceEndPoint * Lwm2mCore_FindResourceEndPoint(ResourceEndPointList * endPoin
     return NULL;
 }
 
-int Lwm2mCore_AddResourceEndPoint(ResourceEndPointList * endPointList, const char * path, EndpointHandlerFunction handler)
+int Lwm2mEndPoint_AddResourceEndPoint(ResourceEndPointList * endPointList, const char * path, EndpointHandlerFunction handler)
 {
     int result = -1;
-    ResourceEndPoint * endPoint = Lwm2mCore_FindResourceEndPoint(endPointList, path);
+    ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(endPointList, path);
 
     if (endPoint == NULL)
     {
@@ -138,10 +138,10 @@ int Lwm2mCore_AddResourceEndPoint(ResourceEndPointList * endPointList, const cha
     return result;
 }
 
-int Lwm2mCore_RemoveResourceEndPoint(ResourceEndPointList * endPointList, const char * path)
+int Lwm2mEndPoint_RemoveResourceEndPoint(ResourceEndPointList * endPointList, const char * path)
 {
     int result = -1;
-    ResourceEndPoint * endPoint = Lwm2mCore_FindResourceEndPoint(endPointList, path);
+    ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(endPointList, path);
 
     if (endPoint != NULL)
     {

@@ -481,7 +481,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
         }
     }
 
-    res = Definition_RegisterObjectType(context->Definitions, objectName ? objectName : "", objectID, MaximumInstances, MinimumInstances, NULL);
+    res = Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), objectName ? objectName : "", objectID, MaximumInstances, MinimumInstances, NULL);
     if (res < 0)
     {
         result = Lwm2mResult_Forbidden;
@@ -644,7 +644,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     char buffer[MAXBUFLEN];
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
-    response = xmlif_GenerateConnectResponse(context->Definitions);
+    response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // create a default response if necessary
     if (response == NULL)
@@ -714,7 +714,7 @@ static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content)
     TreeNode clientsNode = IPC_NewClientsNode();
 
     struct ListHead * i;
-    ListForEach(i, &context->ClientList)
+    ListForEach(i, Lwm2mCore_GetClientList(context))
     {
         const Lwm2mClientType * client = ListEntry(i, Lwm2mClientType, list);
 
@@ -1046,7 +1046,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
 
         TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(requestContext->ResponseObjectsTree, "Object", key.ObjectID);
 
-        ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(context->Definitions, key.ObjectID);
+        ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID);
         if (objectDefinition == NULL)
         {
             Lwm2m_Debug("No definition for object %d\n", key.ObjectID);
@@ -1062,7 +1062,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
             {
                 TreeNode responseResourceNode = ObjectsTree_FindOrCreateChildNode(responseObjectInstanceNode, "Resource", key.ResourceID);
 
-                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, key.ResourceID);
+                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, key.ResourceID);
                 if (resourceDefinition != NULL)
                 {
                     if (Operations_Contains(validOperations, resourceDefinition->Operation))
@@ -1140,7 +1140,9 @@ static int xmlif_HandlerReadRequest(RequestInfoType * request, TreeNode content)
 static bool xmlif_HandlerSendCoapReadRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
                                              ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
-    ContentType contentType = requestContext != NULL && requestContext->Request != NULL && requestContext->Request->Context != NULL ? ((Lwm2mContextType *)requestContext->Request->Context)->ContentType : ContentType_ApplicationOmaLwm2mTLV;
+    ContentType contentType = requestContext != NULL && 
+                              requestContext->Request != NULL && 
+                              requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
     coap_GetRequest(requestContext, xmlif_GetURIForClient(client, key), contentType, xmlif_HandlerReadResponse);
     return true;
 }
@@ -1163,15 +1165,15 @@ static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestC
 
     if (key.ResourceID != -1)
     {
-        len = DeserialiseResource(contentType, &root, context->Definitions, key.ObjectID, key.InstanceID, key.ResourceID, payload, payloadLen);
+        len = DeserialiseResource(contentType, &root, Lwm2mCore_GetDefinitions(context), key.ObjectID, key.InstanceID, key.ResourceID, payload, payloadLen);
     }
     else if (key.InstanceID != -1)
     {
-        len = DeserialiseObjectInstance(contentType, &root, context->Definitions, key.ObjectID, key.InstanceID, payload, payloadLen);
+        len = DeserialiseObjectInstance(contentType, &root, Lwm2mCore_GetDefinitions(context), key.ObjectID, key.InstanceID, payload, payloadLen);
     }
     else
     {
-        len = DeserialiseObject(contentType, &root, context->Definitions, key.ObjectID, payload, payloadLen);
+        len = DeserialiseObject(contentType, &root, Lwm2mCore_GetDefinitions(context), key.ObjectID, payload, payloadLen);
     }
 
     if (len >= 0)
@@ -1179,14 +1181,14 @@ static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestC
         int serialiseResult = 0;
         if (key.ResourceID != -1)
         {
-            serialiseResult = xmlif_SerialiseResourceIntoExistingObjectsTree(root, pathNode, context->Definitions, key.ObjectID, key.InstanceID, key.ResourceID);
+            serialiseResult = xmlif_SerialiseResourceIntoExistingObjectsTree(root, pathNode, Lwm2mCore_GetDefinitions(context), key.ObjectID, key.InstanceID, key.ResourceID);
         }
         else if (key.InstanceID != -1)
         {
-            serialiseResult = xmlif_SerialiseObjectInstanceIntoExistingObjectsTree(root, pathNode, context->Definitions, key.ObjectID, key.InstanceID);
+            serialiseResult = xmlif_SerialiseObjectInstanceIntoExistingObjectsTree(root, pathNode, Lwm2mCore_GetDefinitions(context), key.ObjectID, key.InstanceID);
         }
         else
-            serialiseResult = xmlif_SerialiseObjectIntoExistingObjectsTree(root, pathNode, context->Definitions, key.ObjectID);
+            serialiseResult = xmlif_SerialiseObjectIntoExistingObjectsTree(root, pathNode, Lwm2mCore_GetDefinitions(context), key.ObjectID);
 
         if (serialiseResult == 0)
         {
@@ -1225,7 +1227,9 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
                                                 ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
     bool result = true;
-    ContentType contentType = requestContext != NULL && requestContext->Request != NULL && requestContext->Request->Context != NULL ? ((Lwm2mContextType *)requestContext->Request->Context)->ContentType : ContentType_ApplicationOmaLwm2mTLV;
+    ContentType contentType = requestContext != NULL &&
+                              requestContext->Request != NULL && 
+                              requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
     TreeNode observeTypeNode = NULL;
     if ((observeTypeNode = Xml_Find(currentLeafNode, IPC_MSG_OBSERVE)) != NULL)
     {
@@ -1429,9 +1433,9 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
     }
 
     int resourceID = -1;
-    while ((resourceID = Definition_GetNextResourceType(context->Definitions, objectID, resourceID)) != -1)
+    while ((resourceID = Definition_GetNextResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID)) != -1)
     {
-        ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+        ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
         if (resourceDefinition->Type == ResourceTypeEnum_TypeNone)
             continue;
 
@@ -1495,7 +1499,7 @@ static int xmlif_SendCoapCreateRequest(RequestInfoType * request, Lwm2mClientTyp
     int objectID = 0;
 
     char payload[MAX_PAYLOAD_SIZE];
-    ContentType contentType = request != NULL && request->Context != NULL ? ((Lwm2mContextType *)request->Context)->ContentType : ContentType_ApplicationOmaLwm2mTLV;
+    ContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : ContentType_ApplicationOmaLwm2mTLV;
 
     // node can be either an object (no id specified - will be generated by client) or an object instance (id specified)
     if (Lwm2mTreeNode_GetType(Lwm2mTreeNode_GetParent(node)) == Lwm2mTreeNodeType_Root)
@@ -1539,7 +1543,7 @@ static int xmlif_SendCoapWriteRequest(RequestInfoType * request, Lwm2mClientType
         goto error;
     }
 
-    ContentType contentType = request != NULL && request->Context != NULL ? ((Lwm2mContextType *)request->Context)->ContentType : ContentType_ApplicationOmaLwm2mTLV;
+    ContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : ContentType_ApplicationOmaLwm2mTLV;
 
     char payload[MAX_PAYLOAD_SIZE];
     if (Lwm2mTreeNode_GetChildCount(objectInstanceNode) == 1 && writeMode == AwaWriteMode_Replace)
@@ -1633,7 +1637,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
         TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(requestContext->ResponseObjectsTree, "Object", key.ObjectID);
         TreeNode responseObjectInstanceNode = key.InstanceID != AWA_INVALID_ID? ObjectsTree_FindOrCreateChildNode(responseObjectNode, "ObjectInstance", key.InstanceID) : NULL;
 
-        ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(context->Definitions, key.ObjectID);
+        ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID);
         if (objectDefinition == NULL)
         {
             Lwm2m_Debug("No definition for object %d\n", key.ObjectID);
@@ -1700,7 +1704,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
         {
             TreeNode responseResourceNode = ObjectsTree_FindOrCreateChildNode(responseObjectInstanceNode, "Resource", key.ResourceID);
 
-            ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, key.ResourceID);
+            ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, key.ResourceID);
             if (resourceDefinition != NULL)
             {
                 Lwm2mTreeNode * objectNode = Lwm2mTreeNode_FindOrCreateChildNode(root, key.ObjectID, Lwm2mTreeNodeType_Object, objectDefinition, false);
@@ -2064,7 +2068,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
             }
         }
 
-        coap_PostRequest(requestContext, xmlif_GetURIForClient(client, key), dataLength > 0? ContentType_ApplicationOctetStream : ContentType_None, dataValue, dataLength, xmlif_HandlerExecuteResponse);
+        coap_PostRequest(requestContext, xmlif_GetURIForClient(client, key), (dataLength > 0) ? ContentType_ApplicationOctetStream : ContentType_None, dataValue, dataLength, xmlif_HandlerExecuteResponse);
         free(dataValue);
         result = true;
     }

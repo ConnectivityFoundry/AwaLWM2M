@@ -55,14 +55,14 @@ typedef struct
 
 } ResourceEndPointList;
 
-int Lwm2mCore_InitEndPointList(ResourceEndPointList * endPointList);
-int Lwm2mCore_DestroyEndPointList(ResourceEndPointList * endPointList);
+int Lwm2mEndPoint_InitEndPointList(ResourceEndPointList * endPointList);
+int Lwm2mEndPoint_DestroyEndPointList(ResourceEndPointList * endPointList);
 
-ResourceEndPoint * Lwm2mCore_FindResourceEndPoint(ResourceEndPointList * endPointList, const char * path);
-ResourceEndPoint * Lwm2mCore_FindResourceEndPointAncestors(ResourceEndPointList * endPointList, const char * path);
+ResourceEndPoint * Lwm2mEndPoint_FindResourceEndPoint(ResourceEndPointList * endPointList, const char * path);
+ResourceEndPoint * Lwm2mEndPoint_FindResourceEndPointAncestors(ResourceEndPointList * endPointList, const char * path);
 
-int Lwm2mCore_AddResourceEndPoint(ResourceEndPointList * endPointList, const char * path, EndpointHandlerFunction handler);
-int Lwm2mCore_RemoveResourceEndPoint(ResourceEndPointList * endPointList, const char * path);
+int Lwm2mEndPoint_AddResourceEndPoint(ResourceEndPointList * endPointList, const char * path, EndpointHandlerFunction handler);
+int Lwm2mEndPoint_RemoveResourceEndPoint(ResourceEndPointList * endPointList, const char * path);
 
 #ifdef __cplusplus
 }

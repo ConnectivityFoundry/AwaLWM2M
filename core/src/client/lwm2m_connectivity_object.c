@@ -44,8 +44,7 @@
 
 static int Lwm2mConnectivityStatistics_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
-    ObjectStore * store = ((Lwm2mContextType *)context)->Store;
+    DefinitionRegistry * definitions = Lwm2mCore_GetDefinitions((Lwm2mContextType *)context);
 
     ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
     if (definition == NULL)
@@ -54,7 +53,7 @@ static int Lwm2mConnectivityStatistics_CreateOptionalResourceHandler(void * cont
         goto error;
     }
 
-    if ((resourceID = ObjectStore_CreateResource(store, objectID, objectInstanceID, resourceID)) == -1)
+    if ((resourceID = Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID)) == -1)
     {
         goto error;
     }

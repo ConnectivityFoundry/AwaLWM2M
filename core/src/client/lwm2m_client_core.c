@@ -33,6 +33,7 @@
 #include "lwm2m_serdes.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_bootstrap.h"
+#include "lwm2m_bootstrap_config.h"
 #include "lwm2m_endpoints.h"
 #include "lwm2m_json.h"
 #include "lwm2m_plaintext.h"
@@ -44,6 +45,26 @@
 #include "lwm2m_security_object.h"
 #include "lwm2m_prettyprint.h" /*DEBUG*/
 
+#define MAX_ENDPOINT_NAME_LENGTH 128
+
+struct _Lwm2mContextType
+{
+    Lwm2mBootStrapState BootStrapState;       // Current bootstrap state
+    uint32_t LastBootStrapUpdate;             // Time that the last bootstrap state-machine update was performed
+    struct ListHead ServerList;               // Linked list of "Lwm2mServerType" for the registration process
+    struct ListHead SecurityObjectList;       // Linked list of "LWM2MSecurityInfo"
+    Lwm2mObjectTree ObjectTree;
+    ObjectStore * Store;                      // Object store associated with this context
+    AttributeStore * AttributeStore;          // Notification Attributes store associated with this context
+    DefinitionRegistry * Definitions;         // Storage for object/resource definitions.
+    ResourceEndPointList EndPointList;        // CoaP endpoints.
+    CoapInfo * Coap;                          // CoAP library context information
+    char EndPointName[MAX_ENDPOINT_NAME_LENGTH];  // Client EndPoint name
+    bool UseFactoryBootstrap;                 // Factory bootstrap information has been loaded from file.
+    struct ListHead ObserverList;
+};
+
+static Lwm2mContextType Lwm2mContext;
 
 static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                             ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
@@ -64,8 +85,6 @@ static int Lwm2mCore_DeviceManagmentEndpointHandler(int type, void * ctxt, Addre
                                                     const char * path, const char * query, const char * token, int tokenLength,
                                                     ContentType contentType, const char * requestContent, int requestContentLen,
                                                     ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
-
-static Lwm2mContextType Lwm2mContext;
 
 ObjectOperationHandlers defaultObjectOperationHandlers =
 {
@@ -154,7 +173,7 @@ static void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType obj
     char path[32];
     sprintf(path, "/%d", objectID);
 
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObject(&context->ObjectTree, objectID);
     Lwm2m_MarkObserversChanged(context, objectID, -1, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -166,7 +185,7 @@ static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectID
     char path[32];
     sprintf(path, "/%d/%d", objectID, objectInstanceID);
 
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList,path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList,path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObjectInstance(&context->ObjectTree, objectID, objectInstanceID);
     Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -199,7 +218,7 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
     char path[32];
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
 
     uint8_t * newValue = NULL;
@@ -855,9 +874,9 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         // Special case - shouldn't be able to delete the entire security object
         if ((objectID != 0) || (objectInstanceID != -1))
         {
-            if (Lwm2mCore_FindResourceEndPoint(&context->EndPointList, path) != NULL)
+            if (Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, path) != NULL)
             {
-                ret = Lwm2mCore_RemoveResourceEndPoint(&context->EndPointList, path);
+                ret = Lwm2mEndPoint_RemoveResourceEndPoint(&context->EndPointList, path);
             }
         }
 
@@ -1731,11 +1750,11 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     ResourceEndPoint * endPoint;
     if ((request->type == COAP_GET_REQUEST) || ((request->type == COAP_DELETE_REQUEST) && (strcmp(request->path,"") == 0)))
     {
-        endPoint = Lwm2mCore_FindResourceEndPoint(&context->EndPointList, request->path);
+        endPoint = Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, request->path);
     }
     else
     {
-        endPoint = Lwm2mCore_FindResourceEndPointAncestors(&context->EndPointList, request->path);
+        endPoint = Lwm2mEndPoint_FindResourceEndPointAncestors(&context->EndPointList, request->path);
     }
 
     if (endPoint == NULL)
@@ -1795,74 +1814,9 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
     return nextTick; 
 }
 
-static int Lwm2mCore_ApplyBootstrapInfo(Lwm2mContextType * context, const BootstrapInfo * bootstrapInfo)
-{
-    static int instanceID = 1; // Always start at 1 as we reserve instance 0 for the BOOTSTRAP server
-    Lwm2mCore_CreateObjectInstance(context, LWM2M_SECURITY_OBJECT, instanceID);
-
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SERVER_URI);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_BOOTSTRAP_SERVER);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECURITY_MODE);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_PUBLIC_KEY);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECRET_KEY);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SHORT_SERVER_ID);
-    Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_CLIENT_HOLD_OFF);
-
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SERVER_URI, 0,
-                                       bootstrapInfo->SecurityInfo.ServerURI,     strlen(bootstrapInfo->SecurityInfo.ServerURI));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_BOOTSTRAP_SERVER, 0,
-                                       &bootstrapInfo->SecurityInfo.Bootstrap,    sizeof(bootstrapInfo->SecurityInfo.Bootstrap));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECURITY_MODE, 0,
-                                       &bootstrapInfo->SecurityInfo.SecurityMode, sizeof(bootstrapInfo->SecurityInfo.SecurityMode));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_PUBLIC_KEY, 0,
-                                       bootstrapInfo->SecurityInfo.PublicKey,     strlen(bootstrapInfo->SecurityInfo.PublicKey));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECRET_KEY, 0,
-                                       bootstrapInfo->SecurityInfo.SecretKey,     strlen(bootstrapInfo->SecurityInfo.SecretKey));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SHORT_SERVER_ID, 0,
-                                       &bootstrapInfo->SecurityInfo.ServerID,     sizeof(bootstrapInfo->SecurityInfo.ServerID));
-    Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_CLIENT_HOLD_OFF, 0,
-                                       &bootstrapInfo->SecurityInfo.HoldOffTime,  sizeof(bootstrapInfo->SecurityInfo.HoldOffTime));
-    instanceID++;
-
-    if (!bootstrapInfo->SecurityInfo.Bootstrap)
-    {
-        // This LWM2M Object provides the data related to a LWM2M Server.
-        // A Bootstrap Server has no such an Object Instance associated to it.
-        static int securityInstanceID = 0;
-
-        Lwm2mCore_CreateObjectInstance(context, LWM2M_SERVER_OBJECT, securityInstanceID);
-
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_SHORT_SERVER_ID);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_LIFETIME);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MINIMUM_PERIOD);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MAXIMUM_PERIOD);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_DISABLE_TIMEOUT);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_NOTIFICATION_STORING);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_BINDING);
-
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_SHORT_SERVER_ID,0,
-                                           &bootstrapInfo->ServerInfo.ShortServerID,   sizeof(bootstrapInfo->SecurityInfo.ServerID));
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_LIFETIME,0,
-                                           &bootstrapInfo->ServerInfo.LifeTime,        sizeof(bootstrapInfo->ServerInfo.LifeTime));
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MINIMUM_PERIOD,0,
-                                           &bootstrapInfo->ServerInfo.MinPeriod,       sizeof(bootstrapInfo->ServerInfo.MinPeriod));
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MAXIMUM_PERIOD,0,
-                                           &bootstrapInfo->ServerInfo.MaxPeriod,       sizeof(bootstrapInfo->ServerInfo.MaxPeriod));
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_DISABLE_TIMEOUT,0,
-                                           &bootstrapInfo->ServerInfo.DisableTimeout,  sizeof(bootstrapInfo->ServerInfo.DisableTimeout));
-       Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_NOTIFICATION_STORING,0,
-                                           &bootstrapInfo->ServerInfo.Notification,    sizeof(bootstrapInfo->ServerInfo.Notification));
-        Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_BINDING,0,
-                                           bootstrapInfo->ServerInfo.Binding,          strlen(bootstrapInfo->ServerInfo.Binding));
-        securityInstanceID ++;
-    }
-
-    return 0;
-}
-
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation)
 {
-    if (Lwm2mCore_ApplyBootstrapInfo(context, factoryBootstrapInformation) == 0)
+    if (BootstrapInformation_Apply(context, factoryBootstrapInformation) == 0)
     {
         context->UseFactoryBootstrap = true;
     }
@@ -1872,12 +1826,67 @@ void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapIn
     }
 }
 
+struct ListHead * Lwm2mCore_GetServerList(Lwm2mContextType * context)
+{
+    return &context->ServerList;
+}
+
+struct ListHead * Lwm2mCore_GetSecurityObjectList(Lwm2mContextType * context)
+{
+    return &context->SecurityObjectList;
+}
+
+struct ListHead * Lwm2mCore_GetObserverList(Lwm2mContextType * context)
+{
+    return &context->ObserverList;
+}
+
+AttributeStore * Lwm2mCore_GetAttributes(Lwm2mContextType * context)
+{
+    return context->AttributeStore;
+}
+
+Lwm2mBootStrapState Lwm2mCore_GetBootstrapState(Lwm2mContextType * context)
+{
+    return context->BootStrapState;
+}
+
+void Lwm2mCore_SetBootstrapState(Lwm2mContextType * context, Lwm2mBootStrapState state)
+{
+    context->BootStrapState = state;
+}
+
+uint32_t Lwm2mCore_GetLastBootStrapUpdate(Lwm2mContextType * context)
+{
+    return context->LastBootStrapUpdate;
+}
+
+void Lwm2mCore_SetLastBootStrapUpdate(Lwm2mContextType * context, uint32_t lastUpdate)
+{
+    context->LastBootStrapUpdate = lastUpdate;
+}
+
+int Lwm2mCore_AddResourceEndPoint(Lwm2mContextType * context, const char * path, EndpointHandlerFunction handler)
+{
+    return Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, handler);
+}
+
+DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context)
+{
+    return context->Definitions;
+}
+
+bool Lwm2mCore_GetUseFactoryBootstrap(Lwm2mContextType * context)
+{
+    return context->UseFactoryBootstrap;
+}
+
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
 {
     Lwm2mContextType * context = &Lwm2mContext;
 
-    ListInit(&context->observerList);
+    ListInit(&context->ObserverList);
     ListInit(&context->ServerList);
     Lwm2mObjectTree_Init(&context->ObjectTree);
 
@@ -1887,7 +1896,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
     context->AttributeStore = AttributeStore_Create();
     Lwm2mSecurity_Create(&context->SecurityObjectList);
 
-    Lwm2mCore_InitEndPointList(&context->EndPointList);
+    Lwm2mEndPoint_InitEndPointList(&context->EndPointList);
 
     if (endPointName != NULL)
     {
@@ -1910,7 +1919,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
 void Lwm2mCore_Destroy(Lwm2mContextType * context)
 {
     Lwm2mObjectTree_Destroy(&context->ObjectTree);
-    Lwm2mCore_DestroyEndPointList(&context->EndPointList);
+    Lwm2mEndPoint_DestroyEndPointList(&context->EndPointList);
     Lwm2mCore_DeregisterAllServers(context);
     Lwm2m_UpdateRegistrationState(context);
 
