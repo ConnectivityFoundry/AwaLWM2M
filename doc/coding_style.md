@@ -112,7 +112,7 @@ void MyFunction(void)
 }
 ````
 
-Similarly multi-line comments within a function should be formatted like this:
+Similarly, multi-line comments within a function should be formatted like this:
 ````
 void AwaTask(void *parameters)
 {

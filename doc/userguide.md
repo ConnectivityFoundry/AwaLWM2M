@@ -22,7 +22,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 * [The LWM2M client.](userguide.md#the-lwm2m-client)  
     * [The Awa client daemon.](userguide.md#the-awa-client-daemon)  
     * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
-    * [The Awa_API.](userguide.md#the-awa-api)
+    * [The Awa API.](userguide.md#the-awa-api)
         * [API options.](userguide.md#common-options)
         * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
         * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
@@ -42,7 +42,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
         * [Executing a resource on a registered client.](userguide.md#executing-a-resource-on-a-registered-client)
         * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
-    * [The Awa bootstrap server daemon](userguide.md#the-awa-bootstrap-server-daemon)  
+    * [The Awa bootstrap server daemon.](userguide.md#the-awa-bootstrap-server-daemon)  
 
 ----
 
