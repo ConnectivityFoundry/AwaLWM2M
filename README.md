@@ -46,7 +46,7 @@ Further information can be found in the [Quick start guide](doc/starters_guide.m
 
 ### Documentation.
 
-Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
+Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a technical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
 
 Note that for our purposes the terms *user* and *developer* have the following definitions:
 
