@@ -73,6 +73,10 @@ static const char * ErrorStrings[] =
 
     // 30
     "AwaError_RangeInvalid",
+
+    // 31
+    "AwaError_StaticClientInvalid",
+    "AwaError_StaticClientNotConfigured",
 };
 
 const char * AwaError_ToString(AwaError error)

@@ -77,7 +77,11 @@ typedef enum
     AwaError_Response,                   /**< Indicates an operation response has errors */
 
     // 30
-    AwaError_RangeInvalid,                 /**< Indicates an operation on an invalid array range */
+    AwaError_RangeInvalid,               /**< Indicates an operation on an invalid array range */
+
+    // 31
+    AwaError_StaticClientInvalid,        /**< Indicates an operation was attempted in the context of an invalid Static Client */
+    AwaError_StaticClientNotConfigured,  /**< Indicates a Static Client was initialised without being configured */
 
     AwaError_LAST                        /**< Reserved value */
 } AwaError;

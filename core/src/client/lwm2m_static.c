@@ -25,6 +25,13 @@
 AwaStaticClient * AwaStaticClient_New()
 {
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
+
+    if(client != NULL)
+    {
+        memset(client, 0, sizeof(*client));
+        client->Configured = false;
+    }
+
     return client;
 }
 
@@ -35,4 +42,29 @@ void AwaStaticClient_Free(AwaStaticClient ** client)
         free(*client);
         *client = NULL;
     }
+}
+
+
+AwaError AwaStaticClient_Init(AwaStaticClient * client)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if(client != NULL)
+    {
+        if(client->Configured)
+        {
+            //All initialisation code for lwm2m_core and coap goes here.
+            result = AwaError_Unsupported;
+        }
+        else
+        {
+            result = AwaError_StaticClientNotConfigured;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
 }
