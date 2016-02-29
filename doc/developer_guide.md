@@ -19,7 +19,7 @@ LWM2M makes use of an *Object/Object Instance/Resource* (OIR) model to represent
 
 ![OIR model](LWM2M_object_referencing.png)
 
-Refer to section 6.1 of the LWM2M technical specification for details http://technical.openmobilealliance.org/Technical/technical-information/release-program/current-releases/oma-lightweightm2m-v1-0
+Refer to section [6.1 of the LWM2M technical specification](http://technical.openmobilealliance.org/Technical/technical-information/release-program/current-releases/oma-lightweightm2m-v1-0) for details. 
 
 Awa LightWeightM2M is an implementation of OMA LWM2M written in C. It incorporates both server and client functionality and provides APIs for both. Typically, the client or server runs as a standalone Linux process (a "daemon") and an application uses the API library to access and modify resources across an inter-process communication (IPC) interface. This decoupling of the API from the main functionality allows other languages to make use of the daemons by implementing the IPC protocol.
  
