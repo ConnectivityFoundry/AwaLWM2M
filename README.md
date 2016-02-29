@@ -40,7 +40,7 @@ Firstly, to obtain a copy of the Awa LWM2M source code:
  * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ````   
 
 
-Further information can be found in the [Getting started guide](doc/starters_guide.md).
+Further information can be found in the [Quick start guide](doc/starters_guide.md).
 
 ----
 
@@ -50,7 +50,7 @@ Awa LWM2M documentation is available both at a general level (project informatio
 
 #### General documentation.
 
-* For build instructions see the [Getting started guide](doc/starters_guide.md).  
+* For build instructions see the [Quick start guide](doc/starters_guide.md).  
 * Examples of how to use the tools can be found in the  [User guide](doc/userguide.md). 
 * For developers, an overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
 * Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
