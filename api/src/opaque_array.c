@@ -25,6 +25,7 @@
 
 #include "log.h"
 #include "arrays.h"
+#include "memalloc.h"
 
 typedef struct _AwaArray _AwaOpaqueArray;
 typedef struct _AwaArrayIterator _AwaOpaqueArrayIterator;
@@ -45,13 +46,26 @@ void AwaOpaqueArray_SetValue(AwaOpaqueArray * array, AwaArrayIndex index, AwaOpa
     {
         if (((value.Data != NULL) && (value.Size > 0)) || ((value.Data == NULL) && (value.Size == 0)))
         {
+            void * valuePtr = Array_GetValue((const AwaArray *)array, index);
+            if (valuePtr != NULL)
+            {
+                // free existing entry, if it exists
+                AwaOpaque * storedOpaque = (AwaOpaque *)valuePtr;
+                Awa_MemSafeFree(storedOpaque->Data);
+                storedOpaque->Data = NULL;
+                storedOpaque->Size = 0;
+            }
+
             AwaOpaque copy;
             memset(&copy, 0, sizeof(copy));
             copy.Size = value.Size;
             if (copy.Size > 0)
             {
-                copy.Data = malloc(copy.Size);
-                memcpy(copy.Data, value.Data, value.Size);
+                copy.Data = Awa_MemAlloc(copy.Size);
+                if (copy.Data != NULL)
+                {
+                    memcpy(copy.Data, value.Data, value.Size);
+                }
             }
 
             Array_SetValue((AwaArray *)array, index, (void *)&copy, sizeof(copy));
