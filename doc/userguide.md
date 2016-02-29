@@ -77,7 +77,7 @@ LWM2M is based on an object model such that:
 * The OMA has pre-defined objects suitable for most cases, but custom objects may still be defined for local use. 
 * One or more instances of a resource may exist simultaneously within an object but each will have a unique instance identifier.
 
-Object and resource identifiers are 16 bit integers. Object and resource *instance* identifiers are 8 bit integers. 
+Object and resource identifiers are 16 bit integers.
 
 A resource instance is accessed via its parent object instance using a semantic approach:
 
