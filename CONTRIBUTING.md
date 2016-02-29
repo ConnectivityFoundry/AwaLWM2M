@@ -3,7 +3,7 @@
 
 ----
 
-## Contributor guide.
+# Awa LightweightM2M contributor guide.
 
 
 ## Reporting issues and bugs.
