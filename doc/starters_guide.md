@@ -1,50 +1,80 @@
 
-![](doc/img.png)
+![Imagination Technologies Limited logo](img.png)
 
 ----
 
-## Getting Started Guide.
+
+# Awa LightweightM2M.
+
+
+
+----
+
+## Quick start guide.
+
 
 ### Building the code.
 
+
 #### Building under Linux.
 
- Install the dependencies
+Install the dependencies:
+
 
 ```
  sudo apt-get update
- sudo apt-get install build-essential gcc git mercurial python cmake python-nose python-lxml
+ sudo apt-get install build-essential gcc git mercurial python cmake python-nose python-lxml  
 ```
 
- Run make in the root directory of the Awa LWM2M repository
+Run make in the root directory of the Awa LWM2M repository
 
-    $ make
 
- This will produce the following executable files:
+````$ make````
 
-    build/core/src/client/awa_clientd
-    build/core/src/client/awa_serverd
-    build/core/src/client/awa_bootstrapd
 
- For usage information see the [User guide](doc/userguide.md)
+This will produce the following executable files:
 
-#### The cmake Build.
+* build/core/src/client/awa_clientd
+* build/core/src/client/awa_serverd
+* build/core/src/client/awa_bootstrapd
 
- The build can be created out-of-source, such that all build artefacts are placed in a dedicated directory.
+ 
+For usage information see the [User guide](userguide.md)
 
- First, create a suitable directory for the build output:
 
-    $ mkdir build
+#### The cmake build.
 
- From this directory, run cmake, passing the path to the root directory of the repository as a parameter:
+
+The build can be created out-of-source, such that all build artefacts are placed in a dedicated directory.
+
+
+First, create a suitable directory for the build output:
+
+
+````$ mkdir build ````
+
+
+From this directory, run cmake, passing the path to the root directory of the repository as a parameter:
+````
 
     $ cd build
     $ cmake ..
+````
 
- This generates a Makefile in the build directory, which can be run to generate the build artefacts:
 
-    $ make
+This generates a Makefile in the build directory, which can be run to generate the build artefacts:
 
- Once the build is complete you may optionally "install" the resulting binaries to a specified directory, for example:
 
-    $ make DESTDIR=./install install
+````$ make ````
+
+
+Once the build is complete you may optionally *install* the resulting binaries to a specified directory, for example:
+
+
+````$ make DESTDIR=./install install ````
+
+
+----
+
+----
+

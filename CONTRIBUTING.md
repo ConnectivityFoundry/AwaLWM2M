@@ -3,37 +3,49 @@
 
 ----
 
-## Contributing Guide
+# Awa LightweightM2M contributor guide.
 
-### Reporting a bug.
 
-So you have found a bug, or just generally an area which can be improved and wish to report it.
+## Reporting issues and bugs.
 
-Navigate to the "Issues" tab on the project github page https://github.com/FlowM2M/AwaLWM2M/issues and click the "New Issue" button.
+If you discover a bug, or find an issue or area that you feel needs improvement:
 
-When reporting your bug, please try and be as descriptive as possible. consider adding the following information.
+* Navigate to the "Issues" tab on the project github page https://github.com/FlowM2M/AwaLWM2M/issues  
 
-```
-Description of the problem:
+* Click the "New Issue" button.  
 
-Awa LWM2M Version or commit id:
 
-Environment details (OS/Distribution etc):
+When making your report, be as clear and concise as possible. Use the following list as a guide:
 
-Reproduciblity/Frequency:
 
-Steps to Reproduce/What you were doing when the bug occured:
 
-Excepted Result:
+* Describe the issue, and why you believe it's a problem. 
 
-Actual Result:
+* Include the Awa LWM2M version or commit id.
 
-Addition Infomation (log output etc)
-```
+* Describe environment details (OS/distribution etc).
+
+* State how often the issue has occurred.
+
+* Describe the steps to take to uncover or reproduce the issue (if any).
+
+* Expected behaviour.
+
+* Actual behaviour.
+
+* Any additional infomation, log output etc.
+
+
+----
+
+
+## Developer submissions.
+
 
 ### Branching model.
 
 All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.
+
 
 ### Setting up your development machine.
 
@@ -42,17 +54,54 @@ Configure your user name to be used by git:
     $ git config --global user.name "FirstName LastName"
     $ git config --global user.email "email@email.com"
 
+
 ### Coding style.
 
-The Awa LWM2M coding style guidelines can be found in the [Coding style guide](doc/coding_style.md)
+The Awa LWM2M coding style guidelines can be found in the [coding style guide](doc/coding_style.md).
+
+
+
+### Commit messages.
+
+For the commit message, the following rules apply:
+
+ * The first line should be a brief summary of the patch.
+ * Leave a blank line after the summary.
+ * Provide a detailed description of the change.
+ * Leave a blank line after the description.
+ * If the patch relates to an issue, add a line with 'Ref: ISSUE_ID'.
+ * Add a Gerrit 'Change-id' line.
+ * Add a Git 'Signed-off-by' line using ````git commit -s```` or ````git commit --sign-off```` (see *Signing your work* below).
+
+ Example:
+
+````
+
+    Adds a new example feature xyz
+
+    This patch adds example feature xyz. This feature merely acts
+    as an example of how to commit something to the project.
+    For real features this would contain some text
+    describing in detail what the new feature actually does.
+
+    Ref: AWA-2131
+    Change-Id: Id564ab1230913abf88123dff193b1231b1
+    Signed-off-by: User Name <user.name@email.com>
+
+````
+
+
 
 ### Signing your work.
 
-Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) (from developercertificate.org)
+Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) from developercertificate.org.
 
-The sign-off is a single line at the end of your commit comment which certifies that you wrote the supplied code or otherwise have the right to pass it on the code as open-source.
+The sign-off is a single line at the end of your commit comment to certify that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
-It's pretty simple: if you can certify the following:
+
+Certifying your contribution asserts that *for the current submission* the following statement is true:
+
+
 
 ```
 Developer Certificate of Origin
@@ -92,43 +141,23 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
-Then you just add the following line to every git commit message to indicate that you accept the DCO:
 
-```
+To certify your submission just add the following line to *every* git commit message to indicate that you accept the above DCO:
+
+
+````
 Signed-off-by: User Name <user.name@email.com>
-```
 
-If you set-up your user.name and user.email via git config, you can sign your commit automatically with git commit like so:
+````
 
-```
+If you set-up your user.name and user.email via git config, you can sign your commit automatically with git commit:
+
+````
 git commit --signoff
-```
+````
 
-### Commit messages.
+----
 
-For the commit message, the following rules apply:
-
- * The first line should be a brief summary of the patch.
- * Leave a blank line after the summary.
- * Provide a detailed description of the change.
- * Leave a blank line after the description.
- * If the patch relates to an issue, add a line with 'Ref: ISSUE_ID'.
- * Add a Gerrit 'Change-id' line.
- * Add a Git 'Signed-off-by' line (using `git commit -s` or `git commit --sign-off`).
-
- Example:
-
-    Adds a new example feature xyz
-
-    This patch adds example feature xyz. This feature merely acts
-    as an example of how to commit something to the project.
-    For real features this would contain some text
-    describing in detail what the new feature actually does.
-
-    Ref: AWA-2131
-    Change-Id: Id564ab1230913abf88123dff193b1231b1
-    Signed-off-by: User Name <user.name@email.com>
-
-
+----
 
 

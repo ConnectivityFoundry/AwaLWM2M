@@ -13,7 +13,12 @@ The LWM2M protocol has been designed to be highly efficient in terms of data tra
  
 Awa LWM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards compliant device management solution to simplify the development of M2M applications by providing an intuitive API that enables customization without the need for an intimate knowledge of M2M protocols.
 
+
+![Awa application overview](doc/Awa_application_overview.png)
+
+
 Awa LWM2M is a development suite that provides a number of components and tools which can be combined in various ways depending on requirement. For example:
+
 
 * When running on a larger Linux based device, Awa LWM2M can be deployed as a series of daemons that interact with your application via the libawa library and associated API.
 * For more constrained devices, your application code can be built against the constrained device centric API and compiled along with the Awa LWM2M client code into a binary to be deployed on your device.
@@ -28,59 +33,55 @@ The easiest way to get started with Awa LWM2M is on a Linux PC.  The following i
 
 Firstly, to obtain a copy of the Awa LWM2M source code:
 
- 1. Sign up for a Github account
+ * Sign up for a Github account  
 
- 2. Install Git
+ * Install Git:  ```` sudo apt-get install git ````  
 
-```
-     sudo apt-get install git 
-```
+ * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ````   
 
- 3. Clone the repository 
-```
-     git clone https://github.com/FlowM2M/AwaLWM2M.git
-``` 
 
-Further instructions can be found in the [Getting started guide](doc/starters_guide.md).
+Further information can be found in the [Quick start guide](doc/starters_guide.md).
 
 ----
 
 ### Documentation.
 
-Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
+Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
+
+Note that for our purposes the terms *user* and *developer* have the following definitions:
+
+* *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of, or enhancement to, their own M2M application.  
+* *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project. 
+
 
 #### General documentation.
-
-* For build instructions see the [Getting started guide](doc/starters_guide.md)
-* Examples of how to use the tools can be found in the  [User guide](doc/userguide.md) 
-* For developers, an overview of the system can be found in the [Developer guide](doc/developer_guide.md)
-* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.
+  
+* For project users:  
+	* For build instructions, see the [Quick start guide](doc/starters_guide.md). 
+	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
+* For contributing developers:
+	* An overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
+	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
 
 #### API guide.
 
 The Awa API documentation is available as a Doxygen presentation which is generated via the following process.
  
-  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html)
+  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html): ```` sudo apt-get install doxygen````
 
-```
-    sudo apt-get install doxygen
-```
+  2. Generate the documentation: ```` make docs````
 
-  2. Generate the documentation
-```
-    make docs
-```
-  The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
+The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
 
-For convenience you can also find the latest version of this documentation [here]()
+For convenience you can also find the latest version of this documentation [here]().
 
 ----
 
 ### Contributing.
 
-We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality, to improving documentation and bug reporting - it's all good. 
+We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality to improving documentation and bug reporting - it's all good. 
 
-Find out more in the [Contributing guide](CONTRIBUTING.md).
+Find out more in the [contributor guide](CONTRIBUTING.md).
 
 ### Credits.
 
@@ -96,9 +97,9 @@ We would also like to acknowledge and thank the authors of the following project
 
 ### License information.
 
-* All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE)
-* LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license
-* Jsmn by Serge A. Zaitsev is licensed under the MIT license
+* All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE).  
+* LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license.  
+* Jsmn by Serge A. Zaitsev is licensed under the MIT license.  
 
 ----
 

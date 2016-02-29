@@ -1,5 +1,5 @@
 
-![](doc/img.png)
+![](img.png)
 
 ----
 
@@ -8,6 +8,11 @@
 
 
 ## Coding style guide.
+
+It's important to that coding style remains consistent throughout the project to ensure that all contributors and project administrators are able to easily decipher code blocks, comments, syntax etc. 
+Always consider that another contributor may one day continue to build on your submissions. Make it easy for them by adopting the style outlined below.
+
+### General layout.
 
 The sample code below illustrates the preferred use of indentation, bracing and white space:
 
@@ -60,7 +65,7 @@ typedef struct
 **Notes.** 
 
 * A structure type definition doesn't usually need both a structure name and typedef name (a struct name is not given in the above example). One possible exception to this rule is where the typedef name is declaring a structure-pointer type.  
-* The use of suffix *_e* in enums is not preferred. 
+* The use of suffix *_e* in enums is discouraged. 
 * To avoid namespace problems in 'C' each value should be prefixed by the enum name. For example:
 ````
 typedef enum
@@ -88,11 +93,11 @@ Bitfields also have a code size and performance overhead due to the need to be p
 
 Structure field names should use Pascal casing (e.g. ThisPerson.Age).
 
-### Header Files.
+### Header files.
 
 All public functions, variables and definitions must be declared in a header file. Most .c modules should have a corresponding .h file to be included (both within the module and elsewhere). It is poor form to make the compiler try to guess how to resolve undeclared function calls in other modules.
 
-## Commenting.
+### Code commenting.
 Single line comments should use *//*. For example:
 ````
 void MyFunction(void)
@@ -107,7 +112,7 @@ void MyFunction(void)
 }
 ````
 
-Similarly multi-line comments within a function should be formatted like this:
+Similarly, multi-line comments within a function should be formatted like this:
 ````
 void AwaTask(void *parameters)
 {
@@ -137,7 +142,7 @@ AwaString GetNextEntryFromProcessingQueue()
 }
  ````
  
-### Good/Bad Coding Practise.
+### Good coding practise.
 * Ideally functions should have a single exit point. The use of multiple return points is dangerous and makes it harder to read the code. Always consider what will happen if someone needs to append code to your function.
 
 * Where possible definitions should be used rather than raw values, e.g. use *AllocMessageBuf(MAX_MESSAGE_SIZE)* rather than  *AllocMessagBuf(1024)*. This ensures that all code sharing the same defined value will still work if the 'magic' value is updated.
