@@ -188,6 +188,11 @@ static int Lwm2mClient_Start(Options * options)
     if (options->FactoryBootstrapFile != NULL)
     {
         factoryBootstrapInfo = BootstrapInformation_ReadConfigFile(options->FactoryBootstrapFile);
+        if (factoryBootstrapInfo == NULL)
+        { 
+            result = 1;
+            goto error_coap;
+        }
     }
     else
     {
@@ -199,7 +204,10 @@ static int Lwm2mClient_Start(Options * options)
     // Must happen after coap_Init().
     RegisterObjects(context, options);
 
-    Lwm2mCore_SetFactoryBootstrap(context, factoryBootstrapInfo);
+    if (factoryBootstrapInfo != NULL)
+    {
+        Lwm2mCore_SetFactoryBootstrap(context, factoryBootstrapInfo);
+    }
 
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
@@ -209,11 +217,6 @@ static int Lwm2mClient_Start(Options * options)
     int xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
     {
-        if (logFile)
-        {
-            fclose(logFile);
-        }
-
         Lwm2m_Error("Failed to initialise XML interface on port %d\n", options->IpcPort);
         result = 1;
         goto error;
@@ -264,16 +267,17 @@ static int Lwm2mClient_Start(Options * options)
 
     Lwm2m_Info("Client exiting\n");
 
-    Lwm2mCore_Destroy(context);
-    coap_Destroy();
     xmlif_DestroyExecuteHandlers();
     xmlif_destroy(xmlFd);
+error:
+    Lwm2mCore_Destroy(context);
+error_coap:
+    coap_Destroy();
 
     if (logFile)
     {
         fclose(logFile);
     }
-error:
     return result;
 }
 

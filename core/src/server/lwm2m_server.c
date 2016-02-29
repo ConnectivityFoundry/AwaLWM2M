@@ -113,6 +113,7 @@ static void Daemonise(bool verbose)
 static int Lwm2mServer_Start(Options * options)
 {
     int xmlFd;
+    int result = 0;
 
     if (options->Daemonise)
     {
@@ -188,9 +189,8 @@ static int Lwm2mServer_Start(Options * options)
     xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
     {
-        if (logFile)   
-            fclose(logFile);
-        return -1;
+        result = 1;
+        goto error;
     }
     xmlif_RegisterHandlers();
 
@@ -235,16 +235,17 @@ static int Lwm2mServer_Start(Options * options)
 
     Lwm2m_Info("Server exiting\n");
 
+    xmlif_destroy(xmlFd);
+error:
     Lwm2mCore_Destroy(context);
     coap_Destroy();
-    xmlif_destroy(xmlFd);
 
     if (logFile != NULL)
     {
         fclose(logFile);
     }
 
-    return 0;
+    return result;
 }
 
 static void PrintUsage(void)

@@ -120,6 +120,7 @@ int xmlif_init(void * context, int port)
     if (p == NULL)
     {
         fprintf(stderr, "listener: failed to bind socket\n");
+        freeaddrinfo(servinfo);
         return -1;
     }
 
