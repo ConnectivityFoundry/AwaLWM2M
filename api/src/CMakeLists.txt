@@ -71,7 +71,6 @@ set (Awa_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_debug.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_node.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
-  lwm2m_context.c
 )
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -D_GNU_SOURCE")

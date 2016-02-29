@@ -44,7 +44,7 @@
 #include "lwm2m_debug.h"
 #include "lwm2m_list.h"
 #include "lwm2m_result.h"
-#include "lwm2m_core.h"
+//#include "lwm2m_core.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,8 +67,6 @@ int xmlif_GetInteger(TreeNode content, const char * name);
 const char * xmlif_GetOpaque(TreeNode content, const char * name);
 
 int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char * buffer, int bufferLength);
-
-Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, const TreeNode xmlObjectNode, bool readValues);
 
 #ifdef __cplusplus
 }
