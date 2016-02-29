@@ -21,20 +21,34 @@
 ************************************************************************************************************************/
 
 
-#ifndef AWA_STATIC_CLIENT_H
-#define AWA_STATIC_CLIENT_H
+#ifndef AWA_STATIC_H
+#define AWA_STATIC_H
 
 #include "awa/common.h"
 #include "awa/error.h"
 
-//DO NOT USE - DRAFT
-#error "Do not use this header - draft"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct
+typedef enum
 {
-    void * applicationContext;
-    Lwm2mContextType * context;
-} _AwaStaticClient;
+    AwaOperation_CreateObjectInstance,
+    AwaOperation_DeleteObjectInstance,
+    AwaOperation_WriteResourceInstance,
+    AwaOperation_ReadResourceInstance,
+    AwaOperation_DeleteResource,
+    AwaOperation_ExecuteResource,
+} AwaOperation;
+
+
+typedef enum
+{
+    AwaAccess_Read,
+    AwaAccess_ReadWrite,
+    AwaAccess_Write,
+    AwaAccess_Execute,
+} AwaAccess;
 
 typedef struct _AwaStaticClient AwaStaticClient;
 
@@ -48,13 +62,15 @@ typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation ope
 int AwaStaticClient_Process(AwaStaticClient * core);
 
 //Initialisation functions
-AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
+//AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName);
 AwaError AwaStaticClient_SetCOAPPort(AwaStaticClient * client, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
 
-AwaStaticClient * AwaStaticClient_Init();
+AwaStaticClient * AwaStaticClient_New();
+AwaError AwaStaticClient_Init(AwaStaticClient * client);
+void AwaStaticClient_Free(AwaStaticClient ** client);
 
 AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                                      uint16_t minimumInstances, uint16_t maximumInstances,
@@ -65,17 +81,17 @@ AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * o
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * objectName,
                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                       uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                       uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                        AwaStaticClientHandler handler);
 
 AwaError AwaStaticClient_RegisterResourceWithUniformData(AwaStaticClient * client, const char * objectName,
                                                            AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                           uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                           uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                            void * dataPointer, size_t dataElementSize, size_t dataStepSize);
 
 AwaError AwaStaticClient_RegisterResourceWithArbitraryData(AwaStaticClient * client, const char * objectName,
                                                              AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                             uint16_t minimumInstances, uint16_t maximumInstances, Operations operations,
+                                                             uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                              void * dataPointers[], size_t dataElementSize);
 
 void * AwaStaticClient_GetResourceInstancePointer(AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID);
@@ -86,5 +102,8 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
 AwaError AwaStaticClient_ObjectInstanceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* AWA_STATIC_CLIENT_H */
