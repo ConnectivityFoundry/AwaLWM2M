@@ -48,12 +48,20 @@ Further information can be found in the [Quick start guide](doc/starters_guide.m
 
 Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a techinical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
 
-#### General documentation.
+Note that for our purposes the terms *user* and *developer* have the following definitions:
 
-* For build instructions see the [Quick start guide](doc/starters_guide.md).  
-* Examples of how to use the tools can be found in the  [User guide](doc/userguide.md). 
-* For developers, an overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
-* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
+* *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of, or enhancement to, their own M2M application.  
+* *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project. 
+
+
+#### General documentation.
+  
+* For project users:  
+	* For build instructions, see the [Quick start guide](doc/starters_guide.md). 
+	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
+* For contributing developers:
+	* An overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
+	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
 
 #### API guide.
 
