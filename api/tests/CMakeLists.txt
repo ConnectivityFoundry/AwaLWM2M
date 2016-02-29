@@ -61,6 +61,7 @@ set (test_api_runner_INCLUDE_DIRS
   ${API_SRC_DIR}
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
+  ${CORE_SRC_DIR}/client
   ${XML_INCLUDE_DIR}
 )
 

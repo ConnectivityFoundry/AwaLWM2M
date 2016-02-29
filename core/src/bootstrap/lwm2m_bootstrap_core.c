@@ -35,6 +35,17 @@
 #include "lwm2m_core.h"
 #include "lwm2m_result.h"
 
+struct _Lwm2mContextType
+{
+    ObjectStore * Store;                      // Object store associated with this context
+    DefinitionRegistry * Definitions;
+    ResourceEndPointList EndPointList;        // CoAP endpoints
+    CoapInfo * Coap;                          // CoAP library context information
+    struct ListHead ClientList;               // List of registered clients
+    int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
+    ContentType ContentType;                  // Used to set CoAP content type
+};
+
 static Lwm2mContextType Lwm2mContext;
 
 
@@ -121,11 +132,21 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
     return ObjectStore_GetNextResourceInstanceID(context->Store, objectID, objectInstanceID, resourceID, resourceInstanceID);
 }
 
+int Lwm2mCore_AddResourceEndPoint(Lwm2mContextType * context, const char * path, EndpointHandlerFunction handler)
+{
+    return Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, handler);
+}
+
+DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context)
+{
+    return context->Definitions;
+}
+
 // This function is called by the CoAP library to handle any requests
 static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * response)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)request->ctxt;
-    ResourceEndPoint * endPoint = Lwm2mCore_FindResourceEndPoint(&context->EndPointList, request->path);
+    ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, request->path);
     if (endPoint == NULL)
     {
         response->responseContentType = ContentType_None;
@@ -151,7 +172,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap)
     coap_SetContext(context);
     coap_SetRequestHandler(Lwm2mCore_HandleRequest);
 
-    Lwm2mCore_InitEndPointList(&context->EndPointList);
+    Lwm2mEndPoint_InitEndPointList(&context->EndPointList);
 
     return context;
 }
@@ -170,3 +191,9 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
 
     return nextTick;
 }
+
+void Lwm2mCore_Destroy(Lwm2mContextType * context)
+{
+    ObjectStore_Destroy(context->Store);
+}
+

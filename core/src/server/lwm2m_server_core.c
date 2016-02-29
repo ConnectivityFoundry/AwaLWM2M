@@ -37,6 +37,17 @@
 #include "lwm2m_result.h"
 #include "server/lwm2m_registration.h"
 
+struct _Lwm2mContextType
+{
+    ObjectStore * Store;                      // Object store associated with this context
+    DefinitionRegistry * Definitions;
+    ResourceEndPointList EndPointList;        // CoAP endpoints
+    CoapInfo * Coap;                          // CoAP library context information
+    struct ListHead ClientList;               // List of registered clients
+    int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
+    ContentType ContentType;                  // Used to set CoAP content type
+};
+
 static Lwm2mContextType Lwm2mContext;
 
 int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID,
@@ -82,7 +93,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
 {
     int result = 0;
     Lwm2mContextType * context = (Lwm2mContextType *)request->ctxt;
-    ResourceEndPoint * endPoint = Lwm2mCore_FindResourceEndPoint(&context->EndPointList, request->path);
+    ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, request->path);
     if (endPoint != NULL)
     {
         result = endPoint->Handler(request->type, request->ctxt, &request->addr, request->path, request->query,
@@ -100,6 +111,41 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     return result;
 }
 
+int Lwm2mCore_AddResourceEndPoint(Lwm2mContextType * context, const char * path, EndpointHandlerFunction handler)
+{
+    return Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, handler);
+}
+
+DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context)
+{
+    return context->Definitions;
+}
+
+int Lwm2mCore_RemoveResourceEndPoint(Lwm2mContextType * context, const char * path)
+{
+    return Lwm2mEndPoint_RemoveResourceEndPoint(&context->EndPointList, path);
+}
+
+struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context)
+{
+    return &context->ClientList;
+}
+
+ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context)
+{
+    return context->ContentType;
+}
+
+int Lwm2mCore_GetLastLocation(Lwm2mContextType * context)
+{
+    return context->LastLocation;
+}
+
+void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location)
+{
+    context->LastLocation = location;
+}
+
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType)
 {
     Lwm2m_Debug("Create object store\n");
@@ -110,7 +156,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType)
     context->Definitions = DefinitionRegistry_Create();
     context->ContentType = contentType;
 
-    Lwm2mCore_InitEndPointList(&context->EndPointList);
+    Lwm2mEndPoint_InitEndPointList(&context->EndPointList);
 
     coap_SetContext(context);
     coap_SetRequestHandler(Lwm2mCore_HandleRequest);
@@ -122,7 +168,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType)
 
 void Lwm2mCore_Destroy(Lwm2mContextType * context)
 {
-    Lwm2mCore_DestroyEndPointList(&context->EndPointList);
+    Lwm2mEndPoint_DestroyEndPointList(&context->EndPointList);
     ObjectStore_Destroy(context->Store);
     Lwm2m_RegistrationDestroy(context);
     DefinitionRegistry_Destroy(context->Definitions);

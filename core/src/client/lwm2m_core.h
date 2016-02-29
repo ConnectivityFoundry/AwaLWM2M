@@ -27,6 +27,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#include "lwm2m_context.h"
 #include "lwm2m_list.h"
 #include "coap_abstraction.h"
 #include "lwm2m_types.h"
@@ -38,106 +39,23 @@
 #include "lwm2m_endpoints.h"
 #include "lwm2m_request_origin.h"
 #include "lwm2m_observers.h"
-#ifdef LWM2M_CLIENT
 #include "lwm2m_object_tree.h"
 #include "lwm2m_result.h"
-#endif
+#include "lwm2m_bootstrap.h"
+#include "lwm2m_bootstrap_config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef LWM2M_CLIENT
-typedef enum
-{
-    Lwm2mBootStrapState_NotBootStrapped,
-    Lwm2mBootStrapState_BootStrapPending,
-    Lwm2mBootStrapState_CheckExisting,
-    Lwm2mBootStrapState_ClientHoldOff,
-    Lwm2mBootStrapState_BootStrapFinishPending,  // Waiting for the server to send a bootstrap finished.
-    Lwm2mBootStrapState_BootStrapped,
-    Lwm2mBootStrapState_BootStrapFailed,
-
-} Lwm2mBootStrapState;
-
-typedef enum
-{
-    Lwm2mRegistrationState_NotRegistered,
-    Lwm2mRegistrationState_Register,
-    Lwm2mRegistrationState_Registering,
-    Lwm2mRegistrationState_Registered,
-    Lwm2mRegistrationState_Deregister,
-    Lwm2mRegistrationState_Deregistering,
-    Lwm2mRegistrationState_RegisterFailed,
-    Lwm2mRegistrationState_RegisterFailedRetry,
-    Lwm2mRegistrationState_UpdatingRegistration,
-
-} Lwm2mRegistrationState;
-
-typedef struct
-{
-    struct ListHead list;
-    int ServerObjectInstanceID;
-    char Location[128];
-    Lwm2mRegistrationState RegistrationState;
-    uint32_t LastUpdate;
-    int Attempts;
-    bool UpdateRegistration;
-
-    int LifeTime;
-    int ShortServerID;
-    int DefaultMinimumPeriod;
-    int DefaultMaximumPeriod;
-    int DisableTimeout;
-    bool NotificationStoring;
-    char Binding[4];  // maximum "UQS" + '\0'
-
-} Lwm2mServerType;
-
-typedef struct
-{
-    Lwm2mBootStrapState BootStrapState;       // Current bootstrap state
-    uint32_t LastBootStrapUpdate;             // Time that the last bootstrap state-machine update was performed
-    struct ListHead ServerList;               // Linked list of "Lwm2mServerType" for the registration process
-    struct ListHead SecurityObjectList;       // Linked list of "LWM2MSecurityInfo"
-    Lwm2mObjectTree ObjectTree;
-    ObjectStore * Store;                      // Object store associated with this context
-    AttributeStore * AttributeStore;          // Notification Attributes store associated with this context
-    DefinitionRegistry * Definitions;         // Storage for object/resource definitions.
-    ResourceEndPointList EndPointList;        // CoaP endpoints.
-    CoapInfo * Coap;                          // CoAP library context information
-    char EndPointName[128];                   // Client EndPoint name
-    const char * FactoryBootstrapInformation; // Path of file containing bootstrap information, or NULL
-    struct ListHead observerList;
-} Lwm2mContextType;
-
-// Default handlers for objects and resources. these write directly to the object store
+// Default handlers for objects and resources. (TODO: these shouldn't really be externs)
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
 
-#else
-
-typedef struct
-{
-    ObjectStore * Store;                      // Object store associated with this context
-    DefinitionRegistry * Definitions;
-    ResourceEndPointList EndPointList;        // CoAP endpoints
-    CoapInfo * Coap;                          // CoAP library context information
-    struct ListHead ClientList;               // List of registered clients
-    int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
-    ContentType ContentType;                  // Used to set CoAP content type
-} Lwm2mContextType;
-
-#endif
-
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
-#ifdef LWM2M_CLIENT
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName, const char * factoryBootstrapInformation);
-#elif defined(LWM2M_SERVER)
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType);
-#else
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap);
-#endif
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
+
+void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation);
 
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
@@ -178,8 +96,6 @@ ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * contex
 ResourceIDType Lwm2mCore_GetNextResourceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
-
-#ifdef LWM2M_CLIENT
 Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
@@ -204,8 +120,24 @@ ObjectIDType Lwm2mCore_GetNextObjectID(Lwm2mContextType * context, ObjectIDType 
 
 int Lwm2mCore_GetObjectNumInstances(Lwm2mContextType * context, ObjectIDType objectID);
 
+int Lwm2mCore_AddResourceEndPoint(Lwm2mContextType * context, const char * path, EndpointHandlerFunction handler);
 
-#endif
+DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
+
+bool Lwm2mCore_GetUseFactoryBootstrap(Lwm2mContextType * context);
+
+struct ListHead * Lwm2mCore_GetServerList(Lwm2mContextType * context);
+struct ListHead * Lwm2mCore_GetSecurityObjectList(Lwm2mContextType * context);
+struct ListHead * Lwm2mCore_GetObserverList(Lwm2mContextType * context);
+AttributeStore * Lwm2mCore_GetAttributes(Lwm2mContextType * context);
+
+Lwm2mBootStrapState Lwm2mCore_GetBootstrapState(Lwm2mContextType * context);
+
+void Lwm2mCore_SetBootstrapState(Lwm2mContextType * context, Lwm2mBootStrapState state);
+
+uint32_t Lwm2mCore_GetLastBootStrapUpdate(Lwm2mContextType * context);
+
+void Lwm2mCore_SetLastBootStrapUpdate(Lwm2mContextType * context, uint32_t lastUpdate);
 
 #ifdef __cplusplus
 }

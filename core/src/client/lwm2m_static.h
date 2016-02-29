@@ -24,12 +24,15 @@
 #ifndef LWM2M_STATIC_H_
 #define LWM2M_STATIC_H_
 
+#include <stdbool.h>
+
 #include "awa/static.h"
 #include "lwm2m_core.h"
 
 struct _AwaStaticClient
 {
-    Lwm2mContextType * context;
+    Lwm2mContextType * Context;
+    bool Configured;
 };
 
 #endif /* LWM2M_STATIC_H_ */

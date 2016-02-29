@@ -95,7 +95,7 @@ Lwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mConte
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, resourceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Resource);
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+    ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
 
     if (definition == NULL)
     {
@@ -169,7 +169,7 @@ int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContext
 
     while ((resourceID = Lwm2mCore_GetNextResourceID(context, objectID, objectInstanceID, resourceID)) != -1)
     {
-        if (Definition_IsResourceTypeExecutable(context->Definitions, objectID, resourceID) == 0)
+        if (Definition_IsResourceTypeExecutable(Lwm2mCore_GetDefinitions(context), objectID, resourceID) == 0)
         {
             Lwm2mTreeNode * resourceNode;
 
@@ -201,7 +201,7 @@ int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * c
     Lwm2mTreeNode_SetID(*dest, objectID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Object);
 
-    ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
+    ObjectDefinition * definition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(context), objectID);
 
     if (definition == NULL)
     {

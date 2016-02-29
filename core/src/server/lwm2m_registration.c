@@ -227,7 +227,7 @@ Lwm2mClientType * Lwm2m_LookupClientByName(Lwm2mContextType * context, const cha
 {
     Lwm2mClientType * client = NULL;
     struct ListHead * i;
-    ListForEach(i, &context->ClientList)
+    ListForEach(i, Lwm2mCore_GetClientList(context))
     {
         Lwm2mClientType * c = ListEntry(i, Lwm2mClientType, list);
         if (strcmp(c->EndPointName, endPointName) == 0)
@@ -243,7 +243,7 @@ static Lwm2mClientType * Lwm2m_LookupClientByLocation(Lwm2mContextType * context
 {
     Lwm2mClientType * client = NULL;
     struct ListHead * i;
-    ListForEach(i, &context->ClientList)
+    ListForEach(i, Lwm2mCore_GetClientList(context))
     {
         Lwm2mClientType * c = ListEntry(i, Lwm2mClientType, list);
         if (c->Location == location)
@@ -259,7 +259,7 @@ Lwm2mClientType * Lwm2m_LookupClientByAddress(Lwm2mContextType * context, Addres
 {
     Lwm2mClientType * client = NULL;
     struct ListHead * i;
-    ListForEach(i, &context->ClientList)
+    ListForEach(i, Lwm2mCore_GetClientList(context))
     {
         Lwm2mClientType * c = ListEntry(i, Lwm2mClientType, list);
 
@@ -326,15 +326,15 @@ static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPoin
             client->BindingMode = bindingMode;
             client->SupportsJson = false;
 
-            client->Location = context->LastLocation + 1;
-            context->LastLocation = client->Location;
+            client->Location = Lwm2mCore_GetLastLocation(context) + 1;
+            Lwm2mCore_SetLastLocation(context, client->Location);
 
             ListInit(&client->ObjectList);
 
-            ListAdd(&client->list, &context->ClientList);
+            ListAdd(&client->list, Lwm2mCore_GetClientList(context));
 
             sprintf(RegisterLocation, "/rd/%d", client->Location);
-            Lwm2mCore_AddResourceEndPoint(&context->EndPointList, RegisterLocation, Lwm2mCore_UpdateEndpointHandler);
+            Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, Lwm2mCore_UpdateEndpointHandler);
 
             result = Lwm2m_UpdateClient(context, client->Location, lifeTime, bindingMode, addr, contentType, objectList, objectListLength);
         }
@@ -358,7 +358,7 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
     DestroyObjectList(&client->ObjectList);
 
     sprintf(RegisterLocation, "/rd/%d", client->Location);
-    Lwm2mCore_RemoveResourceEndPoint(&context->EndPointList, RegisterLocation);
+    Lwm2mCore_RemoveResourceEndPoint(context, RegisterLocation);
 
     free(client->EndPointName);
     free(client);
@@ -554,7 +554,7 @@ int32_t Lwm2m_AgeRegistrations(Lwm2mContextType * context)
     uint32_t now = Lwm2mCore_GetTickCountMs();
     struct ListHead * i, *n;
 
-    ListForEachSafe(i, n, &context->ClientList)
+    ListForEachSafe(i, n, Lwm2mCore_GetClientList(context))
     {
         Lwm2mClientType * client = ListEntry(i, Lwm2mClientType, list);
 
@@ -571,10 +571,10 @@ int32_t Lwm2m_AgeRegistrations(Lwm2mContextType * context)
 int Lwm2m_RegistrationInit(Lwm2mContextType * context)
 {
     // Initalise client list
-    ListInit(&context->ClientList);
-    context->LastLocation = 0;
+    ListInit(Lwm2mCore_GetClientList(context));
+    Lwm2mCore_SetLastLocation(context, 0);
 
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList, "/rd", Lwm2mCore_RegistrationEndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/rd", Lwm2mCore_RegistrationEndpointHandler);
 
     return 0;
 }
@@ -615,6 +615,6 @@ static void DestroyClientList(struct ListHead * clientList)
 
 void Lwm2m_RegistrationDestroy(Lwm2mContextType * context)
 {
-    DestroyClientList(&context->ClientList);
+    DestroyClientList(Lwm2mCore_GetClientList(context));
 }
 

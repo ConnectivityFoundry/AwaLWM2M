@@ -36,6 +36,19 @@ extern "C" {
 #include "lwm2m_core.h"
 #include "lwm2m_request_origin.h"
 
+typedef enum
+{
+    Lwm2mRegistrationState_NotRegistered,
+    Lwm2mRegistrationState_Register,
+    Lwm2mRegistrationState_Registering,
+    Lwm2mRegistrationState_Registered,
+    Lwm2mRegistrationState_Deregister,
+    Lwm2mRegistrationState_Deregistering,
+    Lwm2mRegistrationState_RegisterFailed,
+    Lwm2mRegistrationState_RegisterFailedRetry,
+    Lwm2mRegistrationState_UpdatingRegistration,
+
+} Lwm2mRegistrationState;
 
 int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context);
 

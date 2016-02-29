@@ -63,7 +63,7 @@ static Lwm2mServerType * GetServerObjectByObjectInstanceID(Lwm2mContextType * co
 {
     Lwm2mServerType * serverObject = NULL;
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
         if (server->ServerObjectInstanceID == objectInstanceID)
@@ -78,7 +78,7 @@ static Lwm2mServerType * GetServerObjectByShortServerID(Lwm2mContextType * conte
 {
     Lwm2mServerType * serverObject = NULL;
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
         if (server->ShortServerID == shortServerID)
@@ -105,7 +105,7 @@ static Lwm2mServerType * AddServerObject(Lwm2mContextType * context, int serverO
             serverType->DefaultMinimumPeriod = 0;
             serverType->DefaultMaximumPeriod = -1;
             strcpy(serverType->Binding, "U");
-            ListAdd(&serverType->list, &context->ServerList);
+            ListAdd(&serverType->list, Lwm2mCore_GetServerList(context));
         }
         else
         {
@@ -419,7 +419,7 @@ int Lwm2mServerObject_GetLifeTime(Lwm2mContextType * context, int shortServerID)
 void Lwm2mCore_UpdateAllServers(Lwm2mContextType * context, Lwm2mRegistrationState state)
 {
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
         if (server != NULL)
@@ -433,7 +433,7 @@ void Lwm2mCore_UpdateAllServers(Lwm2mContextType * context, Lwm2mRegistrationSta
 void Lwm2mCore_DeregisterAllServers(Lwm2mContextType * context)
 {
     struct ListHead * i;
-    ListForEach(i, &context->ServerList)
+    ListForEach(i, Lwm2mCore_GetServerList(context))
     {
         Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
         if (server != NULL)
@@ -451,7 +451,7 @@ void Lwm2mCore_DestroyServerList(Lwm2mContextType * context)
     if (context != NULL)
     {
         struct ListHead * i, * n;
-        ListForEachSafe(i, n, &context->ServerList)
+        ListForEachSafe(i, n, Lwm2mCore_GetServerList(context))
         {
             Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
             if (server != NULL)

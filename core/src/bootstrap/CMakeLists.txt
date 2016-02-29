@@ -16,7 +16,7 @@ set (awa_bootstrapd_SOURCES
 set (awa_bootstrapd_INCLUDE_DIRS
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
-  ${CORE_SRC_DIR}/server
+  ${CORE_SRC_DIR}/bootstrap
   ${LIBB64_INCLUDE_DIR}
   ${LIBJSMN_INCLUDE_DIR}
 )

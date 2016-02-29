@@ -81,12 +81,12 @@ static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, con
     if (responseCode == 204)
     {
         Lwm2m_Info("Waiting for bootstrap finished\n");
-        context->BootStrapState = Lwm2mBootStrapState_BootStrapFinishPending;
-        context->LastBootStrapUpdate = Lwm2mCore_GetTickCountMs();
+        Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFinishPending);
+        Lwm2mCore_SetLastBootStrapUpdate(context, Lwm2mCore_GetTickCountMs());
     }
     else
     {
-        context->BootStrapState = Lwm2mBootStrapState_BootStrapFailed;
+        Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFailed);
     }
 }
 
@@ -98,33 +98,11 @@ static bool Lwm2m_BootStrapFromSmartCard(Lwm2mContextType * context)
     return false;
 }
 
-// Attempt to retrieve the bootstrap information from factory configuration file
 static bool Lwm2m_BootStrapFromFactory(Lwm2mContextType * context)
 {
-    bool rc = false;
+    Lwm2m_Debug("Lwm2m_BootstrapFromFactory: %s\n", Lwm2mCore_GetUseFactoryBootstrap(context) ? "True" : "False");
 
-#ifndef CONTIKI
-    Lwm2m_Debug("Lwm2m_BootstrapFromFactory: %s\n", context->FactoryBootstrapInformation != NULL ? context->FactoryBootstrapInformation : "Skipped");
-
-    if (context->FactoryBootstrapInformation != NULL)
-    {
-        const BootstrapInfo * bootstrapInfo = BootstrapInformation_ReadConfigFile(context->FactoryBootstrapInformation);
-        if (bootstrapInfo == NULL || BootstrapInformation_WriteToObjectStore(context, bootstrapInfo) != 0)
-        {
-            Lwm2m_Error("Factory Bootstrap failed\n");
-            Lwm2m_Error("EXITING\n");
-            exit(1);
-        }
-        else
-        {
-            Lwm2m_Info("Factory Bootstrap from %s\n", context->FactoryBootstrapInformation);
-            BootstrapInformation_Dump(bootstrapInfo);
-            rc = true;
-        }
-        BootstrapInformation_DeleteBootstrapInfo(bootstrapInfo);
-    }
-#endif
-    return rc;
+    return Lwm2mCore_GetUseFactoryBootstrap(context);
 }
 
 // Handler called when the server posts a "finished" message to /bs
@@ -132,23 +110,24 @@ static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * pat
                                const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
+    Lwm2mBootStrapState state = Lwm2mCore_GetBootstrapState(context);
 
     *responseContentLen = 0;  // no content
 
     Lwm2m_Debug("POST to /bs\n");
 
-    if (context->BootStrapState == Lwm2mBootStrapState_BootStrapFinishPending)
+    if (state == Lwm2mBootStrapState_BootStrapFinishPending)
     {
         Lwm2m_Info("Bootstrap finished\n");
-        context->BootStrapState = Lwm2mBootStrapState_BootStrapped;
+        Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
         *responseCode = 204;
     }
-    else if ((context->BootStrapState == Lwm2mBootStrapState_BootStrapPending) ||
-             (context->BootStrapState == Lwm2mBootStrapState_ClientHoldOff))
+    else if ((state == Lwm2mBootStrapState_BootStrapPending) ||
+             (state == Lwm2mBootStrapState_ClientHoldOff))
     {
         Lwm2m_Info("Server initiated bootstrap\n");
-        context->BootStrapState = Lwm2mBootStrapState_BootStrapped;
+        Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
         *responseCode = 204;
     }
@@ -182,7 +161,7 @@ static int Lwm2mCore_BootstrapEndpointHandler(int type, void * ctxt, AddressType
 // Initialise the boot strap mechanism, create the /bs endpoint
 void Lwm2m_BootStrapInit(Lwm2mContextType * context)
 {
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList, "/bs", Lwm2mCore_BootstrapEndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/bs", Lwm2mCore_BootstrapEndpointHandler);
 }
 
 /* The LWM2M Client MUST follow the procedure specified as below when attempting to bootstrap a LWM2M Device:
@@ -202,28 +181,28 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
     uint32_t clientHoldOff;
     enum { SERVER_BOOTSTRAP = 0 };
 
-    switch (context->BootStrapState)
+    switch (Lwm2mCore_GetBootstrapState(context))
     {
         case Lwm2mBootStrapState_NotBootStrapped:
 
             // First attempt smart card bootstrap.
             if (Lwm2m_BootStrapFromSmartCard(context))
             {
-                context->BootStrapState = Lwm2mBootStrapState_BootStrapped;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
             }
             // If that fails try and use the factory information.
             else if (Lwm2m_BootStrapFromFactory(context))
             {
-                context->BootStrapState = Lwm2mBootStrapState_BootStrapped;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
             }
             // If that fails wait for the client hold off time, for a server initiated bootstrap.
             else
             {
                 Lwm2m_Info("Try existing server entries\n");
-                context->BootStrapState = Lwm2mBootStrapState_CheckExisting;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_CheckExisting);
             }
             Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
-            context->LastBootStrapUpdate = now;
+            Lwm2mCore_SetLastBootStrapUpdate(context, now);
             break;
 
         case Lwm2mBootStrapState_CheckExisting:
@@ -238,22 +217,22 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
             // If the hold off timer has expired, then request a boot strap.
             Lwm2m_GetClientHoldOff(context, SERVER_BOOTSTRAP, &clientHoldOff);
 
-            if (now - context->LastBootStrapUpdate >= (clientHoldOff * 1000))
+            if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= (clientHoldOff * 1000))
             {
                 Lwm2m_Info("HoldOff Expired - Attempt Client Bootstrap\n");
-                context->BootStrapState = Lwm2mBootStrapState_BootStrapPending;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapPending);
                 Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
-                context->LastBootStrapUpdate = now;
+                Lwm2mCore_SetLastBootStrapUpdate(context, now);
             }
             break;
 
         case Lwm2mBootStrapState_BootStrapPending:
 
-            if (now - context->LastBootStrapUpdate >= BOOTSTRAP_TIMEOUT)
+            if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= BOOTSTRAP_TIMEOUT)
             {
                 Lwm2m_Error("No response to client initiated bootstrap\n");
-                context->BootStrapState = Lwm2mBootStrapState_BootStrapFailed;
-                context->LastBootStrapUpdate = now;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFailed);
+                Lwm2mCore_SetLastBootStrapUpdate(context, now);
             }
 
             break;
@@ -261,10 +240,10 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
         case Lwm2mBootStrapState_BootStrapFinishPending:
             // The 2015/07/07 LWM2M draft requires that the server sends a bootstrap finished to the clients /bs endpoint,
             // however for now lets just wait up to 15 seconds and then move to BootStrapped state.
-            if (now - context->LastBootStrapUpdate >= BOOTSTRAP_FINISHED_TIMEOUT)
+            if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= BOOTSTRAP_FINISHED_TIMEOUT)
             {
                 Lwm2m_Warning("No bootstrap finished after 15 seconds, retrying...\n");
-                context->BootStrapState = Lwm2mBootStrapState_BootStrapFailed;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFailed);
             }
             break;
 
@@ -276,15 +255,15 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
             // If the hold off timer has expired, then request a boot strap.
             Lwm2m_GetClientHoldOff(context, SERVER_BOOTSTRAP, &clientHoldOff);
 
-            if (now - context->LastBootStrapUpdate >= (clientHoldOff * 1000))
+            if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= (clientHoldOff * 1000))
             {
                 Lwm2m_Warning("HoldOff Expired - Re-attempt boot-strap\n");
-                context->BootStrapState = Lwm2mBootStrapState_NotBootStrapped;
+                Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_NotBootStrapped);
                 Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
             }
             break;
 
         default:
-            Lwm2m_Error("Unhandled bootstrap state %d\n", context->BootStrapState);
+            Lwm2m_Error("Unhandled bootstrap state %d\n", Lwm2mCore_GetBootstrapState(context));
     }
 }

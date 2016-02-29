@@ -45,7 +45,7 @@ static Lwm2mObserverType * LookupObserver(void * ctxt, AddressType * addr, Objec
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     struct ListHead * i, *n;
-    ListForEachSafe(i, n, &context->observerList)
+    ListForEachSafe(i, n, Lwm2mCore_GetObserverList(context))
     {
         Lwm2mObserverType * observer = ListEntry(i, Lwm2mObserverType, list);
 
@@ -91,7 +91,7 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     struct ListHead * observerItem;
-    ListForEach(observerItem, &context->observerList)
+    ListForEach(observerItem, Lwm2mCore_GetObserverList(context))
     {
         Lwm2mObserverType * observer = ListEntry(observerItem, Lwm2mObserverType, list);
 
@@ -103,12 +103,12 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
             int shortServerID = Lwm2mSecurity_GetShortServerID(context, &observer->Address);
 
             NotificationAttributes * resourceAttributes = (resourceID == -1) ? NULL :
-                    AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, objectID, objectInstanceID, resourceID);
+                    AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, objectID, objectInstanceID, resourceID);
             NotificationAttributes * objectInstanceAttributes = (objectInstanceID == -1) ? NULL :
-                    AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, objectID, objectInstanceID, -1);
-            NotificationAttributes * objectAttributes = AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, objectID, -1, -1);
+                    AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, objectID, objectInstanceID, -1);
+            NotificationAttributes * objectAttributes = AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, objectID, -1, -1);
 
-            ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+            ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
 
             bool passedAttributeChecks = false;
             if ((definition != NULL) && (!IS_MULTIPLE_INSTANCE(definition)) && (observer->OldValue != NULL) && (newValue != NULL))
@@ -227,7 +227,7 @@ int Lwm2m_RemoveAllObserversForOIR(void * ctxt, ObjectIDType objectID, ObjectIns
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     struct ListHead * observerItem, *next;
-    ListForEachSafe(observerItem, next, &context->observerList)
+    ListForEachSafe(observerItem, next, Lwm2mCore_GetObserverList(context))
     {
         Lwm2mObserverType * observer = ListEntry(observerItem, Lwm2mObserverType, list);
 
@@ -251,7 +251,7 @@ void Lwm2m_FreeObservers(void * ctxt)
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     struct ListHead * observerItem, *n;
-    ListForEachSafe(observerItem, n, &context->observerList)
+    ListForEachSafe(observerItem, n, Lwm2mCore_GetObserverList(context))
     {
         Lwm2mObserverType * observer = ListEntry(observerItem, Lwm2mObserverType, list);
 
@@ -284,7 +284,7 @@ int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int token
         }
 
         memset(observer, 0, sizeof(*observer));
-        ListAdd(&observer->list, &context->observerList);
+        ListAdd(&observer->list, Lwm2mCore_GetObserverList(context));
     }
     else
     {
@@ -311,7 +311,7 @@ int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int token
     // otherwise attributes can't be checked on the first modification of a resource value.
     if (resourceID != -1)
     {
-        ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+        ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
 
         if ((resourceDefinition != NULL) && (!IS_MULTIPLE_INSTANCE(resourceDefinition)))
         {
@@ -350,15 +350,15 @@ void Lwm2m_UpdateObservers(void * ctxt)
     uint32_t now = Lwm2mCore_GetTickCountMs();
 
     struct ListHead * observerItem, *n;
-    ListForEachSafe(observerItem, n, &context->observerList)
+    ListForEachSafe(observerItem, n, Lwm2mCore_GetObserverList(context))
     {
         Lwm2mObserverType * observer = ListEntry(observerItem, Lwm2mObserverType, list);
 
         int shortServerID = Lwm2mSecurity_GetShortServerID(context, &observer->Address);
 
-        NotificationAttributes * resourceAttributes = observer->ResourceID == -1? NULL : AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, observer->ObjectID, observer->ObjectInstanceID, observer->ResourceID);
-        NotificationAttributes * objectInstanceAttributes = observer->ObjectInstanceID == -1? NULL : AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, observer->ObjectID, observer->ObjectInstanceID, -1);
-        NotificationAttributes * objectAttributes = AttributeStore_LookupNotificationAttributes(context->AttributeStore, shortServerID, observer->ObjectID, -1, -1);
+        NotificationAttributes * resourceAttributes = observer->ResourceID == -1? NULL : AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, observer->ObjectID, observer->ObjectInstanceID, observer->ResourceID);
+        NotificationAttributes * objectInstanceAttributes = observer->ObjectInstanceID == -1? NULL : AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, observer->ObjectID, observer->ObjectInstanceID, -1);
+        NotificationAttributes * objectAttributes = AttributeStore_LookupNotificationAttributes(Lwm2mCore_GetAttributes(context), shortServerID, observer->ObjectID, -1, -1);
 
         NotificationAttributes * minimumPeriodAttributes = GetHighestValidAttributesForType(AttributeTypeEnum_MinimumPeriod, resourceAttributes, objectInstanceAttributes, objectAttributes);
         int minimumPeriod = minimumPeriodAttributes != NULL? minimumPeriodAttributes->MinimumPeriod : Lwm2mServerObject_GetDefaultMinimumPeriod(context, shortServerID);

@@ -69,7 +69,7 @@ typedef struct
     char * BootStrap;
     char * Logfile;
     int AddressFamily;
-    const char * FactoryBootstrapInformation;
+    const char * FactoryBootstrapFile;
 } Options;
 
 
@@ -183,20 +183,40 @@ static int Lwm2mClient_Start(Options * options)
         goto error;
     }
 
-    Lwm2mContextType * context = Lwm2mCore_Init(coap, options->EndPointName, options->FactoryBootstrapInformation);
+    // if required read the bootstrap information from a file
+    const BootstrapInfo * factoryBootstrapInfo;
+    if (options->FactoryBootstrapFile != NULL)
+    {
+        factoryBootstrapInfo = BootstrapInformation_ReadConfigFile(options->FactoryBootstrapFile);
+        if (factoryBootstrapInfo == NULL)
+        { 
+            result = 1;
+            goto error_coap;
+        }
+    }
+    else
+    {
+        factoryBootstrapInfo = NULL;
+    }
+
+    Lwm2mContextType * context = Lwm2mCore_Init(coap, options->EndPointName);
 
     // Must happen after coap_Init().
     RegisterObjects(context, options);
+
+    if (factoryBootstrapInfo != NULL)
+    {
+        Lwm2mCore_SetFactoryBootstrap(context, factoryBootstrapInfo);
+    }
+
+    // bootstrap information has been loaded, no need to hang onto this anymore
+    BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
+
 
     // Listen for UDP packets on IPC port
     int xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
     {
-        if (logFile)
-        {
-            fclose(logFile);
-        }
-
         Lwm2m_Error("Failed to initialise XML interface on port %d\n", options->IpcPort);
         result = 1;
         goto error;
@@ -247,16 +267,17 @@ static int Lwm2mClient_Start(Options * options)
 
     Lwm2m_Info("Client exiting\n");
 
-    Lwm2mCore_Destroy(context);
-    coap_Destroy();
     xmlif_DestroyExecuteHandlers();
     xmlif_destroy(xmlFd);
+error:
+    Lwm2mCore_Destroy(context);
+error_coap:
+    coap_Destroy();
 
     if (logFile)
     {
         fclose(logFile);
     }
-error:
     return result;
 }
 
@@ -337,7 +358,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 options->Verbose = true;
                 break;
             case 'f':
-                options->FactoryBootstrapInformation = optarg;
+                options->FactoryBootstrapFile = optarg;
                 break;
             case 'h':
             default:
@@ -347,7 +368,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
     }
 
     // Check to see if at least one bootstrap option is specified
-    if ((options->BootStrap == NULL) && (options->FactoryBootstrapInformation == NULL))
+    if ((options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
     {
         printf("Error: please specify a bootstrap option (--bootstrap or --factoryBootstrap)\n\n");
         PrintUsage();
@@ -369,7 +390,7 @@ int main(int argc, char ** argv)
         .EndPointName = "imagination1",
         .Logfile = NULL,
         .AddressFamily = AF_INET,
-        .FactoryBootstrapInformation = NULL,
+        .FactoryBootstrapFile = NULL,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)

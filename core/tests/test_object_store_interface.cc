@@ -14,7 +14,7 @@
 
 class ObjectStoreInterfaceTestSuite : public testing::Test
 {
-  void SetUp() { context = Lwm2mCore_Init(NULL, NULL, NULL); }
+  void SetUp() { context = Lwm2mCore_Init(NULL, NULL); }
   void TearDown() { Lwm2mCore_Destroy(context); }
 protected:
   Lwm2mContextType * context;
@@ -24,8 +24,8 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
 {
     const char * expected = "coap://bootstrap.example.com:5684/";
 
-    Definition_RegisterObjectType(context->Definitions, (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Definition_RegisterResourceType(context->Definitions, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
+    Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, static_cast<const char*>(expected), strlen(expected));
 
@@ -74,7 +74,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
             "first line\nsecond line",
     };
 
-    Definition_RegisterObjectType(context->Definitions, static_cast<const char*>("Test"), 0, 1, 0, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>("Test"), 0, 1, 0, &defaultObjectOperationHandlers);
 
     // register string resources
     int i = 0;
@@ -82,7 +82,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
     {
         char resourceName[100];
         snprintf(resourceName, sizeof(resourceName), "Res%d", i);
-        Definition_RegisterResourceType(context->Definitions, static_cast<const char*>(resourceName), 0, i, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, i, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
 
     }
 
@@ -125,7 +125,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
             Items("first line\nsecond line", 32767),
     };
 
-    Definition_RegisterObjectType(context->Definitions, static_cast<const char*>("Test"), 0, 1, 0, &defaultObjectOperationHandlers);
+    Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>("Test"), 0, 1, 0, &defaultObjectOperationHandlers);
 
     // register string resources
     int i = 0;
@@ -133,7 +133,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
     {
         char resourceName[100];
         snprintf(resourceName, sizeof(resourceName), "Res%d", i);
-        Definition_RegisterResourceType(context->Definitions, static_cast<const char*>(resourceName), 0, it->id, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, it->id, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
     }
 
     Lwm2mCore_CreateObjectInstance(context, 0, 0);

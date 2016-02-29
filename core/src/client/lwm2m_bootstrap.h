@@ -33,8 +33,19 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "lwm2m_core.h"
+#include "lwm2m_context.h"
 
+typedef enum
+{
+    Lwm2mBootStrapState_NotBootStrapped,
+    Lwm2mBootStrapState_BootStrapPending,
+    Lwm2mBootStrapState_CheckExisting,
+    Lwm2mBootStrapState_ClientHoldOff,
+    Lwm2mBootStrapState_BootStrapFinishPending,  // Waiting for the server to send a bootstrap finished.
+    Lwm2mBootStrapState_BootStrapped,
+    Lwm2mBootStrapState_BootStrapFailed,
+
+} Lwm2mBootStrapState;
 
 void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context);
 

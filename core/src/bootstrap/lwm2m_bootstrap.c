@@ -70,7 +70,7 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
     if (config != NULL)
     {
         const BootstrapInfo * bootstrapInfo = BootstrapInformation_ReadConfigFile(config);
-        if ((bootstrapInfo == NULL) || (BootstrapInformation_WriteToObjectStore(context, bootstrapInfo) != 0))
+        if ((bootstrapInfo == NULL) || (BootstrapInformation_Apply(context, bootstrapInfo) != 0))
         {
             Lwm2m_Error("Configuration file load failed\n");
         }
@@ -202,7 +202,7 @@ bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** conf
     bool success = true;
     int i = 0;
 
-    Lwm2mCore_AddResourceEndPoint(&context->EndPointList, "/bs", Lwm2mBootstrap_EndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/bs", Lwm2mBootstrap_EndpointHandler);
 
     for (i = 0; i < configCount; i++)
     {

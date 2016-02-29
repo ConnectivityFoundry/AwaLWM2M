@@ -512,7 +512,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     char buffer[MAXBUFLEN];
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
-    response = xmlif_GenerateConnectResponse(context->Definitions);
+    response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // Create a default response if necessary
     if (response == NULL)
@@ -619,7 +619,7 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     char * dataValue = NULL;
     char * buffer = NULL;
 
-    ResourceTypeType dataType = Definition_GetResourceType(context->Definitions, objectID, resourceID);
+    ResourceTypeType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
     if (dataType != ResourceTypeEnum_TypeNone)
     {
         // Determine buffer size required to read entire resource instance contents
@@ -680,7 +680,7 @@ error:
 static AwaError AddResourceToGetResponse(Lwm2mContextType * context, int objectID, int instanceID, int resourceID, TreeNode responseResourceNode, int idRangeStart, int idRangeEndExclusive)
 {
     AwaError result = AwaError_Success;
-    if (Definition_IsTypeMultiInstance(context->Definitions, objectID, resourceID))
+    if (Definition_IsTypeMultiInstance(Lwm2mCore_GetDefinitions(context), objectID, resourceID))
     {
         int resourceInstanceID = -1;
         while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, objectID, instanceID, resourceID, resourceInstanceID)) != -1)
@@ -811,6 +811,192 @@ static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlReques
 error:
     xmlif_GenerateResponse(request, NULL, NULL, result, MSGTYPE_GET, responseObjectsTree);
     return result;
+}
+
+static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, const TreeNode xmlObjectNode, bool readValues)
+{
+    Lwm2mTreeNode * objectNode = Lwm2mTreeNode_Create();
+    Lwm2mTreeNode_SetType(objectNode, Lwm2mTreeNodeType_Object);
+    int objectID = xmlif_GetInteger(xmlObjectNode, "Object/ID");
+    Lwm2mTreeNode_SetCreateFlag(objectNode, Xml_Find(xmlObjectNode, "Create"));
+    Lwm2mTreeNode_SetID(objectNode, objectID);
+
+    ObjectDefinition * definition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(context), objectID);
+    if (definition != NULL)
+    {
+        Lwm2mTreeNode_SetDefinition(objectNode, definition);
+
+        uint32_t instanceIndex = 0;
+        TreeNode xmlObjectInstanceNode = NULL;
+        while ((xmlObjectInstanceNode = Xml_FindFrom(xmlObjectNode, "ObjectInstance", &instanceIndex)) != NULL)
+        {
+            int instanceID;
+
+            bool createInstance = Xml_Find(xmlObjectInstanceNode, "Create");
+            instanceID = xmlif_GetInteger(xmlObjectInstanceNode, "ObjectInstance/ID");
+
+            if (instanceID == -1 && !createInstance)
+            {
+                Lwm2m_Error("Missing instance ID node in instance for object ID %d\n", objectID);
+                Lwm2mTreeNode_DeleteRecursive(objectNode);
+                objectNode = NULL;
+                goto error;
+            }
+
+            Lwm2mTreeNode * objectInstanceNode = Lwm2mTreeNode_Create();
+            if (instanceID != -1)
+            {
+                Lwm2mTreeNode_SetID(objectInstanceNode, (uint16_t)instanceID);
+            }
+            Lwm2mTreeNode_SetType(objectInstanceNode, Lwm2mTreeNodeType_ObjectInstance);
+            Lwm2mTreeNode_SetCreateFlag(objectInstanceNode, createInstance);
+            Lwm2mTreeNode_AddChild(objectNode, objectInstanceNode);
+
+            if (instanceID != -1)
+            {
+                uint32_t propertyIndex = 0;
+                TreeNode xmlResourceNode = NULL;
+                while ((xmlResourceNode = Xml_FindFrom(xmlObjectInstanceNode, "Resource", &propertyIndex)) != NULL)
+                {
+                    uint16_t resourceID;
+                    bool createOptionalResource = Xml_Find(xmlResourceNode, "Create") != NULL;
+
+                    if ((resourceID = xmlif_GetInteger(xmlResourceNode, "Resource/ID")) == -1)
+                    {
+                        Lwm2m_Error("Missing resource ID node in for object instance %d/%d\n", objectID, instanceID);
+                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                        objectNode = NULL;
+                        goto error;
+                    }
+
+                    Lwm2mTreeNode * resourceNode = Lwm2mTreeNode_Create();
+                    Lwm2mTreeNode_SetID(resourceNode, resourceID);
+                    Lwm2mTreeNode_SetType(resourceNode, Lwm2mTreeNodeType_Resource);
+                    Lwm2mTreeNode_SetCreateFlag(resourceNode, createOptionalResource);
+                    Lwm2mTreeNode_AddChild(objectInstanceNode, resourceNode);
+
+                    ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
+                    if (resourceDefinition != NULL)
+                    {
+                        Lwm2mTreeNode_SetDefinition(resourceNode, resourceDefinition);
+
+                        if (!IS_MULTIPLE_INSTANCE(resourceDefinition))
+                        {
+                            uint16_t resourceInstanceID = 0;
+                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
+                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+
+                            if (readValues)
+                            {
+                                if (!createOptionalResource || Xml_Find(xmlResourceNode, "Value"))
+                                {
+                                    const char * data;
+                                    int dataLength;
+                                    char * dataValue = NULL;
+                                    if ((data = (char*)xmlif_GetOpaque(xmlResourceNode, "Resource/Value")) == NULL)
+                                    {
+                                        Lwm2m_Error("Missing value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
+                                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                                        objectNode = NULL;
+                                        Lwm2mTreeNode_DeleteRecursive(resourceInstanceNode);
+                                        resourceInstanceNode = NULL;
+                                        goto error;
+                                    }
+
+                                    dataLength = xmlif_DecodeValue(&dataValue, resourceDefinition->Type, data, strlen(data));
+                                    if (dataLength < 0)
+                                    {
+                                        Lwm2m_Error("Failed to decode value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
+                                        free(dataValue);
+                                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                                        objectNode = NULL;
+                                        Lwm2mTreeNode_DeleteRecursive(resourceInstanceNode);
+                                        resourceInstanceNode = NULL;
+                                        goto error;
+                                    }
+
+                                    Lwm2mTreeNode_SetValue(resourceInstanceNode, (const uint8_t*)dataValue, dataLength);
+                                    free(dataValue);
+
+                                    Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
+                                    resourceInstanceNode = NULL;
+                                }
+                            }
+
+                            if (resourceInstanceNode != NULL)
+                            {
+                                Lwm2mTreeNode_DeleteRecursive(resourceInstanceNode);
+                                resourceInstanceNode = NULL;
+                            }
+                        }
+                        else
+                        {
+                            uint32_t valueIndex = 0;
+                            TreeNode xmlResourceInstanceNode = NULL;
+                            while ((xmlResourceInstanceNode = Xml_FindFrom(xmlResourceNode, "ResourceInstance", &valueIndex)) != NULL)
+                            {
+                                uint16_t valueID = xmlif_GetInteger(xmlResourceInstanceNode, "ResourceInstance/ID");
+                                Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                                Lwm2mTreeNode_SetID(resourceInstanceNode, valueID);
+                                Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+
+                                if (readValues)
+                                {
+                                    const char * data;
+                                    int dataLength;
+                                    char * dataValue = NULL;
+                                    if ((data = (char*)xmlif_GetOpaque(xmlResourceInstanceNode, "ResourceInstance/Value")) == NULL)
+                                    {
+                                        Lwm2m_Error("Missing value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
+                                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                                        objectNode = NULL;
+                                        Lwm2mTreeNode_DeleteRecursive(resourceInstanceNode);
+                                        resourceInstanceNode = NULL;
+                                        goto error;
+                                    }
+
+                                    dataLength = xmlif_DecodeValue(&dataValue, resourceDefinition->Type, data, strlen(data));
+                                    if (dataLength < 0)
+                                    {
+                                        Lwm2m_Error("Failed to decode value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
+                                        free(dataValue);
+                                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                                        objectNode = NULL;
+                                        Lwm2mTreeNode_DeleteRecursive(resourceInstanceNode);
+                                        resourceInstanceNode = NULL;
+                                        goto error;
+                                    }
+
+                                    Lwm2mTreeNode_SetValue(resourceInstanceNode, (const uint8_t*)dataValue, dataLength);
+                                    free(dataValue);
+
+                                    Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Lwm2m_Debug("No definition for object %d resource %d\n", objectID, resourceID);
+                        Lwm2mTreeNode_DeleteRecursive(objectNode);
+                        objectNode = NULL;
+                        goto error;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        Lwm2m_Debug("No definition for object /%d\n", objectID);
+        Lwm2mTreeNode_DeleteRecursive(objectNode);
+        objectNode = NULL;
+        goto error;
+    }
+
+error:
+    return objectNode;
 }
 
 // Called to handle a request with the type "Set".
@@ -1044,7 +1230,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                         if (key.ResourceID != -1)
                         {
                             ResourceDefinition * resFormat = NULL;
-                            resFormat = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, key.ResourceID);
+                            resFormat = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, key.ResourceID);
                             if (resFormat != NULL)
                             {
                                  // Cancel SubscribeToExecute or SubscribeToChange
@@ -1154,7 +1340,7 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
                 TreeNode resourceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceID);
                 TreeNode_AddChild(resource, resourceIDnode);
 
-                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(context->Definitions, key.ObjectID, resourceID);
+                ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, resourceID);
 
                 if (IS_MULTIPLE_INSTANCE(resourceDefinition))
                 {
