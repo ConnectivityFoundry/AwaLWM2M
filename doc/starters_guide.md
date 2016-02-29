@@ -18,7 +18,7 @@
 
 #### Building under Linux.
 
- Install the dependencies:
+Install the dependencies:
 
 
 ```
