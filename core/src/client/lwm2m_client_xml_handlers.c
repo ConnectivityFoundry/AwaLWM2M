@@ -278,8 +278,8 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
     const char * value;
     TreeNode node;
 
-    uint16_t maximumInstances;
-    uint16_t minimumInstances;
+    uint16_t maximumInstances = 1;
+    uint16_t minimumInstances = 0;
 
     node = TreeNode_Navigate(meta, "ObjectMetadata/SerialisationName");
     if (node != NULL)
@@ -323,7 +323,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
         value = TreeNode_GetValue(node);
         if (value != NULL)
         {
-            maximumInstances =  atoi(value);
+            maximumInstances = atoi(value);
         }
     }
 
@@ -333,7 +333,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
         value = TreeNode_GetValue(node);
         if (value != NULL)
         {
-            minimumInstances =  atoi(value);
+            minimumInstances = atoi(value);
         }
     }
 
@@ -355,8 +355,8 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             ResourceIDType resourceID = -1;
             int dataType = -1;
             const char * resourceName = NULL;
-            uint16_t resourceMaximumInstances;
-            uint16_t resourceMinimumInstances;
+            uint16_t resourceMaximumInstances = 1;
+            uint16_t resourceMinimumInstances = 0;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
             Operations operation = Operations_None;

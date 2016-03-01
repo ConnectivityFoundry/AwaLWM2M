@@ -438,8 +438,8 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
     const char * value;
     TreeNode node;
 
-    uint16_t MaximumInstances;
-    uint16_t MinimumInstances;
+    uint16_t maximumInstances = 1;
+    uint16_t minimumInstances = 0;
 
     node = TreeNode_Navigate(meta, "ObjectMetadata/SerialisationName");
     if (node != NULL)
@@ -467,7 +467,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
         value = TreeNode_GetValue(node);
         if (value != NULL)
         {
-            MaximumInstances =  atoi(value);
+            maximumInstances = atoi(value);
         }
     }
 
@@ -477,11 +477,11 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
         value = TreeNode_GetValue(node);
         if (value != NULL)
         {
-            MinimumInstances =  atoi(value);
+            minimumInstances = atoi(value);
         }
     }
 
-    res = Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), objectName ? objectName : "", objectID, MaximumInstances, MinimumInstances, NULL);
+    res = Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), objectName ? objectName : "", objectID, maximumInstances, minimumInstances, NULL);
     if (res < 0)
     {
         result = Lwm2mResult_Forbidden;
@@ -499,8 +499,8 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             ResourceIDType resourceID = AWA_INVALID_ID;
             int dataType = -1;
             const char * resourceName = NULL;
-            uint16_t ResourceMaximumInstances;
-            uint16_t ResourceMinimumInstances;
+            uint16_t resourceMaximumInstances = 1;
+            uint16_t resourceMinimumInstances = 0;
             Operations operation = Operations_None;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
@@ -540,7 +540,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 value = TreeNode_GetValue(resNode);
                 if (value != NULL)
                 {
-                    ResourceMaximumInstances = atoi(value);
+                    resourceMaximumInstances = atoi(value);
                 }
             }
 
@@ -550,7 +550,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 value = TreeNode_GetValue(resNode);
                 if (value != NULL)
                 {
-                    ResourceMinimumInstances = atoi(value);
+                    resourceMinimumInstances = atoi(value);
                 }
             }
 
@@ -622,7 +622,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             }
 
             res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID,
-                    dataType, ResourceMaximumInstances, ResourceMinimumInstances, operation, NULL, defaultValueNode);
+                    dataType, resourceMaximumInstances, resourceMinimumInstances, operation, NULL, defaultValueNode);
             Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
             if (res < 0)
             {
