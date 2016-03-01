@@ -27,24 +27,13 @@
  *** Awa Client & Server API Common Test Support Functions
  *************************************************************/
 
-#include <iostream>
-#include <vector>
-#include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <cstdio>
-#include <memory>
 #include <gtest/gtest.h>
+#include <unistd.h>
 
 #include "awa/client.h"
 #include "awa/server.h"
+
+#include "daemon.h"
 
 // Convert a preprocessor definition to a string
 #define str(x) #x
@@ -54,294 +43,23 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int clientIpcPort = 57701;
-    const int serverIpcPort = 58701;
-    const int clientIpcPortRange = 50;  // round-robin client IPC port from clientIpcPort to clientIpcPort + clientIpcPortRange (exclusive)
-    const int serverIpcPortRange = 50;  // round-robin server IPC port from serverIpcPort to serverIpcPort + serverIpcPortRange (exclusive)
-
-    // FIXME: The tests should be smarter - rather than using a pre-assigned port range and hoping nothing is using a given port,
-    // Test that the port is OK before creating daemons, etc. If the port cannot be bound, it's still in use and we should try
-    // another one.
-
-    const int clientLocalCoapPort = 6002;
-    const int serverCoapPort = 6001;
     const int timeout = 2500;         // milliseconds
     const int timeoutTolerance = 100;  // milliseconds
-    const char * const clientEndpointName = "TestIMG1";
-    const char * const clientLogFile = "awa_clientd.log";
-    const char * const serverLogFile = "awa_serverd.log";
-
-    // assume binaries are run from directory 'build'
-    const char * const coapClientPath      = "lib/libcoap/examples/coap-client";
-    const char * const clientDaemonPath    = "core/src/client/awa_clientd";
-    const char * const serverDaemonPath    = "core/src/server/awa_serverd";
-    const char * const bootstrapDaemonPath = "core/src/bootstrap/awa_bootstrapd";
-    const char * const bootstrapConfig     = "../api/tests/bootstrap-gtest.config";
 
 } // namespace defaults
 
 namespace global {
-
     void SetGlobalDefaults(void);
-
     extern int logLevel;
-    extern int clientIpcPort;
-    extern int serverIpcPort;
-    extern int clientLocalCoapPort;
-    extern int serverCoapPort;
-    extern bool spawnClientDaemon;
-    extern bool spawnServerDaemon;
-    extern const char * coapClientPath;
-    extern const char * clientDaemonPath;
-    extern const char * serverDaemonPath;
-    extern const char * bootstrapDaemonPath;
-    extern const char * bootstrapConfig;
-    extern const char * clientEndpointName;
-    extern const char * clientLogFile;
-    extern const char * serverLogFile;
 
 } // namespace global
 
 namespace detail {
     extern const char * NonRoutableIPv4Address;
     extern const char * NonRoutableIPv6Address;
+
 } // namespace detail
 
-// Spawn a new child process, arguments specified by a null-terminated commandVector.
-// Note that the type of the vector must be char *, not const char *.
-// If true, wait specifies that the parent should wait for the child to terminate.
-// If true, silent specifies that the child's stdout will be redirected to /dev/null.
-pid_t SpawnProcess(std::vector<char *> &commandVector, bool wait, bool silent);
-
-// Kill an existing process, with SIGKILL.
-void KillProcess(pid_t pid);
-
-// Terminate an existing process, with SIGTERM.
-void TerminateProcess(pid_t pid);
-
-// Perform a CoAP operation on the specified resource, after a short delay.
-pid_t CoAPOperation(int port, const char * method, const char * resource, int delay /*microseconds*/);
-
-// Send a request to the specified IPC port, wait for response. Return 0 on success, -1 on error or timeout
-int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_t requestLen);
-
-// RAII CBuffer - free memory automatically when instance falls out of scope
-class CBuffer
-{
-public:
-    explicit CBuffer(size_t size) : ptr_(nullptr), size_(size) { ptr_ = malloc(size_); }
-    ~CBuffer() { free(ptr_); ptr_ = nullptr; size_ = 0; }
-
-    size_t len() const { return size_; }
-    void * buf() const { return ptr_; }
-
-    CBuffer(CBuffer const &) = delete;
-    CBuffer & operator=(CBuffer const &x) = delete;
-
-private:
-    void * ptr_;
-    size_t size_;
-};
-
-// Start a LWM2M Client process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID, or 0 if failed.
-pid_t StartLWM2MClient(int coapPort, int ipcPort, const char * logFile, const char * clientID);
-
-// Start a LWM2M Server process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID.
-pid_t StartLWM2MServer(int coapPort, int ipcPort, const char * logFile);
-
-
-/*********************************************************************
- *** Test Base Classes
- *********************************************************************/
-
-class Daemon
-{
-public:
-    explicit Daemon(const char * filename="daemon.log") : pid_(0), log_(filename, std::ios::out | std::ios::app ) {}
-    virtual ~Daemon() {}
-    virtual bool Start(const std::string & logMessage) = 0;
-    virtual void Stop() = 0;
-
-protected:
-    pid_t pid_;
-    std::ofstream log_;
-};
-
-class LWM2MClientDaemon : public Daemon
-{
-public:
-  LWM2MClientDaemon() : Daemon(),
-      coapPort_(0), ipcPort_(0), logFile_(), endpointName_("") {}
-  virtual ~LWM2MClientDaemon() {}
-
-  virtual bool Start(const std::string & logMessage)
-  {
-      // pick up the defaults, if not explicitly set
-      ipcPort_ = ipcPort_ == 0 ? global::clientIpcPort : ipcPort_;
-      coapPort_ = coapPort_ == 0 ? global::clientLocalCoapPort : coapPort_;
-      logFile_ = logFile_.empty() ? global::clientLogFile : logFile_;
-      endpointName_ = endpointName_.empty() ? global::clientEndpointName : endpointName_;
-
-      if (global::spawnClientDaemon)
-      {
-          pid_ = StartLWM2MClient(coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str());
-          log_ << "Spawned LWM2M Client: "
-                  << "pid " << pid_
-                  << ", ID " << endpointName_
-                  << ", Local CoAP port " << coapPort_
-                  << ", IPC port " << ipcPort_
-                  << ", Bootstrap config " << global::bootstrapConfig
-                  << ", logging to " << logFile_
-                  << ", " << logMessage << std::endl;
-      }
-      else
-      {
-          log_ << "Not spawning LWM2M Client: "
-                  << "CoAP port " << coapPort_
-                  << ", IPC port " << ipcPort_ << std::endl;
-          pid_ = 0;
-      }
-      return pid_ >= 0;
-  }
-  virtual void Stop()
-  {
-      if (global::spawnClientDaemon)
-      {
-          // round-robin the IPC port to avoid port reuse issues during testing
-          global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
-      }
-      if (pid_ > 0)
-      {
-          // use SIGTERM so that valgrind can terminate correctly and write log
-          log_ << "Terminating LWM2M Client: pid " << pid_ << std::endl;
-          TerminateProcess(pid_);
-          pid_ = 0;
-      }
-  }
-  void SetCoapPort(int port)
-  {
-      coapPort_ = port;
-  }
-  void SetIpcPort(int port)
-  {
-      ipcPort_ = port;
-  }
-  void SetLogFile(const std::string & logFile)
-  {
-      logFile_ = logFile;
-  }
-  void SetEndpointName(const std::string & endpointName)
-  {
-      endpointName_ = endpointName;
-  }
-
-private:
-  int coapPort_;
-  int ipcPort_;
-  std::string logFile_;
-  std::string endpointName_;
-};
-
-class LWM2MServerDaemon : public Daemon
-{
-public:
-  LWM2MServerDaemon() : Daemon(),
-      coapPort_(0), ipcPort_(0), logFile_() {}
-  virtual ~LWM2MServerDaemon() {}
-  virtual bool Start(const std::string & logMessage)
-  {
-      // pick up the defaults, if not explicitly set
-      ipcPort_ = ipcPort_ == 0 ? global::serverIpcPort : ipcPort_;
-      coapPort_ = coapPort_ == 0 ? global::serverCoapPort : coapPort_;
-      logFile_ = logFile_.empty() ? global::serverLogFile : logFile_;
-
-      if (global::spawnServerDaemon)
-      {
-          pid_ = StartLWM2MServer(coapPort_, ipcPort_, logFile_.c_str());
-          log_ << "Spawned LWM2M Server: "
-                  << "pid " << pid_
-                  << ", CoAP port " << coapPort_
-                  << ", IPC port " << ipcPort_
-                  << ", logging to " << logFile_
-                  << ", " << logMessage << std::endl;
-      }
-      else
-      {
-          log_ << "Not spawning LWM2M Server: "
-                  << "CoAP port " << coapPort_
-                  << ", IPC port " << ipcPort_ << std::endl;
-          pid_ = 0;
-      }
-      return pid_ >= 0;
-  }
-  virtual void Stop()
-  {
-      // round-robin the IPC port to avoid port reuse issues during testing
-      if (global::spawnServerDaemon)
-      {
-          global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
-      }
-      if (pid_ > 0)
-      {
-          // use SIGTERM so that valgrind can terminate correctly and write log
-          log_ << "Terminating LWM2M Server: pid " << pid_ << std::endl;
-          TerminateProcess(pid_);
-          pid_ = 0;
-      }
-  }
-  void SetCoapPort(int port)
-  {
-      coapPort_ = port;
-  }
-  void SetIpcPort(int port)
-  {
-      ipcPort_ = port;
-  }
-  void SetLogFile(const std::string & logFile)
-  {
-      logFile_ = logFile;
-  }
-
-private:
-  int coapPort_;
-  int ipcPort_;
-  std::string logFile_;
-};
-
-class LWM2MClientDaemonHorde
-{
-public:
-    LWM2MClientDaemonHorde(std::vector<std::string> clientIDs,
-                           int startPort, std::string testDescription) :
-      clients_(), clientIDs_(clientIDs), startPort_(startPort)
-    {
-        for (auto it = clientIDs_.begin(); it != clientIDs_.end(); ++it)
-        {
-            DaemonPtr p(new LWM2MClientDaemon);
-            p->SetEndpointName(*it);
-            p->SetIpcPort(startPort++);
-            p->Start(std::string(*it) + std::string(" : ") + testDescription);
-            clients_.push_back(std::move(p));
-        }
-    }
-    ~LWM2MClientDaemonHorde()
-    {
-        for (auto it = clients_.begin(); it != clients_.end(); ++it)
-        {
-            (*it)->Stop();
-        }
-    }
-    const std::vector<std::string> & GetClientIDs() const
-    {
-        return clientIDs_;
-    }
-
-private:
-    typedef std::unique_ptr<LWM2MClientDaemon> DaemonPtr;
-    std::vector<DaemonPtr> clients_;
-    std::vector<std::string> clientIDs_;
-    int startPort_;
-};
 
 #define CURRENT_TEST_CASE_NAME \
 ( ::testing::UnitTest::GetInstance()->current_test_info()->test_case_name() )
@@ -353,8 +71,12 @@ private:
 ( std::string(CURRENT_TEST_CASE_NAME) + std::string(".") + std::string(CURRENT_TEST_NAME) )
 
 
+/*********************************************************************
+ *** Test Base Classes
+ *********************************************************************/
+
 // Base class for Awa tests
-class TestAwaBase : public testing::Test
+class TestAwaBase : public virtual testing::Test
 {
 protected:
     virtual void SetUp() {
@@ -367,28 +89,50 @@ protected:
     std::string testDescription_;
 };
 
+
 // Base class for Client tests
 class TestClientBase : public TestAwaBase
 {
 };
 
+
 // Base class for Client tests that require a client daemon to be spawned
 class TestClientWithDaemonBase : public TestClientBase
 {
+public:
+    TestClientWithDaemonBase() :
+        TestClientBase(),
+        daemon_(global::clientLocalCoapPort, global::clientIpcPort, global::clientLogFile, global::clientEndpointName) {}
+
 protected:
   virtual void SetUp() {
       TestClientBase::SetUp();
-      ASSERT_TRUE(daemon_.Start(testDescription_));
+      if (global::spawnClientDaemon)
+      {
+          ASSERT_TRUE(daemon_.Start(testDescription_));
+      }
+      else
+      {
+          daemon_.SkipStart(testDescription_);
+      }
   }
   virtual void TearDown() {
+
+      if (global::spawnClientDaemon)
+      {
+          // round-robin the IPC port to avoid port reuse issues during testing
+          global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
+      }
       daemon_.Stop();
       TestClientBase::TearDown();
   }
 
 private:
-  LWM2MClientDaemon daemon_;
+  AwaClientDaemon daemon_;
 };
 
+
+// For Client tests that require a valid session (session is not connected)
 class TestClientWithSession : public TestClientWithDaemonBase
 {
 protected:
@@ -416,6 +160,8 @@ protected:
     AwaClientSession * session_;
 };
 
+
+// For Client tests that require a valid and connected session
 class TestClientWithConnectedSession : public TestClientWithSession
 {
 protected:
@@ -436,23 +182,44 @@ class TestServerBase : public TestAwaBase
 {
 };
 
+
 // Base class for Server tests that require a server daemon to be spawned
 class TestServerWithDaemonBase : public TestServerBase
 {
+public:
+    TestServerWithDaemonBase() :
+        TestServerBase(),
+        daemon_(global::serverCoapPort, global::serverIpcPort, global::serverLogFile) {}
+
 protected:
   virtual void SetUp() {
       TestServerBase::SetUp();
-      ASSERT_TRUE(daemon_.Start(testDescription_));
+      if (global::spawnServerDaemon)
+      {
+          ASSERT_TRUE(daemon_.Start(testDescription_));
+      }
+      else
+      {
+          daemon_.SkipStart(testDescription_);
+      }
   }
   virtual void TearDown() {
+
+      if (global::spawnServerDaemon)
+      {
+          // round-robin the IPC port to avoid port reuse issues during testing
+          global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
+      }
       daemon_.Stop();
       TestServerBase::TearDown();
   }
 
 private:
-  LWM2MServerDaemon daemon_;
+  AwaServerDaemon daemon_;
 };
 
+
+// For Server tests that require a valid session (session is not connected)
 class TestServerWithSession : public TestServerWithDaemonBase
 {
 protected:
@@ -480,6 +247,8 @@ protected:
     AwaServerSession * session_;
 };
 
+
+// For Server tests that require a valid and connected session
 class TestServerWithConnectedSession : public TestServerWithSession
 {
 protected:
@@ -494,26 +263,25 @@ protected:
     }
 };
 
-// Base class for tests that require a server and client daemon to be spawned
-class TestServerAndClientWithDaemonBase : public TestAwaBase
+
+// Base class for tests that require both a server and client daemon to be spawned
+// Note: no sessions are created.
+class TestServerAndClientWithDaemonBase : public TestServerWithDaemonBase, TestClientWithDaemonBase
 {
 protected:
   virtual void SetUp() {
-      TestAwaBase::SetUp();
-      ASSERT_TRUE(server_daemon_.Start(testDescription_));
-      ASSERT_TRUE(client_daemon_.Start(testDescription_));
+      TestServerWithDaemonBase::SetUp();
+      TestClientWithDaemonBase::SetUp();
   }
   virtual void TearDown() {
-      client_daemon_.Stop();
-      server_daemon_.Stop();
-      TestAwaBase::TearDown();
+      TestClientWithDaemonBase::TearDown();
+      TestServerWithDaemonBase::TearDown();
   }
-
-private:
-  LWM2MServerDaemon server_daemon_;
-  LWM2MClientDaemon client_daemon_;
 };
 
+
+// For tests that require both a server and client daemon to be spawned, with
+// a valid session for each. The sessions are not connected.
 class TestServerAndClientWithSession : public TestServerAndClientWithDaemonBase
 {
 protected:
@@ -549,6 +317,8 @@ protected:
 };
 
 
+// For tests that require both a server and client daemon to be spawned, with
+// a valid session for each. The sessions are automatically connected.
 class TestServerAndClientWithConnectedSession : public TestServerAndClientWithSession
 {
 protected:
@@ -599,6 +369,10 @@ protected:
     }
 };
 
+
+// For tests that require both a Server and Client daemon to be spawned, with
+// a valid and connected session for each.
+// A set of objects and resources that may be useful for testing are pre-defined.
 class TestServerAndClientWithConnectedSessionWithDummyObjects  : public TestServerAndClientWithConnectedSession
 {
 protected:
@@ -663,10 +437,12 @@ protected:
     const int TEST_OBJECT_ID_ = 10000;
 };
 
+
+
 namespace detail {
 
 /**
- * Set a file descriptor to blocking or non-blocking mode.
+ * @brief Set a file descriptor to blocking or non-blocking mode.
  * http://code.activestate.com/recipes/577384-setting-a-file-descriptor-to-blocking-or-non-block/
  *
  * @param fd The file descriptor
@@ -700,6 +476,8 @@ const size_t BUF_SIZE = 256;
 
 } // namespace detail
 
+
+// A test utility class for capturing output from a file
 class CaptureFile
 {
 public:
@@ -768,6 +546,7 @@ private:
   char * buffer_;
 };
 
+// A test utility class for capturing output from a C stream
 class CaptureStream
 {
 protected:
@@ -848,19 +627,21 @@ private:
   char * buffer_;
 };
 
+// A test utility class for capturing output from C stdout
 class CaptureStdout : public CaptureStream
 {
 public:
     CaptureStdout() : CaptureStream(stdout) {};
 };
 
+// A test utility class for capturing output from C stderr
 class CaptureStderr : public CaptureStream
 {
 public:
     CaptureStderr() : CaptureStream(stderr) {};
 };
 
-// Basic timing utility class
+// A test utility class for basic time measurement
 class BasicTimer
 {
 public:
@@ -915,6 +696,39 @@ protected:
 };
 
 bool ElapsedTimeWithinTolerance(double time_ms, double time_target_ms, double tolerance_ms);
+
+
+// Poll an overridden Check function until it returns true, or the timeout is reached.
+class WaitCondition
+{
+public:
+    WaitCondition(useconds_t checkPeriod=1e6,
+                  useconds_t timeoutDuration=1e7) :
+        checkPeriod_(checkPeriod), timeoutDuration_(timeoutDuration) {}
+    virtual ~WaitCondition() {}
+    virtual bool Wait()
+    {
+        const int maxCount = timeoutDuration_ / checkPeriod_;
+        int count = 0;
+        while (!Check())
+        {
+            if (++count > maxCount)
+                break;
+            //std::cout << "Wait " << count * checkPeriod_ / 1000 << "ms" << std::endl;
+            usleep(checkPeriod_);
+        }
+        if (count > maxCount)
+        {
+            std::cerr << "Wait Condition timed out after " << timeoutDuration_ / 1000000.0 << " seconds." << std::endl;
+        }
+        return count <= maxCount;
+    }
+    virtual bool Check() = 0;
+protected:
+    useconds_t checkPeriod_;
+    useconds_t timeoutDuration_;
+};
+
 
 } // namespace Awa
 

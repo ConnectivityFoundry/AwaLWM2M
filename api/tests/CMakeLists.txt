@@ -4,6 +4,8 @@ set (test_api_runner_SOURCES
   support/main/main.cc
   support/main/main_cmdline.c
   support/support.cc
+  support/process.cc
+  support/daemon.cc
 
   test_log.cc
   test_error.cc
@@ -53,6 +55,8 @@ set (test_api_runner_SOURCES
   test_changeset.cc
   test_subscribe_observe_common.cc
   test_execute_operation.cc
+  
+  test_bootstrap.cc
 )
 
 set (test_api_runner_INCLUDE_DIRS

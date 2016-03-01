@@ -53,7 +53,7 @@ typedef struct
     int Port;
     bool Verbose;
     bool Daemonise;
-    char * Logfile;
+    char * LogFile;
     const char * Config[MAX_BOOTSTRAP_CONFIG_FILES];
     int ConfigCount;
     char * IPAddress;
@@ -64,6 +64,8 @@ typedef struct
 static FILE * logFile;
 static const char * version = VERSION; /* from Makefile */
 static volatile int quit = 0;
+
+static void PrintOptions(const Options * options);
 
 static void CtrlCSignalHandler(int dummy)
 {
@@ -109,6 +111,8 @@ static void Daemonise(bool verbose)
 
 static int Bootstrap_Start(Options * options)
 {
+    int result = 0;
+
     if (options->Daemonise)
     {
         Daemonise(options->Verbose);
@@ -121,25 +125,29 @@ static int Bootstrap_Start(Options * options)
     signal(SIGTERM, CtrlCSignalHandler);
 
     // open log files here
-    if (options->Logfile)
+    if (options->LogFile)
     {
         errno = 0;
-        logFile = fopen(options->Logfile, "at");
+        logFile = fopen(options->LogFile, "at");
         if (logFile != NULL)
         {
             Lwm2m_SetOutput(logFile);
 
-            // redirect stdout/stderr
+            // redirect stdout
             dup2(fileno(logFile), STDOUT_FILENO);
         }
         else
         {
-            Lwm2m_Error("Failed to open log file %s: %s\n", options->Logfile, strerror(errno));
+            Lwm2m_Error("Failed to open log file %s: %s\n", options->LogFile, strerror(errno));
         }
     }
 
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     Lwm2m_PrintBanner();
+    if (options->Verbose)
+    {
+        PrintOptions(options);
+    }
     Lwm2m_Info("LWM2M bootstrap - version %s\n", version);
     Lwm2m_Info("LWM2M bootstrap - CoAP port %d\n", options->Port);
 
@@ -157,7 +165,8 @@ static int Bootstrap_Start(Options * options)
     {
         if (Lwm2mCore_GetIPAddressFromInterface(options->InterfaceName, options->AddressFamily, ipAddress, sizeof(ipAddress)) != 0)
         {
-            return -1;
+            result = 1;
+            goto error_close_log;
         }
         Lwm2m_Info("LWM2M bootstrap - Interface Address %s\n", ipAddress);
     }
@@ -170,20 +179,25 @@ static int Bootstrap_Start(Options * options)
     if (coap == NULL)
     {
         printf("Unable to map address to network interface\n");
-        return 1;
+        result = 1;
+        goto error_close_log;
     }
     Lwm2mContextType * context = Lwm2mCore_Init(coap);
+
+    // must happen after coap_Init()
     Lwm2m_RegisterObjectTypes(context);
+
     if (!Lwm2mBootstrap_BootStrapInit(context, options->Config, options->ConfigCount))
     {
         printf("Failed to initialise boostrap\n");
-        return 1;
+        result = 1;
+        goto error_destroy;
     }
 
     // wait for messages on both the "IPC" and coap interfaces
     while (!quit)
     {
-        int result;
+        int loop_result;
         struct pollfd fds[1];
         int nfds = 1;
         int timeout;
@@ -193,9 +207,9 @@ static int Bootstrap_Start(Options * options)
 
         timeout = Lwm2mCore_Process(context);
 
-        result = poll(fds, nfds, timeout);
+        loop_result = poll(fds, nfds, timeout);
 
-        if (result < 0)
+        if (loop_result < 0)
         {
             if (errno == EINTR)
             {
@@ -205,7 +219,7 @@ static int Bootstrap_Start(Options * options)
             perror("poll:");
             break;
         }
-        else if (result > 0)
+        else if (loop_result > 0)
         {
             if (fds[0].revents == POLLIN)
             {
@@ -215,9 +229,18 @@ static int Bootstrap_Start(Options * options)
         coap_Process();
     }
 
-    coap_Destroy();
+error_destroy:
     Lwm2mCore_Destroy(context);
-    return 0;
+    coap_Destroy();
+
+error_close_log:
+    Lwm2m_Info("Bootstrap Server exiting\n");
+    if (logFile != NULL)
+    {
+        fclose(logFile);
+    }
+
+    return result;
 }
 
 static void PrintUsage(void)
@@ -234,12 +257,29 @@ static void PrintUsage(void)
     printf("  --config, -c        : config file (server list)\n");
     printf("  --daemonize, -d     : daemonize\n");
     printf("  --verbose, -v       : verbose debug output\n");
-    printf("  --logfile           : logfile name\n");
+    printf("  --logFile           : log filename\n");
     printf("  --help              : show usage\n\n");
 
     printf("Example:\n");
     printf("    awa_bootstrapd --port 15685 --config bootstrap.conf\n");
 
+}
+
+static void PrintOptions(const Options * options)
+{
+    printf("Options provided:\n");
+    printf("  IPAddress      (--ip)             : %s\n", options->IPAddress);
+    printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName);
+    printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily);
+    printf("  Port           (--port)           : %d\n", options->Port);
+    int i;
+    for (i = 0; i < options->ConfigCount; ++i)
+    {
+        printf("  Config         (--config)         : %s\n", options->Config[i]);
+    }
+    printf("  Daemonise      (--daemonise)      : %d\n", options->Daemonise);
+    printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
+    printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
 }
 
 static int ParseOptions(int argc, char ** argv, Options * options)
@@ -250,16 +290,16 @@ static int ParseOptions(int argc, char ** argv, Options * options)
 
         static struct option longOptions[] =
         {
-            {"ip",          required_argument,      0, 'a'},
-            {"interface",        required_argument, 0, 'e'},
-            {"addressFamily",    required_argument, 0, 'f'},
-            {"port",        required_argument,      0, 'p'},
-            {"config",      required_argument,      0, 'c'},
-            {"verbose",     no_argument,            0, 'v'},
-            {"daemonise",   no_argument,            0, 'd'},
-            {"logfile",     required_argument,      0, 'l'},
-            {"help",        no_argument,            0, 'h'},
-            {0,             0,                      0,  0 }
+            {"ip",            required_argument,      0, 'a'},
+            {"interface",     required_argument,      0, 'e'},
+            {"addressFamily", required_argument,      0, 'f'},
+            {"port",          required_argument,      0, 'p'},
+            {"config",        required_argument,      0, 'c'},
+            {"verbose",       no_argument,            0, 'v'},
+            {"daemonise",     no_argument,            0, 'd'},
+            {"logFile",       required_argument,      0, 'l'},
+            {"help",          no_argument,            0, 'h'},
+            {0,               0,                      0,  0 }
         };
 
         int c = getopt_long(argc, argv, "a:p:c:vdl:h", longOptions, &optionIndex);
@@ -290,7 +330,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 options->Verbose = true;
                 break;
             case 'l':
-                options->Logfile = optarg;
+                options->LogFile = optarg;
                 break;
             case 'h':
             default:
@@ -308,7 +348,7 @@ int main(int argc, char ** argv)
         .Port = 15685,
         .Verbose = false,
         .Daemonise = false,
-        .Logfile = NULL,
+        .LogFile = NULL,
         .Config = {0},
         .ConfigCount = 0,
         .IPAddress = DEFAULT_IP_ADDRESS,

@@ -10,6 +10,8 @@ add_executable (test_tools_runner
   ${API_TEST_DIR}/support/main/main.cc
   ${API_TEST_DIR}/support/main/main_cmdline.c
   ${API_TEST_DIR}/support/support.cc
+  ${API_TEST_DIR}/support/process.cc
+  ${API_TEST_DIR}/support/daemon.cc
 )
 
 set_source_files_properties(${API_TEST_DIR}/support/main/main_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)

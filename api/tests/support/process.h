@@ -20,32 +20,42 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include "support.h"
+#ifndef PROCESS_H
+#define PROCESS_H
+
+#include <vector>
+
+#include <sys/types.h>
 
 namespace Awa {
 
-namespace global {
+// Spawn a new child process, arguments specified by a null-terminated commandVector.
+// Note that the type of the vector must be char *, not const char *.
+// If true, wait specifies that the parent should wait for the child to terminate.
+// If true, silent specifies that the child's stdout will be redirected to /dev/null.
+pid_t SpawnProcess(std::vector<char *> &commandVector, bool wait, bool silent);
 
-    // non-const initialization values are subject to Static Initialization Order Fiasco
-    int logLevel = 0;
+// Kill an existing process, with SIGKILL.
+void KillProcess(pid_t pid);
 
-    // initialise non-const globals with a function to avoid Static Initialization Order Fiasco
-    void SetGlobalDefaults(void)
-    {
-        global::logLevel = defaults::logLevel;
-        SetDaemonGlobalDefaults();
-    }
+// Terminate an existing process, with SIGTERM.
+void TerminateProcess(pid_t pid);
 
-} // namespace global
+// Perform a CoAP operation on the specified resource, after a short delay.
+pid_t CoAPOperation(const char * coapClientPath, int port, const char * method, const char * resource, int delay /*microseconds*/);
 
-namespace detail {
-    const char * NonRoutableIPv4Address = "192.0.2.0";
-    const char * NonRoutableIPv6Address = "2001:db8::";
-} // namespace detail
+// Send a request to the specified IPC port, wait for response. Return 0 on success, -1 on error or timeout
+int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_t requestLen);
 
-bool ElapsedTimeWithinTolerance(double time_ms, double time_target_ms, double tolerance_ms)
-{
-    return (time_ms >= time_target_ms - tolerance_ms) && (time_ms <= time_target_ms + tolerance_ms);
-}
+// Start an Awa Client process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID, or 0 if failed.
+pid_t StartAwaClient(const char * clientDaemonPath, int coapPort, int ipcPort, const char * logFile, const char * clientID, const char * bootstrapConfig, const char * bootstrapURI);
+
+// Start an Awa Server process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID.
+pid_t StartAwaServer(const char * serverDaemonPath, int coapPort, int ipcPort, const char * logFile);
+
+// Start an Awa Server process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID.
+pid_t StartAwaBootstrapServer(const char * bootstrapServerDaemonPath, int coapPort, const char * configFile, const char * logFile);
 
 } // namespace Awa
+
+#endif // PROCESS_H

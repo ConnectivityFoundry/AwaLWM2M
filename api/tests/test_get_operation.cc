@@ -262,7 +262,7 @@ TEST_F(TestGetOperation, AwaClientGetOperation_Perform_honours_timeout)
     // start a client
     const char * clientID = "TestClient1";
 
-    LWM2MClientDaemonHorde * horde_ = new LWM2MClientDaemonHorde( { clientID }, 61001, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001, CURRENT_TEST_DESCRIPTION);
     sleep(1);      // wait for the client to register with the server
 
     AwaClientSession * session = AwaClientSession_New();

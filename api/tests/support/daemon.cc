@@ -20,32 +20,54 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include "support.h"
+#include <memory>
+
+#include "daemon.h"
 
 namespace Awa {
 
 namespace global {
 
-    // non-const initialization values are subject to Static Initialization Order Fiasco
-    int logLevel = 0;
+// initialization values are subject to Static Initialization Order Fiasco
+int clientIpcPort = 0;
+int serverIpcPort = 0;
+int clientLocalCoapPort = 0;
+int serverCoapPort = 0;
+int bootstrapServerCoapPort = 0;
+bool spawnClientDaemon = false;
+bool spawnServerDaemon = false;
+bool spawnBootstrapServerDaemon = false;
+const char * coapClientPath = nullptr;
+const char * clientDaemonPath = nullptr;
+const char * serverDaemonPath = nullptr;
+const char * bootstrapServerDaemonPath = nullptr;
+const char * bootstrapServerConfig = nullptr;
+const char * clientEndpointName = nullptr;
+const char * clientLogFile = nullptr;
+const char * serverLogFile = nullptr;
+const char * bootstrapServerLogFile = nullptr;
 
-    // initialise non-const globals with a function to avoid Static Initialization Order Fiasco
-    void SetGlobalDefaults(void)
-    {
-        global::logLevel = defaults::logLevel;
-        SetDaemonGlobalDefaults();
-    }
+// initialise globals with a function to avoid Static Initialization Order Fiasco
+void SetDaemonGlobalDefaults(void)
+{
+    global::clientIpcPort = defaults::clientIpcPort;
+    global::serverIpcPort = defaults::serverIpcPort;
+    global::clientLocalCoapPort = defaults::clientLocalCoapPort;
+    global::serverCoapPort = defaults::serverCoapPort;
+    global::spawnClientDaemon = true;
+    global::spawnServerDaemon = true;
+    global::spawnBootstrapServerDaemon = true;
+    global::coapClientPath = defaults::coapClientPath;
+    global::clientDaemonPath = defaults::clientDaemonPath;
+    global::serverDaemonPath = defaults::serverDaemonPath;
+    global::bootstrapServerDaemonPath = defaults::bootstrapServerDaemonPath;
+    global::bootstrapServerConfig = defaults::bootstrapServerConfig;
+    global::clientEndpointName = defaults::clientEndpointName;
+    global::clientLogFile = defaults::clientLogFile;
+    global::serverLogFile = defaults::serverLogFile;
+    global::bootstrapServerLogFile = defaults::bootstrapServerLogFile;
+}
 
 } // namespace global
-
-namespace detail {
-    const char * NonRoutableIPv4Address = "192.0.2.0";
-    const char * NonRoutableIPv6Address = "2001:db8::";
-} // namespace detail
-
-bool ElapsedTimeWithinTolerance(double time_ms, double time_target_ms, double tolerance_ms)
-{
-    return (time_ms >= time_target_ms - tolerance_ms) && (time_ms <= time_target_ms + tolerance_ms);
-}
 
 } // namespace Awa

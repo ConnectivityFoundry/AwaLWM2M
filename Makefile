@@ -80,7 +80,7 @@ endif
 # determine absolute binary paths
 export LWM2M_CLIENTD_BIN:=$(BUILD_DIR_ABS)/core/src/client/awa_clientd
 export LWM2M_SERVERD_BIN:=$(BUILD_DIR_ABS)/core/src/server/awa_serverd
-export LWM2M_BOOTSTRAPD_BIN:=$(BUILD_DIR_ABS)/core/src/client/awa_clientd
+export LWM2M_BOOTSTRAPD_BIN:=$(BUILD_DIR_ABS)/core/src/bootstrap/awa_bootstrapd
 export LIBCOAP_COAP_CLIENT:=$(BUILD_DIR_ABS)/lib/libcoap/examples/coap-client
 
 # gtest-based tests:
