@@ -9,7 +9,7 @@ endif()
 Include (ExternalProject)
 ExternalProject_Add(googletest
     GIT_REPOSITORY https://github.com/google/googletest
-    GIT_TAG master
+    GIT_TAG ff07a5de0e81580547f1685e101194ed1a4fcd56
     CMAKE_ARGS ${CMAKE_EXTRA_ARGS}
     SOURCE_DIR     "${CMAKE_BINARY_DIR}/gtest-src"
     BINARY_DIR     "${CMAKE_BINARY_DIR}/gtest-build"

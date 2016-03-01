@@ -41,9 +41,6 @@ struct _Lwm2mContextType
     DefinitionRegistry * Definitions;
     ResourceEndPointList EndPointList;        // CoAP endpoints
     CoapInfo * Coap;                          // CoAP library context information
-    struct ListHead ClientList;               // List of registered clients
-    int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
-    ContentType ContentType;                  // Used to set CoAP content type
 };
 
 static Lwm2mContextType Lwm2mContext;

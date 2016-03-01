@@ -9,7 +9,7 @@ endif()
 Include (ExternalProject)
 ExternalProject_Add(libjsmn
     HG_REPOSITORY https://bitbucket.org/azimoff/jsmn
-    HG_TAG first-child-next-sibling
+    HG_TAG 4b14865
     CMAKE_ARGS ${CMAKE_EXTRA_ARGS}
     SOURCE_DIR     "${CMAKE_BINARY_DIR}/libjsmn-src"
     BINARY_DIR     "${CMAKE_BINARY_DIR}/libjsmn-build"

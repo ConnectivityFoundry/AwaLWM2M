@@ -9,7 +9,7 @@ endif()
 Include (ExternalProject)
 ExternalProject_Add(libcoap
     GIT_REPOSITORY https://github.com/obgm/libcoap
-    GIT_TAG master
+    GIT_TAG d48ab449fd05801e574e4966023589ed7dac500b
     CMAKE_ARGS ${CMAKE_EXTRA_ARGS}
     SOURCE_DIR     "${CMAKE_BINARY_DIR}/libcoap-src"
     BINARY_DIR     "${CMAKE_BINARY_DIR}/libcoap-build"
