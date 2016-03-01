@@ -29,10 +29,4 @@
 #include "awa/static.h"
 #include "lwm2m_core.h"
 
-struct _AwaStaticClient
-{
-    Lwm2mContextType * Context;
-    bool Configured;
-};
-
 #endif /* LWM2M_STATIC_H_ */

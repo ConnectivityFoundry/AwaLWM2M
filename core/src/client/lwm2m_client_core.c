@@ -1771,7 +1771,8 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
                              &response->responseContentLen, &response->responseCode);
 }
 
-int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len)
+
+int Lwm2mCore_SetEndPointClientName(Lwm2mContextType * context, const char * endpoint)
 {
     // UUID URN: Identify a device using a Universally Unique Identifier (UUID).
     //           The UUID specifies a valid, hex digit character string as defined in [RFC4122].
@@ -1787,6 +1788,19 @@ int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, i
     // MEID URN: Identify a device using a Mobile Equipment IDentifier.
     //            The MEID URN specifies a valid, 14 digit
     //
+    if (strlen(endpoint) < MAX_ENDPOINT_NAME_LENGTH)
+    {
+        strcpy(context->EndPointName, endpoint);
+        return strlen(context->EndPointName);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len)
+{
     strcpy(buffer, context->EndPointName);
     return strlen(buffer);
 }
@@ -1879,6 +1893,41 @@ DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context)
 bool Lwm2mCore_GetUseFactoryBootstrap(Lwm2mContextType * context)
 {
     return context->UseFactoryBootstrap;
+}
+
+Lwm2mContextType * Lwm2mCore_New()
+{
+    Lwm2mContextType * context = &Lwm2mContext;
+
+    ListInit(&context->ObserverList);
+    ListInit(&context->ServerList);
+    Lwm2mObjectTree_Init(&context->ObjectTree);
+
+
+    context->Store = ObjectStore_Create();
+    context->Definitions = DefinitionRegistry_Create();
+    context->AttributeStore = AttributeStore_Create();
+    Lwm2mSecurity_Create(&context->SecurityObjectList);
+    Lwm2mEndPoint_InitEndPointList(&context->EndPointList);
+
+    return context;
+}
+
+void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap)
+{
+    context->Coap = coap;
+
+    if (coap != NULL)
+    {
+        coap_SetContext(context);
+        coap_SetRequestHandler(Lwm2mCore_HandleRequest);
+        Lwm2m_BootStrapInit(context);
+    }
+}
+
+CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context)
+{
+    return context->Coap;
 }
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.

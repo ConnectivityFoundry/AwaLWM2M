@@ -1,7 +1,12 @@
 set (STATIC_API_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "STATIC_API_TEST_DIR")
 
 set (test_static_api_runner_SOURCES
-  support/main/main.cc
+  ../tests/support/main/main.cc
+  ../tests/support/main/main_cmdline.c
+  ../tests/support/support.cc
+  ../tests/support/process.cc
+  ../tests/support/daemon.cc
+
   test_client.cc
 )
 
@@ -18,6 +23,8 @@ set (test_static_api_runner_LIBRARIES
   gtest
   pthread
   awa_clientd_static
+  lwm2m_common_static
+  Awa_static
   libb64_static
 )
 

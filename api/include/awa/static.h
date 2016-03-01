@@ -59,12 +59,12 @@ typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation ope
  ************************************************************************************************************/
 
 //Main process function
-int AwaStaticClient_Process(AwaStaticClient * core);
+int AwaStaticClient_Process(AwaStaticClient * client);
 
 //Initialisation functions
 //AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
-AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName);
-AwaError AwaStaticClient_SetCOAPPort(AwaStaticClient * client, int port);
+AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * endPointName);
+AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
 

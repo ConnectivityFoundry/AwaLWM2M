@@ -46,7 +46,7 @@ typedef enum
 
 
 void Lwm2m_RegisterSecurityObject(Lwm2mContextType * context);
-void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, char * bootStrapServer);
+void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, const char * bootStrapServer);
 
 int Lwm2m_GetServerURI(Lwm2mContextType * context, int shortServerID, char * buffer, int len);
 int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff);
