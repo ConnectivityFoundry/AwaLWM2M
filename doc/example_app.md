@@ -97,8 +97,11 @@ Start the server and client:
 ````
 
 Run your application:
+
+*Note: in this case libawa.so isn't in the library path, so we will tell the system where to find
+ it by setting the LD_LIBRARY_PATH variable.*
 ```
-~/client-tutorial$ export LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib; ./client-tutorial
+~/client-tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib; ./client-tutorial
 ````
 
 At this point your application will exit, leaving your new object/resource registered within the client daemon.
