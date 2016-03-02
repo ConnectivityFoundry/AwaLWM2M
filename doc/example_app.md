@@ -42,7 +42,10 @@ Firstly, Awa LWM2M must be compiled and installed, using the commands below to b
 ~/AwaLWM2M/build$ cmake DESTDIR=./install install
 ```
 
-33 Creating the application.
+----
+
+
+## Creating the application.
 
 
 Now we create a new directory for the project. We'll use *tutorial*:
