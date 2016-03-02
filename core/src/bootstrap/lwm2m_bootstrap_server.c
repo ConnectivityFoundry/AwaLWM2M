@@ -230,6 +230,7 @@ static int Bootstrap_Start(Options * options)
     }
 
 error_destroy:
+    Lwm2mBootstrap_Destroy();
     Lwm2mCore_Destroy(context);
     coap_Destroy();
 

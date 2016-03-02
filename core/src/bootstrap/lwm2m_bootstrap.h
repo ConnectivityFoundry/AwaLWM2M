@@ -37,6 +37,8 @@ extern "C" {
 // Initialise the boot strap mechanism, create the /bs endpoint
 bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** config, int configCount);
 
+void Lwm2mBootstrap_Destroy(void);
+
 void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context);
 
 #ifdef __cplusplus

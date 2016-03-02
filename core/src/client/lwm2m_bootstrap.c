@@ -257,7 +257,7 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
 
             if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= (clientHoldOff * 1000))
             {
-                Lwm2m_Warning("HoldOff Expired - Re-attempt boot-strap\n");
+                Lwm2m_Warning("HoldOff Expired - Re-attempt bootstrap\n");
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_NotBootStrapped);
                 Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
             }

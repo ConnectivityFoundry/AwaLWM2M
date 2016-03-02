@@ -72,7 +72,7 @@ void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const 
 #  define ANSI_COLOUR_BRIGHT_MAGENTA "\x1b[35;01m"
 #  define ANSI_COLOUR_BRIGHT_CYAN    "\x1b[36;01m"
 #  define ANSI_COLOUR_BRIGHT_WHITE   "\x1b[37;01m"
-#  define ANSI_COLOUR_RESET          "\x1b[0;00m"
+#  define ANSI_COLOUR_RESET          "\x1b[0m"
 #else
 #  define ANSI_COLOUR_RED
 #  define ANSI_COLOUR_GREEN
