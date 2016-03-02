@@ -42,6 +42,9 @@ Firstly, Awa LWM2M must be compiled and installed, using the commands below to b
 ~/AwaLWM2M/build$ cmake DESTDIR=./install install
 ```
 
+33 Creating the application.
+
+
 Now we create a new directory for the project. We'll use *tutorial*:
 
 ```
@@ -140,6 +143,9 @@ Use the client tools to read your newly defined resource:
 Heater[/1000/0]:
     Manufacturer[/1000/0/101]: HotAir Systems Inc
 ```
+
+----
+
 
 ## Adding further resources.
 Further object resources are easily defined. Note that a resource's data type is implied by the API function used to create it, e.g. resource 101, (defined above), was of type string and thus used *AwaObjectDefinition_AddResourceDefinitionAsString()*. Our new resource, 104, will be of type float, so we'll use *AwaObjectDefinition_AddResourceDefinitionAsFloat()* to create it. Function parameters remain the same.
@@ -261,7 +267,12 @@ Heater[/1000/0]:
 So far our object definitions have remained local to the client. The next section compliments our client application by extending our object definitions to the server.
 
 
-## Creating a server application using the AWA API
+----
+
+
+
+## Creating a server application using the AWA API.
+
 
 Let's create a server side application that makes use of our new object.
 
