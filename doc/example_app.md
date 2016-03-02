@@ -131,15 +131,16 @@ Start the client daemon...
 
 And run the application...
 
-*Note that in this case *libawa.so* isn't in the library path. We'll tell the system where to find
- it by setting the *LD_LIBRARY_PATH variable*.
+Note that in this case *libawa.so* isn't in the library path. We'll tell the system where to find
+ it by setting the *LD_LIBRARY_PATH* variable.
+
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
 ````
 
 The application will then exit, leaving the new object/resource registered within the client daemon.
 
-Use the client tools to read your newly defined resource:
+Use the client tool *awa-client-get* to read your newly defined resource:
 
 ```
 ~/AwaLWM2M/build/install/bin$ ./awa-client-get /1000/0/101
