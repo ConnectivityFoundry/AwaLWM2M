@@ -69,7 +69,7 @@ static void Lwm2m_SendBootStrapRequest(Lwm2mContextType * context, int shortServ
     Lwm2m_GetServerURI(context, shortServerID, serverPath, sizeof(serverPath));
 
     sprintf(uri, "%s%s%s", serverPath, uriPath, uriQuery);
-    Lwm2m_Info("Bootstrap %s\n", uri);
+    Lwm2m_Info("Bootstrap with %s\n", uri);
 
     coap_PostRequest(context, uri, ContentType_None, NULL, 0, Lwm2m_HandleBootstrapResponse);
 }
@@ -80,7 +80,7 @@ static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, con
 
     if (responseCode == 204)
     {
-        Lwm2m_Info("Waiting for bootstrap finished\n");
+        Lwm2m_Info("Waiting for bootstrap to finish\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFinishPending);
         Lwm2mCore_SetLastBootStrapUpdate(context, Lwm2mCore_GetTickCountMs());
     }
@@ -219,7 +219,7 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
 
             if (now - Lwm2mCore_GetLastBootStrapUpdate(context) >= (clientHoldOff * 1000))
             {
-                Lwm2m_Info("HoldOff Expired - Attempt Client Bootstrap\n");
+                Lwm2m_Info("Hold Off expired - attempt client-initiated bootstrap\n");
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapPending);
                 Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
                 Lwm2mCore_SetLastBootStrapUpdate(context, now);

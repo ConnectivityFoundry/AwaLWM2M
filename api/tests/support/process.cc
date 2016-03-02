@@ -104,7 +104,8 @@ void KillProcess(pid_t pid)
 {
     // kill LWM2M Client process
     //std::cout << "Kill pid " << pid_ << std::endl;
-    if (pid > 0) {
+    if (pid > 0)
+    {
         if (kill(pid, SIGKILL))
         {
             perror("kill failed");
@@ -116,7 +117,8 @@ void KillProcess(pid_t pid)
 void TerminateProcess(pid_t pid)
 {
     //std::cout << "Terminate pid " << pid_ << std::endl;
-    if (pid > 0) {
+    if (pid > 0)
+    {
         if (kill(pid, SIGTERM))
         {
             perror("kill failed");

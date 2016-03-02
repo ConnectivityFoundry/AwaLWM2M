@@ -152,9 +152,10 @@ static int Lwm2mServer_Start(Options * options)
     {
         PrintOptions(options);
     }
-    Lwm2m_Info("LWM2M server - version %s\n", version);
-    Lwm2m_Info("LWM2M server - CoAP port %d\n", options->CoapPort);
-    Lwm2m_Info("LWM2M server - IPC port %d\n", options->IpcPort);
+    Lwm2m_Info("Awa LWM2M Server, version %s\n", version);
+    Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
+    Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
+    Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
     if (options->InterfaceName != NULL)
     {

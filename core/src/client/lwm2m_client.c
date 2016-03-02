@@ -176,10 +176,11 @@ static int Lwm2mClient_Start(Options * options)
     {
         PrintOptions(options);
     }
-    Lwm2m_Info("LWM2M client - version %s\n", version);
-    Lwm2m_Info("LWM2M client - Local CoAP port %d\n", options->CoapPort);
-    Lwm2m_Info("LWM2M client - Local IPC port %d\n", options->IpcPort);
-    Lwm2m_Info("LWM2M client - Using IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
+    Lwm2m_Info("Awa LWM2M Client, version %s\n", version);
+    Lwm2m_Info("  Endpoint name  : \'%s\'\n", options->EndPointName);
+    Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
+    Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
+    Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
     CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
@@ -195,9 +196,17 @@ static int Lwm2mClient_Start(Options * options)
     {
         factoryBootstrapInfo = BootstrapInformation_ReadConfigFile(options->FactoryBootstrapFile);
         if (factoryBootstrapInfo == NULL)
-        { 
+        {
+            Lwm2m_Error("Factory Bootstrap configuration file load failed\n");
             result = 1;
             goto error_coap;
+        }
+        else
+        {
+            Lwm2m_Info("Factory Bootstrap:\n");
+            Lwm2m_Info("Server Configuration\n");
+            Lwm2m_Info("====================\n");
+            BootstrapInformation_Dump(factoryBootstrapInfo);
         }
     }
     else

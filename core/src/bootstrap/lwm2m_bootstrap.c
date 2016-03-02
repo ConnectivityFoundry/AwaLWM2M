@@ -40,16 +40,38 @@
 #define MAX_PAYLOAD_LENGTH      (1024)
 #define MAX_URI_LENGTH           (512)
 
+#define QUERY_EP_NAME "ep="
+
 typedef struct
 {
     AddressType Addr;
     ObjectIDType ObjectID;
     ObjectInstanceIDType ObjectInstanceID;
     Lwm2mContextType * Context;
+    const char * EndPointName;
 } Lwm2mBootstrapClient;
 
 static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS];
 static bool bootStrapQueueUsed[MAX_CLIENTS] = {0};
+
+static const char * GetEndPointNameFromQuery(const char * query)
+{
+    const char * endPointName = NULL;
+    char * str = strdup(query);
+    const char delim[] = "&?";
+    char * token = strtok(str, delim);
+    while (token != NULL)
+    {
+        // find end point name
+        if (strncmp(token, QUERY_EP_NAME, strlen(QUERY_EP_NAME)) == 0)
+        {
+            endPointName = strdup(token + strlen(QUERY_EP_NAME));
+        }
+        token = strtok(NULL, delim);
+    }
+    free(str);
+    return endPointName;
+}
 
 static void Lwm2mBootstrap_AddClientToQueue(Lwm2mBootstrapClient * client)
 {
@@ -76,8 +98,8 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
         }
         else
         {
-            Lwm2m_Info("Server configuration\n");
-            Lwm2m_Info("=====================\n");
+            Lwm2m_Info("Server Configuration\n");
+            Lwm2m_Info("====================\n");
             BootstrapInformation_Dump(bootstrapInfo);
             result = true;
         }
@@ -87,9 +109,9 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
 }
 
 static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, 
-                                     const char * token, int tokenLength, ContentType contentType, const char * requestContent, 
-                                     int requestContentLen, ContentType * responseContentType, char * responseContent, 
-                                     int * responseContentLen, int * responseCode)
+                                          const char * token, int tokenLength, ContentType contentType, const char * requestContent,
+                                          int requestContentLen, ContentType * responseContentType, char * responseContent,
+                                          int * responseContentLen, int * responseCode)
 {
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
@@ -107,7 +129,8 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
             client.ObjectID = LWM2M_SECURITY_OBJECT;
             client.ObjectInstanceID = -1;
             client.Context = ctxt;
- 
+            client.EndPointName = GetEndPointNameFromQuery(query);
+
             Lwm2mBootstrap_AddClientToQueue(&client);
     
             *responseCode = Lwm2mResult_SuccessChanged;
@@ -177,6 +200,7 @@ static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * add
             //No more objects so write to /bs to indicate bootstrap complete
             sprintf(uri, "%s/%s", server, "/bs");
             Lwm2m_Debug("Post to %s\n", uri);
+            Lwm2m_Info("Client bootstrapped: %s, \'%s\'\n", server, client->EndPointName);
             coap_PostRequest(context, uri, ContentType_None, NULL, 0, NULL);
         }
     }

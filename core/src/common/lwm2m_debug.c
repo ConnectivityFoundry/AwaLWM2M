@@ -29,35 +29,64 @@
 static DebugLevel debugLevel = DebugLevel_Info;
 static FILE * g_outFile = NULL;
 
+static const char * logLabels[] = { "EMER", "ALERT", "CRIT", "ERROR", "WARN", "NOTICE", "INFO", "DEBUG" };
+
 void Lwm2m_PrintBanner(void)
 {
     const char * banner =
-    "   _____\n"
-    "  / ___  \\_______    /|                                     _\n"
-    " / /    |  ____  |  | | _ __ ___   __ _  __ _ _ _ __   __ _| |_ _  ___  _ __\n"
-    " \\ \\____| |    | |  | || '_ ` _ \\ / _` |/ _` | | '_ \\ / _` | __| |/ _ \\| '_ \\ \n"
-    "  \\____,| |____| |  | || | | | | | (_| | (_| | | | | | (_| | |_| | (_) | | | |\n"
-    "        |________|  |_||_| |_| |_|\\__,_|\\__, |_|_| |_|\\__,_|\\__|_|\\___/|_| |_|\n"
-    "                                         __/ |\n"
-    "                                        |___/        Technologies\n";
-    Lwm2m_Printf(0, "\n\n" ANSI_COLOUR_MAGENTA "%s" ANSI_COLOUR_RESET "\n", banner);
+    "      _                  _            __  __ ____  __  __ \n"
+    "     / \\__      ____ _  | | __      _|  \\/  |___ \\|  \\/  |\n"
+    "    / _ \\ \\ /\\ / / _` | | | \\ \\ /\\ / / |\\/| | __) | |\\/| |\n"
+    "   / ___ \\ V  V / (_| | | |__\\ V  V /| |  | |/ __/| |  | |\n"
+    "  /_/   \\_\\_/\\_/ \\__,_| |_____\\_/\\_/ |_|  |_|_____|_|  |_|\n";
+    Lwm2m_Printf(0, ANSI_COLOUR_BRIGHT_MAGENTA "%s" ANSI_COLOUR_RESET "\n", banner);
+    Lwm2m_Printf(0, ANSI_COLOUR_MAGENTA "   Copyright (C) 2016, Imagination Technologies Limited." ANSI_COLOUR_RESET "\n\n");
 }
 
 void Lwm2m_Printf(DebugLevel level, char const * format, ...)
 {
      if (level <= debugLevel)
      {
-         va_list args;
-
-         if (g_outFile == NULL)
-             g_outFile = stdout;
-
-         va_start(args, format);
-         vfprintf(g_outFile, format, args);
-         va_end(args);
-
+         va_list argp;
+         va_start(argp, format);
+         Lwm2m_vPrintf(level, format, argp);
+         va_end(argp);
          fflush(g_outFile);
      }
+}
+
+void Lwm2m_vPrintf(DebugLevel level, char const * format, va_list argp)
+{
+     if (level <= debugLevel)
+     {
+         g_outFile = (g_outFile == NULL) ? stdout : g_outFile;
+         vfprintf(g_outFile, format, argp);
+         fflush(g_outFile);
+     }
+}
+
+void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const * format, ...)
+{
+    if (level <= debugLevel)
+    {
+        g_outFile = (g_outFile == NULL) ? stdout : g_outFile;
+
+        if ((level >= 0) && (level < (sizeof(logLabels) / sizeof(logLabels[0]))))
+        {
+            fprintf(g_outFile, ANSI_COLOUR_BRIGHT_WHITE " [%s] " ANSI_COLOUR_RESET, logLabels[level]);
+
+            if (level >= DebugLevel_Debug)
+            {
+                const char * shortFileName = strrchr(fileName, DIR_SLASH);
+                fprintf(g_outFile, ANSI_COLOUR_YELLOW "[%s:%d] " ANSI_COLOUR_RESET, shortFileName ? shortFileName+1 : fileName, lineNum);
+            }
+        }
+
+        va_list argp;
+        va_start(argp, format);
+        Lwm2m_vPrintf(level, format, argp);
+        va_end(argp);
+    }
 }
 
 void Lwm2m_SetOutput(FILE * outFile)

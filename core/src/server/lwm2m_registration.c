@@ -315,7 +315,7 @@ static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPoin
     Lwm2mClientType * client = Lwm2m_LookupClientByName(context, endPointName);
     if (client == NULL)
     {
-        Lwm2m_Info("Register new client %s\n", endPointName);
+        Lwm2m_Info("Client registered: \'%s\'\n", endPointName);
 
         client = malloc(sizeof(Lwm2mClientType));
         if (client != NULL)
@@ -360,6 +360,8 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
     sprintf(RegisterLocation, "/rd/%d", client->Location);
     Lwm2mCore_RemoveResourceEndPoint(context, RegisterLocation);
 
+    Lwm2m_Info("Client deregistered: \'%s\'\n", client->EndPointName);
+
     free(client->EndPointName);
     free(client);
 }
@@ -403,7 +405,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         // Check to see if this is a re-register from the same address, otherwise treat as a duplicate.
         if ((addr->Size == client->Address.Size) && (memcmp(addr, &client->Address, addr->Size) == 0))
         {
-            Lwm2m_Info("Client %s already registered, deleting\n", q.EndPointName);
+            Lwm2m_Info("Client \'%s\' already registered, deleting\n", q.EndPointName);
             Lwm2m_DeregisterClient(context, client);
         }
     }
@@ -535,7 +537,7 @@ static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressT
                                                  int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
                                                  ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
 {
-    switch(type)
+    switch (type)
     {
         case COAP_POST_REQUEST:
             return Lwm2m_RegisterPost(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
@@ -560,7 +562,7 @@ int32_t Lwm2m_AgeRegistrations(Lwm2mContextType * context)
 
         if ((now - client->LastUpdateTime) > (client->LifeTime * 1000))
         {
-            Lwm2m_Error("Client %s Lifetime Expired\n", client->EndPointName);
+            Lwm2m_Error("Client \'%s\' Lifetime Expired\n", client->EndPointName);
 
             Lwm2m_DeregisterClient(context, client);
         }
@@ -570,7 +572,7 @@ int32_t Lwm2m_AgeRegistrations(Lwm2mContextType * context)
 
 int Lwm2m_RegistrationInit(Lwm2mContextType * context)
 {
-    // Initalise client list
+    // Initialise client list
     ListInit(Lwm2mCore_GetClientList(context));
     Lwm2mCore_SetLastLocation(context, 0);
 
