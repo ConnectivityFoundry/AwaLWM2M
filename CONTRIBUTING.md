@@ -59,9 +59,24 @@ When you're prompted to "Enter a file in which to save the key," press Enter. Th
 
 Now that you have a key, sign in to your Github account
 
-click the top right icon, select settings->ssh keys->new ssh key
+Click the top right icon, select settings->ssh keys->new ssh key
 
-paste the contents of your public key into the box.
+Paste the contents of your public key into the box.
+
+Your public key should look something like:
+```
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDOvXIAom7iVB/JmNFZrDNZVz+ta6vZoAvoyzjAR53
+LwFyA82TDK4RkosKZHgEU/KT+AXYZ9983uVvzS/O7rxa1YxiL21ckw8Ymm4qRxjMP6Bvw8vsGXlLfq7
+bNH2tmxIMxd/csIR246FxmCIddLcrIJ2JOTF3AXNRX8uw0FFeJuZTIkAF/PLDO4HhStY6AGxDzpgoZt
+480EdPXzNRqTPJ41iXmMZhsJ3I7HCNeZHmy4VFk0XWKXdvmYKm7nSHeqMZxA9LHRPbLnolJyuBp7qPJ
+yWC8xT48dS8PDmn5i/wYyXEBNS6uwsYfLZuPfPAKaSTzd1g1fphEw4/9rTZIqqUSMBR87IdDhVKffvf
+tQD4O0TTJAsVEzx6w2dx29lwKWrhuJ9ipSZyH+ujai+azW52b+RmcFOqXh7E79XvWfMF1NqiEDtlqFV
+gqnvYg+PkS4+sCyLE0qfMx301r9E6pSTj0SIsBz0PUHFhNUx3grg4eJ1FH8Zu9+JYaFjZeNEFSypxaS
+Z7J6coWx8hfBG6bpdnFsuL8JJHKwzlU2OdUJ78uLGgl190OYOEsIz5k3yK49nTyky4sOGmJsmds+fqR
+rbURhDGu/tLAAK/6np3fai5ef4beZDbdhXrWS+rjOKSU0lRifUXU/JJFicG2PiX2B1InuqGLwGwAp/3
+xoHqsuyNhTw== user.name@email.com
+
+```
 
 ### Set your git user name.
 
@@ -73,16 +88,16 @@ $ git config --global user.name User Name
 $ git config --global user.email User.Name@email.com
 ```
 
-use the same email address as the one you used to sign up for your Github account.
+Use the same email address as the one you used to sign up for your Github account.
 
 ### Forking the repository.
 
-If you want to contribute to the project the best practice is to create a fork. To do so
+If you want to contribute to the project the best practice is to create a Github fork. To do so
 navigate to https://github.com/FlowM2M/AwaLWM2M and click on the "fork" button at the top right of the 
 screen.  If you are a member of multiple organisations you will be presented with a selection screen
-which can be used to select where to create the fork. click on your user account to create the fork.
+which can be used to select where to create the fork. Click on your user account to create the fork.
 
-you can now clone your fork 
+You can now clone your fork with the following command:
 
 ```
 $ git clone git@github.com:<username>/AwaLWM2M.git
@@ -90,21 +105,22 @@ $ git clone git@github.com:<username>/AwaLWM2M.git
 
 ### Keeping your fork in sync.
 
-In order to easily pull down upstream changes to your fork you need to setup a new remote.
+In order to easily pull down upstream changes to your fork you need to set up a new remote.
 
 ```
 $ git remote add upstream git@github.com/FlowM2M/AwaLWM2M.git
 ```
 
-you can now fetch from the upstream repository with:
+You can now fetch from the upstream repository with:
 
 ```
 $ git fetch upstream
 ```
 
-and merge any new changes into your master branch with:
+And merge any new changes into your master branch with:
 
 ```
+$ git checkout master
 $ git merge upstream/master
 ```
 
@@ -114,14 +130,14 @@ We have found that the easiest way of working is to keep a clean master branch i
 and create branches for each new pull request. This prevents merge conflicts with the upstream
 master branch, and allows you to make changes to your pull request if required.
 
-To create a new branch
+To create a new branch:
 
 ```
 $ git checkout master -b dev-branch1 --track
 ```
 
-*NOTE: the branch name here is important, it will show up in the git history, so it is recommended
-to use something meaningful.*
+*Note: the branch name here is important, it will show up in the git history, so it is recommended
+to use something meaningful or suitably general.*
 
 Once you have created your branch make any changes you desire, then commit them to your new branch.
 
@@ -224,19 +240,19 @@ $ git commit --signoff
 
 ### Pushing your changes to your branch.
 
-If you specified --track when you created your new branch you should be able to simply push using
+If you specified --track when you created your new branch you should be able to simply push using:
 
 ```
 $ git push
 ```
 
-If not you will either have to specify where to push your new commits.
+If not you will either have to specify where to push your new commits:
 
 ```
 $ git push origin dev_branch1:dev_branch1
 ```
 
-or alternatively setup branch tracking 
+Or alternatively set up branch tracking:
 
 ```
 $ git push --set-upstream origin dev_branch1
@@ -245,19 +261,20 @@ $ git push --set-upstream origin dev_branch1
 ### Creating a pull request.
 
 - Navigate to https://github.com/username/AwaLWM2M/pulls
-- click on "new pull request"
-- select FlowM2M/AwaLWM2M/master as the base in the left hand box
-- select the branch you wish to submit as a pull request in the right hand box.
-- click the create button.
+- Click on "new pull request"
+- Select FlowM2M/AwaLWM2M/master as the base in the left hand box
+- Select the branch you wish to submit as a pull request in the right hand box.
+- Click the create button.
 
-*NOTE: All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.*
+*Note: All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.*
 
 An email will be sent to the project maintainers, who will review your pull request.
 
-If everything checks out no further action will be required.
+If everything checks out no further action will be required and your pull request
+will be merged onto the main line.
 
-You may wish to continue making other changes, in this case simply resync with the upstream
-and create a new branch. Do NOT add your new unrelated changes to the branch you 
+You may wish to continue making other changes.  In this case simply resync with the upstream
+and create a new branch. Do **not** add your new unrelated changes to the branch you 
 used for the pull request as they will automatically be included in the request.
 
 ### Making changes to a pull request.
@@ -272,19 +289,17 @@ sign-off. You can find more information on rebasing in the section below.
 
 #### Rebasing.
 
-In most cases, rebasing commits that have already been pushed is considered a big no no. 
+In most cases, rebasing commits that have already been pushed is considered bad form. 
 
 The main problem is rebasing pushed commits is that if someone else happens to have based
 their work off one of these commits and then you go and rebase it, then you have effectively
 created a parallel universe where the commits they based their work on never existed..
 
 Given that we created our own fork, and branch within that fork, it should be reasonably safe
-to assume nobody else is using this work as a baseline, allowing us to rebase without causing
+to assume nobody else is using this work as a baseline, allowing you to rebase without causing
 the universe to implode.
 
-with that said, lets get started.
-
-firstly fetch any upstream changes:
+Firstly fetch any upstream changes:
 
 ```
 $ git fetch upstream 
@@ -419,8 +434,8 @@ $ git rebase --abort
 
 ##### Pushing your changes.
 
-After rebasing you will no able to simply push you changes back to your branch. You will need to use the --force
-option. becareful here, there is no going back if you make a mistake, so be sure to make sure you are happy with 
+After rebasing you will not able to simply push you changes back to your branch. You will need to use the --force
+option.  Be careful here, there is no going back if you make a mistake, so be sure to make sure you are happy with 
 what you are pushing and that you are pushing the correct branch to the correct remote.
 
 ```
