@@ -10,7 +10,7 @@
 
 If you discover a bug, or find an issue or area that you feel needs improvement:
 
-* Navigate to the "Issues" tab on the project github page https://github.com/FlowM2M/AwaLWM2M/issues  
+* Navigate to the "Issues" tab on the project Github page https://github.com/FlowM2M/AwaLWM2M/issues  
 
 * Click the "New Issue" button.  
 
@@ -41,15 +41,15 @@ When making your report, be as clear and concise as possible. Use the following 
 
 ## Developer submissions.
 
-### Create a git hub account.
+### Create a Github account.
 
-Before you can contribute you require a git hub account.
+Before you can contribute you require a Github account.
 
-Please sign up for an account at https://github.com/
+Please sign up for a free account at https://github.com/
 
-### Add your ssh key to your git hub account.
+### Add your ssh key to your Github account.
 
-If you are using a Linux development environment, you can normally find your public key (if you have generated one) in ~/.ssh/id_rsa
+If you are using a Linux development environment, you can normally find your public key (if you have generated one) in ~/.ssh/id_rsa.pub
 or alternatively you can generate a new key but using the following commands:
 
 ```
@@ -57,7 +57,7 @@ ssh-keygen -t rsa -b 4096 -C "user.name@email.com"
 ````
 When you're prompted to "Enter a file in which to save the key," press Enter. This accepts the default file location.
 
-Now that you have a key, sign in to your git hub account
+Now that you have a key, sign in to your Github account
 
 click the top right icon, select settings->ssh keys->new ssh key
 
@@ -73,7 +73,7 @@ $ git config --global user.name User Name
 $ git config --global user.email User.Name@email.com
 ```
 
-use the same email address as the one you used to sign up for your github account.
+use the same email address as the one you used to sign up for your Github account.
 
 ### Forking the repository.
 
