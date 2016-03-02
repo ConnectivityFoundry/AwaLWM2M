@@ -44,6 +44,7 @@
 
 typedef struct
 {
+    bool Used;
     AddressType Addr;
     ObjectIDType ObjectID;
     ObjectInstanceIDType ObjectInstanceID;
@@ -52,7 +53,6 @@ typedef struct
 } Lwm2mBootstrapClient;
 
 static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS];
-static bool bootStrapQueueUsed[MAX_CLIENTS] = {0};
 
 static const char * GetEndPointNameFromQuery(const char * query)
 {
@@ -62,7 +62,7 @@ static const char * GetEndPointNameFromQuery(const char * query)
     char * token = strtok(str, delim);
     while (token != NULL)
     {
-        // find end point name
+        // Find end point name
         if (strncmp(token, QUERY_EP_NAME, strlen(QUERY_EP_NAME)) == 0)
         {
             endPointName = strdup(token + strlen(QUERY_EP_NAME));
@@ -78,9 +78,10 @@ static void Lwm2mBootstrap_AddClientToQueue(Lwm2mBootstrapClient * client)
     int i;
     for (i = 0 ; i < MAX_CLIENTS; i++)
     {
-        if (!bootStrapQueueUsed[i])
+        if (!bootStrapQueue[i].Used)
         {
             memcpy(&bootStrapQueue[i], client, sizeof(*client));
+            bootStrapQueue[i].Used = true;
             break;
         }
     }
@@ -197,11 +198,15 @@ static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * add
         }
         else
         {
-            //No more objects so write to /bs to indicate bootstrap complete
+            // No more objects so write to /bs to indicate bootstrap complete
             sprintf(uri, "%s/%s", server, "/bs");
             Lwm2m_Debug("Post to %s\n", uri);
             Lwm2m_Info("Client bootstrapped: %s, \'%s\'\n", server, client->EndPointName);
             coap_PostRequest(context, uri, ContentType_None, NULL, 0, NULL);
+
+            // Delete the client record
+            free((void *)client->EndPointName);
+            memset(client, 0, sizeof(*client));
         }
     }
 }
@@ -212,15 +217,15 @@ void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
     int i;
     for (i = 0 ; i < MAX_CLIENTS; i++)
     {
-        // kick start sending bootstrap with callback
-        if (bootStrapQueue[i].ObjectID == 0 && bootStrapQueue[i].ObjectInstanceID == -1)
+        // Kick start sending bootstrap with callback
+        if (bootStrapQueue[i].Used && (bootStrapQueue[i].ObjectID == 0) && (bootStrapQueue[i].ObjectInstanceID == -1))
         {
             Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, Lwm2mResult_Success, 0, NULL, 0);
         }
     }
 }
 
-// initialise the boot strap mechanism, create the /bs endpoint
+// Initialise the boot strap mechanism, create the /bs endpoint
 bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** config, int configCount)
 {
     bool success = true;
@@ -232,9 +237,22 @@ bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** conf
     {
         if ((success = Lwm2mBootstrap_AddServerValues(context, config[i])) == false)
         {
-            Lwm2m_Error("Failed to initialise boostrap config for server %d\n", i);
+            Lwm2m_Error("Failed to initialise bootstrap config for server %d\n", i);
             break;
         }
     }
     return success;
+}
+
+void Lwm2mBootstrap_Destroy(void)
+{
+    int i;
+    for (i = 0 ; i < MAX_CLIENTS; i++)
+    {
+        if (bootStrapQueue[i].Used)
+        {
+            free(&bootStrapQueue[i].EndPointName);
+            memset(&bootStrapQueue[i], 0, sizeof(bootStrapQueue[i]));
+        }
+    }
 }

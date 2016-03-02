@@ -142,14 +142,14 @@ static void Lwm2m_SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerTyp
     server->RegistrationState = Lwm2mRegistrationState_Registering;
 }
 
-static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
 {
     Lwm2mServerType * server = ctxt;
 
     if (responseCode == 201)
     {
         Lwm2m_Debug("Registration Response %s %d\n", responsePath, responseCode);
-        Lwm2m_Info("Registered\n");
+        Lwm2m_Info("Registered with %s\n", Lwm2mCore_DebugPrintAddress(address));
         strcpy(server->Location, responsePath);
         server->RegistrationState = Lwm2mRegistrationState_Registered;
     }
