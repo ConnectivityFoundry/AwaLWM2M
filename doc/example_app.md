@@ -3,14 +3,38 @@
 
 ----
 
+
 # Awa LightweightM2M.
 
-## Writing your own client application using the Awa API.
+## Example: Create a client application on a gateway device using the Awa API.
+
+### Application overview.
+
+![](Awa_client_tutorial_application_positioning.png)
+
+This example shows how to:
+
+* Compile and install Awa LightweightM2M   
+* Create the application *client-tutorial* which:
+    * Initiates a client session
+    * Defines an object
+    * Defines a resource within the object
+    * Instantiates the defined object within the client
+    * closes the client session
+    * Exits
+* Enhance the initial application with the addition of another resource to the existing object
+* Create a server side application which uses the same object model
+
+
+The client-tutorial application makes use of the Awa API to define objects and resources and to register these with the client daemon:
 
 ![](client-tutorial.png)
 
-Before we can start, Awa LWM2M must first be compiled and installed,
-the commands below can be used to build and install Awa LWM2M to ./build/install
+
+
+## Awa LightweightM2M installation.
+
+Firstly, Awa LWM2M must be compiled and installed, using the commands below to build and install Awa LWM2M to the  *./build/install* directory:
 
 ```
 ~/AwaLWM2M$ make
@@ -18,16 +42,14 @@ the commands below can be used to build and install Awa LWM2M to ./build/install
 ~/AwaLWM2M/build$ cmake DESTDIR=./install install
 ```
 
-Create a new directory for your project, in this case we will use "tutorial":
+Now we create a new directory for the project. We'll use *tutorial*:
 
 ```
 $ mkdir ~/tutorial
 $ cd ~/tutorial
 ```
 
-Copy the code below to tutorial/Makefile:
-
-*note: make sure to retain the <TAB> character preceding "$(CC) client-tutorial.c"*
+To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to retain the ````<TAB>```` character preceding *$(CC) client-tutorial.c* :
 
 ```make
 INSTALL_PATH:=~/AwaLWM2M/build/install
@@ -36,7 +58,11 @@ all:
 	$(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
 ```
 
-Copy the code below to tutorial/client-tutorial.c:
+Now is a good time to define our objects and resources:
+
+![](Awa_client_tutorial_object_description.png)
+
+To create the above object model the following code goes into tutorial/*client-tutorial.c*:
 
 ```c
 #include <stdlib.h>
@@ -85,27 +111,27 @@ int main(void)
 }
 ```
 
-Build your new application:
+Now build the application...
 
 ```
 ~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
-Start the client daemon:
+Start the client daemon...
 
 ````
 ~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./core/bootstrap-localhost.config --daemonise --logFile /tmp/awa_clientd.log
 ````
 
-Run your application:
+And run the application...
 
-*Note: in this case libawa.so isn't in the library path, so we will tell the system where to find
- it by setting the LD_LIBRARY_PATH variable.*
+*Note that in this case *libawa.so* isn't in the library path. We'll tell the system where to find
+ it by setting the *LD_LIBRARY_PATH variable*.
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
 ````
 
-At this point your application will exit, leaving your new object/resource registered within the client daemon.
+The application will then exit, leaving the new object/resource registered within the client daemon.
 
 Use the client tools to read your newly defined resource:
 
@@ -115,7 +141,27 @@ Heater[/1000/0]:
     Manufacturer[/1000/0/101]: HotAir Systems Inc
 ```
 
-## Extending the tutorial
+## Adding further resources.
+Further object resources are easily defined. Note that a resource's data type is implied by the API function used to create it, e.g. resource 101, (defined above), was of type string and thus used *AwaObjectDefinition_AddResourceDefinitionAsString()*. Our new resource, 104, will be of type float, so we'll use *AwaObjectDefinition_AddResourceDefinitionAsFloat()* to create it. Function parameters remain the same.
+
+So our *client-tutorial.c* file now contains two additional lines:
+
+In the *DefineHeaterObject()* function...
+````
+AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition,  104, "Temperature", false, AwaResourceOperations_ReadWrite, 0.0);
+````
+This defines the new resource.
+
+And in the *SetInitialValues()* function...
+````
+AwaClientSetOperation_CreateOptionalResource(operation, "/1000/0/104");
+    AwaClientSetOperation_AddValueAsCString(operation, "/1000/0/101", "HotAir Systems Inc");
+````
+Which instantiates the resource.
+
+We've also added a function called *UpdateTemperature()* which accepts a float value *temperature* and writes it to the new resource, and a *while* loop in the *main()* function which accepts temperature values entered at the console, (to simulate actual sensor values from a device for example), and uses *UpdateTemperature()* to update the resource to the entered value.
+
+Here's the updated application code:
 
 ```c
 static void DefineHeaterObject(AwaClientSession * session)
@@ -182,19 +228,20 @@ int main(void)
 }
 ```
 
-Re-build your new application:
+After updating the application code, rebuild the application:
 
 ```
 ~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
-Re-start the client daemon:
+And restart the client daemon:
 
 ```
 ~/AwaLWM2M$ killall awa_clientd
 ~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./core/bootstrap-localhost.config --daemonise --logFile /tmp/awa_clientd.log
 ```
-Re-start your client application and set the temperature:
+
+Then restart the client application and set the temperature...
 
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
@@ -203,7 +250,7 @@ set temperature /1000/0/104 to 10.000000
 enter temperature or any other key to exit:q
 ```
 
-Use the client tools to read your newly defined resource:
+To check for success, use the client tools to read your newly defined resource:
 
 ```
 ~/AwaLWM2M/build/install/bin$ ./awa-client-get /1000/0/104
@@ -211,17 +258,18 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-## Writing your own server application using the AWA API
+So far our object definitions have remained local to the client. The next section compliments our client application by extending our object definitions to the server.
 
-Now that we have the client side application, we must write a server side application to
-be able to make use of our new object.
+
+## Creating a server application using the AWA API
+
+Let's create a server side application that makes use of our new object.
 
 ![](server-tutorial.png)
 
-The code below simply registers the definition of our object with the LWM2M server daemon
-providing it the ability to communicate with any LWM2M clients that support the same object.
+The following code registers our object definition with the LWM2M server daemon, allowing it to communicate with any LWM2M clients that support the same object.
 
-Copy the following code to tutorial/server-tutorial.c:
+Create the file tutorial/*server-tutorial.c* which contains the following code:
 
 ```c
 #include <stdlib.h>
@@ -254,7 +302,7 @@ int main(void)
 }
 ```
 
-Update tutorial/Makefile like so:
+Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
 INSTALL_PATH:=~/AwaLWM2M/build/install
@@ -263,13 +311,14 @@ all:
         $(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
         $(CC) server-tutorial.c -o server-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
 ```
-Build your new application:
+
+Build the new application...
 
 ```
 ~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
-Restart the client/server daemon:
+Restart the client/server daemon...
 ````
 ~/AwaLWM2M$ killall awa_serverd
 ~/AwaLWM2M$ killall awa_clientd
@@ -277,19 +326,19 @@ Restart the client/server daemon:
 ~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./core/bootstrap-localhost.config --daemonise --logFile /tmp/awa_clientd.log
 ````
 
-Start your server application:
+And start the server application...
 
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./server-tutorial
 ```
 
-Start your client application:
+Now start client client application...
 
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
 ```
 
-Check the client is registered with the server:
+Use the server tool *awa-server-list-clients* to check that the client is registered with the server (look for object /1000/0 ):
 
 ```
 ./awa-server-list-clients --objects
@@ -307,7 +356,7 @@ Client: client1
   /1000/0  Heater
 ```
 
-Read from the new resource using the server tools:
+And read from the new resource using the server tool *awa-server-read*:
 
 ```
 ~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000/0/104
@@ -315,7 +364,7 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-Alternatively you can read entire objects or object instances like so
+Alternatively you can read entire objects or object instances:
 
 ```
 ~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000
@@ -329,5 +378,5 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-
-
+----
+----
