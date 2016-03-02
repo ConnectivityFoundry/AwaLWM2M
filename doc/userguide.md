@@ -43,6 +43,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
         * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
     * [The Awa bootstrap server daemon.](userguide.md#the-awa-bootstrap-server-daemon)  
+* [Application example.](userguide.md#application-example)  
 
 ----
 
@@ -77,7 +78,7 @@ LWM2M is based on an object model such that:
 * The OMA has pre-defined objects suitable for most cases, but custom objects may still be defined for local use. 
 * One or more instances of a resource may exist simultaneously within an object but each will have a unique instance identifier.
 
-Object and resource identifiers are 16 bit integers. Object and resource *instance* identifiers are 8 bit integers. 
+Object and resource identifiers are 16 bit integers.
 
 A resource instance is accessed via its parent object instance using a semantic approach:
 
@@ -566,6 +567,11 @@ Multiple attribute values can be set with the same call. For example, to set the
 ````./awa-server-write_attributes --clientID imagination1 /1000/0\?pmin=5\&pmax=100 ````
 
 Note that the *?* and *&* characters will need to be escaped for most shells.
+
+
+## Application example.
+
+For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
 
 ----
 ----
