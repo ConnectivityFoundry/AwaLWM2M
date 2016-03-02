@@ -219,8 +219,28 @@ Signed-off-by: User Name <user.name@email.com>
 If you set-up your user.name and user.email via git config, you can sign your commit automatically with git commit:
 
 ````
-git commit --signoff
+$ git commit --signoff
 ````
+
+### Pushing your changes to your branch.
+
+If you specified --track when you created your new branch you should be able to simply push using
+
+```
+$ git push
+```
+
+If not you will either have to specify where to push your new commits.
+
+```
+$ git push origin dev_branch1:dev_branch1
+```
+
+or alternatively setup branch tracking 
+
+```
+$ git push --set-upstream origin dev_branch1
+```
 
 ### Creating a pull request.
 
