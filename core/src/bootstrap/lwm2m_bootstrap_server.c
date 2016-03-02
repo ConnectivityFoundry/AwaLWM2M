@@ -148,16 +148,16 @@ static int Bootstrap_Start(Options * options)
     {
         PrintOptions(options);
     }
-    Lwm2m_Info("LWM2M bootstrap - version %s\n", version);
-    Lwm2m_Info("LWM2M bootstrap - CoAP port %d\n", options->Port);
+    Lwm2m_Info("Awa LWM2M Bootstrap Server, version %s\n", version);
+    Lwm2m_Info("  CoAP port      : %d\n", options->Port);
 
     if (options->InterfaceName != NULL)
     {
-        Lwm2m_Info("LWM2M bootstrap - Using interface %s [IPv%d]\n", options->InterfaceName, options->AddressFamily == AF_INET? 4 : 6);
+        Lwm2m_Info("  Interface      : %s [IPv%d]\n", options->InterfaceName, options->AddressFamily == AF_INET? 4 : 6);
     }
     else if (strcmp(DEFAULT_IP_ADDRESS, options->IPAddress) != 0)
     {
-        Lwm2m_Info("LWM2M bootstrap - IP Address %s\n", options->IPAddress);
+        Lwm2m_Info("  IP Address     : %s\n", options->IPAddress);
     }
 
     char ipAddress[NI_MAXHOST];
@@ -168,7 +168,7 @@ static int Bootstrap_Start(Options * options)
             result = 1;
             goto error_close_log;
         }
-        Lwm2m_Info("LWM2M bootstrap - Interface Address %s\n", ipAddress);
+        Lwm2m_Info("  Interface Addr : %s\n", ipAddress);
     }
     else
     {

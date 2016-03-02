@@ -134,8 +134,9 @@ static void Lwm2m_SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerTyp
 
     Lwm2m_Debug("Registration: POST %s %s %s %s\n", serverUri, uriPath, uriQuery, payload);
 
+    Lwm2m_Info("Register with %s\n", serverUri);
     sprintf(uri, "%s%s%s", serverUri, uriPath, uriQuery);
-    Lwm2m_Info("Registration %s\n", uri);
+    Lwm2m_Debug("Register: POST %s\n", uri);
 
     coap_PostRequest(server, uri, ContentType_ApplicationLinkFormat, payload, strlen(payload), Lwm2m_HandleRegisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Registering;
@@ -148,7 +149,7 @@ static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType* address, cons
     if (responseCode == 201)
     {
         Lwm2m_Debug("Registration Response %s %d\n", responsePath, responseCode);
-        Lwm2m_Info("Registration Success\n");
+        Lwm2m_Info("Registered\n");
         strcpy(server->Location, responsePath);
         server->RegistrationState = Lwm2mRegistrationState_Registered;
     }
@@ -233,8 +234,9 @@ static void Lwm2m_Deregister(Lwm2mContextType * context, Lwm2mServerType * serve
     }
 
     Lwm2m_GetServerURI(context, server->ShortServerID, serverUri, sizeof(serverUri));
+    Lwm2m_Info("Deregister from %s\n", serverUri);
     sprintf(uri, "%s%s", serverUri, server->Location);
-    Lwm2m_Info("Deregister: DELETE %s\n", uri);
+    Lwm2m_Debug("Deregister: DELETE %s\n", uri);
     coap_DeleteRequest(server, uri, Lwm2m_HandleDeregisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Deregistering;
 }
@@ -242,13 +244,12 @@ static void Lwm2m_Deregister(Lwm2mContextType * context, Lwm2mServerType * serve
 static void Lwm2m_HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
 {
     Lwm2mServerType * server = ctxt;
-
     if (responseCode == 202)
     {
         server->RegistrationState = Lwm2mRegistrationState_NotRegistered;
+        Lwm2m_Info("Deregistered\n");
     }
 }
-
 
 // Set all servers to send a Registration Update.
 void Lwm2m_SetUpdateRegistration(Lwm2mContextType * context)

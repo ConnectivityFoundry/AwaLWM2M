@@ -212,18 +212,18 @@ const BootstrapInfo * BootstrapInformation_ReadConfigFile(const char * configFil
 
 void BootstrapInformation_Dump(const BootstrapInfo * bootstrapInfo)
 {
-    Lwm2m_Info("ServerURI     : %s\n", bootstrapInfo->SecurityInfo.ServerURI);
-    Lwm2m_Info("SecurityMode  : %d\n", bootstrapInfo->SecurityInfo.SecurityMode);
-    Lwm2m_Info("SecretKey     : %s\n", bootstrapInfo->SecurityInfo.SecretKey);
-    Lwm2m_Info("PublicKey     : %s\n", bootstrapInfo->SecurityInfo.PublicKey);
-    Lwm2m_Info("ServerID      : %d\n", bootstrapInfo->SecurityInfo.ServerID);
-    Lwm2m_Info("HoldOffTime   : %d\n", bootstrapInfo->SecurityInfo.HoldOffTime);
-    Lwm2m_Info("ShortServerID : %d\n", bootstrapInfo->ServerInfo.ShortServerID);
-    Lwm2m_Info("Binding       : %s\n", bootstrapInfo->ServerInfo.Binding);
-    Lwm2m_Info("LifeTime      : %d\n", bootstrapInfo->ServerInfo.LifeTime);
+    Lwm2m_Info("ServerURI            : %s\n", bootstrapInfo->SecurityInfo.ServerURI);
+    Lwm2m_Info("SecurityMode         : %d\n", bootstrapInfo->SecurityInfo.SecurityMode);
+    Lwm2m_Info("SecretKey            : %s\n", bootstrapInfo->SecurityInfo.SecretKey);
+    Lwm2m_Info("PublicKey            : %s\n", bootstrapInfo->SecurityInfo.PublicKey);
+    Lwm2m_Info("ServerID             : %d\n", bootstrapInfo->SecurityInfo.ServerID);
+    Lwm2m_Info("HoldOffTime          : %d\n", bootstrapInfo->SecurityInfo.HoldOffTime);
+    Lwm2m_Info("ShortServerID        : %d\n", bootstrapInfo->ServerInfo.ShortServerID);
+    Lwm2m_Info("Binding              : %s\n", bootstrapInfo->ServerInfo.Binding);
+    Lwm2m_Info("LifeTime             : %d\n", bootstrapInfo->ServerInfo.LifeTime);
+    Lwm2m_Info("DisableTimeout       : %d\n", bootstrapInfo->ServerInfo.DisableTimeout);
     Lwm2m_Info("DefaultMinimumPeriod : %d\n", bootstrapInfo->ServerInfo.MinPeriod);
     Lwm2m_Info("DefaultMaximumPeriod : %d\n", bootstrapInfo->ServerInfo.MaxPeriod);
-    Lwm2m_Info("DisableTimeout : %d\n", bootstrapInfo->ServerInfo.DisableTimeout);
     Lwm2m_Info("NotificationStoringWhenDisabledOrOffline : %d\n", bootstrapInfo->ServerInfo.Notification);
 }
 

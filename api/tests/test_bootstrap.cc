@@ -17,7 +17,7 @@ struct SingleClientWaitCondition : public WaitCondition
     AwaServerListClientsOperation * Operation;
     std::string ClientEndpointName;
 
-    SingleClientWaitCondition(AwaServerListClientsOperation * Operation, const std::string ClientEndpointName) :
+    SingleClientWaitCondition(AwaServerListClientsOperation * Operation, const std::string & ClientEndpointName) :
         Operation(Operation), ClientEndpointName(ClientEndpointName) {}
     virtual ~SingleClientWaitCondition() {}
     virtual bool Check()

@@ -43,11 +43,7 @@ typedef enum {
     DebugLevel_Debug
 } DebugLevel;
 
-#define DEBUG_FILELINE
 #define DEBUG_FANCY
-
-#define xstringy(a) stringy(a)
-#define stringy(a) #a
 
 // Host dependent directory slash
 #define DIR_SLASH '/'
@@ -56,55 +52,63 @@ typedef enum {
 #  define __attribute__(X)
 #endif // __GNUC__
 
-void Lwm2m_Printf(DebugLevel level, char const * format, ...) __attribute__ ((format (printf, 2, 3)));
+void Lwm2m_Printf(DebugLevel level, char const * format, ...) __attribute__ ((format (printf, 2, 3)));;
+void Lwm2m_vPrintf(DebugLevel level, char const * format, va_list argp);
+
+void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const * format, ...) __attribute__ ((format (printf, 4, 5)));
 
 #ifdef DEBUG_FANCY
-#define ANSI_COLOUR_RED     "\x1b[31m"
-#define ANSI_COLOUR_GREEN   "\x1b[32m"
-#define ANSI_COLOUR_YELLOW  "\x1b[33m"
-#define ANSI_COLOUR_BLUE    "\x1b[34m"
-#define ANSI_COLOUR_MAGENTA "\x1b[35m"
-#define ANSI_COLOUR_CYAN    "\x1b[36m"
-#define ANSI_COLOUR_RESET   "\x1b[0m"
+#  define ANSI_COLOUR_RED            "\x1b[31m"
+#  define ANSI_COLOUR_GREEN          "\x1b[32m"
+#  define ANSI_COLOUR_YELLOW         "\x1b[33m"
+#  define ANSI_COLOUR_BLUE           "\x1b[34m"
+#  define ANSI_COLOUR_MAGENTA        "\x1b[35m"
+#  define ANSI_COLOUR_CYAN           "\x1b[36m"
+#  define ANSI_COLOUR_WHITE          "\x1b[37m"
+#  define ANSI_COLOUR_BRIGHT_RED     "\x1b[31;01m"
+#  define ANSI_COLOUR_BRIGHT_GREEN   "\x1b[32;01m"
+#  define ANSI_COLOUR_BRIGHT_YELLOW  "\x1b[33;01m"
+#  define ANSI_COLOUR_BRIGHT_BLUE    "\x1b[34;01m"
+#  define ANSI_COLOUR_BRIGHT_MAGENTA "\x1b[35;01m"
+#  define ANSI_COLOUR_BRIGHT_CYAN    "\x1b[36;01m"
+#  define ANSI_COLOUR_BRIGHT_WHITE   "\x1b[37;01m"
+#  define ANSI_COLOUR_RESET          "\x1b[0;00m"
 #else
-#define ANSI_COLOUR_RED
-#define ANSI_COLOUR_GREEN
-#define ANSI_COLOUR_YELLOW
-#define ANSI_COLOUR_BLUE
-#define ANSI_COLOUR_MAGENTA
-#define ANSI_COLOUR_CYAN
-#define ANSI_COLOUR_RESET
+#  define ANSI_COLOUR_RED
+#  define ANSI_COLOUR_GREEN
+#  define ANSI_COLOUR_YELLOW
+#  define ANSI_COLOUR_BLUE
+#  define ANSI_COLOUR_MAGENTA
+#  define ANSI_COLOUR_CYAN
+#  define ANSI_COLOUR_WHITE
+#  define ANSI_COLOUR_BRIGHT_RED
+#  define ANSI_COLOUR_BRIGHT_GREEN
+#  define ANSI_COLOUR_BRIGHT_YELLOW
+#  define ANSI_COLOUR_BRIGHT_BLUE
+#  define ANSI_COLOUR_BRIGHT_MAGENTA
+#  define ANSI_COLOUR_BRIGHT_CYAN
+#  define ANSI_COLOUR_BRIGHT_WHITE
+#  define ANSI_COLOUR_RESET
 #endif
-
-#ifdef DEBUG_FILELINE
 
 void Lwm2m_PrintBanner(void);
 
-#define _Lwm2m_Printf(COLOUR, level, format, ...) \
-{\
-    const char * fileName = __FILE__;\
-    const char * lineNum = xstringy(__LINE__);\
-    const char * shortFileName = strrchr(fileName, DIR_SLASH);\
-    Lwm2m_Printf(level, ANSI_COLOUR_YELLOW "[%s:%s] " COLOUR format ANSI_COLOUR_RESET, shortFileName ? shortFileName+1 : fileName, lineNum, ##__VA_ARGS__);\
-}\
-
-#else
-
-#define _Lwm2m_Printf(level, format, ...) \
-        Lwm2m_Printf(, level, format, ##__VA_ARGS__)
-#endif
+#define _Lwm2m_Log(COLOUR, level, format, ...) \
+{ \
+    Lwm2m_Log(level, __FILE__, __LINE__, COLOUR format ANSI_COLOUR_RESET, ##__VA_ARGS__); \
+}
 
 #define Lwm2m_Debug(format, ...) \
-    _Lwm2m_Printf(ANSI_COLOUR_RESET, DebugLevel_Debug, format, ##__VA_ARGS__)
+    _Lwm2m_Log(ANSI_COLOUR_RESET, DebugLevel_Debug, format, ##__VA_ARGS__)
 
 #define Lwm2m_Error(format, ...) \
-    _Lwm2m_Printf(ANSI_COLOUR_RED, DebugLevel_Error, format, ##__VA_ARGS__)
+    _Lwm2m_Log(ANSI_COLOUR_BRIGHT_RED, DebugLevel_Error, format, ##__VA_ARGS__)
 
 #define Lwm2m_Warning(format, ...) \
-    _Lwm2m_Printf(ANSI_COLOUR_YELLOW, DebugLevel_Warning, format, ##__VA_ARGS__)
+    _Lwm2m_Log(ANSI_COLOUR_BRIGHT_YELLOW, DebugLevel_Warning, format, ##__VA_ARGS__)
 
 #define Lwm2m_Info(format, ...) \
-    _Lwm2m_Printf(ANSI_COLOUR_CYAN, DebugLevel_Info, format, ##__VA_ARGS__)
+    _Lwm2m_Log(ANSI_COLOUR_CYAN, DebugLevel_Info, format, ##__VA_ARGS__)
 
 void Lwm2m_SetOutput(FILE * output);
 
