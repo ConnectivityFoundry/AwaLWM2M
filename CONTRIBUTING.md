@@ -244,7 +244,7 @@ $ git push --set-upstream origin dev_branch1
 
 ### Creating a pull request.
 
-- Navigate to https://github.com/<username>/AwaLWM2M/pulls
+- Navigate to https://github.com/username/AwaLWM2M/pulls
 - click on "new pull request"
 - select FlowM2M/AwaLWM2M/master as the base in the left hand box
 - select the branch you wish to submit as a pull request in the right hand box.
