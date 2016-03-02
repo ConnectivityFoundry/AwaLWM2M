@@ -52,14 +52,21 @@ extern "C" {
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
 
+Lwm2mContextType * Lwm2mCore_New();
+void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap);
+CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context);
+
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
+
+
 
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation);
 
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
 
+int Lwm2mCore_SetEndPointClientName(Lwm2mContextType * context, const char * endpoint);
 int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len);
 
 void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * buffer, int len, bool updated);

@@ -589,7 +589,7 @@ int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_
     return result;
 }
 
-static void Lwm2m_PopulateSecurityObjectInstance(Lwm2mContextType * context, int instanceID, char * serverURI, int bootstrap, LWM2MSecurityMode securityMode, LWM2MSecurityInfo * securityInfo, int serverID, int holdOffTime)
+static void Lwm2m_PopulateSecurityObjectInstance(Lwm2mContextType * context, int instanceID, const char * serverURI, int bootstrap, LWM2MSecurityMode securityMode, LWM2MSecurityInfo * securityInfo, int serverID, int holdOffTime)
 {
     int securityModeAsInt = (int)securityMode;
     Lwm2mCore_CreateObjectInstance(context, LWM2M_SECURITY_OBJECT, instanceID);
@@ -607,7 +607,7 @@ static void Lwm2m_PopulateSecurityObjectInstance(Lwm2mContextType * context, int
     Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, 11, 0,  &holdOffTime,                      sizeof(holdOffTime));
 }
 
-void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, char * bootStrapServer)
+void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, const char * bootStrapServer)
 {
     // Populate security object with defaults
     LWM2MSecurityInfo securityInfo;
