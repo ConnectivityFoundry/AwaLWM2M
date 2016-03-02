@@ -43,6 +43,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
         * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
     * [The Awa bootstrap server daemon.](userguide.md#the-awa-bootstrap-server-daemon)  
+* [Application example.](userguide.md#application-example)  
 
 ----
 
@@ -566,6 +567,11 @@ Multiple attribute values can be set with the same call. For example, to set the
 ````./awa-server-write_attributes --clientID imagination1 /1000/0\?pmin=5\&pmax=100 ````
 
 Note that the *?* and *&* characters will need to be escaped for most shells.
+
+
+## Application example.
+
+For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
 
 ----
 ----
