@@ -617,27 +617,14 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     AwaError result = AwaError_Unspecified;
     int outLength;
     char * dataValue = NULL;
-    char * buffer = NULL;
+    const char * buffer = NULL;
 
     ResourceTypeType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
     if (dataType != ResourceTypeEnum_TypeNone)
     {
-        // Determine buffer size required to read entire resource instance contents
-        int dataLength = Lwm2mCore_GetResourceInstanceLength(context, objectID, instanceID, resourceID, resourceInstanceID);
-        if (dataLength < 0)
-        {
-            result = AwaError_PathNotFound;
-            goto error;
-        }
+        int dataLength = 0;
 
-        buffer = malloc(dataLength);
-        if (buffer == NULL)
-        {
-            result = AwaError_Internal;
-            goto error;
-        }
-
-        outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID, buffer, dataLength);
+        outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID, (const void **)&buffer, &dataLength);
         //Lwm2m_Debug("GET /%d/%d/%d[%d]: outLength %d, dataLength %d\n", objectID, instanceID, resourceID, resourceInstanceID, outLength, dataLength);
         if (outLength < 0)
         {
@@ -654,8 +641,6 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
                 goto error;
             }
         }
-
-        free(buffer);
     }
 
     TreeNode valueNode = Xml_CreateNode("Value");

@@ -56,7 +56,7 @@ void Lwm2mCore_Destroy(Lwm2mContextType * context);
 
 // The following functions are called by other parts of the system to "Operate" on a resource
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                       ResourceInstanceIDType resourceInstanceID, void * Value, int ValueBufferSize);
+                                       ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
 
 int Lwm2mCore_GetResourceInstanceLength(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);

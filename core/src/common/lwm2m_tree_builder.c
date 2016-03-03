@@ -46,30 +46,13 @@ static Lwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mT
 {
     Lwm2mResult result = Lwm2mResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
-    void * value = NULL;
+    const void * value = NULL;
     int valueLength;
 
     Lwm2mTreeNode_SetID(*dest, resourceInstanceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ResourceInstance);
 
-    // Determine buffer size required to read entire resource instance contents
-    valueLength = Lwm2mCore_GetResourceInstanceLength(context, objectID, objectInstanceID, resourceID, resourceInstanceID);
-    if (valueLength < 0)
-    {
-        Lwm2m_Error("ERROR: failed to retrieve instance value from object store: /%d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
-        result = Lwm2mResult_NotFound;
-        goto error;
-    }
-
-    value = malloc(valueLength);
-    if (value == NULL)
-    {
-        Lwm2m_Error("ERROR: out of memory\n");
-        result = Lwm2mResult_OutOfMemory;
-        goto error;
-    }
-
-    if (Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, value, valueLength) < 0)
+    if (Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, &value, &valueLength) < 0)
     {
         Lwm2m_Error("ERROR: Failed to retrieve resource instance from object store\n");
         result = Lwm2mResult_NotFound;
@@ -84,7 +67,6 @@ static Lwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mT
     }
     result = Lwm2mResult_Success;
 error:
-    free(value);
     return result;
 }
 

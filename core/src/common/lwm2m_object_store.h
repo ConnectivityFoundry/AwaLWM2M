@@ -44,7 +44,7 @@ ObjectStore * ObjectStore_Create(void);
 int ObjectStore_GetResourceInstanceLength(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                           ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void * ValueBuffer, int ValueBufferSize);
+                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** ValueBuffer, int * ValueBufferSize);
 int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                          ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, int valueSize,
                                          const void * valueBuffer, int valueBufferPos, int valueBufferLen, bool * changed);

@@ -315,12 +315,16 @@ int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int token
 
         if ((resourceDefinition != NULL) && (!IS_MULTIPLE_INSTANCE(resourceDefinition)))
         {
-            observer->OldValueLength = Lwm2mCore_GetResourceInstanceLength(context, objectID, objectInstanceID, resourceID, 0);
-            if (observer->OldValueLength > 0)
+            const void * oldValue = NULL;
+            int oldValueLength = 0;
+
+            Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &oldValue, &oldValueLength);
+
+            if (oldValueLength > 0 && oldValue != NULL)
             {
-                //Lwm2m_Debug("Observer->OldValueLength = %d\n", observer->OldValueLength);
+                observer->OldValueLength = oldValueLength;
                 observer->OldValue = malloc(observer->OldValueLength);
-                Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, observer->OldValue, observer->OldValueLength);
+                memcpy(observer->OldValue, oldValue, observer->OldValueLength);
             }
         }
     }
