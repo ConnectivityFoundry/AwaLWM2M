@@ -11,29 +11,19 @@
 If you discover a bug, or find an issue or area that you feel needs improvement:
 
 * Navigate to the "Issues" tab on the project Github page https://github.com/FlowM2M/AwaLWM2M/issues  
-
 * Click the "New Issue" button.  
 
 
 When making your report, be as clear and concise as possible. Use the following list as a guide:
 
-
-
 * Describe the issue, and why you believe it's a problem. 
-
-* Include the Awa LWM2M version or commit id.
-
-* Describe environment details (OS/distribution etc).
-
-* State how often the issue has occurred.
-
-* Describe the steps to take to uncover or reproduce the issue (if any).
-
-* Expected behaviour.
-
-* Actual behaviour.
-
-* Any additional infomation, log output etc.
+* Include the Awa LightweightM2M version or commit id.  
+* Describe environment details (OS/distribution etc).  
+* State how often the issue has occurred.  
+* Describe the steps to take to uncover or reproduce the issue (if any).  
+* Expected behaviour.  
+* Actual behaviour.  
+* Any additional infomation, log output etc.  
 
 
 ----
@@ -45,23 +35,23 @@ When making your report, be as clear and concise as possible. Use the following 
 
 Before you can contribute you require a Github account.
 
-Please sign up for a free account at https://github.com/
+You can sign up for a free account here: [https://github.com/](https://github.com/)
 
 ### Add your ssh key to your Github account.
 
-If you are using a Linux development environment, you can normally find your public key (if you have generated one) in ~/.ssh/id_rsa.pub
-or alternatively you can generate a new key but using the following commands:
+If you are using a Linux development environment, you can normally find your public key in *~/.ssh/id_rsa.pub*. Alternatively you can generate a new key with the following command:
 
 ```
 ssh-keygen -t rsa -b 4096 -C "user.name@email.com"
 ````
-When you're prompted to "Enter a file in which to save the key," press Enter. This accepts the default file location.
 
-Now that you have a key, sign in to your Github account
+When you're prompted to enter a file in which to save the key, press Enter to accept the default file location.
 
-Click the top right icon, select settings->ssh keys->new ssh key
-
-Paste the contents of your public key into the box.
+Now that you have a key:
+* Sign in to your Github account
+* Click the top right icon  
+* Select *settings -> ssh keys -> new ssh key*
+* Paste the contents of your public key into the box.
 
 Your public key should look something like:
 ```
@@ -81,23 +71,23 @@ xoHqsuyNhTw== user.name@email.com
 ### Set your git user name.
 
 It is important that you set the user name and email address to use for any commits to the 
-git repository.
+git repository:
 
 ```
 $ git config --global user.name User Name
 $ git config --global user.email User.Name@email.com
 ```
 
-Use the same email address as the one you used to sign up for your Github account.
+Use the same email address that you used to sign up for your github account.
 
 ### Forking the repository.
 
-If you want to contribute to the project the best practice is to create a Github fork. To do so
-navigate to https://github.com/FlowM2M/AwaLWM2M and click on the "fork" button at the top right of the 
-screen.  If you are a member of multiple organisations you will be presented with a selection screen
+f you want to contribute to the project the best practice is to create a fork. To do so
+navigate to *https://github.com/FlowM2M/AwaLWM2M* and click on the *fork* button at the top right of the 
+screen. If you are a member of multiple organisations you will be presented with a selection screen
 which can be used to select where to create the fork. Click on your user account to create the fork.
 
-You can now clone your fork with the following command:
+You can now clone your fork: 
 
 ```
 $ git clone git@github.com:<username>/AwaLWM2M.git
@@ -105,7 +95,7 @@ $ git clone git@github.com:<username>/AwaLWM2M.git
 
 ### Keeping your fork in sync.
 
-In order to easily pull down upstream changes to your fork you need to set up a new remote.
+In order to easily pull down upstream changes to your fork you need to setup a new remote.
 
 ```
 $ git remote add upstream git@github.com/FlowM2M/AwaLWM2M.git
@@ -126,8 +116,8 @@ $ git merge upstream/master
 
 ### Making changes.
 
-We have found that the easiest way of working is to keep a clean master branch in the new fork
-and create branches for each new pull request. This prevents merge conflicts with the upstream
+The simplest way of working is to keep a clean master branch in the new fork
+and to create branches for each new pull request. This prevents merge conflicts with the upstream
 master branch, and allows you to make changes to your pull request if required.
 
 To create a new branch:
@@ -136,14 +126,13 @@ To create a new branch:
 $ git checkout master -b dev-branch1 --track
 ```
 
-*Note: the branch name here is important, it will show up in the git history, so it is recommended
-to use something meaningful or suitably general.*
+**Note.** *The branch name here is important. It will show up in the git history so use something meaningful or suitably general*
 
-Once you have created your branch make any changes you desire, then commit them to your new branch.
+Once you have created your branch make your changes, then commit them to your new branch.
 
 ### Coding style.
 
-The Awa LWM2M coding style guidelines can be found in the [coding style guide](doc/coding_style.md).
+The Awa LightweightM2M coding style guidelines can be found in the [coding style guide](doc/coding_style.md).
 
 ### Commit messages.
 
@@ -178,7 +167,7 @@ For the commit message, the following rules apply:
 
 ### Signing your work.
 
-Awa LWM2M requires contributors to accept the Developer Certificate of Origin (DCO) from developercertificate.org.
+Awa LightweightM2M requires contributors to accept the Developer Certificate of Origin (DCO) from developercertificate.org.
 
 The sign-off is a single line at the end of your commit comment to certify that you either wrote the supplied code or otherwise have the right to pass on the code as open source.
 
@@ -240,19 +229,19 @@ $ git commit --signoff
 
 ### Pushing your changes to your branch.
 
-If you specified --track when you created your new branch you should be able to simply push using:
+If you specified --track when you created your new branch you should be able to simply push using
 
 ```
 $ git push
 ```
 
-If not you will either have to specify where to push your new commits:
+If not you will either have to specify where to push your new commits.
 
 ```
 $ git push origin dev_branch1:dev_branch1
 ```
 
-Or alternatively set up branch tracking:
+or alternatively setup branch tracking 
 
 ```
 $ git push --set-upstream origin dev_branch1
@@ -261,20 +250,19 @@ $ git push --set-upstream origin dev_branch1
 ### Creating a pull request.
 
 - Navigate to https://github.com/username/AwaLWM2M/pulls
-- Click on "new pull request"
+- Click on *New pull request*
 - Select FlowM2M/AwaLWM2M/master as the base in the left hand box
 - Select the branch you wish to submit as a pull request in the right hand box.
-- Click the create button.
+- Click the *create* button.
 
-*Note: All Awa LWM2M development occurs on the master branch. Developers should only submit patches against the master branch.*
+**Note.** *All Awa LightweightM2M development occurs on the master branch. Developers should only submit patches against the master branch.*
 
-An email will be sent to the project maintainers, who will review your pull request.
+An email will be sent to the project maintainers who will review your pull request.
 
-If everything checks out no further action will be required and your pull request
-will be merged onto the main line.
+If everything checks out no further action will be required.
 
-You may wish to continue making other changes.  In this case simply resync with the upstream
-and create a new branch. Do **not** add your new unrelated changes to the branch you 
+You may wish to continue making other changes, in this case simply resync with the upstream
+and create a new branch. Do **NOT** add your new unrelated changes to the branch you 
 used for the pull request as they will automatically be included in the request.
 
 ### Making changes to a pull request.
@@ -283,29 +271,31 @@ You may be asked to make some changes before your pull request will be accepted.
 Any further commits that are pushed to the branch you used for the initial pull 
 request will be automatically added to your pull request.
 
-In some cases you may be asked to re-base your commits, either to bring them in-line
+In some cases you may be asked to rebase your commits, either to bring them in-line
 with the current master branch, to tidy up any commit comments or to add a forgotten 
 sign-off. You can find more information on rebasing in the section below.
 
 #### Rebasing.
 
-In most cases, rebasing commits that have already been pushed is considered bad form. 
+In most cases, rebasing commits that have already been pushed is strongly discouraged. 
 
-The main problem is rebasing pushed commits is that if someone else happens to have based
-their work off one of these commits and then you go and rebase it, then you have effectively
-created a parallel universe where the commits they based their work on never existed..
+The main problem with rebasing pushed commits is that if someone else happens to have based
+their work on one of the commits which is subsequently rebased, this effectively
+creates a parallel universe where the commits on which their work is based never existed.
 
-Given that we created our own fork, and branch within that fork, it should be reasonably safe
-to assume nobody else is using this work as a baseline, allowing you to rebase without causing
+Given that we created our own fork, and branched within that fork, it's safe
+to assume nobody will be using it as a baseline. We can therefore rebase without causing
 the universe to implode.
 
-Firstly fetch any upstream changes:
+That said, let's get started.
+
+First, fetch any upstream changes...
 
 ```
 $ git fetch upstream 
 ```
 
-Change to your development branch, assuming you haven't already
+Change to your development branch...
 
 ```
 $ git checkout dev-branch1
@@ -313,8 +303,7 @@ $ git checkout dev-branch1
 
 ##### Rebasing your commits on top of upstream/master.
 
-Now if you want to rebase your commits ontop without making any addition changes
-you can simply use the command:
+Now if you want to rebase your commits on top without making any addition changes you can use the command:
 
 ```
 $ git rebase upstream/master
@@ -322,14 +311,13 @@ $ git rebase upstream/master
 
 ##### Editing commit messages.
 
-If you want to edit a commit messages you will need to use the interactive
-rebase.
+If you want to edit a commit message you will need to use the interactive rebase.
 
 ```
 $ git rebase -i origin/dev-branch1
 ```
 
-Your default text editor will launch and display something like
+Your default text editor will launch and display something like...
 
 ```
 pick d8ff6b0 Update readme
@@ -347,7 +335,7 @@ pick d38fb35 Deleted line
 # x, exec = run command (the rest of the line) using shell
 # d, drop = remove commit
 ```
-To simply change a commit comment, select the line you wish to change by replacing 
+To change a commit comment, select the line you wish to change by replacing 
 "pick" with "r" and then saving the document.
 
 ```
@@ -356,7 +344,7 @@ r 80309d3 Fixed tpyo
 pick d38fb35 Deleted line
 ```
 
-Your text editor will open a new window allowing you to change the commit message
+Your text editor will open a new window allowing you to change the commit message...
 
 ```
 Fixed typo
@@ -365,7 +353,7 @@ Fixed typo
 # with '#' will be ignored, and an empty message aborts the commit.
 ```
 
-Save and quit to apply the changes.
+Save and quit to apply your changes.
 
 ##### Squashing commits.
 
@@ -394,7 +382,7 @@ pick d38fb35 Deleted line
 # x, exec = run command (the rest of the line) using shell
 # d, drop = remove commit
 ```
-To simply change a commit comment, select the lines you wish to squash by replacing
+To change a commit comment, select the lines you wish to squash by replacing
 "pick" with "s" and saving the document.
 
 for example:
@@ -405,7 +393,7 @@ s 80309d3 Fixed tpyo
 s d38fb35 Deleted line
 ```
 
-If all goes well your text editor will open and display something similar to 
+If all goes well your text editor will open and display something like... 
 
 ```
 # This is a combination of 3 commits.
@@ -432,11 +420,11 @@ If you ever feel like you have messed up, you can abort a rebase using the follo
 $ git rebase --abort
 ```
 
+
 ##### Pushing your changes.
 
-After rebasing you will not able to simply push you changes back to your branch. You will need to use the --force
-option.  Be careful here, there is no going back if you make a mistake, so be sure to make sure you are happy with 
-what you are pushing and that you are pushing the correct branch to the correct remote.
+After rebasing you will not be able to simply push you changes back to your branch. You will need to use the --force
+option. Be careful here because there's no going back if you make a mistake. Be sure about what you are pushing, and that you are pushing the correct branch to the correct remote.
 
 ```
 $ git push -f origin dev-branch1:dev-branch1
@@ -448,5 +436,7 @@ This command will replace origin/dev-branch1 with the contents of dev-branch1, i
 ----
 
 ----
+
+
 
 
