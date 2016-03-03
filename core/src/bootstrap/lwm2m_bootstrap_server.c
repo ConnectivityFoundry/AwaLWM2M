@@ -149,6 +149,7 @@ static int Bootstrap_Start(Options * options)
         PrintOptions(options);
     }
     Lwm2m_Info("Awa LWM2M Bootstrap Server, version %s\n", version);
+    Lwm2m_Info("  Process ID     : %d\n", getpid());
     Lwm2m_Info("  CoAP port      : %d\n", options->Port);
 
     if (options->InterfaceName != NULL)
