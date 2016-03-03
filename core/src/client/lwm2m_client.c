@@ -177,6 +177,7 @@ static int Lwm2mClient_Start(Options * options)
         PrintOptions(options);
     }
     Lwm2m_Info("Awa LWM2M Client, version %s\n", version);
+    Lwm2m_Info("  Process ID     : %d\n", getpid());
     Lwm2m_Info("  Endpoint name  : \'%s\'\n", options->EndPointName);
     Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
