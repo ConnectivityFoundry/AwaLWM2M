@@ -44,6 +44,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server) 
     * [The Awa bootstrap server daemon.](userguide.md#the-awa-bootstrap-server-daemon)  
 * [Application example.](userguide.md#application-example)  
+* [Awa API reference.](userguide.md#awa-api-reference)
 
 ----
 
@@ -297,9 +298,9 @@ For tools that write data, values can be specified with the format: ````PATH=VAL
 
 ### Creating a new object definition.
 
-An *object* is a collection of individual *resources* bundled together under a single identifier, along with some extra attributes that describe the nature of the object (listed below). Numerous standard objects are pre-defined within the LWM2M model but additional custom objects may also be defined as needed. Custom objects are created by registering the new object definition with the daemon. The *add-definition* tool is used to perform this operation. Note that an object definition does not result in an object instance. Creation of an object instance is a separate process. Resource manipulation is only possible on object instances. 
+An *object* is a collection of individual *resources* bundled together under a single identifier, along with some extra attributes that describe the nature of the object (listed below). Numerous standard objects are pre-defined within the LWM2M model but additional custom objects may also be defined as needed. Custom objects are created by registering the new object definition with the daemon. The *awa-client-define* tool is used to perform this operation. Note that an object definition does not result in an object instance. Creation of an object instance is a separate process. Resource manipulation is only possible on object instances. 
 
-**NOTE: A custom object must be defined for both the client *and* server daemons. Use the *awa-server-add-definition* tool to define a custom object with the server.**
+**NOTE: A custom object must be defined for both the client *and* server daemons. Use the *awa-server-define* tool to define a custom object with the server.**
 
 Firstly the object itself is defined by providing an ID, descriptive name, mandatory or optional flag (to determine whether the device must provide at least one instance), and whether the object supports single or multiple instances.
 
@@ -573,6 +574,13 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 
 For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
 
+
+## Awa API reference.
+
+Full Awa API reference material is available [here](http://flowm2m.github.io/AwaLWM2M-docs/index.html).
+
+
 ----
+
 ----
 
