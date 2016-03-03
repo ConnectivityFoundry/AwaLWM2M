@@ -18,22 +18,28 @@ rm .build_openwrt -rf
 rm .build_x86 -rf
 rm -rf tools/tools_tests.xml
 
-# Build for OpenWRT
+# build for OpenWRT
 make BUILD_DIR=.build_openwrt CMAKE_OPTIONS=-DCMAKE_TOOLCHAIN_FILE=ci/openwrt-toolchain.cmake
 
 # setup lcov
 mkdir .build_x86
 (cd .build_x86; lcov --zerocounters --directory .; lcov --capture --initial --directory . --output-file test_lwm2m || true)
 
-# Build for x86 and run test cases
+# build for x86 and run test cases
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON"
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON" tests
 
-# parse coverage results
+# prepare coverage results
 (cd .build_x86;
  lcov --no-checksum --directory . --capture --output-file tmp_test_lwm2m.info; 
  lcov --remove tmp_test_lwm2m.info "api/tests/*" --remove tmp_test_lwm2m.info "api/src/unsupported*" --output-file test_lwm2m.info;
  mkdir -p lcov-html; 
  cd lcov-html; genhtml ../test_lwm2m.info)
 
+# prepare cobertura coverage results
+(cd .build_x86;
+ python ../ci/lcov_cobertura.py test_lwm2m.info -b ../
+)
+
+# run cppcheck
 make cppcheck BUILD_DIR=.build_x86
