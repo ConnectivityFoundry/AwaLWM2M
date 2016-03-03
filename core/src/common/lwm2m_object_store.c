@@ -334,7 +334,7 @@ int ObjectStore_GetResourceInstanceLength(ObjectStore * store, ObjectIDType obje
 }
 
 int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void * ValueBuffer, int ValueBufferSize)
+                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** ValueBuffer, int * ValueBufferSize)
 {
     Resource * resource = LookupResource(store, objectID, objectInstanceID, resourceID);
     if (resource != NULL)
@@ -345,20 +345,15 @@ int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
             Lwm2mResult_SetResult(Lwm2mResult_NotFound);
             return -1;
         }
-        else if (ValueBuffer == NULL)
+        else if (ValueBuffer == NULL || ValueBufferSize == NULL)
         {
-            Lwm2m_Error("ValueBuffer is NULL");
+            Lwm2m_Error("ValueBuffer or ValueBufferSize is NULL\n");
             Lwm2mResult_SetResult(Lwm2mResult_InternalError);
             return -1;
         }
-        else if (ValueBufferSize < instance->Size)
-        {
-            Lwm2m_Error("ValueBuffer is smaller than the size of the requested resource instance (%d < %d)", ValueBufferSize, instance->Size);
-            Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
-            return -1;
-        }
 
-        memcpy(ValueBuffer, instance->Value, instance->Size);
+        *ValueBuffer = instance->Value;
+        *ValueBufferSize = instance->Size;
         Lwm2mResult_SetResult(Lwm2mResult_Success);
         return instance->Size;
     }

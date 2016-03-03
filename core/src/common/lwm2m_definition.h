@@ -42,7 +42,7 @@ extern "C" {
 
 // handler to call to retrieve a value from a resource instance
 typedef int (*ReadHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                           ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen);
+                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
 
 typedef int (*GetLengthHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                 ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
@@ -69,7 +69,7 @@ typedef struct
     WriteHandler Write;
     ReadHandler Read;
     ExecuteHandler Execute;
-    GetLengthHandler GetLength;
+    //GetLengthHandler GetLength;
     CreateOptionalResourceHandler CreateOptionalResource;
 } ResourceOperationHandlers;
 

@@ -72,10 +72,7 @@ typedef struct
 
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen);
-
-static int Lwm2mSecurity_ResourceGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                                  ResourceInstanceIDType resourceInstanceID);
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
 
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                               ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
@@ -183,7 +180,6 @@ static ObjectOperationHandlers securityObjectOperationHandlers =
 static ResourceOperationHandlers securityResourceOperationHandlers =
 {
     .Read = Lwm2mSecurity_ResourceReadHandler,
-    .GetLength = Lwm2mSecurity_ResourceGetLengthHandler,
     .Write = Lwm2mSecurity_ResourceWriteHandler,
     .Execute = NULL,
     .CreateOptionalResource = Lwm2mSecurity_CreateOptionalResourceHandler,
@@ -248,127 +244,86 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 }
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen)
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
 {
-    int size = -1;
     LWM2MSecurityInfo * security = GetSecurityInfo(context, objectInstanceID);
 
     if (security != NULL)
     {
-        void * src = NULL;
         switch (resourceID)
         {
             case LWM2M_SECURITY_OBJECT_SERVER_URI:
-                src = security->ServerURI;
-                size = strlen(security->ServerURI);
+                *buffer = security->ServerURI;
+                *bufferLen = strlen(security->ServerURI);
                 break;
 
             case LWM2M_SECURITY_OBJECT_BOOTSTRAP_SERVER:
-                src = &security->IsBootstrapServer;
-                size = sizeof(security->IsBootstrapServer);
+                *buffer = &security->IsBootstrapServer;
+                *bufferLen = sizeof(security->IsBootstrapServer);
                 break;
 
             case LWM2M_SECURITY_OBJECT_SECURITY_MODE:
-                src = &security->SecurityMode;
-                size = sizeof(security->SecurityMode);
+                *buffer = &security->SecurityMode;
+                *bufferLen = sizeof(security->SecurityMode);
                 break;
 
             case LWM2M_SECURITY_OBJECT_PUBLIC_KEY:
-                src = &security->PublicKeyIdentity;
-                size = security->PublicKeyIdentityLength;
+                *buffer = &security->PublicKeyIdentity;
+                *bufferLen = security->PublicKeyIdentityLength;
                 break;
 
             case LWM2M_SECURITY_OBJECT_SERVER_PUBLIC_KEY:
-                src = &security->ServerPublicKey;
-                size = security->ServerPublicKeyLength;
+                *buffer = &security->ServerPublicKey;
+                *bufferLen = security->ServerPublicKeyLength;
                 break;
 
             case LWM2M_SECURITY_OBJECT_SECRET_KEY:
-                src = &security->SecretKey;
-                size = security->SecretKeyLength;
+                *buffer = &security->SecretKey;
+                *bufferLen = security->SecretKeyLength;
                 break;
 
             case LWM2M_SECURITY_OBJECT_SMS_MODE:
-                src = &security->SmsSecurityMode;
-                size = sizeof(security->SmsSecurityMode);
+                *buffer = &security->SmsSecurityMode;
+                *bufferLen = sizeof(security->SmsSecurityMode);
                 break;
 
             case LWM2M_SECURITY_OBJECT_SMS_BINDING_PARAM:
-                src = &security->SmsBindingKeyParams;
-                size = security->SmsBindingKeyParamsLength;
+                *buffer = &security->SmsBindingKeyParams;
+                *bufferLen = security->SmsBindingKeyParamsLength;
                 break;
 
             case LWM2M_SECURITY_OBJECT_SMS_BINDING_SECRET_KEY:
-                src = &security->SmsBindingKeySecret;
-                size = security->SmsBindingKeySecretLength;
+                *buffer = &security->SmsBindingKeySecret;
+                *bufferLen = security->SmsBindingKeySecretLength;
                 break;
 
             case LWM2M_SECURITY_OBJECT_SMS_NUMBER:
-                src = &security->ServerSmsNumber;
-                size = sizeof(security->ServerSmsNumber);
+                *buffer = &security->ServerSmsNumber;
+                *bufferLen = sizeof(security->ServerSmsNumber);
                 break;
 
             case LWM2M_SECURITY_OBJECT_SHORT_SERVER_ID:
-                src = &security->ShortServerID;
-                size = sizeof(security->ShortServerID);
+                *buffer = &security->ShortServerID;
+                *bufferLen = sizeof(security->ShortServerID);
                 break;
 
             case LWM2M_SECURITY_OBJECT_CLIENT_HOLD_OFF:
-                src = &security->ClientHoldOffTime;
-                size = sizeof(security->ClientHoldOffTime);
+                *buffer = &security->ClientHoldOffTime;
+                *bufferLen = sizeof(security->ClientHoldOffTime);
                 break;
 
             default:
-                size = -1;
+                *bufferLen = 0;
         }
 
-        if (size > 0)
-        {
-            if (size <= destBufferLen)
-            {
-                memcpy(destBuffer, src, size);
-            }
-            else
-            {
-                Lwm2m_Error("Dest buffer is too small - did not retrieve resource %d of security object\n", resourceID);
-            }
-        }
     }
     else
     {
-        size = -1;
+        *buffer = NULL;
+        *bufferLen = 0;
     }
 
-    return size;
-}
-
-static int Lwm2mSecurity_ResourceGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                                  ResourceInstanceIDType resourceInstanceID)
-{
-    int length = -1;
-    LWM2MSecurityInfo * security =  GetSecurityInfo(context, objectInstanceID);
-
-    if (security != NULL)
-    {
-        switch (resourceID)
-        {
-            case LWM2M_SECURITY_OBJECT_SERVER_URI:             length = strlen(security->ServerURI); break;
-            case LWM2M_SECURITY_OBJECT_BOOTSTRAP_SERVER:       length = sizeof(security->IsBootstrapServer); break;
-            case LWM2M_SECURITY_OBJECT_SECURITY_MODE:          length = sizeof(security->SecurityMode); break;
-            case LWM2M_SECURITY_OBJECT_PUBLIC_KEY:             length = security->PublicKeyIdentityLength; break;
-            case LWM2M_SECURITY_OBJECT_SERVER_PUBLIC_KEY:      length = security->ServerPublicKeyLength; break;
-            case LWM2M_SECURITY_OBJECT_SECRET_KEY:             length = security->SecretKeyLength; break;
-            case LWM2M_SECURITY_OBJECT_SMS_MODE:               length = sizeof(security->SmsSecurityMode); break;
-            case LWM2M_SECURITY_OBJECT_SMS_BINDING_PARAM:      length = security->SmsBindingKeyParamsLength; break;
-            case LWM2M_SECURITY_OBJECT_SMS_BINDING_SECRET_KEY: length = security->SmsBindingKeySecretLength; break;
-            case LWM2M_SECURITY_OBJECT_SMS_NUMBER:             length = sizeof(security->ServerSmsNumber); break;
-            case LWM2M_SECURITY_OBJECT_SHORT_SERVER_ID:        length = sizeof(security->ShortServerID); break;
-            case LWM2M_SECURITY_OBJECT_CLIENT_HOLD_OFF:        length = sizeof(security->ClientHoldOffTime); break;
-            default:
-                length = -1;
-        }
-    }
-    return length;
+    return *bufferLen;
 }
 
 // Warn via log if the expected value size is larger than the supplied buffer size

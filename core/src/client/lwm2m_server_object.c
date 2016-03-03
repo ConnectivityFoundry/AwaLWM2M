@@ -26,10 +26,7 @@
 #include "lwm2m_objects.h"
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen);
-
-static int Lwm2mServer_ResourceGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                                ResourceInstanceIDType resourceInstanceID);
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
 
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
@@ -52,7 +49,6 @@ static ObjectOperationHandlers serverObjectOperationHandlers =
 static ResourceOperationHandlers serverResourceOperationHandlers =
 {
     .Read = Lwm2mServer_ResourceReadHandler,
-    .GetLength = Lwm2mServer_ResourceGetLengthHandler,
     .Write = Lwm2mServer_ResourceWriteHandler,
     .Execute = NULL,
     .CreateOptionalResource = Lwm2mServer_CreateOptionalResourceHandler,
@@ -146,90 +142,53 @@ static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID
 }
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen)
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
 {
-    int size = -1;
     Lwm2mServerType * server = GetServerObjectByObjectInstanceID(context, objectInstanceID);
     if (server != NULL)
     {
-        void * src = NULL;
         switch(resourceID)
         {
             case LWM2M_SERVER_OBJECT_SHORT_SERVER_ID:
-                src = &server->ShortServerID;
-                size = sizeof(server->ShortServerID);
+                *buffer = &server->ShortServerID;
+                *bufferLen = sizeof(server->ShortServerID);
                 break;
 
             case LWM2M_SERVER_OBJECT_LIFETIME:
-                src = &server->LifeTime;
-                size = sizeof(server->LifeTime);
+                *buffer = &server->LifeTime;
+                *bufferLen = sizeof(server->LifeTime);
                 break;
 
             case LWM2M_SERVER_OBJECT_MINIMUM_PERIOD:
-                src = &server->DefaultMinimumPeriod;
-                size = sizeof(server->DefaultMinimumPeriod);
+                *buffer = &server->DefaultMinimumPeriod;
+                *bufferLen = sizeof(server->DefaultMinimumPeriod);
                 break;
 
             case LWM2M_SERVER_OBJECT_MAXIMUM_PERIOD:
-                src = &server->DefaultMaximumPeriod;
-                size = sizeof(server->DefaultMaximumPeriod);
+                *buffer = &server->DefaultMaximumPeriod;
+                *bufferLen = sizeof(server->DefaultMaximumPeriod);
                 break;
 
             case LWM2M_SERVER_OBJECT_DISABLE_TIMEOUT:
-                src = &server->DisableTimeout;
-                size = sizeof(server->DisableTimeout);
+                *buffer = &server->DisableTimeout;
+                *bufferLen = sizeof(server->DisableTimeout);
                 break;
 
             case LWM2M_SERVER_OBJECT_NOTIFICATION_STORING:
-                src = &server->NotificationStoring;
-                size = sizeof(server->NotificationStoring);
+                *buffer = &server->NotificationStoring;
+                *bufferLen = sizeof(server->NotificationStoring);
                 break;
 
             case LWM2M_SERVER_OBJECT_BINDING:
-                src = server->Binding;
-                size = strlen(server->Binding);
+                *buffer = server->Binding;
+                *bufferLen = strlen(server->Binding);
                 break;
 
             default:
-                size = -1;
-        }
-
-        if (size > 0)
-        {
-            if (size <= destBufferLen)
-            {
-                memcpy(destBuffer, src, size);
-            }
-            else
-            {
-                Lwm2m_Error("Dest buffer is too small - did not retrieve resource %d of server object\n", resourceID);
-            }
+                *bufferLen = -1;
         }
     }
-    return size;
-}
-
-static int Lwm2mServer_ResourceGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                                ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
-{
-    int length = -1;
-    Lwm2mServerType * serverType = GetServerObjectByObjectInstanceID(context, objectInstanceID);
-    if (serverType != NULL)
-    {
-        switch (resourceID)
-        {
-            case LWM2M_SERVER_OBJECT_SHORT_SERVER_ID:      length = sizeof(serverType->ShortServerID); break;
-            case LWM2M_SERVER_OBJECT_LIFETIME:             length = sizeof(serverType->LifeTime); break;
-            case LWM2M_SERVER_OBJECT_MINIMUM_PERIOD:       length = sizeof(serverType->DefaultMinimumPeriod); break;
-            case LWM2M_SERVER_OBJECT_MAXIMUM_PERIOD:       length = sizeof(serverType->DefaultMaximumPeriod); break;
-            case LWM2M_SERVER_OBJECT_DISABLE_TIMEOUT:      length = sizeof(serverType->DisableTimeout); break;
-            case LWM2M_SERVER_OBJECT_NOTIFICATION_STORING: length = sizeof(serverType->NotificationStoring); break;
-            case LWM2M_SERVER_OBJECT_BINDING:              length = (strlen(serverType->Binding) == 0) ? 0 : strlen(serverType->Binding) + 1; break; // space for NULL terminator
-            default:
-                length = -1;
-        }
-    }
-    return length;
+    return *bufferLen;
 }
 
 // Warn via log if the expected value size is larger than the supplied buffer size
@@ -375,11 +334,11 @@ void Lwm2mCore_SetServerUpdateRegistration(Lwm2mContextType * context, int serve
 
 int Lwm2mServerObject_GetDefaultMinimumPeriod(Lwm2mContextType * context, int shortServerID)
 {
-    int64_t defaultMinimumPeriod = 0;
+    int64_t defaultMinimumPeriod = -1;
     Lwm2mServerType * server = GetServerObjectByShortServerID(context, shortServerID);
     if (server != NULL)
     {
-        Lwm2mCore_GetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, server->ServerObjectInstanceID, LWM2M_SERVER_OBJECT_DEFAULT_MINIMUM_PERIOD, 0, (void *)&defaultMinimumPeriod, sizeof(int64_t));
+        defaultMinimumPeriod = server->DefaultMinimumPeriod;
     }
     return defaultMinimumPeriod;
 }
@@ -389,7 +348,7 @@ int Lwm2mServerObject_GetDefaultMaximumPeriod(Lwm2mContextType * context, int sh
     Lwm2mServerType * server = GetServerObjectByShortServerID(context, shortServerID);
     if (server != NULL)
     {
-        Lwm2mCore_GetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, server->ServerObjectInstanceID, LWM2M_SERVER_OBJECT_DEFAULT_MAXIMUM_PERIOD, 0, (void*)&defaultMaximumPeriod, sizeof(int64_t));
+       defaultMaximumPeriod = server->DefaultMaximumPeriod;
     }
     return defaultMaximumPeriod;
 }

@@ -94,7 +94,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     {
         if (client->COAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
-            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, DebugLevel_Info);
+            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, DebugLevel_Debug);
 
             if (client->COAP != NULL)
             {
@@ -251,3 +251,13 @@ int AwaStaticClient_Process(AwaStaticClient * client)
 
     return result;
 }
+
+
+//AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+//                                          uint16_t minimumInstances, uint16_t maximumInstances)
+//{
+//    ObjectOperationHandlers * handlers = NULL;
+//    ObjectDefinition * defintion = Definition_NewObjectType(objectName, objectID, maximumInstances, minimumInstances, handlers);
+//}
+
+

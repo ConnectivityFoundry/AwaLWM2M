@@ -9,7 +9,6 @@ int staticClientProcessBootstrapTimeout = 10;
 
 }
 
-
 namespace Awa {
 
 class TestStaticClient : public testing::Test
@@ -42,7 +41,7 @@ TEST_F(TestStaticClient, AwaStaticClient_New_Init_Unconfigured_Client)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_vaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -53,7 +52,7 @@ TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_vaild_input)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_invaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_invalid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -65,7 +64,7 @@ TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_invaild_input)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_vaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -76,7 +75,7 @@ TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_vaild_input)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_invaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_invalid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -99,7 +98,7 @@ TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_long_name)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_vaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -110,7 +109,7 @@ TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_vaild_input)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invaild_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invalid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
@@ -160,6 +159,7 @@ TEST_F(TestStaticClient, AwaStaticClient_Init_valid_inputs)
     EXPECT_TRUE(client == NULL);
 }
 
+//This test is for valgrind
 TEST_F(TestStaticClient, AwaStaticClient_Process)
 {
     AwaStaticClient * client = AwaStaticClient_New();
@@ -171,6 +171,9 @@ TEST_F(TestStaticClient, AwaStaticClient_Process)
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 
+    AwaStaticClient_Process(client);
+    AwaStaticClient_Process(client);
+    AwaStaticClient_Process(client);
     AwaStaticClient_Process(client);
 
     AwaStaticClient_Free(&client);

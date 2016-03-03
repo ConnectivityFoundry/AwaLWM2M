@@ -103,15 +103,10 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
     return (ObjectStore_CreateResource(context->Store, objectID, objectInstanceID, resourceID) == -1) ? -1 : 0;
 }
 
-int Lwm2mCore_GetResourceInstanceLength(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
-{
-    return ObjectStore_GetResourceInstanceLength(context->Store, objectID, objectInstanceID, resourceID, resourceInstanceID);
-}
-
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, 
-                                       ResourceInstanceIDType resourceInstanceID, void * destBuffer, int destBufferLen)
+                                       ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
 {
-    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, destBuffer, destBufferLen);
+    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
 }
 
 ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * context, ObjectIDType  objectID, ObjectInstanceIDType objectInstanceID)

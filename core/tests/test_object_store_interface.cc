@@ -29,8 +29,9 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, static_cast<const char*>(expected), strlen(expected));
 
-    char buffer[512] = { 0 };
-    int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, 0, 0, buffer, sizeof(buffer));
+    const char * buffer;
+    int bufferSize = 0;
+    int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, 0, 0, (const void **)&buffer, &bufferSize);
 
     EXPECT_EQ(static_cast<size_t>(len), strlen(buffer) + 1);
     EXPECT_EQ(strlen(expected), strlen(buffer));
@@ -98,8 +99,10 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
     i = 0;
     for(auto it = expected.begin(); it < expected.end(); ++it, ++i)
     {
-        char buffer[512] = { 0 };
-        int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, i, 0, buffer, sizeof(buffer));
+        const char * buffer = NULL;
+        int len = 0;
+        Lwm2mCore_GetResourceInstanceValue(context, 0, 0, i, 0, (const void **)&buffer, &len);
+        ASSERT_TRUE(buffer != NULL);
         std::string actual(buffer);
         //std::cout << i << ": expected " << *it << ", actual " << actual << std::endl;
         EXPECT_EQ(static_cast<size_t>(len), actual.length() + 1);
@@ -149,8 +152,11 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
     i = 0;
     for(auto it = expected.begin(); it < expected.end(); ++it, ++i)
     {
-        char buffer[512] = { 0 };
-        int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, it->id, 0, buffer, sizeof(buffer));
+        const char * buffer = NULL;
+        int len = 0;
+        Lwm2mCore_GetResourceInstanceValue(context, 0, 0, it->id, 0, (const void **)&buffer, &len);
+        ASSERT_TRUE(buffer != NULL);
+
         std::string actual(buffer);
         //std::cout << i << ": expected " << *it << ", actual " << actual << std::endl;
         EXPECT_EQ(static_cast<size_t>(len), actual.length() + 1);

@@ -68,14 +68,11 @@ static Lwm2mContextType Lwm2mContext;
 
 static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                             ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
-                                            uint8_t * destBuffer, int destBufferLen);
+                                            const void ** buffer, int * bufferLen);
 
 static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                              ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
                                              uint8_t * srcBuffer, int srcBufferLen, bool * changed);
-
-static int Lwm2mCore_ObjectStoreGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                                 ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 static int Lwm2mCore_ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
@@ -95,7 +92,6 @@ ObjectOperationHandlers defaultObjectOperationHandlers =
 ResourceOperationHandlers defaultResourceOperationHandlers =
 {
     .Read = Lwm2mCore_ObjectStoreReadHandler,    //default handler, read from object store
-    .GetLength = Lwm2mCore_ObjectStoreGetLengthHandler,
     .Write = Lwm2mCore_ObjectStoreWriteHandler,  //default handler, write to object store.
     .Execute = NULL,
     .CreateOptionalResource = Lwm2mCore_ObjectStoreCreateOptionalResourceHandler,
@@ -216,44 +212,24 @@ static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectID
 static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     char path[32];
+    const void * newValue = NULL;
+    int newValueLength = 0;
+
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
-
-    uint8_t * newValue = NULL;
-    int newValueLength = Lwm2mCore_GetResourceInstanceLength(context, objectID, objectInstanceID, resourceID, 0);
-    if (newValueLength > 0)
-    {
-        newValue = malloc(newValueLength);
-        if (newValue == NULL)
-        {
-            Lwm2m_Error("Failed to allocate memory for resource\n");
-            return;
-        }
-        Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, newValue, newValueLength);
-    }
-    
+    Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
     Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
-    if (newValue)
-    {
-        free(newValue);
-    }
 }
 
 // This function is called when a read is performed for a resource that uses the "default" read handler. It is responsible
 // for looking up the resource specified and copying it's contents into the buffer specified by "destBuffer".
 // Return -1 on error, or the size of the data written to destBuffer.
 static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, uint8_t * destBuffer, int destBufferLen)
+                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
 {
-    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, destBuffer, destBufferLen);
-}
-
-static int Lwm2mCore_ObjectStoreGetLengthHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                                     ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
-{
-    return ObjectStore_GetResourceInstanceLength(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID);
+    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
 }
 
 // This function is called when a write is performed for a resource that uses the "default" write handler. It is responsible
@@ -944,16 +920,6 @@ int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID,
     return definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
 }
 
-int Lwm2mCore_GetResourceInstanceLength(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
-{
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.GetLength == NULL))
-    {
-        return -1;
-    }
-    return definition->Handlers.GetLength(context, objectID, objectInstanceID, resourceID, resourceInstanceID);
-}
-
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     int valueID = -1;
@@ -999,14 +965,14 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
     return Lwm2mObjectTree_GetNextResourceInstanceID(&context->ObjectTree, &iterator);
 }
 
-int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void * Value, int ValueBufferSize)
+int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** Value, int * ValueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
     if ((definition == NULL) || (definition->Handlers.Read == NULL))
     {
         return -1;
     }
-    return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t *)Value, ValueBufferSize);
+    return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
 }
 
 /**
