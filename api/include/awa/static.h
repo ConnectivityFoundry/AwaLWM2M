@@ -26,6 +26,8 @@
 
 #include "awa/common.h"
 #include "awa/error.h"
+#include "lwm2m_definition.h"
+#include "lwm2m_result.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +54,9 @@ typedef enum
 
 typedef struct _AwaStaticClient AwaStaticClient;
 
-typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
+
+typedef LWM2MHandler AwaStaticClientHandler;
+//typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
 
 /************************************************************************************************************
  * Awa Static Client functions
@@ -79,8 +83,8 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
 AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                           uint16_t minimumInstances, uint16_t maximumInstances);
 
-AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * objectName,
-                                                       AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                       AwaObjectID objectID, AwaResourceID resourceID, ResourceTypeEnum resourceType,
                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                        AwaStaticClientHandler handler);
 

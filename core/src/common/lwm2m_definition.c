@@ -76,8 +76,8 @@ ResourceDefinition * Definition_LookupResourceDefinition(const DefinitionRegistr
     return Definition_LookupResourceDefinitionFromObjectDefinition(objFormat, resourceID);
 }
 
-ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
-                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers)
+ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers, LWM2MHandler handler)
 {
     ObjectDefinition * objFormat = NULL;
     objFormat = (ObjectDefinition *)malloc(sizeof(ObjectDefinition));
@@ -90,10 +90,15 @@ ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType o
          objFormat->ObjectID = objectID;
          objFormat->MinimumInstances = minimumInstances;
          objFormat->MaximumInstances = maximumInstances;
+         objFormat->Handler = handler;
 
          if (handlers != NULL)
          {
              memcpy(&objFormat->Handlers, handlers, sizeof(*handlers));
+         }
+         else
+         {
+             memset(&objFormat->Handlers, 0, sizeof(*handlers));
          }
 
          ListInit(&objFormat->Resource);
@@ -104,6 +109,18 @@ ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType o
      }
 
      return objFormat;
+}
+
+ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers)
+{
+     return  NewObjectType(objName, objectID, maximumInstances, minimumInstances, handlers, NULL);
+}
+
+ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t MinimumInstances,
+                                            uint16_t MaximumInstances, LWM2MHandler Handler)
+{
+    return  NewObjectType(objName, objectID, MaximumInstances, MinimumInstances, NULL, Handler);
 }
 
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat)
@@ -303,9 +320,9 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
     return isMultipleInstance;
 }
 
-ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
+ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
                                                 ResourceTypeType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
-                                                Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+                                                Operations operations, ResourceOperationHandlers * handlers, LWM2MHandler handler, Lwm2mTreeNode * defaultValueNode)
 {
     ResourceDefinition * resFormat = (ResourceDefinition *)malloc(sizeof(*resFormat));
     if (resFormat != NULL)
@@ -318,15 +335,33 @@ ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, co
         resFormat->MaximumInstances = maximumInstances;
         resFormat->MinimumInstances = minimumInstances;
         resFormat->DefaultValueNode = (defaultValueNode != NULL) ? Lwm2mTreeNode_CopyRecursive(defaultValueNode) : NULL;
+        resFormat->Handler = handler;
 
         if (handlers != NULL)
         {
             memcpy(&resFormat->Handlers, handlers, sizeof(resFormat->Handlers));
         }
+        else
+        {
+            memset(&resFormat->Handlers, 0, sizeof(resFormat->Handlers));
+        }
 
         ListAdd(&resFormat->list, &objFormat->Resource);
     }
     return resFormat;
+}
+
+ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
+                                                ResourceTypeType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
+                                                Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+{
+    return NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL, defaultValueNode);
+}
+
+ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, ResourceTypeType resourceType,
+                                                           uint16_t MinimumInstances, uint16_t MaximumInstances, Operations operations, LWM2MHandler Handler)
+{
+    return NewResourceType(objFormat, resName, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, NULL, Handler, NULL);
 }
 
 int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,

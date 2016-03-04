@@ -89,7 +89,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
 
 int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
                                  uint16_t MinimumInstances, ObjectOperationHandlers * Handlers);
-
+void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID);
 
 int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
                                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,

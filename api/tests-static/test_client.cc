@@ -260,4 +260,52 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     bootstrapServerDaemon.Stop();
 }
 
+extern "C" {
+
+Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+{
+    Lwm2mResult result = Lwm2mResult_InternalError;
+    printf("\n\nHandler called for operation %d\n\n", operation);
+
+    switch(operation)
+    {
+        case LWM2MOperation_CreateResource:
+            result = Lwm2mResult_SuccessCreated;
+            break;
+
+        default:
+            break;
+    }
+
+    return result;
+}
+
+
+};
+
+TEST_F(TestStaticClient, AwaStaticClient_Register_Object)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client, "TestObject", 9999, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client, "test", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_Read, handler ));
+
+    AwaStaticClient_CreateObjectInstance(client, 9999, 0);
+
+    AwaStaticClient_Process(client);
+    AwaStaticClient_Process(client);
+    AwaStaticClient_Process(client);
+    AwaStaticClient_Process(client);
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
 } // namespace Awa

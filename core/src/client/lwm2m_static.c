@@ -253,11 +253,90 @@ int AwaStaticClient_Process(AwaStaticClient * client)
 }
 
 
-//AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-//                                          uint16_t minimumInstances, uint16_t maximumInstances)
-//{
-//    ObjectOperationHandlers * handlers = NULL;
-//    ObjectDefinition * defintion = Definition_NewObjectType(objectName, objectID, maximumInstances, minimumInstances, handlers);
-//}
+AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                          uint16_t minimumInstances, uint16_t maximumInstances)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (objectName != NULL))
+    {
+
+        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, NULL);
+
+        if(defintion != NULL)
+        {
+            if(Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+            {
+                Lwm2mCore_ObjectCreated(client->Context, objectID);
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_Internal;
+            }
+        }
+        else
+        {
+            result = AwaError_OutOfMemory;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstance)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (objectInstance == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstance))
+    {
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_CannotCreate;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                       AwaObjectID objectID, AwaResourceID resourceID, ResourceTypeEnum resourceType,
+                                                       uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
+                                                       AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (resourceName != NULL) && (handler != NULL))
+    {
+        ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+        if (objFormat != NULL)
+        {
+            ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, handler);
+            if (resourceDefinition != NULL)
+            {
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
 
 
