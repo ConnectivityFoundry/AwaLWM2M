@@ -272,7 +272,9 @@ Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objec
         case LWM2MOperation_CreateResource:
             result = Lwm2mResult_SuccessCreated;
             break;
-
+        case LWM2MOperation_CreateObjectInstance:
+            result = Lwm2mResult_SuccessCreated;
+            break;
         default:
             break;
     }
@@ -294,8 +296,8 @@ TEST_F(TestStaticClient, AwaStaticClient_Register_Object)
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client, "TestObject", 9999, 0, 1));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client, "test", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_Read, handler ));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client, "test", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_Read, handler));
 
     AwaStaticClient_CreateObjectInstance(client, 9999, 0);
 

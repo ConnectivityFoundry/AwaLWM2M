@@ -296,13 +296,26 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
 
     if(definition->Handlers.CreateInstance == NULL)
     {
-        if(objectInstanceID >= 0)
+        if(definition->Handler != NULL)
         {
-            Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+            //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+            Lwm2mResult result = definition->Handler(NULL, LWM2MOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+            Lwm2mResult_SetResult(result);
+
+            if (result == Lwm2mResult_SuccessCreated)
+            {
+                Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+            }
+            else
+            {
+                goto error;
+            }
         }
         else
         {
-            Lwm2m_Error("Object instance ID incorrect (/%d/%d)\n", objectID, objectInstanceID);
+            Lwm2m_Error("No hander defined for Object ID %d\n", objectID);
+            Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+            goto error;
         }
     }
     else

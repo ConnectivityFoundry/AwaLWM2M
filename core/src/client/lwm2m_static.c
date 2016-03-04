@@ -253,15 +253,16 @@ int AwaStaticClient_Process(AwaStaticClient * client)
 }
 
 
-AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-                                          uint16_t minimumInstances, uint16_t maximumInstances)
+AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances,
+                                                     AwaStaticClientHandler handler)
 {
     AwaError result = AwaError_Unspecified;
 
     if ((client != NULL) && (objectName != NULL))
     {
 
-        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, NULL);
+        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, handler);
 
         if(defintion != NULL)
         {
