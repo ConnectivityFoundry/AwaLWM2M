@@ -75,7 +75,7 @@ void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const 
         {
             fprintf(g_outFile, ANSI_COLOUR_BRIGHT_WHITE " [%s] " ANSI_COLOUR_RESET, logLabels[level]);
 
-            if (level >= DebugLevel_Debug)
+            if (debugLevel >= DebugLevel_Debug)
             {
                 const char * shortFileName = strrchr(fileName, DIR_SLASH);
                 fprintf(g_outFile, ANSI_COLOUR_YELLOW "[%s:%d] " ANSI_COLOUR_RESET, shortFileName ? shortFileName+1 : fileName, lineNum);
