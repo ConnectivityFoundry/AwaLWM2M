@@ -14,7 +14,6 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 ----
 
 
-
 ### Contents.
 
 * [Introduction.](userguide.md#introduction) 
@@ -261,13 +260,16 @@ The client API header file can be found in "include/Awa/client.h".
 The server API header file can be found in "include/Awa/server.h".
 Both server and client APIs are implemented in the *libawa* library.   Applications may be linked against the either the static library *libawa.a* or the shared library *libawa.so*.
 
-Useful examples can be found in the *api/example* folder. The tools directory contains a number of useful tools. These are built with the daemons, by default.
+Useful examples can be found in the *api/example* folder. 
+
+The tools directory contains a number of useful tools. These are built with the daemons, by default. A complete toolset reference can be found [here](Awa_tools_reference.md).
 
 ## Awa client API tools.
 
 Several command-line tools are available for user interaction with the LWM2M daemon. These tools support simple operations, such as defining a custom object type, setting a resource value, retrieving a resource value, and waiting for a resource to change or be executed. They interact with the LWM2M daemon via the SDK and IPC channel, and are applications that interact with the daemon locally.
 
 Note that these are *not* LWM2M Protocol tools - they do not issue LWM2M operations.
+
 
 ### Common options.
 
@@ -441,7 +443,7 @@ The *--clientID/-c* option is not required. Each client endpoint name is display
 
 If *--verbose/-v* is specified, the output shows the number of registered clients, and their client endpoint names:
 
-For eaxmple: ````./awa-server-list-clients --verbose ````
+For example: ````./awa-server-list-clients --verbose ````
     
 Returns:
 ````
@@ -569,18 +571,20 @@ Multiple attribute values can be set with the same call. For example, to set the
 
 Note that the *?* and *&* characters will need to be escaped for most shells.
 
+## Further information.
 
-## Application example.
+### Application example.
 
 For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
 
 
-## Awa API reference.
+### Awa API reference.
 
 Full Awa API reference material is available [here](http://flowm2m.github.io/AwaLWM2M-docs/index.html).
 
+### Connecting to third party servers.
+
+A howTo guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
 
 ----
-
 ----
-
