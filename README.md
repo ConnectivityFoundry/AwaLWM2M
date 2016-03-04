@@ -5,7 +5,7 @@
 
 ## Awa LightweightM2M.
 
-The Internet of Things (IoT) market is currently fragmented by numerous proprietary methods of device management. In order for the IoT to reach its full potential, devices from different vendors must be able to communicate effectively with each other. This is where open standards such as the Open Mobile Alliance's (OMA) Lightweight Machine to Machine protocol (LWM2M) become important.
+The Internet of Things (IoT) is currently fragmented by numerous proprietary methods of device management. In order for the IoT to reach its full potential, devices from different vendors must be able to communicate effectively with each other. This is where open standards such as the Open Mobile Alliance's (OMA) Lightweight Machine to Machine protocol (LWM2M) become important.
  
 The LWM2M protocol has been designed to be highly efficient in terms of data transfer and memory footprint, making it  suitable for deployment on larger gateway devices as well as the more constrained devices.
  
@@ -16,8 +16,8 @@ Awa LWM2M is an implementation of the OMA Lightweight M2M protocol that provides
 Awa LWM2M is a development suite that provides a number of components and tools which can be combined in various ways depending on requirement. For example:
 
 
-* When running on a larger Linux based device, Awa LWM2M can be deployed as a series of daemons that interact with your application via the libawa library and associated API.
-* For more constrained devices, your application code can be built against the constrained device centric API and compiled along with the Awa LWM2M client code into a binary to be deployed on your device.
+* When running on a larger Linux based device, Awa LWM2M can be deployed as a series of daemons that interact with your application via the Awa API.
+* For more constrained devices, your application code can be built against the Awa static API and compiled along with the Awa LWM2M client code into a binary to be deployed on your device.
 
 *Regardless of the method, adding LWM2M support for your device is simply a matter of incorporating any objects you need into your own M2M application.*
 
