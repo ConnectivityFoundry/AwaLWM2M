@@ -71,12 +71,9 @@ extern "C" {
 #define IPC_MSG_CANCEL_OBSERVATION "CancelObserve"
 
 
-
 typedef struct _IPCInfo IPCInfo;
 typedef struct _IPCChannel IPCChannel;
 typedef struct _IPCMessage IPCMessage;
-
-#define IPC_UDP_TIMEOUT (5 * 1000)  /* 5 Secs Timeout */
 
 // Response codes, as specified by daemon
 typedef enum

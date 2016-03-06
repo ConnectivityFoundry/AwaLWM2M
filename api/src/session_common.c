@@ -37,6 +37,8 @@
 #include "xmltree.h"
 #include "lwm2m_xml_serdes.h"
 
+#define SESSION_CONNECT_TIMEOUT (10 * 1000)  // 10 second timeout
+
 /* Notes:
  *  - a Session is considered 'connected' if it has a non-NULL IPCChannel.
  */
@@ -376,7 +378,7 @@ AwaError SessionCommon_ConnectSession(SessionCommon * session)
                     IPCMessage_SetType(connectRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
 
                     IPCMessage * connectResponse = NULL;
-                    result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, IPC_UDP_TIMEOUT);
+                    result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
 
                     if (result == AwaError_Success)
                     {
@@ -465,7 +467,7 @@ AwaError SessionCommon_DisconnectSession(SessionCommon * session)
                 IPCMessage_SetType(connectRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_DISCONNECT);
 
                 IPCMessage * connectResponse = NULL;
-                result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, IPC_UDP_TIMEOUT);
+                result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
 
                 if (result == AwaError_Success)
                 {
