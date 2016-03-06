@@ -23,21 +23,26 @@ make BUILD_DIR=.build_openwrt CMAKE_OPTIONS=-DCMAKE_TOOLCHAIN_FILE=ci/openwrt-to
 
 # setup lcov
 mkdir .build_x86
-(cd .build_x86; lcov --zerocounters --directory .; lcov --capture --initial --directory . --output-file test_lwm2m || true)
+(cd .build_x86
+ lcov --rc lcov_branch_coverage=1 --zerocounters --directory .
+ lcov --rc lcov_branch_coverage=1 --capture --initial --directory . --output-file test_lwm2m || true
+)
 
 # build for x86 and run test cases
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON"
 make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON" tests
 
 # prepare coverage results
-(cd .build_x86;
- lcov --no-checksum --directory . --capture --output-file tmp_test_lwm2m.info; 
- lcov --remove tmp_test_lwm2m.info "api/tests/*" --remove tmp_test_lwm2m.info "api/src/unsupported*" --output-file test_lwm2m.info;
- mkdir -p lcov-html; 
- cd lcov-html; genhtml ../test_lwm2m.info)
+(cd .build_x86
+ lcov --rc lcov_branch_coverage=1 --no-checksum --directory . --capture --output-file tmp_test_lwm2m.info
+ lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "api/tests/*" --remove tmp_test_lwm2m.info "api/src/unsupported*" --output-file test_lwm2m.info
+ mkdir -p lcov-html
+ cd lcov-html
+ genhtml --rc genhtml_branch_coverage=1 ../test_lwm2m.info
+)
 
 # prepare cobertura coverage results
-(cd .build_x86;
+(cd .build_x86
  python ../ci/lcov_cobertura.py test_lwm2m.info -b ../
 )
 
