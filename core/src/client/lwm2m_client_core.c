@@ -62,6 +62,7 @@ struct _Lwm2mContextType
     char EndPointName[MAX_ENDPOINT_NAME_LENGTH];  // Client EndPoint name
     bool UseFactoryBootstrap;                 // Factory bootstrap information has been loaded from file.
     struct ListHead ObserverList;
+    void * ApplicationContext;
 };
 
 static Lwm2mContextType Lwm2mContext;
@@ -299,7 +300,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
         if(definition->Handler != NULL)
         {
             //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
-            Lwm2mResult result = definition->Handler(NULL, LWM2MOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context) , LWM2MOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
             Lwm2mResult_SetResult(result);
 
             if (result == Lwm2mResult_SuccessCreated)
@@ -417,7 +418,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
         else
         {
             //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
-            Lwm2mResult result = definition->Handler(NULL, LWM2MOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
+            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
             Lwm2mResult_SetResult(result);
 
             if(result != Lwm2mResult_SuccessCreated)
@@ -1942,7 +1943,30 @@ void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap)
 
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context)
 {
-    return context->Coap;
+    CoapInfo * result = NULL;
+
+    if(context != NULL)
+        result = context->Coap;
+
+    return result;
+}
+
+void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context)
+{
+    void * result = NULL;
+
+    if (context != NULL)
+        result = context->ApplicationContext;
+
+    return result;
+}
+
+void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicaitonContext)
+{
+    if(context != NULL)
+    {
+        context->ApplicationContext = applicaitonContext;
+    }
 }
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.

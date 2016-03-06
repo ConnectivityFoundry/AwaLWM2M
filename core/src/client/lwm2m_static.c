@@ -103,6 +103,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
                 Lwm2m_RegisterServerObject(client->Context);
                 Lwm2m_RegisterSecurityObject(client->Context);
                 Lwm2m_PopulateSecurityObject(client->Context, client->BootstrapServerURI);
+                Lwm2mCore_SetApplicationContext(client->Context, client);
                 result = AwaError_Success;
             }
             else

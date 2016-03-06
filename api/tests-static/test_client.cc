@@ -11,10 +11,40 @@ int staticClientProcessBootstrapTimeout = 10;
 
 namespace Awa {
 
-class TestStaticClient : public testing::Test
-{
 
+struct SignleStaticClientPollCondition : public PollCondition
+{
+    AwaStaticClient * StaticClient;
+    AwaServerListClientsOperation * Operation;
+    std::string ClientEndpointName;
+    int counter;
+
+    SignleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
+        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
+    virtual ~SignleStaticClientPollCondition() {}
+
+    virtual bool Check()
+    {
+        bool found = false;
+
+        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
+        AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(Operation);
+        EXPECT_TRUE(iterator != NULL);
+        if (AwaClientIterator_Next(iterator))
+        {
+            if (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
+            {
+                found = true;
+            }
+        }
+        AwaClientIterator_Free(&iterator);
+        AwaStaticClient_Process(StaticClient);
+        counter++;
+        return found;
+    }
 };
+
+class TestStaticClient : public testing::Test {};
 
 TEST_F(TestStaticClient, AwaStaticClient_New_Free)
 {
@@ -225,30 +255,8 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
     EXPECT_TRUE(NULL != operation);
 
-    bool found = false;
-    int counter = 0;
-
-    while(counter < StaticClient::staticClientProcessBootstrapTimeout && !found)
-    {
-        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
-        AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
-        EXPECT_TRUE(iterator != NULL);
-        if (AwaClientIterator_Next(iterator))
-        {
-            if (clientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
-            {
-                found = true;
-                printf("Took %d iterations of AwaStaticClient_Process to bootstrap and register.\n", counter);
-            }
-        }
-        counter++;
-        AwaClientIterator_Free(&iterator);
-        AwaStaticClient_Process(client);
-    }
-
-    //Check it hasn't timed out.
-    ASSERT_NE(counter, StaticClient::staticClientProcessBootstrapTimeout);
-    ASSERT_TRUE(found);
+    SignleStaticClientPollCondition condition = SignleStaticClientPollCondition(client, operation, clientEndpointName, 10);
+    ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
     AwaServerSession_Free(&session);
@@ -281,7 +289,6 @@ Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objec
 
     return result;
 }
-
 
 };
 
