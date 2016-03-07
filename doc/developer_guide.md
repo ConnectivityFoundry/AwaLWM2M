@@ -59,8 +59,8 @@ The client and server APIs are for the less constrained devices (running Linux),
 The Static client API is designed for cases where the configuration will not change during the lifetime of the software. Typical use cases are constrained devices (which are severely resource limited) and the use of Standard Objects (as defined by the LWM2M specification), which are not expected to change.
 
 
-### The client API.
-The client API consists of the *client core*, which coordinates the IPC layer (for communication with the client API), the static API, serialiser/deserialiser (*serdes*), CoAP, definition registry, data storage (*object tree*) and observer registry.  
+### The client.
+The client consists of the *client core*, which coordinates the IPC layer (for communication with the client API), the static API, serialiser/deserialiser (*serdes*), CoAP, definition registry, data storage (*object tree*) and observer registry.  
 
 ![Awa client API structure](Awa_client_API_structure.png)
 
