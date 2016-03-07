@@ -953,7 +953,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
         }
         else
         {
-            Lwm2m_Warning("Request path is NULL - No CoAP request was sent");
+            Lwm2m_Warning("Request path is NULL - No CoAP request was sent\n");
         }
     }
     else
@@ -1485,7 +1485,7 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
             Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
             Lwm2mTreeNode_AddChild(child, resourceInstance);
 
-            Lwm2m_Error("Added default value for: %d\n", resourceID);
+            Lwm2m_Debug("Added default value for: %d\n", resourceID);
         }
     }
 error:

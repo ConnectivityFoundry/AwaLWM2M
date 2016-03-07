@@ -234,6 +234,114 @@ INSTANTIATE_TEST_CASE_P(
            Target { const_cast<char *>("/3"),   56345}
         ));
 
+
+
+class TestToolsCommonWithSession: public TestClientWithSession {};
+
+TEST_F(TestToolsCommonWithSession, Client_GetValue_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Client_GetValue(session_, NULL, "");
+}
+
+TEST_F(TestToolsCommonWithSession, Client_GetValue_handles_null_arg)
+{
+    // test it doesn't seg-fault:
+    Target t = { const_cast<char *>("/7/0/0"), 0 };
+    Client_GetValue(session_, &t, NULL);
+}
+
+TEST_F(TestToolsCommonWithSession, Client_IsObjectTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Client_IsObjectTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithSession, Client_IsObjectInstanceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Client_IsObjectInstanceTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithSession, Client_IsResourceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Client_IsResourceTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithSession, Client_IsResourceInstanceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Client_IsResourceInstanceTarget(session_, NULL);
+}
+
+
+class TestToolsCommonWithServerSession: public TestServerWithSession {};
+
+TEST_F(TestToolsCommonWithServerSession, Server_GetValue_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Server_GetValue(session_, NULL, "");
+}
+
+TEST_F(TestToolsCommonWithServerSession, Server_GetValue_handles_null_arg)
+{
+    // test it doesn't seg-fault:
+    Target t = { const_cast<char *>("/7/0/0"), 0 };
+    Server_GetValue(session_, &t, NULL);
+}
+
+TEST_F(TestToolsCommonWithServerSession, Server_IsObjectTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Server_IsObjectTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithServerSession, Server_IsObjectInstanceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Server_IsObjectInstanceTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithServerSession, Server_IsResourceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Server_IsResourceTarget(session_, NULL);
+}
+
+TEST_F(TestToolsCommonWithServerSession, Server_IsResourceInstanceTarget_handles_null_target)
+{
+    // test it doesn't seg-fault:
+    Server_IsResourceInstanceTarget(session_, NULL);
+}
+
+
+TEST_F(TestToolsCommon, GetNextTargetResourceInstanceIDFromPath_handles_null_targets)
+{
+    int index = 0;
+    GetNextTargetResourceInstanceIDFromPath(NULL, 1, "/3/0/0", &index);
+}
+
+TEST_F(TestToolsCommon, GetNextTargetResourceInstanceIDFromPath_handles_null_path)
+{
+    Target t1 = { const_cast<char *>("/7/0/0"), 0 };
+    Target * targets[] = { &t1 };
+    int index = 0;
+    GetNextTargetResourceInstanceIDFromPath(targets, 1, NULL, &index);
+}
+
+TEST_F(TestToolsCommon, GetNextTargetResourceInstanceIDFromPath_handles_null_index)
+{
+    Target t1 = { const_cast<char *>("/7/0/0"), 0 };
+    Target * targets[] = { &t1 };
+    GetNextTargetResourceInstanceIDFromPath(targets, 1, "/3/0/0", NULL);
+}
+
+TEST_F(TestToolsCommon, PrintAllObjectDefinitions_handles_null_iterator)
+{
+    PrintAllObjectDefinitions(NULL, false);
+}
+
 } // namespace Awa
 
 
