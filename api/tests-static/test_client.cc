@@ -45,19 +45,51 @@ struct SignleStaticClientPollCondition : public PollCondition
 
 class TestStaticClient : public testing::Test {};
 
-// For Server tests that require a valid and connected session
 class TestStaticClientWithServer : public TestServerWithConnectedSession
 {
 protected:
     virtual void SetUp() {
         TestServerWithConnectedSession::SetUp();
-        this->Connect();
+
+        std::string serverURI = std::string("coap://127.0.0.1:") + std::to_string(global::serverCoapPort) + "/";
+        std::string clientEndpointName = "TestClient";
+        client_ = AwaStaticClient_New();
+        EXPECT_TRUE(client_ != NULL);
+
+        BootstrapInfo bootstrapinfo = { 0 };
+
+        sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", serverURI.c_str());
+        bootstrapinfo.SecurityInfo.Bootstrap = false;
+        bootstrapinfo.SecurityInfo.SecurityMode = 0;
+        sprintf(bootstrapinfo.SecurityInfo.PublicKey, "[PublicKey]");
+        sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+        bootstrapinfo.SecurityInfo.ServerID = 1;
+        bootstrapinfo.SecurityInfo.HoldOffTime = 30;
+
+        bootstrapinfo.ServerInfo.ShortServerID = 1;
+        bootstrapinfo.ServerInfo.LifeTime = 30;
+        bootstrapinfo.ServerInfo.MinPeriod = 1;
+        bootstrapinfo.ServerInfo.MaxPeriod = -1;
+        bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+        bootstrapinfo.ServerInfo.Notification = false;
+        sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client_, ""));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client_, global::clientEndpointName));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client_, "0.0.0.0", global::clientLocalCoapPort));
+
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client_));
+
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetFactoryBootstrapInformation(client_, &bootstrapinfo));
     }
 
     virtual void TearDown() {
-        this->Disconnect();
+        AwaStaticClient_Free(&client_);
+        EXPECT_TRUE(client_ == NULL);
         TestServerWithConnectedSession::TearDown();
     }
+
+    AwaStaticClient * client_;
 };
 
 
@@ -343,95 +375,15 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     bootstrapServerDaemon.Stop();
 }
 
-TEST_F(TestStaticClient,  AwaStaticClient_Factory_Bootstrap_Test)
+TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
 {
-    std::string testDescription = std::string(CURRENT_TEST_CASE_NAME + std::string(".") + CURRENT_TEST_NAME);
-
-    std::string serverAddress = "127.0.0.1";
-    int serverCoapPort = 44443;
-    int serverIpcPort = 6301;
-    std::string serverURI = std::string("coap://") + serverAddress + std::string(":") + std::to_string(serverCoapPort) + "/";
-    AwaServerDaemon serverDaemon;
-    serverDaemon.SetCoapPort(serverCoapPort);
-    serverDaemon.SetIpcPort(serverIpcPort);
-
-    // start the server daemons
-    EXPECT_TRUE(serverDaemon.Start(testDescription));
-
-    std::string clientEndpointName = "BootstrapTestClient";
-    AwaStaticClient * client = AwaStaticClient_New();
-    EXPECT_TRUE(client != NULL);
-
-    /*
-     * typedef struct
-{
-    .ServerURI = serverURI.c_str(),
-    .Bootstrap = false,
-    .SecurityMode = 0,
-    .PublicKey = "[PublicKey]",
-    . = "[SecretKey]",
-    .ServerID = 1,
-    .HoldOffTime = 30,
-} Lwm2mSecurityInfo;
-
-typedef struct
-{
-    .ShortServerID = 1,
-    .LifeTime = 30,
-    .MinPeriod = 1,
-    .MaxPeriod = -1,
-    .DisableTimeout = 86400,
-    .Notification = false,
-    .Binding = "U",
-} Lwm2mServerInfo;
-     */
-
-    BootstrapInfo bootstrapinfo = { 0 };
-
-
-    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", serverURI.c_str());
-    bootstrapinfo.SecurityInfo.Bootstrap = false;
-    bootstrapinfo.SecurityInfo.SecurityMode = 0;
-    sprintf(bootstrapinfo.SecurityInfo.PublicKey, "[PublicKey]");
-    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
-    bootstrapinfo.SecurityInfo.ServerID = 1;
-    bootstrapinfo.SecurityInfo.HoldOffTime = 30;
-
-    bootstrapinfo.ServerInfo.ShortServerID = 1;
-    bootstrapinfo.ServerInfo.LifeTime = 30;
-    bootstrapinfo.ServerInfo.MinPeriod = 1;
-    bootstrapinfo.ServerInfo.MaxPeriod = -1;
-    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
-    bootstrapinfo.ServerInfo.Notification = false;
-    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, ""));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, clientEndpointName.c_str()));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
-
-    // wait for the client to register with the server
-    AwaServerSession * session = AwaServerSession_New();
-    EXPECT_TRUE(NULL != session);
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, serverAddress.c_str(), serverIpcPort));
-    EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
-
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
 
-    SignleStaticClientPollCondition condition(client, operation, clientEndpointName, 10);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
     ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
-    AwaServerSession_Free(&session);
-
-    AwaStaticClient_Free(&client);
-    EXPECT_TRUE(client == NULL);
-
-    serverDaemon.Stop();
 }
 
 TEST_F(TestStaticClient, AwaStaticClient_Create_Operation_for_Object_and_Resource)
