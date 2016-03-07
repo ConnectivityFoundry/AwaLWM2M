@@ -742,7 +742,7 @@ static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlReques
             goto error;
         }
 
-        Lwm2m_Debug("Subscribe to %s (ID = /%d/%d/%d)\n", TreeNode_GetName(currentLeafNode), key.ObjectID, key.InstanceID, key.ResourceID);
+        Lwm2m_Debug("Get request: %s (ID = /%d/%d/%d)\n", TreeNode_GetName(currentLeafNode), key.ObjectID, key.InstanceID, key.ResourceID);
 
         TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(responseObjectsTree, "Object", key.ObjectID);
         TreeNode responseObjectInstanceNode = key.InstanceID != AWA_INVALID_ID? ObjectsTree_FindOrCreateChildNode(responseObjectNode, "ObjectInstance", key.InstanceID) : NULL;
