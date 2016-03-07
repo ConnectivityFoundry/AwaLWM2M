@@ -390,41 +390,55 @@ char * Client_GetValue(const AwaClientSession * session, const Target * target, 
 {
     char * value = NULL;
 
-    // Only resources can be set
-    AwaResourceID resourceID = AWA_INVALID_ID;
-    AwaClientSession_PathToIDs(session, target->Path, NULL, NULL, &resourceID);
-    if (resourceID == AWA_INVALID_ID)
+    if (target != NULL)
     {
-        Error("Resource or Resource Instance must be specified: %s\n", arg);
-    }
-    else
-    {
-        const char * valueStr = strchr(arg, '=');
-        if (valueStr == NULL)
+        if (arg != NULL)
         {
-            Error("A value must be specified: %s\n", arg);
-        }
-        else
-        {
-            valueStr++;  // Skip the '=' character
-            int valueLen = strlen(valueStr);
-            if (valueLen == 0)
+            // Only resources can be set
+            AwaResourceID resourceID = AWA_INVALID_ID;
+            AwaClientSession_PathToIDs(session, target->Path, NULL, NULL, &resourceID);
+            if (resourceID == AWA_INVALID_ID)
             {
-                Error("A value must be specified: %s\n", arg);
+                Error("Resource or Resource Instance must be specified: %s\n", arg);
             }
             else
             {
-                value = malloc(sizeof(char) * valueLen + 1);
-                if (value != NULL)
+                const char * valueStr = strchr(arg, '=');
+                if (valueStr == NULL)
                 {
-                    strncpy(value, valueStr, valueLen + 1);  // Add 1 to accommodate the null terminator otherwise strncpy doesn't add one
+                    Error("A value must be specified: %s\n", arg);
                 }
                 else
                 {
-                    Error("Out of memory\n");
+                    valueStr++;  // Skip the '=' character
+                    int valueLen = strlen(valueStr);
+                    if (valueLen == 0)
+                    {
+                        Error("A value must be specified: %s\n", arg);
+                    }
+                    else
+                    {
+                        value = malloc(sizeof(char) * valueLen + 1);
+                        if (value != NULL)
+                        {
+                            strncpy(value, valueStr, valueLen + 1);  // Add 1 to accommodate the null terminator otherwise strncpy doesn't add one
+                        }
+                        else
+                        {
+                            Error("Out of memory\n");
+                        }
+                    }
                 }
             }
         }
+        else
+        {
+            Error("arg is NULL\n");
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
 
     return value;
@@ -436,9 +450,17 @@ bool Client_IsObjectTarget(const AwaClientSession * session, const Target * targ
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && !IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && !IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -449,9 +471,17 @@ bool Client_IsObjectInstanceTarget(const AwaClientSession * session, const Targe
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -462,9 +492,17 @@ bool Client_IsResourceTarget(const AwaClientSession * session, const Target * ta
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -475,9 +513,17 @@ bool Client_IsResourceInstanceTarget(const AwaClientSession * session, const Tar
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && IsIDValid(target->ResourceInstanceID);
+        if (AwaClientSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -602,30 +648,38 @@ static char * EncodeOpaque(AwaOpaque * value)
 {
     enum { OPAQUE_DISPLAY_LEN = 32 };
     enum { OPAQUE_BUFFER_LEN = (OPAQUE_DISPLAY_LEN * 3) + 32 }; // 3 bytes per character, plus extra for header
+    char * resourceValue = NULL;
 
-    char * resourceValue = (char *)malloc(OPAQUE_BUFFER_LEN);
-    if (resourceValue != NULL)
+    if (value != NULL)
     {
-        memset(resourceValue, 0, OPAQUE_BUFFER_LEN);
-
-        // Print opaque in hex, but truncate the output and place continuation characters on the end.
-        // cppcheck-suppress redundantCopy
-        snprintf(resourceValue, OPAQUE_BUFFER_LEN, "Opaque (%zu):", value->Size);
-        int i;
-        for (i = 0; i < value->Size; i++)
+        resourceValue = (char *)malloc(OPAQUE_BUFFER_LEN);
+        if (resourceValue != NULL)
         {
-            if ((i <= OPAQUE_DISPLAY_LEN) || (i == value->Size - 1))
+            memset(resourceValue, 0, OPAQUE_BUFFER_LEN);
+
+            // Print opaque in hex, but truncate the output and place continuation characters on the end.
+            // cppcheck-suppress redundantCopy
+            snprintf(resourceValue, OPAQUE_BUFFER_LEN, "Opaque (%zu):", value->Size);
+            int i;
+            for (i = 0; i < value->Size; i++)
             {
-                char hexValue[4] = {0};
-                snprintf(hexValue, 4, "%02X ", ((uint8_t*)value->Data)[i]);
-                strcat(resourceValue, hexValue);
-            }
-            else
-            {
-                strcat(resourceValue, "...");
-                break;
+                if ((i <= OPAQUE_DISPLAY_LEN) || (i == value->Size - 1))
+                {
+                    char hexValue[4] = {0};
+                    snprintf(hexValue, 4, "%02X ", ((uint8_t*)value->Data)[i]);
+                    strcat(resourceValue, hexValue);
+                }
+                else
+                {
+                    strcat(resourceValue, "...");
+                    break;
+                }
             }
         }
+    }
+    else
+    {
+        Error("value is NULL\n");
     }
     return resourceValue;
 }
@@ -1300,41 +1354,55 @@ char * Server_GetValue(const AwaServerSession * session, const Target * target, 
 {
     char * value = NULL;
 
-    // Only resources can be set
-    AwaResourceID resourceID = AWA_INVALID_ID;
-    AwaServerSession_PathToIDs(session, target->Path, NULL, NULL, &resourceID);
-    if (resourceID == AWA_INVALID_ID)
+    if (target != NULL)
     {
-        Error("Resource or Resource Instance must be specified: %s\n", arg);
-    }
-    else
-    {
-        const char * valueStr = strchr(arg, '=');
-        if (valueStr == NULL)
+        if (arg != NULL)
         {
-            Error("A value must be specified: %s\n", arg);
-        }
-        else
-        {
-            valueStr++;  // skip the '='
-            int valueLen = strlen(valueStr);
-            if (valueLen == 0)
+            // Only resources can be set
+            AwaResourceID resourceID = AWA_INVALID_ID;
+            AwaServerSession_PathToIDs(session, target->Path, NULL, NULL, &resourceID);
+            if (resourceID == AWA_INVALID_ID)
             {
-                Error("A value must be specified: %s\n", arg);
+                Error("Resource or Resource Instance must be specified: %s\n", arg);
             }
             else
             {
-                value = malloc(sizeof(char) * valueLen + 1);
-                if (value != NULL)
+                const char * valueStr = strchr(arg, '=');
+                if (valueStr == NULL)
                 {
-                    strncpy(value, valueStr, valueLen + 1);  // note: add 1 to accommodate the null terminator otherwise strncpy doesn't add one
+                    Error("A value must be specified: %s\n", arg);
                 }
                 else
                 {
-                    Error("Out of memory\n");
+                    valueStr++;  // skip the '='
+                    int valueLen = strlen(valueStr);
+                    if (valueLen == 0)
+                    {
+                        Error("A value must be specified: %s\n", arg);
+                    }
+                    else
+                    {
+                        value = malloc(sizeof(char) * valueLen + 1);
+                        if (value != NULL)
+                        {
+                            strncpy(value, valueStr, valueLen + 1);  // note: add 1 to accommodate the null terminator otherwise strncpy doesn't add one
+                        }
+                        else
+                        {
+                            Error("Out of memory\n");
+                        }
+                    }
                 }
             }
         }
+        else
+        {
+            Error("arg is NULL\n");
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return value;
 }
@@ -1345,9 +1413,17 @@ bool Server_IsObjectTarget(const AwaServerSession * session, const Target * targ
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && !IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && !IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -1358,9 +1434,17 @@ bool Server_IsObjectInstanceTarget(const AwaServerSession * session, const Targe
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && !IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -1371,9 +1455,17 @@ bool Server_IsResourceTarget(const AwaServerSession * session, const Target * ta
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && !IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -1384,9 +1476,17 @@ bool Server_IsResourceInstanceTarget(const AwaServerSession * session, const Tar
     AwaObjectID objectID = AWA_INVALID_ID;
     AwaObjectInstanceID objectInstanceID = AWA_INVALID_ID;
     AwaResourceID resourceID = AWA_INVALID_ID;
-    if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+
+    if (target != NULL)
     {
-        result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && IsIDValid(target->ResourceInstanceID);
+        if (AwaServerSession_PathToIDs(session, target->Path, &objectID, &objectInstanceID, &resourceID) == AwaError_Success)
+        {
+            result = IsIDValid(objectID) && IsIDValid(objectInstanceID) && IsIDValid(resourceID) && IsIDValid(target->ResourceInstanceID);
+        }
+    }
+    else
+    {
+        Error("target is NULL\n");
     }
     return result;
 }
@@ -1394,12 +1494,29 @@ bool Server_IsResourceInstanceTarget(const AwaServerSession * session, const Tar
 int GetNextTargetResourceInstanceIDFromPath(Target ** targets, int numTargets, const char * path, int * index)
 {
     AwaResourceInstanceID resourceInstanceID = AWA_INVALID_ID;
-    for (/* no init */; *index < numTargets; (*index)++)
+    if (targets != NULL)
     {
-        if ((targets[*index] != NULL) && (strcmp(targets[*index]->Path, path) == 0))
+        if (path != NULL)
         {
-            resourceInstanceID = targets[(*index)++]->ResourceInstanceID;
-            break;
+            if (index != NULL)
+            {
+                for (/* no init */; *index < numTargets; (*index)++)
+                {
+                    if ((targets[*index] != NULL) && (strcmp(targets[*index]->Path, path) == 0))
+                    {
+                        resourceInstanceID = targets[(*index)++]->ResourceInstanceID;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Error("index is NULL\n");
+            }
+        }
+        else
+        {
+            Error("path is NULL\n");
         }
     }
     return resourceInstanceID;

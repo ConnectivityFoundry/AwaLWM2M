@@ -44,23 +44,8 @@
 
 static int Lwm2mConnectivityStatistics_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    DefinitionRegistry * definitions = Lwm2mCore_GetDefinitions((Lwm2mContextType *)context);
-
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
-    if (definition == NULL)
-    {
-        Lwm2m_Error("No definition for object ID %d Resource ID %d\n", objectID, resourceID);
-        goto error;
-    }
-
-    if ((resourceID = Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID)) == -1)
-    {
-        goto error;
-    }
-
+    // No action
     return 0;
-error:
-    return -1;
 }
 
 static int connectivityStatisticsStartOrReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
