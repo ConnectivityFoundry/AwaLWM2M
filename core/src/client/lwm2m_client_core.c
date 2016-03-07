@@ -942,19 +942,46 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     bool changed = false;
 
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Write == NULL))
+    if (definition == NULL)
     {
         return -1;
     }
 
-    if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
+    if (definition->Handlers.Write == NULL)
     {
-        Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
-        if (changed)
+        if (definition->Handler != NULL)
         {
-            Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+            //typedef Lwm2mResult (*LWM2MHandler)(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
+            uint16_t valueSizeU = valueSize;
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSizeU, &changed) == Lwm2mResult_SuccessChanged)
+            {
+                Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                if (changed)
+                {
+                    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+                }
+            }
+            else
+            {
+                return -1;
+            }
         }
-        return 0;
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
+        {
+            Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+            if (changed)
+            {
+                Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+            }
+            return 0;
+        }
     }
     return -1;
 }
