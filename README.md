@@ -48,7 +48,7 @@ Awa LWM2M documentation is available both at a general level (project informatio
 Note that for our purposes the terms *user* and *developer* have the following definitions:
 
 * *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of, or enhancement to, their own M2M application.  
-* *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project. 
+* *Contributor* - A developer who develops for and contributes to the Awa LightweightM2M project. 
 
 
 #### General documentation.
@@ -57,8 +57,8 @@ Note that for our purposes the terms *user* and *developer* have the following d
 	* For build instructions, see the [Quick start guide](doc/starters_guide.md). 
 	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
 	* A sample application tutorial can be found [here](doc/example_app.md).
-* For contributing developers:
-	* An overview of the system can be found in the [Developer guide](doc/developer_guide.md).  
+* For contributors:
+	* An overview of the system can be found in the [Contributing developer guide](doc/developer_guide.md).  
 	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
 
 #### API guide.
@@ -94,7 +94,7 @@ We would also like to acknowledge and thank the authors of the following project
 
 ### Development tasks.
 
-A list of ongoing development tasks can be seen [here]().
+A list of ongoing development tasks can be seen [here](doc/development_task_list.md).
 
 
 ----

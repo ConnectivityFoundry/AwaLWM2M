@@ -23,7 +23,6 @@ Refer to section [6.1 of the LWM2M technical specification](http://technical.ope
 
 Awa LightWeightM2M is an implementation of OMA LWM2M written in C. It incorporates both server and client functionality and provides APIs for both. Typically, the client or server runs as a standalone Linux process (a "daemon") and an application uses the API library to access and modify resources across an inter-process communication (IPC) interface. This decoupling of the API from the main functionality allows other languages to make use of the daemons by implementing the IPC protocol.
  
-**ADD DIAGRAM**
 
 
 ### License.
@@ -31,7 +30,7 @@ Awa LightWeightM2M source code is made available by Imagination Technologies Lim
 
 ### Contributing to Awa LightWeightM2M.
 Contributions to the Awa project are welcome and there are many ways to help, by submitting bug reports for example, or making feature requests, code changes or documentation edits.  
-To ensure that the codebase remains easy to understand, maintain and improve, all contributions should adhere to the [coding style guide](doc/coding_style.md).  
+To ensure that the codebase remains easy to understand, maintain and improve, all contributions should adhere to the [coding style guide](coding_style.md).  
 A comprehensive collection of unit tests is being developed and maintained to ensure that new contributions do not break existing functionality. All code submissions should be accompanied by one or more relevant unit tests, implemented within the existing unit test framework as described in the [*Testing*](developer_guide.md#testing) section below.
 
 For further details on contributing go [here](../CONTRIBUTING.md). 
@@ -60,8 +59,8 @@ The client and server APIs are for the less constrained devices (running Linux),
 The Static client API is designed for cases where the configuration will not change during the lifetime of the software. Typical use cases are constrained devices (which are severely resource limited) and the use of Standard Objects (as defined by the LWM2M specification), which are not expected to change.
 
 
-### The client API.
-The client API consists of the *client core*, which coordinates the IPC layer (for communication with the client API), the static API, serialiser/deserialiser (*serdes*), CoAP, definition registry, data storage (*object tree*) and observer registry.  
+### The client.
+The client consists of the *client core*, which coordinates the IPC layer (for communication with the client API), the static API, serialiser/deserialiser (*serdes*), CoAP, definition registry, data storage (*object tree*) and observer registry.  
 
 ![Awa client API structure](Awa_client_API_structure.png)
 

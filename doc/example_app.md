@@ -275,7 +275,7 @@ So far our object definitions have remained local to the client. The next sectio
 
 
 
-## Creating a server application using the AWA API.
+## Creating a server application using the Awa API.
 
 
 Let's create a server side application that makes use of our new object.

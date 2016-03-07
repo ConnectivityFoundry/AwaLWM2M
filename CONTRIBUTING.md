@@ -82,7 +82,7 @@ Use the same email address that you used to sign up for your github account.
 
 ### Forking the repository.
 
-f you want to contribute to the project the best practice is to create a fork. To do so
+If you want to contribute to the project the best practice is to create a fork. To do so
 navigate to *https://github.com/FlowM2M/AwaLWM2M* and click on the *fork* button at the top right of the 
 screen. If you are a member of multiple organisations you will be presented with a selection screen
 which can be used to select where to create the fork. Click on your user account to create the fork.
@@ -116,8 +116,7 @@ $ git merge upstream/master
 
 ### Making changes.
 
-The simplest way of working is to keep a clean master branch in the new fork
-and to create branches for each new pull request. This prevents merge conflicts with the upstream
+The simplest way of working is to keep a clean master branch in the new fork and to create branches for each new pull request. This prevents merge conflicts with the upstream
 master branch, and allows you to make changes to your pull request if required.
 
 To create a new branch:
