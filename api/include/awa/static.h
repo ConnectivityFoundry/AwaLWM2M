@@ -26,6 +26,7 @@
 
 #include "awa/common.h"
 #include "awa/error.h"
+#include "lwm2m_bootstrap_config.h"
 #include "lwm2m_definition.h"
 #include "lwm2m_result.h"
 
@@ -70,7 +71,7 @@ int AwaStaticClient_Process(AwaStaticClient * client);
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * endPointName);
 AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
-AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const BootstrapInfo * factoryBootstrapInformation);
 
 AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context);
 void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);

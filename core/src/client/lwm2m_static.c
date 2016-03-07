@@ -150,6 +150,30 @@ AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const c
     return result;
 }
 
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const BootstrapInfo * factoryBootstrapInformation)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (factoryBootstrapInformation != NULL))
+    {
+        if (!client->Running)
+        {
+            Lwm2mCore_SetFactoryBootstrap(client->Context, factoryBootstrapInformation);
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_OperationInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName)
 {
     AwaError result = AwaError_Unspecified;

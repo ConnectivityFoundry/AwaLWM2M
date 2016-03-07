@@ -29,36 +29,6 @@
 #include "lwm2m_debug.h"
 #include "lwm2m_objects.h"
 
-typedef struct
-{
-    char ServerURI[255];
-    bool Bootstrap;
-    int SecurityMode ;
-    char PublicKey[255];
-    char SecretKey[255];
-    int ServerID;
-    int HoldOffTime;
-} Lwm2mSecurityInfo;
-
-typedef struct
-{
-    int ShortServerID;
-    int LifeTime;
-    int MinPeriod;
-    int MaxPeriod;
-    //char * Disable;
-    int DisableTimeout;
-    bool Notification;
-    char Binding[10];
-    //char * UpdateTrigger;
-} Lwm2mServerInfo;
-
-struct _BootstrapInfo
-{
-    Lwm2mSecurityInfo SecurityInfo;
-    Lwm2mServerInfo ServerInfo;
-};
-
 static bool ParseLine(BootstrapInfo * bootstrapInfo, char * line, size_t len)
 {
     if (len == 0)
