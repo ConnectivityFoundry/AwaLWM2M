@@ -72,6 +72,9 @@ AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, cons
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
 
+AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context);
+void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
+
 AwaStaticClient * AwaStaticClient_New();
 AwaError AwaStaticClient_Init(AwaStaticClient * client);
 void AwaStaticClient_Free(AwaStaticClient ** client);

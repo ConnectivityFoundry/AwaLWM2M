@@ -17,7 +17,6 @@ struct SignleStaticClientPollCondition : public PollCondition
     AwaStaticClient * StaticClient;
     AwaServerListClientsOperation * Operation;
     std::string ClientEndpointName;
-    int counter;
 
     SignleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
         PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
@@ -39,12 +38,52 @@ struct SignleStaticClientPollCondition : public PollCondition
         }
         AwaClientIterator_Free(&iterator);
         AwaStaticClient_Process(StaticClient);
-        counter++;
         return found;
     }
 };
 
 class TestStaticClient : public testing::Test {};
+
+class StaticClientCallbackPollCondition : public PollCondition
+{
+    AwaStaticClient * StaticClient;
+    bool complete;
+
+public:
+    StaticClientCallbackPollCondition(AwaStaticClient * StaticClient, int maxCount) :
+        PollCondition(maxCount), StaticClient(StaticClient), complete(false) {}
+
+    virtual bool Check()
+    {
+        AwaStaticClient_Process(StaticClient);
+        return complete;
+    }
+
+    virtual Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+    {
+        return Lwm2mResult_InternalError;
+    };
+};
+
+Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+{
+    AwaStaticClient * client = (AwaStaticClient *)context;
+    Lwm2mResult result = Lwm2mResult_InternalError;
+
+    std::cerr << "Handler" << std::endl;
+
+    void * callback = AwaStaticClient_GetApplicationContext(client);
+
+    if (callback)
+    {
+        auto * callbackClass = static_cast<StaticClientCallbackPollCondition*>(callback);
+        result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
+    }
+
+    return result;
+}
+
+
 
 TEST_F(TestStaticClient, AwaStaticClient_New_Free)
 {
@@ -151,6 +190,26 @@ TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invalid_input)
     EXPECT_TRUE(client == NULL);
 }
 
+TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationContext_invalid_inputs)
+{
+    ASSERT_TRUE(NULL == AwaStaticClient_GetApplicationContext(NULL));
+    ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetApplicationContext(NULL, NULL));
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationContext_valid_inputs)
+{
+    int dummycontext = 5;
+    void * applicationContext = &dummycontext;
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client, applicationContext));
+    ASSERT_EQ(applicationContext, AwaStaticClient_GetApplicationContext(client));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
 TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_long_name)
 {
     AwaStaticClient * client = AwaStaticClient_New();
@@ -251,11 +310,10 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, serverAddress.c_str(), serverIpcPort));
     EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
 
-
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
     EXPECT_TRUE(NULL != operation);
 
-    SignleStaticClientPollCondition condition = SignleStaticClientPollCondition(client, operation, clientEndpointName, 10);
+    SignleStaticClientPollCondition condition(client, operation, clientEndpointName, 10);
     ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
@@ -268,38 +326,29 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     bootstrapServerDaemon.Stop();
 }
 
-extern "C" {
-
-Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
-{
-    Lwm2mResult result = Lwm2mResult_InternalError;
-    printf("\n\nHandler called for operation %d\n\n", operation);
-
-    switch(operation)
-    {
-        case LWM2MOperation_CreateResource:
-            result = Lwm2mResult_SuccessCreated;
-            break;
-        case LWM2MOperation_CreateObjectInstance:
-            result = Lwm2mResult_SuccessCreated;
-            break;
-        default:
-            break;
-    }
-
-    return result;
-}
-
-};
-
 TEST_F(TestStaticClient, AwaStaticClient_Register_Object)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
+    struct callback1 : public StaticClientCallbackPollCondition
+    {
+        callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
+
+        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        {
+            EXPECT_EQ(LWM2MOperation_DeleteResource, operation);
+            return Lwm2mResult_InternalError;
+        }
+    };
+
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    callback1 cbHandler(client, 10);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client, &cbHandler));
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 

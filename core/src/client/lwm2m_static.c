@@ -42,6 +42,7 @@ struct _AwaStaticClient
     const char * BootstrapServerURI;
     char COAPListenAddress[MAX_ADDRESS_LENGTH];
     int COAPListenPort;
+    void * ApplicationContext;
 };
 
 AwaStaticClient * AwaStaticClient_New()
@@ -208,6 +209,35 @@ AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, cons
     else
     {
         result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        client->ApplicationContext = context;
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
+{
+    void *  result = NULL;
+
+    if (client != NULL)
+    {
+        result = client->ApplicationContext;
     }
 
     return result;
