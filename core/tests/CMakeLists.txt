@@ -35,7 +35,7 @@ set (test_core_runner_LIBRARIES
 
 set (CMAKE_CXX_FLAGS "-Wall -Werror -g -std=c++11")
 
-add_definitions (-DLWM2M_CLIENT)
+add_definitions (-DLWM2M_CLIENT -D__STDC_FORMAT_MACROS)
 
 add_executable (test_core_runner ${test_core_runner_SOURCES})
 target_include_directories (test_core_runner PRIVATE ${test_core_runner_INCLUDE_DIRS})

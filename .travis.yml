@@ -1,0 +1,19 @@
+sudo: false
+language: cpp
+compiler: gcc
+
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+
+addons:
+ apt:
+  sources:
+   - george-edison55-precise-backports
+   - ubuntu-toolchain-r-test
+  packages:
+   - cmake
+   - cmake-data
+   - gcc-5
+   - g++-5
+
+script: make
