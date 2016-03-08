@@ -34,7 +34,7 @@ The client-tutorial application makes use of the Awa API to define objects and r
 
 ## Awa LightweightM2M installation.
 
-Firstly, Awa LWM2M must be compiled and installed, using the commands below to build and install Awa LWM2M to the  *./build/install* directory:
+Use the commands below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
 ```
 ~/AwaLWM2M$ make
