@@ -54,10 +54,11 @@ pid_t SpawnProcess(std::vector<const char *> &commandVector, bool wait_, bool si
         // child
         //std::cout << "Child: executing " << commandVector[0] << std::endl;
 
+        FILE * fd = NULL;
         if (silent)
         {
             // redirect stdout to /dev/null
-            FILE * fd = fopen("/dev/null", "at");
+            fd = fopen("/dev/null", "at");
             dup2(fileno(fd), STDOUT_FILENO);
         }
 
@@ -74,6 +75,10 @@ pid_t SpawnProcess(std::vector<const char *> &commandVector, bool wait_, bool si
         // only get here if exec failed
         perror("execve failed");
         std::cerr << argv[0] << std::endl;
+        if (fd != NULL)
+        {
+            fclose(fd);
+        }
         _exit(1);
     }
     else if (c_pid > 0)
@@ -190,6 +195,7 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) !=  0)
     {
         perror("setsockopt failed");
+        close(sockfd);
         return -1;
     }
 
@@ -206,6 +212,7 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
         {
             perror("sendto failed");
             //printf("sockfd %d, request %p, requestLen %zu, fromAddr %p, fromAddrLen %d\n", sockfd, request, requestLen, &fromAddr, fromAddrLen);
+            close(sockfd);
             return -1;
         }
 
@@ -217,7 +224,6 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     }
 
     close(sockfd);
-
     return response ? 0 : -1;
 }
 

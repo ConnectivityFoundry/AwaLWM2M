@@ -816,10 +816,13 @@ struct FloatItem
 
 ::std::ostream& operator<<(::std::ostream& os, const FloatItem& item)
 {
-    return os << std::setprecision(15)
-              << "FloatItem: "
-              << "Value " << item.Value
-              << ", Size " << item.Size;
+    std::streamsize ss = os.precision();
+    os << std::setprecision(15)
+       << "FloatItem: "
+       << "Value " << item.Value
+       << ", Size " << item.Size;
+    os.precision(ss);
+    return os;
 }
 
 } // namespace detail
