@@ -153,7 +153,7 @@ static void Lwm2m_ParseObjectList(Lwm2mClientType * client, const char * objectL
                 {
                     // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
                     // by including the content type in the root path link using the ct= link attribute.
-                    if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                    if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (objectStr != NULL) && (!strcmp(objectStr, "</>")))
                     {
                         client->SupportsJson = true;
                         Lwm2m_Info("Supports JSON\n");

@@ -58,7 +58,7 @@ int16_t ptrToInt16(void * ptr);
 int32_t ptrToInt32(void * ptr);
 int64_t ptrToInt64(void * ptr);
 
-void Lwm2mCore_AddressTypeToPath(char * path, AddressType * addr);
+void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * addr);
 const char * Lwm2mCore_DebugPrintAddress(AddressType * addr);
 int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr);
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2);

@@ -1865,6 +1865,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
     AwaOpaque value = { 0 };
     ASSERT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsOpaque(response, "/1000/0/0", &value));
     EXPECT_EQ(opaque.Size, value.Size);
+    ASSERT_TRUE(NULL != value.Data);
     EXPECT_EQ(0, std::memcmp(expectedData, value.Data, sizeof(expectedData)));
     //LogHex(LOG_LEVEL_DEBUG, stdout, opaque.Data, opaque.Size);
     AwaServerReadOperation_Free(&operation);

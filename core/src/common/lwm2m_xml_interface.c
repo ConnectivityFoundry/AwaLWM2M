@@ -65,11 +65,16 @@ int xmlif_AddRequestHandler(const char * msgType, XmlRequestHandler handler)
     return 0;
 }
 
-int xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
-        const struct sockaddr *dest_addr, socklen_t addrlen)
+ssize_t xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
+                     const struct sockaddr *dest_addr, socklen_t addrlen)
 {
     Lwm2m_Debug("Send %zu bytes on IPC\n%s\n", len , (const char *)buf);
-    return sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    ssize_t result = sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    if (result == -1)
+    {
+        perror("sendto");
+    }
+    return result;
 }
 
 int xmlif_init(void * context, int port)
@@ -262,7 +267,10 @@ error:
 
 void xmlif_destroy(int sockfd)
 {
-    close(sockfd);
+    if (sockfd >= 0)
+    {
+        close(sockfd);
+    }
 
     struct ListHead * i, * n;
     ListForEachSafe(i, n, &handlerList)

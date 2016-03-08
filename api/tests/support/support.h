@@ -43,8 +43,8 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int timeout = 2500;         // milliseconds
-    const int timeoutTolerance = 100;  // milliseconds
+    const int timeout = 2500;          // milliseconds
+    const int timeoutTolerance = 250;  // milliseconds
 
 } // namespace defaults
 
@@ -474,8 +474,28 @@ static int fd_set_blocking(int fd, int blocking) {
 
 const size_t BUF_SIZE = 256;
 
-} // namespace detail
+static void null_terminate_buffer(char * buffer, int rc, size_t bufSize)
+{
+    // if rc is valid, null-terminate buffer after rc bytes read
+    if (rc > 0)
+    {
+        if (rc < static_cast<int>(bufSize))
+        {
+            buffer[rc] = 0;
+        }
+        else
+        {
+            // unless bytes fill buffer entirely, then truncate
+            buffer[bufSize - 1] = 0;
+        }
+    }
+    else
+    {
+        buffer[0] = 0;
+    }
+}
 
+} // namespace detail
 
 // A test utility class for capturing output from a file
 class CaptureFile
@@ -524,9 +544,7 @@ protected:
   const char * Read() const {
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
-      if (rc == 0 || rc == -1) {
-          buffer_[0] = 0;
-      }
+      detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
 
       if (strlen(buffer_) > 0)
       {
@@ -605,9 +623,7 @@ protected:
   virtual const char * Read() const {
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
-      if (rc == 0 || rc == -1) {
-          buffer_[0] = 0;
-      }
+      detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
 
       if (strlen(buffer_) > 0)
       {

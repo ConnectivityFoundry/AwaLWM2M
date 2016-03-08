@@ -111,6 +111,7 @@ IPCInfo * IPCInfo_NewUDP(const char * address, unsigned short port)
         }
         else
         {
+            freeaddrinfo(addressInfo);
             LogErrorWithEnum(AwaError_OutOfMemory);
         }
     }
@@ -297,8 +298,7 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
                 }
 
                 TreeNode contentNode = Xml_CreateNode("Content");
-
-                if (subTypeNode != NULL)
+                if (contentNode != NULL)
                 {
                     if (TreeNode_AddChild(message->RootNode, contentNode) != false)
                     {
@@ -315,11 +315,16 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
                 }
             }
 
-            Awa_MemSafeFree(path);
         }
         else
         {
             result = InternalError_OutOfMemory;
+        }
+
+        if (path != NULL)
+        {
+            Awa_MemSafeFree(path);
+            path = NULL;
         }
     }
     else
@@ -339,7 +344,6 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const
         if (message->RootNode && (*type = TreeNode_GetName(message->RootNode)) != NULL)
         {
             char * path = NULL;
-
             if (msprintf(&path, "%s/Type", *type) > 0)
             {
                 TreeNode subTypeNode = TreeNode_Navigate(message->RootNode, path);
@@ -361,13 +365,16 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const
                     *type = NULL;
                     result = InternalError_InvalidMessage;
                 }
-
-                Awa_MemSafeFree(path);
             }
             else
             {
                 *type = NULL;
                 result = InternalError_InvalidMessage;
+            }
+
+            if (path != NULL)
+            {
+                Awa_MemSafeFree(path);
             }
         }
         else
@@ -386,98 +393,113 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const
 IPCResponseCode IPCMessage_GetResponseCode(IPCMessage * message)
 {
     IPCResponseCode code = IPCResponseCode_NotSet;
-    const char * type = NULL;
 
-    if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+    if (message != NULL)
     {
-
-        char * path = NULL;
-
-        if (msprintf(&path, "%s/Code", type) > 0)
+        const char * type = NULL;
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
         {
-           TreeNode codeNode = TreeNode_Navigate(message->RootNode, path);
-           const char * codeStr = NULL;
+            char * path = NULL;
+            if (msprintf(&path, "%s/Code", type) > 0)
+            {
+               TreeNode codeNode = TreeNode_Navigate(message->RootNode, path);
+               const char * codeStr = NULL;
 
-           if ((codeStr = (const char *)TreeNode_GetValue(codeNode)) != NULL)
-           {
-               code = atoi(codeStr);
-           }
+               if ((codeStr = (const char *)TreeNode_GetValue(codeNode)) != NULL)
+               {
+                   code = atoi(codeStr);
+               }
+            }
+
+            Awa_MemSafeFree(path);
         }
-
-        Awa_MemSafeFree(path);
     }
-
+    else
+    {
+        LogError("message is NULL");
+    }
     return code;
 }
 
 TreeNode IPCMessage_GetContentNode(IPCMessage * message)
 {
     TreeNode content = NULL;
-    const char * type = NULL;
 
-    if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+    if (message != NULL)
     {
-
-        char * path = NULL;
-
-        if (msprintf(&path, "%s/Content", type) > 0)
+        const char * type = NULL;
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
         {
-           content = TreeNode_Navigate(message->RootNode, path);
+            char * path = NULL;
+            if (msprintf(&path, "%s/Content", type) > 0)
+            {
+               content = TreeNode_Navigate(message->RootNode, path);
+            }
+
+            Awa_MemSafeFree(path);
         }
-
-        Awa_MemSafeFree(path);
     }
-
+    else
+    {
+        LogError("message is NULL");
+    }
     return content;
 }
 
 AwaError IPCMessage_AddContent(IPCMessage * message, TreeNode content)
 {
     AwaError result = AwaError_IPCError;
-    TreeNode contentNode = NULL;
-    const char * type = NULL;
 
-    if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+    if (message != NULL)
     {
-        if(content != NULL)
+        const char * type = NULL;
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
         {
-            char * path = NULL;
-
-            if (msprintf(&path, "%s/Content", type) > 0)
+            if (content != NULL)
             {
-                contentNode = TreeNode_Navigate(message->RootNode, path);
-
-                if(contentNode)
+                char * path = NULL;
+                if (msprintf(&path, "%s/Content", type) > 0)
                 {
-                    TreeNode contentCopy = Tree_Copy(content);
-                    if(contentCopy != NULL)
+                    TreeNode contentNode = TreeNode_Navigate(message->RootNode, path);
+                    if (contentNode)
                     {
-                        TreeNode_AddChild(contentNode, contentCopy);
-                        result = AwaError_Success;
+                        TreeNode contentCopy = Tree_Copy(content);
+                        if (contentCopy != NULL)
+                        {
+                            TreeNode_AddChild(contentNode, contentCopy);
+                            result = AwaError_Success;
+                        }
+                        else
+                        {
+                            result = AwaError_OutOfMemory;
+                        }
                     }
                     else
                     {
-                        result = AwaError_OutOfMemory;
+                        result = AwaError_IPCError;
                     }
                 }
                 else
                 {
-                    result = AwaError_IPCError;
+                    result = AwaError_OutOfMemory;
                 }
 
-                Awa_MemSafeFree(path);
+                if (path != NULL)
+                {
+                    Awa_MemSafeFree(path);
+                    path = NULL;
+                }
             }
             else
             {
-                result = AwaError_OutOfMemory;
+                result = AwaError_IPCError;
             }
         }
-        else
-        {
-            result = AwaError_IPCError;
-        }
     }
-
+    else
+    {
+        LogError("message is NULL");
+    }
     return result;
 }
 

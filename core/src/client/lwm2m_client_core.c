@@ -419,7 +419,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
     definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
     if (definition == NULL)
     {
-        Lwm2m_Error("Resource definition not found\n");
+        Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", objectID, resourceID);
         result = Lwm2mResult_NotFound;
         goto error;
     }
@@ -572,7 +572,7 @@ static Lwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType *
     if (createOptionalResource || Lwm2mTreeNode_IsCreateFlagSet(resourceNode))
     {
         ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-        if (!IS_MANDATORY(definition) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+        if ((definition != NULL) && !IS_MANDATORY(definition) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
         {
             if (Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == -1)
             {
@@ -1054,14 +1054,15 @@ static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequenc
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     int oir[3];
     ObjectInstanceResourceKey key = { objectID, objectInstanceID, resourceID };
-    char path[128] = {0};
+    enum { PATH_LEN = 128 };
+    char path[PATH_LEN] = {0};
     int matches;
     ContentType payloadContentType;
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    Lwm2mCore_AddressTypeToPath(path, addr);
-    strcat(path, "/");
-    strcat(path, OirToUri(key));
+    Lwm2mCore_AddressTypeToPath(path, PATH_LEN, addr);
+    strncat(path, "/", PATH_LEN - strlen(path));
+    strncat(path, OirToUri(key), PATH_LEN - strlen(path));
 
     matches = sscanf(OirToUri(key), "%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
@@ -1070,14 +1071,13 @@ static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequenc
     {
         char payload[1024];
         int payloadLen = Lwm2mCore_SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
-        Lwm2mTreeNode_DeleteRecursive(dest);
-
         if (payloadLen >= 0)
         {
             Lwm2m_Debug("Send Notify to %s\n", path);
             coap_SendNotify(addr, path, token, tokenLength, payloadContentType, payload, payloadLen, sequence);
         }
     }
+    Lwm2mTreeNode_DeleteRecursive(dest);
     return 0;
 }
 
@@ -1376,7 +1376,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
         if (pairs != NULL)
         {
             int i = 0;
-            for (i = 0; i < numPairs; i++)
+            for  (i = 0; i < numPairs; i++)
             {
                 QueryPair * pair = &pairs[i];
                 Lwm2m_Debug("Pair %d: %s = %s\n", i, pair->Key, pair->Value);
@@ -1397,6 +1397,8 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             {
                                 Lwm2m_Error("Failed to parse integer value %s for write attribute: %s\n", pair->Value, pair->Key);
                                 *responseCode = Lwm2mResult_BadRequest;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                             }
                             break;
@@ -1407,6 +1409,8 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             {
                                 Lwm2m_Error("Failed to parse float value %s for write attribute: %s\n", pair->Value, pair->Key);
                                 *responseCode = Lwm2mResult_BadRequest;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                             }
                             break;
@@ -1416,6 +1420,8 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                         default:
                             Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);
                             *responseCode = Lwm2mResult_InternalError;
+                            Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                            pairs = NULL;
                             goto error;
                             break;
                     }
@@ -1450,6 +1456,8 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             default:
                                 Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);
                                 *responseCode = Lwm2mResult_InternalError;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                                 break;
                         }
@@ -1461,6 +1469,8 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                 {
                     Lwm2m_Error("No write attribute matches query key: %s\n", pair->Key);
                     *responseCode = Lwm2mResult_BadRequest;
+                    Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                    pairs = NULL;
                     goto error;
                 }
             }
@@ -1897,7 +1907,7 @@ CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context)
 }
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName)
 {
     Lwm2mContextType * context = &Lwm2mContext;
 
@@ -1915,7 +1925,8 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
 
     if (endPointName != NULL)
     {
-        strcpy(context->EndPointName, endPointName);
+        strncpy(context->EndPointName, endPointName, MAX_ENDPOINT_NAME_LENGTH);
+        context->EndPointName[MAX_ENDPOINT_NAME_LENGTH - 1] = '\0'; // Defensive
     }
 
     context->UseFactoryBootstrap = false;

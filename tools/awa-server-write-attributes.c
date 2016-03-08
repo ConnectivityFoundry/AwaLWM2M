@@ -296,16 +296,19 @@ static WriteAttributesTarget * CreateWriteAttributesTarget(const char * arg)
             else
             {
                 Error("Out of memory\n");
+                free(queryPairs);
             }
         }
         else
         {
             Error("Path %s is not valid\n", path);
+            free(queryPairs);
         }
     }
     else
     {
         Error("WriteAttributesTarget %s is not valid\n", arg);
+        free(queryPairs);
     }
     return target;
 }

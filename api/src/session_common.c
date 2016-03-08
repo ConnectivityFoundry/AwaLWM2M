@@ -723,6 +723,7 @@ AwaError SessionCommon_SendDefineMessage(const SessionCommon * session, const Tr
             }
             else
             {
+                IPCMessage_Free(&registerRequest);
                 result = LogErrorWithEnum(AwaError_IPCError);
             }
         }

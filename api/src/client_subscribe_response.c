@@ -75,8 +75,8 @@ AwaError SubscribeResponse_Free(AwaClientSubscribeResponse ** response)
     if ((response != NULL) && (*response != NULL))
     {
         ResponseCommon_Free(&(*response)->Common);
-        Awa_MemSafeFree(*response);
         LogFree("AwaClientSubscribeResponse", *response);
+        Awa_MemSafeFree(*response);
         *response = NULL;
         result = AwaError_Success;
     }

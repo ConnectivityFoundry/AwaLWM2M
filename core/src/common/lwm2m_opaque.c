@@ -93,10 +93,6 @@ static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNod
     Lwm2mTreeNode_SetID(*dest, resourceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Resource);
 
-    Lwm2mTreeNode * resourceValueNode = Lwm2mTreeNode_Create();
-    Lwm2mTreeNode_SetID(resourceValueNode, 0);
-    Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
-
     definition = Definition_LookupResourceDefinition(registry, objectID, resourceID);
 
     if (definition == NULL)
@@ -116,6 +112,10 @@ static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNod
         Lwm2m_Error("ERROR: opaque data format requested, but the requested resource is not of opaque type\n");
         return -1;
     }
+
+    Lwm2mTreeNode * resourceValueNode = Lwm2mTreeNode_Create();
+    Lwm2mTreeNode_SetID(resourceValueNode, 0);
+    Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&buffer[0], bufferLen);
 

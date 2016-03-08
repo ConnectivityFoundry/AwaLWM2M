@@ -467,13 +467,18 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                         uint16_t defaultValueLength = 0;
 
                         defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
-
-                        Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                        Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
-                        Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-                        Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, defaultValueLength);
-                        Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
-
+                        if (defaultValueLength != -1)
+                        {
+                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                            Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, defaultValueLength);
+                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
+                        }
+                        else
+                        {
+                            Lwm2m_Error("xmlif_DecodeValue failed\n");
+                        }
                         free((void*)defaultValue);
                     }
                 }
@@ -843,7 +848,7 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                 TreeNode xmlResourceNode = NULL;
                 while ((xmlResourceNode = Xml_FindFrom(xmlObjectInstanceNode, "Resource", &propertyIndex)) != NULL)
                 {
-                    uint16_t resourceID;
+                    int resourceID;
                     bool createOptionalResource = Xml_Find(xmlResourceNode, "Create") != NULL;
 
                     if ((resourceID = xmlif_GetInteger(xmlResourceNode, "Resource/ID")) == -1)
@@ -921,13 +926,13 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                             TreeNode xmlResourceInstanceNode = NULL;
                             while ((xmlResourceInstanceNode = Xml_FindFrom(xmlResourceNode, "ResourceInstance", &valueIndex)) != NULL)
                             {
-                                uint16_t valueID = xmlif_GetInteger(xmlResourceInstanceNode, "ResourceInstance/ID");
-                                Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                                Lwm2mTreeNode_SetID(resourceInstanceNode, valueID);
-                                Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-
                                 if (readValues)
                                 {
+                                    int valueID = xmlif_GetInteger(xmlResourceInstanceNode, "ResourceInstance/ID");
+                                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                                    Lwm2mTreeNode_SetID(resourceInstanceNode, valueID);
+                                    Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+
                                     const char * data;
                                     int dataLength;
                                     char * dataValue = NULL;
@@ -1326,27 +1331,33 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
                 TreeNode_AddChild(resource, resourceIDnode);
 
                 ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, resourceID);
-
-                if (IS_MULTIPLE_INSTANCE(resourceDefinition))
+                if (resourceDefinition != NULL)
                 {
-                    int resourceInstanceID = -1;
-                    while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, key.ObjectID, instanceID, resourceID, resourceInstanceID)) != -1)
+                    if (IS_MULTIPLE_INSTANCE(resourceDefinition))
                     {
-                        TreeNode resourceInstance = Xml_CreateNode("ResourceInstance");
-                        TreeNode resourceInstanceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceInstanceID);
-                        TreeNode_AddChild(resourceInstance, resourceInstanceIDnode);
-                        TreeNode_AddChild(resource, resourceInstance);
+                        int resourceInstanceID = -1;
+                        while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, key.ObjectID, instanceID, resourceID, resourceInstanceID)) != -1)
+                        {
+                            TreeNode resourceInstance = Xml_CreateNode("ResourceInstance");
+                            TreeNode resourceInstanceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceInstanceID);
+                            TreeNode_AddChild(resourceInstance, resourceInstanceIDnode);
+                            TreeNode_AddChild(resource, resourceInstance);
 
-                        AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, resourceInstanceID, resourceInstance);
+                            AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, resourceInstanceID, resourceInstance);
+                        }
                     }
+                    else
+                    {
+                        AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, 0, resource);
+                    }
+
+                    // If we have requested a specific resource, then return -1 here and break.
+                    resourceID = (key.ResourceID == -1) ? Lwm2mCore_GetNextResourceID(context, key.ObjectID, instanceID, resourceID) : -1;
                 }
                 else
                 {
-                    AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, 0, resource);
+                    Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", key.ObjectID, resourceID);
                 }
-
-                // If we have requested a specific resource, then return -1 here and break.
-                resourceID = (key.ResourceID == -1) ? Lwm2mCore_GetNextResourceID(context, key.ObjectID, instanceID, resourceID) : -1;
             }
             instanceID = (key.InstanceID == -1) ? Lwm2mCore_GetNextObjectInstanceID(context, key.ObjectID, instanceID) : -1;
         }

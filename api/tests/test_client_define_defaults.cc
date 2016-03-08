@@ -218,9 +218,10 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
-    AwaOpaque value;
+    AwaOpaque value = { 0 };
     ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsOpaque(getResponse, "/10000/0/0", &value));
     EXPECT_EQ(expected.Size, value.Size);
+    ASSERT_TRUE(NULL != value.Data);
     EXPECT_EQ(0, memcmp(expected.Data, value.Data, expected.Size));
     AwaClientGetOperation_Free(&getOperation);
 }

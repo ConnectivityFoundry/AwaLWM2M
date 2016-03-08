@@ -44,11 +44,11 @@ struct TestItem
 
 ::std::ostream& operator<<(::std::ostream& os, const TestItem& item)
 {
-  return os << "Item: path " << item.Path
-            << "pathLen " << item.PathLen
-            << "objectID " << item.ObjectID
-            << "objectInstanceID " << item.ObjectInstanceID
-            << "resourceID " << item.ResourceID;
+    return os << "Item: path " << item.Path
+              << "pathLen " << item.PathLen
+              << "objectID " << item.ObjectID
+              << "objectInstanceID " << item.ObjectInstanceID
+              << "resourceID " << item.ResourceID;
 }
 
 } // namespace detail

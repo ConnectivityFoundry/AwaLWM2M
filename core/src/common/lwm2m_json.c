@@ -490,11 +490,6 @@ static Lwm2mTreeNode * AddObjectNode(Lwm2mTreeNode * root, const DefinitionRegis
     Lwm2mTreeNode * objectNode = (root != NULL) ? Lwm2mTreeNode_FindNode(root, objectID) : NULL;
     if (objectNode == NULL)
     {
-        objectNode = Lwm2mTreeNode_Create();
-
-        Lwm2mTreeNode_SetID(objectNode, objectID);
-        Lwm2mTreeNode_SetType(objectNode, Lwm2mTreeNodeType_Object);
-
         ObjectDefinition * definition = Definition_LookupObjectDefinition(registry, objectID);
 
         if (definition == NULL)
@@ -503,9 +498,14 @@ static Lwm2mTreeNode * AddObjectNode(Lwm2mTreeNode * root, const DefinitionRegis
             return NULL;
         }
 
+        objectNode = Lwm2mTreeNode_Create();
+        Lwm2mTreeNode_SetID(objectNode, objectID);
+        Lwm2mTreeNode_SetType(objectNode, Lwm2mTreeNodeType_Object);
+
         if (Lwm2mTreeNode_SetDefinition(objectNode, definition) != 0)
         {
             Lwm2m_Error("ERROR: Failed to set definition Object %d\n", objectID);
+            Lwm2mTreeNode_DeleteRecursive(objectNode);
             return NULL;
         }
 
@@ -542,10 +542,6 @@ static Lwm2mTreeNode * AddResourceNode(Lwm2mTreeNode * instanceNode, const Defin
     Lwm2mTreeNode * resourceNode = (instanceNode != NULL) ? Lwm2mTreeNode_FindNode(instanceNode, resourceID) : NULL;
     if (resourceNode == NULL)
     {
-        resourceNode = Lwm2mTreeNode_Create();
-        Lwm2mTreeNode_SetID(resourceNode, resourceID);
-        Lwm2mTreeNode_SetType(resourceNode, Lwm2mTreeNodeType_Resource);
-
         ResourceDefinition * definition = Definition_LookupResourceDefinition(registry, objectID, resourceID);
 
         if (definition == NULL)
@@ -554,9 +550,14 @@ static Lwm2mTreeNode * AddResourceNode(Lwm2mTreeNode * instanceNode, const Defin
             return NULL;
         }
 
+        resourceNode = Lwm2mTreeNode_Create();
+        Lwm2mTreeNode_SetID(resourceNode, resourceID);
+        Lwm2mTreeNode_SetType(resourceNode, Lwm2mTreeNodeType_Resource);
+
         if (Lwm2mTreeNode_SetDefinition(resourceNode, definition) != 0)
         {
             Lwm2m_Error("ERROR: Failed to set definition Object %d Resource %d\n", objectID, resourceID);
+            Lwm2mTreeNode_DeleteRecursive(resourceNode);
             return NULL;
         }
 
@@ -576,7 +577,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
     int index;
     jsmn_parser p;
     jsmntok_t tokens[MAX_JSON_TOKENS];
-    char basename[128];
+    enum { BASENAME_SIZE = 128 };
+    char basename[BASENAME_SIZE];
     uint64_t basetime = 0;
     const char * buffer = (const char *)buf;
 
@@ -605,7 +607,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
         {
             return -1;
         }
-        strcpy(basename, JsonTokenToString(buffer, t));
+        strncpy(basename, JsonTokenToString(buffer, t), BASENAME_SIZE);
+        basename[BASENAME_SIZE - 1] = '\0'; // Defensive
 
         *dest = Lwm2mTreeNode_Create();
         Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Root);
@@ -722,10 +725,6 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                 resourceNode = *dest;
             }
 
-            resourceValueNode = Lwm2mTreeNode_Create();
-            Lwm2mTreeNode_SetID(resourceValueNode, resourceInstanceID);
-            Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
-
             // Data type, "sv", "v", "bv" etc
             JsonDataType jsonDataType;
             t = &tokens[t->next_sibling];
@@ -763,6 +762,10 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
             }
             char * value = JsonTokenToString(buffer, t);
 
+            resourceValueNode = Lwm2mTreeNode_Create();
+            Lwm2mTreeNode_SetID(resourceValueNode, resourceInstanceID);
+            Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
+
             int resourceType = Definition_GetResourceType(registry, objectID, resourceID);
             switch (resourceType)
             {
@@ -780,6 +783,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     else
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
                     break;
@@ -789,6 +793,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
 
                     if (jsonDataType != JSON_TYPE_FLOAT)
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
 
@@ -820,6 +825,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     else
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
                     break;
@@ -828,6 +834,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     {
                         if (jsonDataType != JSON_TYPE_STRING)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
 
@@ -835,6 +842,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         char * decodedValue = (char *)malloc(outLength);
                         if (decodedValue == NULL)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
                         int decodedLength = b64Decode(decodedValue, outLength, value, strlen(value));
@@ -846,6 +854,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                 case ResourceTypeEnum_TypeString:
                     if (jsonDataType != JSON_TYPE_STRING)
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
 
@@ -856,6 +865,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     {
                         if (jsonDataType != JSON_TYPE_OBJECT_LINK)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
 

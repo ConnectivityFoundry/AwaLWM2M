@@ -179,7 +179,8 @@ static int Lwm2mServer_Start(Options * options)
     }
     else
     {
-        strcpy(ipAddress, options->IPAddress);
+        strncpy(ipAddress, options->IPAddress, NI_MAXHOST);
+        ipAddress[NI_MAXHOST - 1] = '\0'; // Defensive
     }
 
     CoapInfo * coap = coap_Init(ipAddress, options->CoapPort, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);

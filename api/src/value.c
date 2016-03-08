@@ -174,7 +174,10 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                     break;
                                 }
                                 default:
-                                    Array_SetValue(array, index, dataValue, dataLength);
+                                    if (dataLength >= 0)
+                                    {
+                                        Array_SetValue(array, index, dataValue, dataLength);
+                                    }
                                     break;
                             }
                             free(dataValue);
@@ -212,6 +215,10 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                     value->Length = sizeof(array);
                     value->Data = array;
                     LogNew("Value", value);
+                }
+                else
+                {
+                    AwaArray_Free(&array, type);
                 }
             }
         }
