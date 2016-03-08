@@ -28,6 +28,7 @@
 #include "lwm2m_security_object.h"
 #include "lwm2m_server_object.h"
 #include "lwm2m_acl_object.h"
+#include "lwm2m_debug.h"
 
 #define MAX_ADDRESS_LENGTH      50
 
@@ -184,6 +185,7 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
         {
             if (Lwm2mCore_SetEndPointClientName(client->Context, EndPointName) > 0)
             {
+                Lwm2m_Debug("Client endpoint name: %s\n", EndPointName);
                 client->EndpointNameConfigured = true;
                 result = AwaError_Success;
             }

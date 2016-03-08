@@ -421,8 +421,14 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
             Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
             Lwm2mResult_SetResult(result);
 
-            if(result != Lwm2mResult_SuccessCreated)
+            if(result == Lwm2mResult_SuccessCreated)
+            {
+                Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+            }
+            else
+            {
                 goto error;
+            }
         }
     }
     else
@@ -951,9 +957,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     {
         if (definition->Handler != NULL)
         {
-            //typedef Lwm2mResult (*LWM2MHandler)(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
-            uint16_t valueSizeU = valueSize;
-            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSizeU, &changed) == Lwm2mResult_SuccessChanged)
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
             {
                 Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
                 if (changed)
@@ -1045,11 +1049,35 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** Value, int * ValueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Read == NULL))
+    if ((definition == NULL))
     {
         return -1;
     }
-    return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+
+    if (definition->Handlers.Read == NULL)
+    {
+        if (definition->Handler != NULL)
+        {
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)Value, ValueBufferSize, NULL) == Lwm2mResult_SuccessContent)
+            {
+                return *ValueBufferSize;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+    }
+
+    return -1;
 }
 
 /**
