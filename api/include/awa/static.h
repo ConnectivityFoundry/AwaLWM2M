@@ -45,11 +45,23 @@ typedef enum
 } AwaOperation;
 
 
+/*
 typedef enum
 {
+    Operations_None = 0,
+    Operations_R = 1,
+    Operations_W = 2,
+    Operations_RW = 3,
+    Operations_E = 4,
+} Operations;
+ */
+
+typedef enum
+{
+    AwaAccess_None = 0,
     AwaAccess_Read,
-    AwaAccess_ReadWrite,
     AwaAccess_Write,
+    AwaAccess_ReadWrite,
     AwaAccess_Execute,
 } AwaAccess;
 

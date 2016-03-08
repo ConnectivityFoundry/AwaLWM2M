@@ -219,9 +219,13 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
-    Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
-    Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
-    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+
+    if(Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != ResourceTypeEnum_TypeNone)
+    {
+        Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
+        Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
+        Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+    }
 }
 
 // This function is called when a read is performed for a resource that uses the "default" read handler. It is responsible
@@ -1015,12 +1019,33 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
 // Execute a resource and pass in the provided value. Return -1 on error, 0 or greater on success.
 int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
 {
+    int result = -1;
+
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Execute == NULL))
+    if ((definition != NULL))
     {
-        return -1;
+
+        if((definition->Handlers.Execute == NULL))
+        {
+            if(definition->Handler != NULL)
+            {
+                Lwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
+
+                if (res == Lwm2mResult_Success)
+                    result = 1;
+            }
+        }
+        else
+        {
+            result = definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+        }
     }
-    return definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+    else
+    {
+        result = -1;
+    }
+
+    return result;
 }
 
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
