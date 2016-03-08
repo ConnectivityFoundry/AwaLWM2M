@@ -14,6 +14,7 @@
 #include "client_session.h"
 #include "changeset.h"
 #include "utils.h"
+#include "support/mock_malloc.h"
 
 namespace Awa {
 
@@ -49,6 +50,28 @@ TEST_F(TestClientChangeSet, Client_AwaChangeSet_New_free_invalid_inputs)
 
     ASSERT_EQ(AwaError_OperationInvalid, ChangeSet_Free(&changeSet));
     ASSERT_EQ(AwaError_OperationInvalid, ChangeSet_Free(NULL));
+    Tree_Delete(objectsTree);
+}
+
+TEST_F(TestClientChangeSet, ChangeSet_NewWithClientID_handles_out_of_memory)
+{
+    TreeNode objectsTree = ObjectsTree_New();
+    mockMallocFailCounter = 1;
+    ASSERT_EQ(NULL, ChangeSet_NewWithClientID(NULL, SessionType_Client, objectsTree, "IMG1"));
+
+    mockMallocFailCounter = 2;
+    ASSERT_EQ(NULL, ChangeSet_NewWithClientID(NULL, SessionType_Client, objectsTree, "IMG1"));
+    Tree_Delete(objectsTree);
+}
+
+TEST_F(TestClientChangeSet, ChangeSet_New_handles_out_of_memory)
+{
+    TreeNode objectsTree = ObjectsTree_New();
+    mockMallocFailCounter = 1;
+    ASSERT_EQ(NULL, ChangeSet_New(NULL, SessionType_Client, objectsTree));
+
+    mockMallocFailCounter = 2;
+    ASSERT_EQ(NULL, ChangeSet_New(NULL, SessionType_Client, objectsTree));
     Tree_Delete(objectsTree);
 }
 

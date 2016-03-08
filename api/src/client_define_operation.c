@@ -49,6 +49,12 @@ AwaClientDefineOperation * AwaClientDefineOperation_New(const AwaClientSession *
             {
                 LogNew("AwaClientDefineOperation", session);
             }
+            else
+            {
+                LogErrorWithEnum(AwaError_OutOfMemory, "Could not create define operation");
+                Awa_MemSafeFree(operation);
+                operation = NULL;
+            }
         }
         else
         {

@@ -6,7 +6,8 @@ set (test_api_runner_SOURCES
   support/support.cc
   support/process.cc
   support/daemon.cc
-
+  support/mock_malloc.c
+  
   test_log.cc
   test_error.cc
   test_lwm2m_error.cc
@@ -70,6 +71,7 @@ set (test_api_runner_INCLUDE_DIRS
 )
 
 set (test_api_runner_LIBRARIES
+  dl
   gtest
   pthread
   Awa_static

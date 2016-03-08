@@ -48,19 +48,24 @@ AwaServerSession * AwaServerSession_New(void)
         memset(session, 0, sizeof(*session));
 
         session->SessionCommon = SessionCommon_New(SessionType_Server);
-        if (session->SessionCommon == NULL)
+        if (session->SessionCommon != NULL)
         {
-            LogErrorWithEnum(AwaError_OutOfMemory, "Could not create common session.");
-        }
-
-        session->Observers = Map_New();
-        if (session->Observers)
-        {
-            session->NotificationQueue = Queue_New();
+            session->Observers = Map_New();
+            if (session->Observers)
+            {
+                session->NotificationQueue = Queue_New();
+            }
+            else
+            {
+                LogErrorWithEnum(AwaError_OutOfMemory, "Could not create observer list");
+                SessionCommon_Free(&session->SessionCommon);
+                Awa_MemSafeFree(session);
+                session = NULL;
+            }
         }
         else
         {
-            LogErrorWithEnum(AwaError_OutOfMemory, "Could not create observer list.");
+            LogErrorWithEnum(AwaError_OutOfMemory, "Could not create common session");
             SessionCommon_Free(&session->SessionCommon);
             Awa_MemSafeFree(session);
             session = NULL;
@@ -68,7 +73,7 @@ AwaServerSession * AwaServerSession_New(void)
     }
     else
     {
-        LogErrorWithEnum(AwaError_OutOfMemory);
+        LogErrorWithEnum(AwaError_OutOfMemory, "Could not create ServerSession");
     }
     return session;
 }
