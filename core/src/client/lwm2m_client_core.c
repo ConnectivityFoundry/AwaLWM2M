@@ -851,9 +851,9 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
     }
 
     ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
-    if ((definition == NULL) || (definition->Handlers.Delete == NULL))
+    if ((definition == NULL))
     {
-        Lwm2m_Error("No delete handler for object ID %d\n", objectID);
+        Lwm2m_Error("No defintions for object ID %d\n", objectID);
         return Lwm2mResult_NotFound;
     }
 
@@ -876,7 +876,29 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         }
     }
 
-    int ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+
+    int ret = -1;
+    if ((definition->Handlers.Delete == NULL))
+    {
+        if (definition->Handler != NULL)
+        {
+            Lwm2mResult result = Lwm2mResult_InternalError;
+            LWM2MOperation operation = LWM2MOperation_DeleteObjectInstance;
+            if (resourceID != -1)
+            {
+                operation = LWM2MOperation_DeleteResource;
+            }
+
+            result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, -1, NULL, NULL, NULL);
+
+            ret = (result == Lwm2mResult_SuccessDeleted) ? 0 : -1;
+        }
+    }
+    else
+    {
+        definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+    }
+
     if (ret != -1)
     {
         char path[32];

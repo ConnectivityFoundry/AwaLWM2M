@@ -602,4 +602,81 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
 }
 
 
+void * do_delete_operation(void * attr)
+{
+    AwaServerDeleteOperation * deleteOperation = (AwaServerDeleteOperation *)attr;
+    sleep(2);
+    AwaServerDeleteOperation_Perform(deleteOperation, defaults::timeout);
+    return 0;
+}
+
+TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_for_Object_and_Resource)
+{
+    struct callback1 : public StaticClientCallbackPollCondition
+    {
+
+        callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
+
+        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        {
+            Lwm2mResult result = Lwm2mResult_InternalError;
+            EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_DeleteObjectInstance) || (operation == LWM2MOperation_Read));
+
+            if ((operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_DeleteObjectInstance))
+            {
+                EXPECT_EQ(9999, objectID);
+                EXPECT_EQ(0, objectInstanceID);
+                result = operation == LWM2MOperation_CreateObjectInstance ? Lwm2mResult_SuccessCreated : Lwm2mResult_SuccessDeleted;
+
+                if (operation == LWM2MOperation_DeleteObjectInstance)
+                    complete = true;
+            }
+            else if ((operation == LWM2MOperation_CreateResource) )
+            {
+                EXPECT_EQ(9999, objectID);
+                EXPECT_EQ(0, objectInstanceID);
+                EXPECT_EQ(1, resourceID);
+                result = Lwm2mResult_SuccessCreated;
+
+
+            }
+
+            return result;
+        }
+    };
+
+    AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
+    EXPECT_TRUE(defineOpertaion != NULL);
+    AwaObjectDefinition * objectDefintion = AwaObjectDefinition_New(9999, "TestObject", 0, 1);
+    EXPECT_TRUE(objectDefintion != NULL);
+    EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefintion, 1, "TestResource", false, AwaResourceOperations_ReadWrite, 0));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOpertaion, objectDefintion));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, defaults::timeout));
+    AwaServerDefineOperation_Free(&defineOpertaion);
+    AwaObjectDefinition_Free(&objectDefintion);
+
+    callback1 cbHandler(client_, 20);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 0, 1, AwaAccess_ReadWrite, handler));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
+
+    AwaServerDeleteOperation * deleteOperation = AwaServerDeleteOperation_New(session_);
+    EXPECT_TRUE(deleteOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(deleteOperation, global::clientEndpointName, "/9999/0"));
+
+    pthread_t t;
+    pthread_create(&t, NULL, do_delete_operation, (void *)deleteOperation);
+
+    ASSERT_TRUE(cbHandler.Wait());
+
+    pthread_join(t, NULL);
+
+    AwaServerDeleteOperation_Free(&deleteOperation);
+}
+
+
 } // namespace Awa

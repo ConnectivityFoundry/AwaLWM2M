@@ -346,11 +346,27 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
     return result;
 }
 
-AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstance)
+AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
 {
     AwaError result = AwaError_Unspecified;
 
-    if (objectInstance == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstance))
+    if (Lwm2mCore_CreateOptionalResource(client->Context, objectID, objectInstanceID, resourceID) == 0)
+    {
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_CannotCreate;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (objectInstanceID == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID))
     {
         result = AwaError_Success;
     }
