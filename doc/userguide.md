@@ -253,7 +253,7 @@ $ build/core/src/server/awa_serverd --verbose
 $ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
 ````
 
-### The Awa_API.
+### The Awa API.
 
 The Awa API provides a way for applications to communicate with the LWM2M client and server daemons via the IPC interface.  
 The client API header file can be found in "include/Awa/client.h".  
@@ -584,7 +584,7 @@ Full Awa API reference material is available [here](http://flowm2m.github.io/Awa
 
 ### Connecting to third party servers.
 
-A *how to* guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
+A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
 
 ----
 ----
