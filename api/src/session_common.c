@@ -68,20 +68,22 @@ SessionCommon * SessionCommon_New(SessionType sessionType)
 
             session->SessionType = sessionType;
             session->DefinitionRegistry = DefinitionRegistry_Create();
-            if (session->DefinitionRegistry == NULL)
+            if (session->DefinitionRegistry != NULL)
+            {
+                LogNew("SessionCommon", session);
+            }
+            else
             {
                 LogErrorWithEnum(AwaError_OutOfMemory, "Could not create definition registry.");
                 Awa_MemSafeFree(session);
                 session = NULL;
             }
-            else
-            {
-                LogNew("SessionCommon", session);
-            }
         }
         else
         {
-            LogErrorWithEnum(AwaError_OutOfMemory);
+            LogErrorWithEnum(AwaError_OutOfMemory, "Could not create SessionCommon");
+            Awa_MemSafeFree(session);
+            session = NULL;
         }
     }
     else
