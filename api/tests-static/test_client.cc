@@ -380,7 +380,7 @@ TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
 
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
     ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
@@ -423,7 +423,7 @@ TEST_F(TestStaticClient, AwaStaticClient_Create_Operation_for_Object_and_Resourc
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
 
-    callback1 cbHandler(client, 10);
+    callback1 cbHandler(client, 20);
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client, &cbHandler));
 
@@ -474,10 +474,12 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_Operation_for_Object_a
             }
             else if (operation == LWM2MOperation_Write)
             {
+                AwaInteger * integer = (AwaInteger *)(*dataPointer);
                 EXPECT_TRUE(dataPointer != NULL);
                 EXPECT_TRUE(*dataPointer != NULL);
                 EXPECT_TRUE(dataSize != NULL);
                 EXPECT_EQ(sizeof(AwaInteger), *dataSize);
+                EXPECT_EQ(5, *integer);
                 complete = true;
                 result = Lwm2mResult_SuccessChanged;
             }
