@@ -270,6 +270,8 @@ Useful examples can be found in the *api/example* folder.
 
 The tools directory contains a number of useful tools. These are built with the daemons, by default. A complete toolset reference can be found [here](Awa_tools_reference.md).
 
+[Back to the table of contents](userguide.md#contents)
+
 ## Awa client API tools.
 
 Several command-line tools are available for user interaction with the LWM2M daemon. These tools support simple operations, such as defining a custom object type, setting a resource value, retrieving a resource value, and waiting for a resource to change or be executed. They interact with the LWM2M daemon via the SDK and IPC channel, and are applications that interact with the daemon locally.
@@ -303,6 +305,9 @@ Most tools take one or more PATH parameters, specified in the format:
 | /O/I/R/i | specifies the object ID, object instance ID, resource ID and resource instance ID for operations on specific resource instances. |
 
 For tools that write data, values can be specified with the format: ````PATH=VALUE````
+
+[Back to the table of contents](userguide.md#contents)
+
 
 ### Creating a new object definition.
 
