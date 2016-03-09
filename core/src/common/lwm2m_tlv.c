@@ -54,6 +54,8 @@
 #define BIT6 (1 << 6)
 #define BIT7 (1 << 7)
 
+#define TLV_MAX_HEADER_SIZE              (6)   // Type + 16 bit Ident + 24 bit Length
+
 /*
  * TLV types
  *
@@ -209,7 +211,7 @@ static int TlvEncodeHeader(uint8_t * buffer, int type, uint16_t identifier, int 
  */
 static int TlvEncodeOpaque(uint8_t * buffer, int bufferLen, int type, int id, uint8_t * value, int len)
 {
-    uint8_t header[5];
+    uint8_t header[TLV_MAX_HEADER_SIZE];
     int headerLen;
 
     if ((buffer == NULL) || (len > 0 && value == NULL))
@@ -802,7 +804,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
 
     if (IS_MULTIPLE_INSTANCE(definition))
     {
-       uint8_t header[5];
+       uint8_t header[TLV_MAX_HEADER_SIZE];
        int headerLen;
        // Add Mutliple resource instance header
        headerLen = TlvEncodeHeader(&header[0], TLV_TYPE_IDENT_MULTIPLE_RESOURCE, resourceID, resourceLength);
