@@ -52,7 +52,6 @@ protected:
         TestServerWithConnectedSession::SetUp();
 
         std::string serverURI = std::string("coap://127.0.0.1:") + std::to_string(global::serverCoapPort) + "/";
-        std::string clientEndpointName = "TestClient";
         client_ = AwaStaticClient_New();
         EXPECT_TRUE(client_ != NULL);
 
