@@ -219,10 +219,10 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
 
     if(Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != ResourceTypeEnum_TypeNone)
     {
-        Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
         Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
         Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
     }
@@ -900,7 +900,7 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
     }
     else
     {
-        definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+        ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
     }
 
     if (ret != -1)
