@@ -721,6 +721,39 @@ TEST_F(TlvTestSuite, test_ident_16bit)
     ASSERT_EQ(0, memcmp(buffer, expected, sizeof(expected)));
 }
 
+TEST_F(TlvTestSuite, test_encode_large_opaque)
+{
+    int valueLen = 0x1ffff;
+    int bufferLen = valueLen + 6;
+    uint8_t * value = (uint8_t*)malloc(valueLen);
+    uint8_t * buffer = (uint8_t*)malloc(bufferLen);
+    int len;
+
+    memset(buffer, 0, bufferLen);
+
+    for (int i = 0; i < valueLen; i++)
+    {
+        value [i] = i % 0xff;
+    }
+
+    len = TlvEncodeOpaque(buffer, bufferLen,  TLV_TYPE_IDENT_OBJECT_INSTANCE, 1024, value, valueLen);
+
+    uint8_t expected[] = { 0x38, 0x04, 0x00, 0x01, 0xff, 0xff };
+    
+    ASSERT_EQ(static_cast<int>(bufferLen), len);
+
+    // check header block
+    ASSERT_EQ(0, memcmp(buffer, expected, sizeof(expected)));
+
+    for (int i = 6; i < len; i++) 
+    {
+        ASSERT_EQ(buffer[i], (i - 6) % 0xff);
+    }
+
+    free(value);
+    free(buffer);
+}
+
 TEST_F(TlvTestSuite, test_multiple_instance_resource)
 {
     int16_t temp = 0x44;
