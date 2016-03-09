@@ -227,21 +227,30 @@ error:
 Lwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength)
 {
     Lwm2mResult result = Lwm2mResult_Unspecified;
-    if (OIRLength == 1)
+    if (dest != NULL)
     {
-        result = TreeBuilder_CreateTreeFromObject(dest, context, requestOrigin, OIR[0]);
-    }
-    else if (OIRLength == 2)
-    {
-        result = TreeBuilder_CreateTreeFromObjectInstance(dest, context, requestOrigin, OIR[0], OIR[1]);
-    }
-    else if (OIRLength == 3)
-    {
-        result = TreeBuilder_CreateTreeFromResource(dest, context, requestOrigin, OIR[0], OIR[1], OIR[2]);
+        if (OIRLength == 1)
+        {
+            result = TreeBuilder_CreateTreeFromObject(dest, context, requestOrigin, OIR[0]);
+        }
+        else if (OIRLength == 2)
+        {
+            result = TreeBuilder_CreateTreeFromObjectInstance(dest, context, requestOrigin, OIR[0], OIR[1]);
+        }
+        else if (OIRLength == 3)
+        {
+            result = TreeBuilder_CreateTreeFromResource(dest, context, requestOrigin, OIR[0], OIR[1], OIR[2]);
+        }
+        else
+        {
+            Lwm2m_Error("Invalid OIR, length %d\n", OIRLength);
+            result = Lwm2mResult_BadRequest;
+            *dest = NULL;
+        }
     }
     else
     {
-        Lwm2m_Error("Invalid OIR, length %d\n", OIRLength);
+        Lwm2m_Error("dest is NULL\n");
         result = Lwm2mResult_BadRequest;
     }
 

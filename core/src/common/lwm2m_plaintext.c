@@ -162,10 +162,6 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
     Lwm2mTreeNode_SetID(*dest, resourceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Resource);
 
-    Lwm2mTreeNode * resourceValueNode = Lwm2mTreeNode_Create();
-    Lwm2mTreeNode_SetID(resourceValueNode, 0);
-    Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
-
     definition = Definition_LookupResourceDefinition(registry, objectID, resourceID);
 
     if (definition == NULL)
@@ -179,6 +175,10 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
         Lwm2m_Error("ERROR: Failed to set definition Object %d Resource %d\n", objectID, resourceID);
         return -1;
     }
+
+    Lwm2mTreeNode * resourceValueNode = Lwm2mTreeNode_Create();
+    Lwm2mTreeNode_SetID(resourceValueNode, 0);
+    Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
     ResourceTypeEnum resourceType = Definition_GetResourceType(registry, objectID, resourceID);
     switch (resourceType)

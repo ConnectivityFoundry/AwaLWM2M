@@ -183,10 +183,11 @@ TEST_F(TestServerChangeSet, Server_AwaChangeSet_GetExecuteArguments_valid_inputs
     TreeNode objectsTree = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
     AwaChangeSet * changeSet = ChangeSet_New(session_, SessionType_Server, objectsTree);
     ASSERT_TRUE(NULL != changeSet);
-    AwaExecuteArguments arguments;
+    AwaExecuteArguments arguments = { 0 };
     EXPECT_EQ(AwaError_Success, ChangeSet_GetExecuteArguments(changeSet, "/3/0/4", &arguments));
 
     EXPECT_EQ(arguments.Size, 5u);
+    ASSERT_TRUE(NULL != arguments.Data);
     EXPECT_EQ(0, memcmp("Hello", (const char *)arguments.Data, 5));
 
     ASSERT_EQ(AwaError_Success, ChangeSet_Free(&changeSet));

@@ -35,11 +35,13 @@ extern "C" {
 #include "lwm2m_core.h"
 #include "lwm2m_registration.h"
 
+#define LWM2M_SERVER_TYPE_LOCATION_SIZE (128)
+
 typedef struct
 {
     struct ListHead list;
     int ServerObjectInstanceID;
-    char Location[128];
+    char Location[LWM2M_SERVER_TYPE_LOCATION_SIZE];
     Lwm2mRegistrationState RegistrationState;
     uint32_t LastUpdate;
     int Attempts;

@@ -828,8 +828,9 @@ class TlvTestSuiteFloat : public TlvTestSuite, public ::testing::WithParamInterf
 
 TEST_P(TlvTestSuiteFloat, test_float_precision_selection)
 {
-    uint8_t buffer[100] = { 0 };
-    int bufferLen = 100;
+    const size_t BUFFER_LEN = 100;
+    uint8_t buffer[BUFFER_LEN] = { 0 };
+    int bufferLen = BUFFER_LEN;
     int type = TLV_TYPE_IDENT_RESOURCE_VALUE;
     unsigned short identifier = 42;
     int resourceLen = 0;
@@ -845,6 +846,8 @@ TEST_P(TlvTestSuiteFloat, test_float_precision_selection)
     EXPECT_EQ(GetParam().Size, resourceLen);
 
     double actualValue = 0.0;
+    ASSERT_GE(headerLen, 0);
+    ASSERT_LT(headerLen, static_cast<decltype(headerLen)>(BUFFER_LEN));
     EXPECT_EQ(0, TlvDecodeFloat(&actualValue, &buffer[headerLen], resourceLen));
     EXPECT_NEAR(expectedValue, actualValue, FLT_EPSILON);
 }

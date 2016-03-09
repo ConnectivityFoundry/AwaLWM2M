@@ -337,7 +337,10 @@ public:
     }
     ~BootstrapConfigFile()
     {
-        std::remove(filename_.c_str());
+        if (std::remove(filename_.c_str()) < 0)
+        {
+            std::perror("Error deleting file");
+        }
     }
     const std::string & GetFilename() const
     {

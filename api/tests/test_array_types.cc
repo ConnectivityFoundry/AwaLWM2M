@@ -175,7 +175,7 @@ TEST_F(TestArray, AwaIntegerArrayIterator_Set_Get_values)
     AwaIntegerArray * array = AwaIntegerArray_New();
     EXPECT_TRUE(NULL != array);
 
-    for(int i = 0; i < 1000; i+=5)
+    for (int i = 0; i < 1000; i+=5)
     {
         AwaIntegerArray_SetValue(array, i, i*2);
     }
@@ -183,11 +183,11 @@ TEST_F(TestArray, AwaIntegerArrayIterator_Set_Get_values)
     AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
-    for(int i = 0; i < 1000; i+=5)
+    for (int i = 0; i < 1000; i+=5)
     {
         ASSERT_TRUE(AwaIntegerArrayIterator_Next(iterator));
-        ASSERT_EQ(static_cast<size_t>(i), AwaIntegerArrayIterator_GetIndex(iterator));
-        ASSERT_EQ(i*2, AwaIntegerArrayIterator_GetValue(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaIntegerArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(i*2, AwaIntegerArrayIterator_GetValue(iterator));
 //        ASSERT_EQ(sizeof(AwaInteger), ArrayIterator_GetValueLength(iterator));
     }
 
@@ -361,7 +361,7 @@ TEST_F(TestArray, AwaFloatArrayIterator_Set_Get_values)
     AwaFloatArray * array = AwaFloatArray_New();
     EXPECT_TRUE(NULL != array);
 
-    for(int i = 0; i < 1000; i+=5)
+    for(int i = 1; i < 1000; i+=5)
     {
         AwaFloatArray_SetValue(array, i, 100000.0 / i*2);
     }
@@ -369,7 +369,7 @@ TEST_F(TestArray, AwaFloatArrayIterator_Set_Get_values)
     AwaFloatArrayIterator * iterator = AwaFloatArray_NewFloatArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
-    for(int i = 0; i < 1000; i+=5)
+    for(int i = 1; i < 1000; i+=5)
     {
         ASSERT_TRUE(AwaFloatArrayIterator_Next(iterator));
         ASSERT_EQ(static_cast<size_t>(i), AwaFloatArrayIterator_GetIndex(iterator));

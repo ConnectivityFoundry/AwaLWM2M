@@ -343,7 +343,7 @@ int main(int argc, char ** argv)
             exit(1);
         }
 
-        targets = malloc(ai.inputs_num * sizeof(Target));
+        targets = malloc(ai.inputs_num * sizeof(Target *));
 
         ObserveContext observeContext;
         observeContext.targets = targets;

@@ -818,7 +818,6 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
     if (*requestContext == NULL)
     {
         Lwm2m_Error("Out of memory");
-        (*requestContext)->Result = Lwm2mResult_OutOfMemory;
         goto error;
     }
 
@@ -1244,7 +1243,10 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
     else
     {
         Lwm2m_Error("No <Observe> or <CancelObserve> tag within leaf node\n");
-        requestContext->Result = Lwm2mResult_BadRequest;
+        if (requestContext != NULL)
+        {
+            requestContext->Result = Lwm2mResult_BadRequest;
+        }
         result = false;
     }
     return result;
@@ -1436,56 +1438,63 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
     while ((resourceID = Definition_GetNextResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID)) != -1)
     {
         ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
-        if (resourceDefinition->Type == ResourceTypeEnum_TypeNone)
-            continue;
-
-        Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
-        while(child != NULL)
+        if (resourceDefinition != NULL)
         {
-            int childID;
-            Lwm2mTreeNode_GetID(child, &childID);
-            if (childID == resourceID)
+            if (resourceDefinition->Type == ResourceTypeEnum_TypeNone)
+                continue;
+
+            Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
+            while(child != NULL)
             {
-                break;  // found
+                int childID;
+                Lwm2mTreeNode_GetID(child, &childID);
+                if (childID == resourceID)
+                {
+                    break;  // found
+                }
+                child = Lwm2mTreeNode_GetNextChild(node, child);
             }
-            child = Lwm2mTreeNode_GetNextChild(node, child);
+
+            if (child == NULL)
+            {
+                const void * defaultData = NULL;
+                uint16_t defaultLen = 0;
+
+                if (resourceDefinition->DefaultValueNode != NULL)
+                {
+                    defaultData = Lwm2mTreeNode_GetValue(resourceDefinition->DefaultValueNode, &defaultLen);
+                }
+                else
+                {
+                    int temp;
+                    Definition_AllocSensibleDefault(resourceDefinition, &defaultData, &temp);
+                    defaultLen = temp;
+                }
+
+                if (defaultData == NULL)
+                {
+                    Lwm2m_Error("Failed to allocate sensible default for missing mandatory resource /%d/%d\n", objectID, resourceID);
+                    result = 1;
+                    goto error;
+                }
+                child = Lwm2mTreeNode_Create();
+                Lwm2mTreeNode_SetID(child, resourceID);
+                Lwm2mTreeNode_SetType(child, Lwm2mTreeNodeType_Resource);
+                Lwm2mTreeNode_SetDefinition(child, resourceDefinition);
+                Lwm2mTreeNode_AddChild(node, child);
+
+                Lwm2mTreeNode * resourceInstance = Lwm2mTreeNode_Create();
+                Lwm2mTreeNode_SetID(resourceInstance, 0);
+                Lwm2mTreeNode_SetType(resourceInstance, Lwm2mTreeNodeType_ResourceInstance);
+                Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
+                Lwm2mTreeNode_AddChild(child, resourceInstance);
+
+                Lwm2m_Error("Added default value for: %d\n", resourceID);
+            }
         }
-
-        if (child == NULL)
+        else
         {
-            const void * defaultData = NULL;
-            uint16_t defaultLen = 0;
-
-            if (resourceDefinition->DefaultValueNode != NULL)
-            {
-                defaultData = Lwm2mTreeNode_GetValue(resourceDefinition->DefaultValueNode, &defaultLen);
-            }
-            else
-            {
-                int temp;
-                Definition_AllocSensibleDefault(resourceDefinition, &defaultData, &temp);
-                defaultLen = temp;
-            }
-
-            if (defaultData == NULL)
-            {
-                Lwm2m_Error("Failed to allocate sensible default for missing mandatory resource /%d/%d\n", objectID, resourceID);
-                result = 1;
-                goto error;
-            }
-            child = Lwm2mTreeNode_Create();
-            Lwm2mTreeNode_SetID(child, resourceID);
-            Lwm2mTreeNode_SetType(child, Lwm2mTreeNodeType_Resource);
-            Lwm2mTreeNode_SetDefinition(child, resourceDefinition);
-            Lwm2mTreeNode_AddChild(node, child);
-
-            Lwm2mTreeNode * resourceInstance = Lwm2mTreeNode_Create();
-            Lwm2mTreeNode_SetID(resourceInstance, 0);
-            Lwm2mTreeNode_SetType(resourceInstance, Lwm2mTreeNodeType_ResourceInstance);
-            Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
-            Lwm2mTreeNode_AddChild(child, resourceInstance);
-
-            Lwm2m_Debug("Added default value for: %d\n", resourceID);
+            Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", objectID, resourceID);
         }
     }
 error:

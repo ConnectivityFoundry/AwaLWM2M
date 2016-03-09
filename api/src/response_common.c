@@ -607,7 +607,7 @@ AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, co
 
     AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedObjectLink, NULL, AwaResourceType_ObjectLink, sizeof(*value));
 
-    if (result == AwaError_Success)
+    if ((result == AwaError_Success) && (value != NULL))
     {
         value->ObjectID = storedObjectLink->ObjectID;
         value->ObjectInstanceID = storedObjectLink->ObjectInstanceID;
@@ -621,7 +621,7 @@ AwaError ResponseCommon_GetValueAsOpaque(const ResponseCommon * response, const 
 
     AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedOpaque, NULL, AwaResourceType_Opaque, sizeof(*value));
 
-    if (result == AwaError_Success)
+    if ((result == AwaError_Success) && (value != NULL))
     {
         value->Data = storedOpaque->Data;
         value->Size = storedOpaque->Size;

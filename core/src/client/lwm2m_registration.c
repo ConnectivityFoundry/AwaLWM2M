@@ -150,7 +150,8 @@ static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType * address, con
     {
         Lwm2m_Debug("Registration Response %s %d\n", responsePath, responseCode);
         Lwm2m_Info("Registered with %s\n", Lwm2mCore_DebugPrintAddress(address));
-        strcpy(server->Location, responsePath);
+        strncpy(server->Location, responsePath, LWM2M_SERVER_TYPE_LOCATION_SIZE);
+        server->Location[LWM2M_SERVER_TYPE_LOCATION_SIZE - 1] = '\0'; // Defensive
         server->RegistrationState = Lwm2mRegistrationState_Registered;
     }
     else
@@ -227,7 +228,7 @@ static void Lwm2m_Deregister(Lwm2mContextType * context, Lwm2mServerType * serve
     char serverUri[255];
     char uri[1024];
 
-    if ((server->Location == NULL) || (strlen(server->Location) == 0))
+    if (strlen(server->Location) == 0)
     {
         server->RegistrationState = Lwm2mRegistrationState_NotRegistered;
         return;

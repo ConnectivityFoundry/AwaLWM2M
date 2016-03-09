@@ -118,7 +118,7 @@ static int TlvEncodeHeader(uint8_t * buffer, int type, uint16_t identifier, int 
 
     if (buffer == NULL)
     {
-        Lwm2m_Error("ERROR: output buffer cannot be NULL\n");
+        Lwm2m_Error("Output buffer cannot be NULL\n");
         return -1;
     }
 
@@ -145,7 +145,7 @@ static int TlvEncodeHeader(uint8_t * buffer, int type, uint16_t identifier, int 
     if (length > 0xffffff)
     {
         // ERROR: length exceeds 24 bits
-        Lwm2m_Error("ERROR: length exceeds 24 bits\n");
+        Lwm2m_Error("Length exceeds 24 bits\n");
         return -1;
     }
     else if (length > 0xffff)
@@ -186,7 +186,7 @@ static int TlvEncodeHeader(uint8_t * buffer, int type, uint16_t identifier, int 
     else
     {
         // ERROR: negative length
-        Lwm2m_Error("ERROR: length is negative\n");
+        Lwm2m_Error("Length is negative\n");
         return -1;
     }
 
@@ -214,21 +214,25 @@ static int TlvEncodeOpaque(uint8_t * buffer, int bufferLen, int type, int id, ui
 
     if ((buffer == NULL) || (len > 0 && value == NULL))
     {
-        Lwm2m_Error("ERROR: input or output buffers cannot be NULL\n");
+        Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
 
     headerLen = TlvEncodeHeader(&header[0], type, id, len);
+    if (headerLen == -1)
+    {
+        Lwm2m_Error("Failed to encode TLV header\n");
+        return -1;
+    }
 
     if (bufferLen < (headerLen + len))
     {
-        Lwm2m_Error("ERROR: output buffer is too small to encode data\n");
+        Lwm2m_Error("Output buffer is too small to encode data\n");
         return -1;
     }
 
     memmove(buffer + headerLen, value, len);
     memcpy(buffer, header, headerLen);
-
     return headerLen + len;
 }
 
@@ -431,13 +435,13 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
 
     if ((type == NULL) || (identifier == NULL) || (length == NULL) || (buffer == NULL))
     {
-        Lwm2m_Error("ERROR: input or output buffers cannot be NULL\n");
+        Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
     
     if (bufferLen < 2)
     {
-        Lwm2m_Error("ERROR: buffer length is too small\n");
+        Lwm2m_Error("Buffer length is too small\n");
         return -1;
     }
 
@@ -448,7 +452,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
     {
         if (bufferLen < 3)
         {
-            Lwm2m_Error("ERROR: buffer length is too small\n");
+            Lwm2m_Error("Buffer length is too small\n");
             return -1;
         }
 
@@ -469,7 +473,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
     case TLV_TYPE_LENGTH_24BIT:
         if (bufferLen < (lengthIndex + 2))
         {
-            Lwm2m_Error("ERROR: buffer length is too small\n");
+            Lwm2m_Error("Buffer length is too small\n");
             return -1;
         }
         *length = (buffer[lengthIndex] << 16) |
@@ -481,7 +485,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
     case TLV_TYPE_LENGTH_16BIT:
         if (bufferLen < lengthIndex + 1)
         {
-            Lwm2m_Error("ERROR: buffer length is too small\n");
+            Lwm2m_Error("Buffer length is too small\n");
             return -1;
         }
         *length = (buffer[lengthIndex] << 8) |
@@ -492,7 +496,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
     case TLV_TYPE_LENGTH_8BIT:
         if (bufferLen < lengthIndex)
         {
-            Lwm2m_Error("ERROR: buffer length is too small\n");
+            Lwm2m_Error("Buffer length is too small\n");
             return -1;
         }
         *length = buffer[lengthIndex];
@@ -505,7 +509,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
         break;
 
     default:
-        Lwm2m_Error("ERROR: invalid data length\n");
+        Lwm2m_Error("Invalid data length\n");
         return -1;
     }
 
@@ -524,7 +528,7 @@ static int TlvDecodeFloat(double * dest, const uint8_t * buffer, int size)
 {
     if ((dest == NULL) || (buffer == NULL))
     {
-        Lwm2m_Error("ERROR: input or ouput buffers cannot be NULL\n");
+        Lwm2m_Error("Input or ouput buffers cannot be NULL\n");
         return -1;
     }
 
@@ -542,7 +546,7 @@ static int TlvDecodeFloat(double * dest, const uint8_t * buffer, int size)
     }
     else
     {
-        Lwm2m_Error("ERROR: invalid size, should be either 4 or 8 bytes\n");
+        Lwm2m_Error("Invalid size, should be either 4 or 8 bytes\n");
         return -1;
     }
 
@@ -566,14 +570,14 @@ static int TlvDecodeInteger(int64_t * dest, const uint8_t * buffer, int size)
 
     if ((dest == NULL) || (buffer == NULL))
     {
-        Lwm2m_Error("ERROR: input or output buffers cannot be NULL\n");
+        Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
 
     // check for valid range
     if ((size != 1) && (size != 2) && (size != 4) && (size != 8))
     {
-        Lwm2m_Error("ERROR: invalid size, should be 1,2,4 or 8 bytes\n");
+        Lwm2m_Error("Invalid size, should be 1,2,4 or 8 bytes\n");
         return -1;
     }
 
@@ -615,13 +619,13 @@ static int TlvDecodeObjectLink(uint16_t * objectID, uint16_t * objectInstanceID,
 {
     if ((objectID == NULL) || (objectInstanceID == NULL) || (buffer == NULL))
     {
-        Lwm2m_Error("ERROR: input or output buffers cannot be NULL\n");
+        Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
 
     if (size != 4)
     {
-        Lwm2m_Error("ERROR: invalid size, should be 4 bytes\n");
+        Lwm2m_Error("Invalid size, should be 4 bytes\n");
         return -1;
     }
 
@@ -649,7 +653,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 {
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_ResourceInstance)
     {
-       Lwm2m_Error("ERROR: Resource Instance node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
+       Lwm2m_Error("Resource Instance node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
        return -1;
     }
 
@@ -669,7 +673,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
                 size = 0; // This is ok: just means we have an empty string.
                 break;
             default:
-                Lwm2m_Error("ERROR: resource instance value is NULL: /%d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
+                Lwm2m_Error("Resource instance value is NULL: /%d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
                 return -1;
         }
 
@@ -727,7 +731,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(double*)value);
                     break;
                 default:
-                    Lwm2m_Error("ERROR: TLV - invalid length for float\n");
+                    Lwm2m_Error("Invalid length for float\n");
                     break;
             }
             break;
@@ -743,7 +747,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
         default:
-            Lwm2m_Error("ERROR: unknown type: %d\n", definition->Type);
+            Lwm2m_Error("Unknown type: %d\n", definition->Type);
             break;
     }
 
@@ -768,7 +772,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)
     {
-       Lwm2m_Error("ERROR: Resource node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
+       Lwm2m_Error("Resource node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
        return -1;
     }
 
@@ -776,7 +780,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
 
     if (definition == NULL)
     {
-        Lwm2m_Error("ERROR: No resource definition for Object %d Instance %d Resource %d\n", objectID, objectInstanceID, resourceID);
+        Lwm2m_Error("No resource definition for Object %d Instance %d Resource %d\n", objectID, objectInstanceID, resourceID);
         return -1;
     }
 
@@ -789,7 +793,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
        int valueLength = TlvSerialiseResourceInstance(child, definition, objectID, objectInstanceID, resourceID, resourceInstanceID, &buffer[resourceLength], len - resourceLength);
        if (valueLength <= 0)
        {
-           Lwm2m_Error("ERROR: Failed to serialise resource instance /%d/%d/%d/%d valueLength = %d\n", objectID, objectInstanceID, resourceID, resourceInstanceID, valueLength);
+           Lwm2m_Error("Failed to serialise resource instance /%d/%d/%d/%d valueLength = %d\n", objectID, objectInstanceID, resourceID, resourceInstanceID, valueLength);
            return -1;
        }
        resourceLength += valueLength;
@@ -802,6 +806,11 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
        int headerLen;
        // Add Mutliple resource instance header
        headerLen = TlvEncodeHeader(&header[0], TLV_TYPE_IDENT_MULTIPLE_RESOURCE, resourceID, resourceLength);
+       if (headerLen == -1)
+       {
+           Lwm2m_Error("Failed to encode TLV header\n");
+           return -1;
+       }
        memmove(buffer + headerLen, buffer, resourceLength);
        memcpy(buffer, header, headerLen);
        resourceLength += headerLen;
@@ -827,7 +836,7 @@ static int TlvSerialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTreeNo
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_ObjectInstance)
     {
-        Lwm2m_Error("ERROR: Object instance node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
+        Lwm2m_Error("Object instance node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
         return -1;
     }
 
@@ -865,7 +874,7 @@ static int TlvSerialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode * nod
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Object)
     {
-        Lwm2m_Error("ERROR: Object node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
+        Lwm2m_Error("Object node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
         return -1;
     }
 
@@ -888,6 +897,11 @@ static int TlvSerialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode * nod
         // if there are multiple object instances, then we need to add an object instance header.
         // For single object instances we can skip this step, and exit from the object instance loop.
         headerLen = TlvEncodeHeader(&header[0], TLV_TYPE_IDENT_OBJECT_INSTANCE, objectInstanceID, instanceLength);
+        if (headerLen == -1)
+        {
+            Lwm2m_Error("Failed to encode TLV header\n");
+            return -1;
+        }
 
         memmove(&buffer[pos] + headerLen, &buffer[pos], instanceLength);
         memcpy(&buffer[pos], header, headerLen);
@@ -963,7 +977,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 break;
             }
         default:
-            Lwm2m_Error("ERROR: unknown type: %d\n", resourceType);
+            Lwm2m_Error("Unknown type: %d\n", resourceType);
             break;
     }
 
@@ -992,22 +1006,21 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
 
     if (definition == NULL)
     {
-       Lwm2m_Error("ERROR: Failed to determine resource definition Object %d Resource %d\n", objectID, resourceID);
+       Lwm2m_Error("Failed to determine resource definition Object %d Resource %d\n", objectID, resourceID);
        return -1;
     }
 
     if (Lwm2mTreeNode_SetDefinition(*dest, definition) != 0)
     {
-        Lwm2m_Error("ERROR: Failed to set definition Object %d Resource %d\n", objectID, resourceID);
+        Lwm2m_Error("Failed to set definition Object %d Resource %d\n", objectID, resourceID);
         return -1;
     }
 
     // peek in buffer to check to see if we are dealing with a resource, or multiple resource 
     headerLen = TlvDecodeHeader(&type, &identifier, &resourceLen, buffer, bufferLen);
-
     if (headerLen == -1)
     {
-        Lwm2m_Error("ERROR: cannot deserialise header\n");
+        Lwm2m_Error("Failed to decode TLV header\n");
         return -1;
     }
 
@@ -1034,7 +1047,7 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
 
         if ((bufferLen - headerLen) < resourceLen)
         {
-            Lwm2m_Error("ERROR: cannot deserialise resource, buffer too short\n");
+            Lwm2m_Error("Cannot deserialise resource, buffer too short\n");
             return -1;
         }
 
@@ -1053,14 +1066,14 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
 
             if (length > (resourceLen - pos))
             {
-                Lwm2m_Error("ERROR: cannot deserialise resource, buffer too short\n");
+                Lwm2m_Error("Cannot deserialise resource, buffer too short\n");
                 return -1;
             }
 
             // the header must either be a resource value, or a multiple resource
             if (type != TLV_TYPE_IDENT_MULTI_RESOURCE_VALUE)
             {
-                Lwm2m_Error("ERROR: cannot deserialise resource, malformed tlv\n");
+                Lwm2m_Error("Cannot deserialise resource, malformed tlv\n");
                 return -1;
             }
 
@@ -1071,7 +1084,7 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
             if (result == -1)
             {
                 Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
-                Lwm2m_Error("ERROR: Failed to deserialise resource instance\n");
+                Lwm2m_Error("Failed to deserialise resource instance\n");
                 return -1;
             }
 
@@ -1083,7 +1096,7 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
         return pos;
     }
 
-    Lwm2m_Error("ERROR: Malformed TLV, unexpected type 0x%X, ident 0x%X resource length %d header len %d\n", type, identifier, resourceLen, headerLen);
+    Lwm2m_Error("Malformed TLV, unexpected type 0x%X, ident 0x%X resource length %d header len %d\n", type, identifier, resourceLen, headerLen);
     return -1;
 }
 
@@ -1106,13 +1119,13 @@ static int TlvDeserialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTree
     ObjectDefinition * definition = Definition_LookupObjectDefinition(registry, objectID);
     if (definition == NULL)
     {
-       Lwm2m_Error("ERROR: Failed to determine object definition Object %d\n", objectID);
+       Lwm2m_Error("Failed to determine object definition Object %d\n", objectID);
        return -1;
     }
 
     if (Lwm2mTreeNode_SetDefinition(*dest, definition) != 0)
     {
-        Lwm2m_Error("ERROR: Failed to set definition Object %d\n", objectID);
+        Lwm2m_Error("Failed to set definition Object %d\n", objectID);
         return -1;
     }
 
@@ -1123,9 +1136,9 @@ static int TlvDeserialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTree
 
         // peek in buffer to check to see if we are dealing with a resource, or an object instance.
         headerLen = TlvDecodeHeader(&type, &identifier, &length, &buffer[pos], bufferLen - pos);
-
         if (headerLen == -1)
         {
+            Lwm2m_Error("Failed to decode TLV header\n");
             return -1;
         }
 
@@ -1186,13 +1199,13 @@ static int TlvDeserialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode ** 
 
     if (definition == NULL)
     {
-       Lwm2m_Error("ERROR: Failed to determine resource definition Object %d\n", objectID);
+       Lwm2m_Error("Failed to determine resource definition Object %d\n", objectID);
        return -1;
     }
 
     if (Lwm2mTreeNode_SetDefinition(*dest, definition) != 0)
     {
-        Lwm2m_Error("ERROR: Failed to set definition Object %d\n", objectID);
+        Lwm2m_Error("Failed to set definition Object %d\n", objectID);
         return -1;
     }
 
@@ -1204,9 +1217,11 @@ static int TlvDeserialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode ** 
 
         // peek in buffer to check to see if we are dealing with a resource, or and object instance.
         headerLen = TlvDecodeHeader(&type, &identifier, &length, &buffer[pos], bufferLen - pos);
-
         if (headerLen == -1)
+        {
+            Lwm2m_Error("Failed to decode TLV header\n");
             return -1;
+        }
 
         if (type == TLV_TYPE_IDENT_OBJECT_INSTANCE)
         {

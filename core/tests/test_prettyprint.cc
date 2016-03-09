@@ -115,6 +115,7 @@ TEST_F(PrettyPrintTestSuite, test_multiple_object_instance)
 
     Lwm2mTreeNode_DeleteRecursive(dest);
 
+    ASSERT_GE(len, 0);
     ASSERT_EQ(strlen(expected), static_cast<size_t>(len));
     ASSERT_EQ(0, memcmp(buffer, expected, len));
 }

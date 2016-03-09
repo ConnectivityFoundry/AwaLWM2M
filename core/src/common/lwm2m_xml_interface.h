@@ -59,8 +59,8 @@ char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int buf
 int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char * buffer, int bufferLength);
 
 // Wrapper for socket.h sendto, for easy debugging
-int xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
-                 const struct sockaddr *dest_addr, socklen_t addrlen);
+ssize_t xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
+                     const struct sockaddr *dest_addr, socklen_t addrlen);
 
 // Initialise XML interface
 int xmlif_init(void * context, int port);

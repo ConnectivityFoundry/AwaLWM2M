@@ -1622,6 +1622,7 @@ void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool qu
                 PrintResourceDefinition(resourceDefinition, quiet, AwaObjectDefinition_GetID(objectDefinition));
             }
         }
+        AwaResourceDefinitionIterator_Free(&resourceIterator);
     }
 }
 
