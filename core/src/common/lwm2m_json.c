@@ -838,7 +838,14 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                             return -1;
                         }
                         int decodedLength = b64Decode(decodedValue, outLength, value, strlen(value));
-                        result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)decodedValue, decodedLength);
+                        if (decodedLength >= 0)
+                        {
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)decodedValue, decodedLength);
+                        }
+                        else
+                        {
+                            result = -1;
+                        }
                         free(decodedValue);
                     }
                     break;
