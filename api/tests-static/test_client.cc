@@ -389,7 +389,6 @@ TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
 void * do_write_operation(void * attr)
 {
     AwaServerWriteOperation * writeOperation = (AwaServerWriteOperation *)attr;
-    sleep(2);
     AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout);
     return 0;
 }
@@ -454,6 +453,17 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
         }
     };
 
+    callback1 cbHandler(client_, 20);
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    EXPECT_TRUE(condition.Wait());
+    AwaServerListClientsOperation_Free(&operation);
+
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
     AwaObjectDefinition * objectDefintion = AwaObjectDefinition_New(9999, "TestObject", 0, 1);
@@ -464,12 +474,6 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
-    callback1 cbHandler(client_, 20);
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
-
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     EXPECT_TRUE(writeOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/9999/0"));
@@ -477,9 +481,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 
     pthread_t t;
     pthread_create(&t, NULL, do_write_operation, (void *)writeOperation);
-
     ASSERT_TRUE(cbHandler.Wait());
-
     pthread_join(t, NULL);
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -488,7 +490,6 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 void * do_read_operation(void * attr)
 {
     AwaServerReadOperation * readOperation = (AwaServerReadOperation *)attr;
-    sleep(2);
     AwaServerReadOperation_Perform(readOperation, defaults::timeout);
     return 0;
 }
@@ -543,6 +544,18 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
         }
     };
 
+    callback1 cbHandler(client_, 20);
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    EXPECT_TRUE(condition.Wait());
+    AwaServerListClientsOperation_Free(&operation);
+
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
     AwaObjectDefinition * objectDefintion = AwaObjectDefinition_New(9999, "TestObject", 0, 1);
@@ -553,24 +566,13 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
-    callback1 cbHandler(client_, 20);
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
-
-
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
     EXPECT_TRUE(readOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/9999/0"));
 
     pthread_t t;
     pthread_create(&t, NULL, do_read_operation, (void *)readOperation);
-
     ASSERT_TRUE(cbHandler.Wait());
-
     pthread_join(t, NULL);
 
     AwaServerReadOperation_Free(&readOperation);
@@ -580,7 +582,6 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
 void * do_delete_operation(void * attr)
 {
     AwaServerDeleteOperation * deleteOperation = (AwaServerDeleteOperation *)attr;
-    sleep(2);
     AwaServerDeleteOperation_Perform(deleteOperation, defaults::timeout);
     return 0;
 }
@@ -589,7 +590,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
-
+        AwaInteger integer = 5;
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
         Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
@@ -618,6 +619,16 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
                     EXPECT_EQ(0, objectInstanceID);
                     EXPECT_EQ(1, resourceID);
                     result = Lwm2mResult_SuccessCreated;
+                    break;
+                }
+                case LWM2MOperation_Read:
+                {
+                    EXPECT_TRUE(dataPointer != NULL);
+                    EXPECT_TRUE(dataSize != NULL);
+                    *dataPointer = &integer;
+                    *dataSize = sizeof(integer);
+                    result = Lwm2mResult_SuccessContent;
+                    break;
                 }
                 default:
                     result = Lwm2mResult_InternalError;
@@ -627,6 +638,19 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
             return result;
         }
     };
+
+    callback1 cbHandler(client_, 20);
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 0, 1, AwaAccess_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    EXPECT_TRUE(condition.Wait());
+    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
@@ -638,24 +662,13 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
-    callback1 cbHandler(client_, 20);
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 0, 1, AwaAccess_ReadWrite, handler));
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
-
     AwaServerDeleteOperation * deleteOperation = AwaServerDeleteOperation_New(session_);
     EXPECT_TRUE(deleteOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(deleteOperation, global::clientEndpointName, "/9999/0"));
 
     pthread_t t;
     pthread_create(&t, NULL, do_delete_operation, (void *)deleteOperation);
-
     ASSERT_TRUE(cbHandler.Wait());
-
     pthread_join(t, NULL);
 
     AwaServerDeleteOperation_Free(&deleteOperation);
@@ -664,7 +677,6 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
 void * do_execute_operation(void * attr)
 {
     AwaServerExecuteOperation * executeOperation = (AwaServerExecuteOperation *)attr;
-    sleep(2);
     AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout);
     return 0;
 }
@@ -673,7 +685,6 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
-
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
         Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
@@ -698,6 +709,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
                     EXPECT_EQ(0, objectInstanceID);
                     EXPECT_EQ(1, resourceID);
                     result = Lwm2mResult_SuccessCreated;
+                    break;
                 }
                 case LWM2MOperation_Execute:
                 {
@@ -706,6 +718,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
                     EXPECT_EQ(1, resourceID);
                     result = Lwm2mResult_Success;
                     complete = true;
+                    break;
                 }
                 default:
                     result = Lwm2mResult_InternalError;
@@ -715,6 +728,19 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
             return result;
         }
     };
+
+    callback1 cbHandler(client_, 20);
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeNone, 1, 1, AwaAccess_Execute, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    EXPECT_TRUE(condition.Wait());
+    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
@@ -726,24 +752,13 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
-    callback1 cbHandler(client_, 20);
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeNone, 1, 1, AwaAccess_Execute, handler));
-
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
-
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     EXPECT_TRUE(executeOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/9999/0/1", NULL));
 
     pthread_t t;
     pthread_create(&t, NULL, do_execute_operation, (void *)executeOperation);
-
     ASSERT_TRUE(cbHandler.Wait());
-
     pthread_join(t, NULL);
 
     AwaServerExecuteOperation_Free(&executeOperation);
