@@ -13,15 +13,15 @@ int staticClientProcessBootstrapTimeout = 10;
 namespace Awa {
 
 
-struct SignleStaticClientPollCondition : public PollCondition
+struct SingleStaticClientPollCondition : public PollCondition
 {
     AwaStaticClient * StaticClient;
     AwaServerListClientsOperation * Operation;
     std::string ClientEndpointName;
 
-    SignleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
+    SingleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
         PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
-    virtual ~SignleStaticClientPollCondition() {}
+    virtual ~SingleStaticClientPollCondition() {}
 
     virtual bool Check()
     {
@@ -361,7 +361,7 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
     EXPECT_TRUE(NULL != operation);
 
-    SignleStaticClientPollCondition condition(client, operation, clientEndpointName, 10);
+    SingleStaticClientPollCondition condition(client, operation, clientEndpointName, 10);
     ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
@@ -379,7 +379,7 @@ TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
 
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
     ASSERT_TRUE(condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
@@ -459,7 +459,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
     EXPECT_TRUE(condition.Wait());
     AwaServerListClientsOperation_Free(&operation);
 
@@ -551,7 +551,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
     EXPECT_TRUE(condition.Wait());
     AwaServerListClientsOperation_Free(&operation);
 
@@ -647,7 +647,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
     EXPECT_TRUE(condition.Wait());
     AwaServerListClientsOperation_Free(&operation);
 
@@ -737,7 +737,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
-    SignleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
     EXPECT_TRUE(condition.Wait());
     AwaServerListClientsOperation_Free(&operation);
 

@@ -58,7 +58,7 @@ Lwm2mContextType * Lwm2mCore_New();
 void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap);
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context);
 void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context);
-void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicaitonContext);
+void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicationContext);
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
