@@ -1,8 +1,12 @@
 /** @mainpage Awa API
 @section overview Overview
 
-The Awa library provides a LWM2M client and server implementation.
+Awa LWM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards 
+compliant device management solution to simplify the development of M2M applications by providing an intuitive API 
+that enables customization without the need for an intimate knowledge of M2M protocols.
  
 This documentation covers the APIs provided for an application to interact with the client or server. 
+
+The Awa Lightweight M2M source code and further information can be found at https://github.com/FlowM2M/AwaLWM2M
 
  */
