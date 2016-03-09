@@ -22,6 +22,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
     * [The Awa client daemon.](userguide.md#the-awa-client-daemon)  
     * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
     * [The Awa API.](userguide.md#the-awa-api)
+    * [Awa client API tools.](userguide.md#awa-client-api-tools)
         * [API options.](userguide.md#common-options)
         * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
         * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
