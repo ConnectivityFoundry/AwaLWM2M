@@ -114,13 +114,13 @@ ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, ui
 ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
                                             uint16_t minimumInstances, const ObjectOperationHandlers * handlers)
 {
-     return  NewObjectType(objName, objectID, maximumInstances, minimumInstances, handlers, NULL);
+     return NewObjectType(objName, objectID, maximumInstances, minimumInstances, handlers, NULL);
 }
 
 ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t MinimumInstances,
                                             uint16_t MaximumInstances, LWM2MHandler Handler)
 {
-    return  NewObjectType(objName, objectID, MaximumInstances, MinimumInstances, NULL, Handler);
+    return NewObjectType(objName, objectID, MaximumInstances, MinimumInstances, NULL, Handler);
 }
 
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat)

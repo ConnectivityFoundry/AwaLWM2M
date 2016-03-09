@@ -321,9 +321,9 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
 
         ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, handler);
 
-        if(defintion != NULL)
+        if (defintion != NULL)
         {
-            if(Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+            if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
             {
                 Lwm2mCore_ObjectCreated(client->Context, objectID);
                 result = AwaError_Success;

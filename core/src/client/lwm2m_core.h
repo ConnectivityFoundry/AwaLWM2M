@@ -48,6 +48,8 @@
 extern "C" {
 #endif
 
+#define LWM2M_MAX_OIR_PATH_LEN  32
+
 // Default handlers for objects and resources. (TODO: these shouldn't really be externs)
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
@@ -111,7 +113,7 @@ int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char
 
 int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-int Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
                                                            ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, bool createObjectInstance);
