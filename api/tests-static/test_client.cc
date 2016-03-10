@@ -763,5 +763,296 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
     AwaServerExecuteOperation_Free(&executeOperation);
 }
 
+namespace writeDetail
+{
+
+struct TestWriteResource
+{
+    AwaError expectedAddResult;
+    AwaError expectedProcessResult;
+
+    AwaObjectID objectID;
+    AwaObjectInstanceID objectInstanceID;
+    AwaResourceID resourceID;
+
+    const void * value;
+    const size_t valueCount;
+    AwaResourceType type;
+
+    bool useOperation;
+};
+
+::std::ostream& operator<<(::std::ostream& os, const TestWriteResource& item)
+{
+  return os << "Item: expectedAddResult " << item.expectedAddResult
+            << ", expectedProcessResult " << item.expectedProcessResult
+            << ", objectID " << item.objectID
+            << ", objectInstanceID " << item.objectInstanceID
+            << ", resourceID " << item.resourceID
+            << ", value " << item.value
+            << ", valueCount " << item.valueCount
+            << ", type " << item.type
+            << ", useOperation " << item.useOperation;
+}
+
+const char * clientID = "TestClient1";
+
+//static AwaInteger dummyInteger1 = 123456;
+static const char * dummyString1 = "Lightweight M2M Server";
+//static AwaFloat dummyFloat1 = 1.0;
+//static AwaTime dummyTime1 = 0xA20AD72B;
+//static AwaBoolean dummyBoolean1 = true;
+
+static char dummyOpaqueData[] = {'a',0,'x','\0', 123};
+//static int dummyObjLinkData[] = {-1,-1};
+
+AwaOpaque dummyOpaque1 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
+AwaObjectLink dummyObjectLink1 = { 3, 5 };
+AwaObjectLink dummyObjectLink2 = { 1, 7 };
+AwaObjectLink dummyObjectLink3 = { 0, 1 };
+
+const char * dummyStringArray1[] = {"Lightweight M2M Server", "test1", ""};
+const char * dummyStringArray2[] = {"Lightweight M2M Server", "test1", "", "", "", ""};
+const AwaInteger dummyIntegerArray1[] = {55, 8732, 11};
+const AwaInteger dummyIntegerArray2[] = {55, 8732, 11, 55, 8732, 11};
+const AwaFloat dummyFloatArray1[] = {55.0, 0.0008732, 11e10};
+const AwaFloat dummyFloatArray2[] = {55.0, 0.0008732, 11e10, 55.0, 0.0008732, 11e10};
+const AwaBoolean dummyBooleanArray1[] = {true, false, true};
+const AwaBoolean dummyBooleanArray2[] = {true, false, true, true, false, true};
+
+AwaOpaque dummyOpaque2 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
+AwaOpaque dummyOpaque3 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
+const AwaOpaque * dummyOpaqueArray1[] = {&dummyOpaque1, &dummyOpaque2, &dummyOpaque3};
+const AwaOpaque * dummyOpaqueArray2[] = {&dummyOpaque1, &dummyOpaque2, &dummyOpaque3, &dummyOpaque1, &dummyOpaque2, &dummyOpaque3};
+
+const AwaInteger dummyTimeArray1[] = {16000, 8732222, 1111};
+const AwaInteger dummyTimeArray2[] = {16000, 8732222, 1111, 16000, 8732222, 1111};
+
+
+const AwaObjectLink * dummyObjectLinkArray1[] = {&dummyObjectLink1, &dummyObjectLink2, &dummyObjectLink3};
+
+const AwaObjectID TEST_OBJECT_NON_ARRAY_TYPES = 10000;
+const AwaResourceID TEST_RESOURCE_STRING = 1;
+const AwaResourceID TEST_RESOURCE_INTEGER = 2;
+const AwaResourceID TEST_RESOURCE_FLOAT = 3;
+const AwaResourceID TEST_RESOURCE_BOOLEAN = 4;
+const AwaResourceID TEST_RESOURCE_OPAQUE = 5;
+const AwaResourceID TEST_RESOURCE_TIME = 6;
+const AwaResourceID TEST_RESOURCE_OBJECTLINK = 7;
+
+const AwaObjectID TEST_OBJECT_ARRAY_TYPES = 10001;
+const AwaResourceID TEST_RESOURCE_STRINGARRAY = 1;
+const AwaResourceID TEST_RESOURCE_INTEGERARRAY = 2;
+const AwaResourceID TEST_RESOURCE_FLOATARRAY = 3;
+const AwaResourceID TEST_RESOURCE_BOOLEANARRAY = 4;
+const AwaResourceID TEST_RESOURCE_OPAQUEARRAY = 5;
+const AwaResourceID TEST_RESOURCE_TIMEARRAY = 6;
+const AwaResourceID TEST_RESOURCE_OBJECTLINKARRAY = 7;
+
+}
+
+
+struct TestWriteStaticResource
+{
+    AwaStaticClientHandler handler;
+    AwaError expectedAddResult;
+    AwaError expectedProcessResult;
+
+    AwaObjectID objectID;
+    AwaObjectInstanceID objectInstanceID;
+    AwaResourceID resourceID;
+
+    const void * value;
+    const size_t valueCount;
+    AwaResourceType type;
+
+    bool complete;
+};
+
+class TestWriteValueStaticClient : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestWriteStaticResource >
+{
+
+protected:
+
+    class callback1 : public StaticClientCallbackPollCondition
+    {
+        TestWriteStaticResource data;
+
+    public:
+        callback1(AwaStaticClient * StaticClient, int maxCount, TestWriteStaticResource data) : StaticClientCallbackPollCondition(StaticClient, maxCount), data(data) {};
+
+        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        {
+            Lwm2mResult result = data.handler(&data, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
+            complete = data.complete;
+            return result;
+        }
+    };
+
+    callback1 * cbHandler;
+
+
+    void SetUp() {
+        TestStaticClientWithServer::SetUp();
+        TestWriteStaticResource data = GetParam();
+
+        cbHandler = new callback1(client_, 20, data);
+
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, cbHandler));
+        EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING, ResourceTypeEnum_TypeString, 1, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
+
+        AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+        EXPECT_TRUE(NULL != operation);
+        SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+        EXPECT_TRUE(condition.Wait());
+        AwaServerListClientsOperation_Free(&operation);
+
+        AwaServerDefineOperation * serverDefineOperation = AwaServerDefineOperation_New(session_);
+        EXPECT_TRUE(serverDefineOperation != NULL);
+
+        AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, "Test Object Single", 0, 1);
+        EXPECT_TRUE(NULL != customObjectDefinition);
+
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsString     (customObjectDefinition, writeDetail::TEST_RESOURCE_STRING,     "Test String Resource",      true, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger    (customObjectDefinition, writeDetail::TEST_RESOURCE_INTEGER,    "Test Integer Resource",     true, AwaResourceOperations_ReadWrite, 0));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloat      (customObjectDefinition, writeDetail::TEST_RESOURCE_FLOAT,      "Test Float Resource",       true, AwaResourceOperations_ReadWrite, 0.0));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBoolean    (customObjectDefinition, writeDetail::TEST_RESOURCE_BOOLEAN,    "Test Boolean Resource",     true, AwaResourceOperations_ReadWrite, false));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque     (customObjectDefinition, writeDetail::TEST_RESOURCE_OPAQUE,     "Test Opaque Resource",      true, AwaResourceOperations_ReadWrite, AwaOpaque {0}));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTime       (customObjectDefinition, writeDetail::TEST_RESOURCE_TIME,       "Test Time Resource",        true, AwaResourceOperations_ReadWrite, 0));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLink (customObjectDefinition, writeDetail::TEST_RESOURCE_OBJECTLINK, "Test Object Link Resource", true, AwaResourceOperations_ReadWrite, AwaObjectLink {0}));
+
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
+        AwaObjectDefinition_Free(&customObjectDefinition);
+
+        customObjectDefinition = AwaObjectDefinition_New(writeDetail::TEST_OBJECT_ARRAY_TYPES, "Test Object Array", 0, 1);
+        EXPECT_TRUE(NULL != customObjectDefinition);
+
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsStringArray    (customObjectDefinition, writeDetail::TEST_RESOURCE_STRING,     "Test String Array Resource",      0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray   (customObjectDefinition, writeDetail::TEST_RESOURCE_INTEGER,    "Test Integer Array Resource",     0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloatArray     (customObjectDefinition, writeDetail::TEST_RESOURCE_FLOAT,      "Test Float Array Resource",       0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBooleanArray   (customObjectDefinition, writeDetail::TEST_RESOURCE_BOOLEAN,    "Test Boolean Array Resource",     0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray    (customObjectDefinition, writeDetail::TEST_RESOURCE_OPAQUE,     "Test Opaque Array Resource",      0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTimeArray      (customObjectDefinition, writeDetail::TEST_RESOURCE_TIME,       "Test Time Array Resource",        0,5, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, writeDetail::TEST_RESOURCE_OBJECTLINK, "Test Object Link Array Resource", 0,5, AwaResourceOperations_ReadWrite, NULL));
+
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+
+        AwaObjectDefinition_Free(&customObjectDefinition);
+        AwaServerDefineOperation_Free(&serverDefineOperation);
+
+        writeOperation_ = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+        EXPECT_TRUE(NULL != writeOperation_);
+    }
+
+    void TearDown() {
+        AwaServerWriteOperation_Free(&writeOperation_);
+        delete cbHandler;
+        TestStaticClientWithServer::TearDown();
+    }
+
+    AwaClientSession * clientSession_;
+    AwaServerSession * serverSession_;
+    AwaClientDaemonHorde * horde_;
+    AwaServerWriteOperation * writeOperation_;
+};
+
+Lwm2mResult TestWriteValueStaticClient_handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+{
+    TestWriteStaticResource * data = (TestWriteStaticResource *)context;
+    Lwm2mResult result = Lwm2mResult_InternalError;
+
+    switch(operation)
+    {
+        case LWM2MOperation_CreateObjectInstance:
+        {
+            EXPECT_EQ(data->objectID, objectID);
+            EXPECT_EQ(data->objectInstanceID, objectInstanceID);
+            result = Lwm2mResult_SuccessCreated;
+            break;
+        }
+        case LWM2MOperation_CreateResource:
+        {
+            EXPECT_EQ(data->objectID, objectID);
+            EXPECT_EQ(data->objectInstanceID, objectInstanceID);
+            EXPECT_EQ(data->resourceID, resourceID);
+            result = Lwm2mResult_SuccessCreated;
+            break;
+        }
+        case LWM2MOperation_Write:
+        {
+            EXPECT_EQ(data->objectID, objectID);
+            EXPECT_EQ(data->objectInstanceID, objectInstanceID);
+            EXPECT_EQ(data->resourceID, resourceID);
+            EXPECT_EQ(0, resourceInstanceID);
+            data->complete = true;
+            result = Lwm2mResult_SuccessChanged;
+            break;
+        }
+        default:
+            result = Lwm2mResult_InternalError;
+            break;
+    }
+
+    return result;
+}
+
+TEST_P(TestWriteValueStaticClient, TestWriteValueSingle)
+{
+    TestWriteStaticResource data = GetParam();
+    AwaServerWriteOperation * writeOperation = writeOperation_;
+    char path[128] = {0};
+
+    if(data.objectID == AWA_INVALID_ID)
+    {
+        sprintf(path, "a/n in/valid/ path");
+    }
+    else
+    {
+        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
+    }
+
+    switch(data.type)
+    {
+        case AwaResourceType_String:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsCString(writeOperation, path, (const char *)data.value));
+            break;
+        case AwaResourceType_Integer:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, *((AwaInteger*)data.value)));
+            break;
+        case AwaResourceType_Float:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsFloat(writeOperation, path, *((AwaFloat*)data.value)));
+            break;
+        case AwaResourceType_Boolean:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsBoolean(writeOperation, path, *((AwaBoolean*)data.value)));
+            break;
+        case AwaResourceType_Opaque:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsOpaque(writeOperation, path, *((AwaOpaque*)data.value)));
+            break;
+        case AwaResourceType_Time:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsTime(writeOperation, path, *((AwaTime*)data.value)));
+            break;
+        case AwaResourceType_ObjectLink:
+            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation, path, *((AwaObjectLink*)data.value)));
+            break;
+        default:
+            ASSERT_TRUE(false);
+            break;
+    }
+
+    pthread_t t;
+    pthread_create(&t, NULL, do_write_operation, (void *)writeOperation);
+    ASSERT_TRUE(cbHandler->Wait());
+    pthread_join(t, NULL);
+}
+
+INSTANTIATE_TEST_CASE_P(
+        TestWriteValueStaticClient,
+        TestWriteValueStaticClient,
+        ::testing::Values(
+        TestWriteStaticResource {TestWriteValueStaticClient_handler, AwaError_Success,          AwaError_Success,          writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1,1,     AwaResourceType_String,   false}
+));
 
 } // namespace Awa
