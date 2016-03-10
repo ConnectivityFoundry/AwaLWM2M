@@ -16,4 +16,5 @@ client_src = \
   lwm2m_prettyprint.c \
   lwm2m_tree_builder.c \
   lwm2m_object_tree.c \
-  lwm2m_observers.c 
+  lwm2m_observers.c \
+  lwm2m_static.c
