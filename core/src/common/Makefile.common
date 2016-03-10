@@ -9,5 +9,6 @@ common_src = \
     lwm2m_tree_node.c \
     lwm2m_result.c \
     lwm2m_types.c \
-    lwm2m_attributes.c
+    lwm2m_attributes.c \
+    lwm2m_bootstrap_config.c
 

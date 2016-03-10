@@ -20,9 +20,14 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <signal.h>
-#include <errno.h>
-#include <poll.h>
+#if !defined (CONTIKI)
+  #include <signal.h>
+  #include <errno.h>
+  #include <poll.h>
+#else
+  #include "contiki.h"
+  #include "contiki-net.h"
+#endif
 
 #include "lwm2m_static.h"
 #include "lwm2m_security_object.h"
@@ -272,6 +277,7 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
     int result;
+#if !defined (CONTIKI)
     struct pollfd fds[1];
     int nfds = 1;
     int timeout;
@@ -306,6 +312,9 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     if (result == timeout)
         coap_Process();
 
+#else
+    result = Lwm2mCore_Process(client->Context);
+#endif
     return result;
 }
 
