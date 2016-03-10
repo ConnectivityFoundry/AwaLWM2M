@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 #include "lwm2m_bootstrap_config.h"
 #include "lwm2m_core.h"
