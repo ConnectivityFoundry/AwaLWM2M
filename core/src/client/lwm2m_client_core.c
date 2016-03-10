@@ -62,6 +62,7 @@ struct _Lwm2mContextType
     char EndPointName[MAX_ENDPOINT_NAME_LENGTH];  // Client EndPoint name
     bool UseFactoryBootstrap;                 // Factory bootstrap information has been loaded from file.
     struct ListHead ObserverList;
+    void * ApplicationContext;
 };
 
 static Lwm2mContextType Lwm2mContext;
@@ -164,9 +165,9 @@ static int Lwm2mCore_DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentTy
     return len;
 }
 
-static void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
+void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
 {
-    char path[32];
+    char path[LWM2M_MAX_OIR_PATH_LEN];
     sprintf(path, "/%d", objectID);
 
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
@@ -219,8 +220,12 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
 
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
-    Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
-    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+
+    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != ResourceTypeEnum_TypeNone)
+    {
+        Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
+        Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+    }
 }
 
 // This function is called when a read is performed for a resource that uses the "default" read handler. It is responsible
@@ -280,92 +285,143 @@ static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDTy
 // Return -1 on error, or the ID of the created object instance on success.
 int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
-    if ((objectInstanceID != -1) && (Lwm2mCore_Exists(context, objectID, objectInstanceID, -1)))
-    {
-        Lwm2m_Error("Object instance already exists: /%d/%d\n", objectID, objectInstanceID);
-        goto error;
-    }
+    ObjectInstanceIDType result = -1;
 
-    ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
-    if ((definition == NULL) || (definition->Handlers.CreateInstance == NULL))
+    if ((objectInstanceID == -1) || (!Lwm2mCore_Exists(context, objectID, objectInstanceID, -1)))
     {
-        Lwm2m_Error("No create handler for object ID %d\n", objectID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
-        goto error;
-    }
+        ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
+        if (definition != NULL)
+        {
+            if (definition->Handlers.CreateInstance == NULL)
+            {
+                if (definition->Handler != NULL)
+                {
+                    //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+                    Lwm2mResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , LWM2MOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+                    Lwm2mResult_SetResult(lwm2mResult);
 
-    if ((objectInstanceID = definition->Handlers.CreateInstance(context, objectID, objectInstanceID)) >= 0) 
-    {
-        Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+                    if (lwm2mResult == Lwm2mResult_SuccessCreated)
+                    {
+                        Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+                        result = objectInstanceID;
+                    }
+                    else
+                    {
+                        Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
+                        result = -1;
+                    }
+                }
+                else
+                {
+                    Lwm2m_Error("No hander defined for Object ID %d\n", objectID);
+                    Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+                    result = -1;
+                }
+            }
+            else
+            {
+                if ((result = definition->Handlers.CreateInstance(context, objectID, objectInstanceID)) >= 0)
+                {
+                    Lwm2mCore_ObjectInstanceCreated(context, objectID, result);
+                }
+                else
+                {
+                    Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
+                    result = -1;
+                }
+            }
+        }
+        else
+        {
+            Lwm2m_Error("No definition for object ID %d\n", objectID);
+            Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+            result = -1;
+        }
     }
     else
     {
-        Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
+        Lwm2m_Error("Object instance already exists: /%d/%d\n", objectID, objectInstanceID);
+        result = -1;
     }
 
-    return objectInstanceID;
-error:
-    return -1;
+    return result;
 }
 
 // This function is called when a create optional resource is performed for a resource that uses the "default" handler.
 // Return 0 if resource created successfully, otherwise -1 on error.
 static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
-    ObjectStore * store = ((Lwm2mContextType *)context)->Store;
-
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
-    if (definition == NULL)
+    int result = -1;
+    if (context != NULL)
     {
-        Lwm2m_Error("No definition for object ID %d Resource ID %d\n", objectID, resourceID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
-        goto error;
-    }
+        DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
+        ObjectStore * store = ((Lwm2mContextType *)context)->Store;
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
 
-    if ((resourceID = ObjectStore_CreateResource(store, objectID, objectInstanceID, resourceID)) == -1)
-    {
-        goto error;
-    }
-
-    if (definition->DefaultValueNode == NULL)
-    {
-        // load new resource with a sensible default
-        Lwm2mObjectTree * objectTree = &((Lwm2mContextType *)context)->ObjectTree;
-        const void * defaultData = NULL;
-        int defaultLen = 0;
-        if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+        if (definition != NULL)
         {
-            ResourceInstanceIDType resourceInstanceID = 0;
-            if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+            if ((resourceID = ObjectStore_CreateResource(store, objectID, objectInstanceID, resourceID)) != -1)
             {
-                Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                if (definition->DefaultValueNode == NULL)
+                {
+                    // load new resource with a sensible default
+                    Lwm2mObjectTree * objectTree = &((Lwm2mContextType *)context)->ObjectTree;
+
+                    if(objectTree)
+                    {
+                        const void * defaultData = NULL;
+                        int defaultLen = 0;
+                        if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+                        {
+                            ResourceInstanceIDType resourceInstanceID = 0;
+                            if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                            {
+                                Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                                result = 0;
+                            }
+                            else
+                            {
+                                result = -1;
+                            }
+                        }
+                        else
+                        {
+                            Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
+                            result = -1;;
+                        }
+                    }
+                }
+                else
+                {
+                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(definition->DefaultValueNode);
+                    while (resourceInstanceNode != NULL)
+                    {
+                        int resourceInstanceID = 0;
+                        const uint8_t * resourceInstanceValue;
+                        uint16_t resourceInstanceValueLength;
+                        Lwm2mTreeNode_GetID(resourceInstanceNode, &resourceInstanceID);
+                        resourceInstanceValue = Lwm2mTreeNode_GetValue(resourceInstanceNode, &resourceInstanceValueLength);
+                        Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, resourceInstanceValue, resourceInstanceValueLength);
+                        resourceInstanceNode = Lwm2mTreeNode_GetNextChild(definition->DefaultValueNode, resourceInstanceNode);
+                    }
+
+                    result = 0;
+                }
             }
+            else
+            {
+                result = -1;
+            }
+
         }
         else
         {
-            Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-            goto error;
+            Lwm2m_Error("No definition for object ID %d Resource ID %d\n", objectID, resourceID);
+            Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+            result = -1;
         }
     }
-    else
-    {
-        Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(definition->DefaultValueNode);
-        while (resourceInstanceNode)
-        {
-            int resourceInstanceID = 0;
-            const uint8_t * resourceInstanceValue;
-            uint16_t resourceInstanceValueLength;
-            Lwm2mTreeNode_GetID(resourceInstanceNode, &resourceInstanceID);
-            resourceInstanceValue = Lwm2mTreeNode_GetValue(resourceInstanceNode, &resourceInstanceValueLength);
-            Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, resourceInstanceValue, resourceInstanceValueLength);
-            resourceInstanceNode = Lwm2mTreeNode_GetNextChild(definition->DefaultValueNode, resourceInstanceNode);
-        }
-    }
-
-    return 0;
-error:
-    return -1;
+    return result;
 }
 
 // Create an optional resource for a specified object instance.
@@ -373,17 +429,43 @@ error:
 int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.CreateOptionalResource == NULL))
+    if (definition == NULL)
     {
-        Lwm2m_Error("No create resource handler for object ID %d resource ID %d\n", objectID, resourceID);
+        Lwm2m_Error("No resource definition for object ID %d resource ID %d\n", objectID, resourceID);
         Lwm2mResult_SetResult(Lwm2mResult_NotFound);
         goto error;
     }
 
-    if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0) 
+    if (definition->Handlers.CreateOptionalResource == NULL)
     {
-        Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        if (definition->Handler == NULL)
+        {
+            Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        }
+        else
+        {
+            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
+            Lwm2mResult_SetResult(result);
+
+            if (result == Lwm2mResult_SuccessCreated)
+            {
+                Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+            }
+            else
+            {
+                goto error;
+            }
+        }
     }
+    else
+    {
+        if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0)
+        {
+            Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        }
+    }
+
+
     return 0;
 error:
     return -1;
@@ -795,9 +877,9 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
     }
 
     ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
-    if ((definition == NULL) || (definition->Handlers.Delete == NULL))
+    if ((definition == NULL))
     {
-        Lwm2m_Error("No delete handler for object ID %d\n", objectID);
+        Lwm2m_Error("No definitions for object ID %d\n", objectID);
         return Lwm2mResult_NotFound;
     }
 
@@ -820,7 +902,29 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         }
     }
 
-    int ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+
+    int ret = -1;
+    if (definition->Handlers.Delete == NULL)
+    {
+        if (definition->Handler != NULL)
+        {
+            Lwm2mResult result = Lwm2mResult_InternalError;
+            LWM2MOperation operation = LWM2MOperation_DeleteObjectInstance;
+            if (resourceID != -1)
+            {
+                operation = LWM2MOperation_DeleteResource;
+            }
+
+            result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, -1, NULL, NULL, NULL);
+
+            ret = (result == Lwm2mResult_SuccessDeleted) ? 0 : -1;
+        }
+    }
+    else
+    {
+        ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+    }
+
     if (ret != -1)
     {
         char path[32];
@@ -866,9 +970,16 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
 }
 
 // Check to see if an Object, ObjectInstance or Resource exists. Return 1 if exists, or 0 if the specified entity does not exist.
-int Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    return Lwm2mObjectTree_Exists(&context->ObjectTree, objectID, objectInstanceID, resourceID, -1);
+    bool result = false;
+
+    if (context != NULL)
+    {
+        result = Lwm2mObjectTree_Exists(&context->ObjectTree, objectID, objectInstanceID, resourceID, -1);
+    }
+
+    return result;
 }
 
 // Register an Observer of a specific resource. Return -1 on error, 0 on success.
@@ -892,19 +1003,44 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     bool changed = false;
 
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Write == NULL))
+    if (definition == NULL)
     {
         return -1;
     }
 
-    if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
+    if (definition->Handlers.Write == NULL)
     {
-        Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
-        if (changed)
+        if (definition->Handler != NULL)
         {
-            Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
+            {
+                Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                if (changed)
+                {
+                    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+                }
+            }
+            else
+            {
+                return -1;
+            }
         }
-        return 0;
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
+        {
+            Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+            if (changed)
+            {
+                Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+            }
+            return 0;
+        }
     }
     return -1;
 }
@@ -912,12 +1048,36 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
 // Execute a resource and pass in the provided value. Return -1 on error, 0 or greater on success.
 int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
 {
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Execute == NULL))
+    int result = -1;
+
+    if(context)
     {
-        return -1;
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+        if ((definition != NULL))
+        {
+
+            if (definition->Handlers.Execute == NULL)
+            {
+                if (definition->Handler != NULL)
+                {
+                    Lwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
+
+                    if (res == Lwm2mResult_Success)
+                        result = 1;
+                }
+            }
+            else
+            {
+                result = definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+            }
+        }
+        else
+        {
+            result = -1;
+        }
     }
-    return definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+
+    return result;
 }
 
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
@@ -968,11 +1128,35 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** Value, int * ValueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Read == NULL))
+    if (definition == NULL)
     {
         return -1;
     }
-    return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+
+    if (definition->Handlers.Read == NULL)
+    {
+        if (definition->Handler != NULL)
+        {
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)Value, ValueBufferSize, NULL) == Lwm2mResult_SuccessContent)
+            {
+                return *ValueBufferSize;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+    }
+
+    return -1;
 }
 
 /**
@@ -1903,7 +2087,34 @@ void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap)
 
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context)
 {
-    return context->Coap;
+    CoapInfo * result = NULL;
+
+    if (context != NULL)
+    {
+        result = context->Coap;
+    }
+
+    return result;
+}
+
+void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context)
+{
+    void * result = NULL;
+
+    if (context != NULL)
+    {
+        result = context->ApplicationContext;
+    }
+
+    return result;
+}
+
+void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicationContext)
+{
+    if (context != NULL)
+    {
+        context->ApplicationContext = applicationContext;
+    }
 }
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.

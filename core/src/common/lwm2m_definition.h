@@ -29,6 +29,7 @@
 #include "lwm2m_types.h"
 #include "lwm2m_list.h"
 #include "lwm2m_tree_node.h"
+#include "lwm2m_result.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +65,8 @@ typedef int (*CreateInstanceHandler)(void * context, ObjectIDType objectID, Obje
 // handler to call to create an optional resource
 typedef int (*CreateOptionalResourceHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
+typedef Lwm2mResult (*LWM2MHandler)(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed);
+
 typedef struct
 {
     WriteHandler Write;
@@ -92,6 +95,7 @@ struct  _ResourceDefinition
 
     Operations Operation;
     ResourceOperationHandlers Handlers;
+    LWM2MHandler Handler;
 
     Lwm2mTreeNode * DefaultValueNode;
 };
@@ -109,6 +113,7 @@ struct _ObjectDefinition
     struct ListHead Resource;
 
     ObjectOperationHandlers Handlers;
+    LWM2MHandler Handler;
 };
 
 typedef struct _ResourceDefinition ResourceDefinition;
@@ -125,9 +130,10 @@ int DefinitionRegistry_Destroy(DefinitionRegistry * registry);
 ObjectDefinition * Definition_LookupObjectDefinition(const DefinitionRegistry * registry, ObjectIDType objectID);
 ResourceDefinition * Definition_LookupResourceDefinition(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID);
 ResourceDefinition * Definition_LookupResourceDefinitionFromObjectDefinition(const ObjectDefinition * objFormat, ResourceIDType resourceID);
-
 ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
                                             uint16_t MinimumInstances, const ObjectOperationHandlers * Handlers);
+ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t MinimumInstances,
+                                            uint16_t MaximumInstances, LWM2MHandler Handler);
 void Definition_FreeObjectType(ObjectDefinition * definition);
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat);
 ObjectDefinition * Definition_CopyObjectDefinition(const ObjectDefinition * definition);
@@ -137,6 +143,8 @@ int Definition_GetNextObjectType(DefinitionRegistry * registry, ObjectIDType obj
 ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, ResourceTypeType resourceType,
                                                 uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                                 ResourceOperationHandlers * Handlers, Lwm2mTreeNode * DefaultValueNode);
+ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, ResourceTypeType resourceType,
+                                                           uint16_t MinimumInstances, uint16_t MaximumInstances,  Operations operations, LWM2MHandler Handler);
 int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
                                     uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                     ResourceOperationHandlers * Handlers, Lwm2mTreeNode * DefaultValueNode);

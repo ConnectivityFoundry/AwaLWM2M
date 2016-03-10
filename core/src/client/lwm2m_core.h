@@ -48,6 +48,8 @@
 extern "C" {
 #endif
 
+#define LWM2M_MAX_OIR_PATH_LEN  32
+
 // Default handlers for objects and resources. (TODO: these shouldn't really be externs)
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
@@ -55,6 +57,8 @@ extern ObjectOperationHandlers defaultObjectOperationHandlers;
 Lwm2mContextType * Lwm2mCore_New();
 void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap);
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context);
+void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context);
+void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicationContext);
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
@@ -89,7 +93,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
 
 int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
                                  uint16_t MinimumInstances, ObjectOperationHandlers * Handlers);
-
+void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID);
 
 int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
                                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
@@ -109,7 +113,7 @@ int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char
 
 int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-int Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
                                                            ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, bool createObjectInstance);

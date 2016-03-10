@@ -28,6 +28,7 @@
 #include "lwm2m_security_object.h"
 #include "lwm2m_server_object.h"
 #include "lwm2m_acl_object.h"
+#include "lwm2m_debug.h"
 
 #define MAX_ADDRESS_LENGTH      50
 
@@ -42,6 +43,7 @@ struct _AwaStaticClient
     const char * BootstrapServerURI;
     char COAPListenAddress[MAX_ADDRESS_LENGTH];
     int COAPListenPort;
+    void * ApplicationContext;
 };
 
 AwaStaticClient * AwaStaticClient_New()
@@ -103,6 +105,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
                 Lwm2m_RegisterServerObject(client->Context);
                 Lwm2m_RegisterSecurityObject(client->Context);
                 Lwm2m_PopulateSecurityObject(client->Context, client->BootstrapServerURI);
+                Lwm2mCore_SetApplicationContext(client->Context, client);
                 result = AwaError_Success;
             }
             else
@@ -148,6 +151,30 @@ AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const c
     return result;
 }
 
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const BootstrapInfo * factoryBootstrapInformation)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (factoryBootstrapInformation != NULL))
+    {
+        if (!client->Running)
+        {
+            Lwm2mCore_SetFactoryBootstrap(client->Context, factoryBootstrapInformation);
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_OperationInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName)
 {
     AwaError result = AwaError_Unspecified;
@@ -158,6 +185,7 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
         {
             if (Lwm2mCore_SetEndPointClientName(client->Context, EndPointName) > 0)
             {
+                Lwm2m_Debug("Client endpoint name: %s\n", EndPointName);
                 client->EndpointNameConfigured = true;
                 result = AwaError_Success;
             }
@@ -212,6 +240,35 @@ AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, cons
     return result;
 }
 
+AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        client->ApplicationContext = context;
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
+{
+    void *  result = NULL;
+
+    if (client != NULL)
+    {
+        result = client->ApplicationContext;
+    }
+
+    return result;
+}
+
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
     int result;
@@ -253,11 +310,107 @@ int AwaStaticClient_Process(AwaStaticClient * client)
 }
 
 
-//AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-//                                          uint16_t minimumInstances, uint16_t maximumInstances)
-//{
-//    ObjectOperationHandlers * handlers = NULL;
-//    ObjectDefinition * defintion = Definition_NewObjectType(objectName, objectID, maximumInstances, minimumInstances, handlers);
-//}
+AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances,
+                                                     AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (objectName != NULL))
+    {
+
+        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, handler);
+
+        if (defintion != NULL)
+        {
+            if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+            {
+                Lwm2mCore_ObjectCreated(client->Context, objectID);
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_Internal;
+            }
+        }
+        else
+        {
+            result = AwaError_OutOfMemory;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (Lwm2mCore_CreateOptionalResource(client->Context, objectID, objectInstanceID, resourceID) == 0)
+    {
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_CannotCreate;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (objectInstanceID == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID))
+    {
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_CannotCreate;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                       AwaObjectID objectID, AwaResourceID resourceID, ResourceTypeEnum resourceType,
+                                                       uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
+                                                       AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (resourceName != NULL) && (handler != NULL))
+    {
+        ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+        if (objFormat != NULL)
+        {
+            ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, handler);
+            if (resourceDefinition != NULL)
+            {
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
 
 

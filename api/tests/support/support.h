@@ -745,6 +745,31 @@ protected:
     useconds_t timeoutDuration_;
 };
 
+class PollCondition
+{
+public:
+    PollCondition(int maxCount) : pollCount(0), pollMaxCount(maxCount) {}
+
+    virtual ~PollCondition() {}
+
+    virtual bool Wait()
+    {
+        while(++pollCount < pollMaxCount)
+        {
+            if (Check())
+            {
+                break;
+            }
+        }
+
+        return pollCount < pollMaxCount;
+    }
+
+    virtual bool Check() = 0;
+protected:
+    int pollCount;
+    int pollMaxCount;
+};
 
 } // namespace Awa
 

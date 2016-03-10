@@ -75,6 +75,18 @@ typedef enum
     MultipleInstancesEnum_Multiple = LWM2M_MAX_ID,
 } MultipleInstancesEnum;
 
+
+typedef enum
+{
+    LWM2MOperation_CreateObjectInstance,
+    LWM2MOperation_DeleteObjectInstance,
+    LWM2MOperation_Read,
+    LWM2MOperation_Write,
+    LWM2MOperation_Execute,
+    LWM2MOperation_CreateResource,
+    LWM2MOperation_DeleteResource,
+} LWM2MOperation;
+
 typedef struct
 {
     uint16_t ObjectID;

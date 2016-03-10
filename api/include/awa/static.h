@@ -26,6 +26,9 @@
 
 #include "awa/common.h"
 #include "awa/error.h"
+#include "lwm2m_bootstrap_config.h"
+#include "lwm2m_definition.h"
+#include "lwm2m_result.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,17 +45,31 @@ typedef enum
 } AwaOperation;
 
 
+/*
 typedef enum
 {
+    Operations_None = 0,
+    Operations_R = 1,
+    Operations_W = 2,
+    Operations_RW = 3,
+    Operations_E = 4,
+} Operations;
+ */
+
+typedef enum
+{
+    AwaAccess_None = 0,
     AwaAccess_Read,
-    AwaAccess_ReadWrite,
     AwaAccess_Write,
+    AwaAccess_ReadWrite,
     AwaAccess_Execute,
 } AwaAccess;
 
 typedef struct _AwaStaticClient AwaStaticClient;
 
-typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
+
+typedef LWM2MHandler AwaStaticClientHandler;
+//typedef int (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
 
 /************************************************************************************************************
  * Awa Static Client functions
@@ -66,7 +83,10 @@ int AwaStaticClient_Process(AwaStaticClient * client);
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * endPointName);
 AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
-AwaError AwaStaticClient_SetFactorBootstrapInformation(AwaStaticClient * client, const char * factoryBootstrapInformation);
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const BootstrapInfo * factoryBootstrapInformation);
+
+AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context);
+void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
 
 AwaStaticClient * AwaStaticClient_New();
 AwaError AwaStaticClient_Init(AwaStaticClient * client);
@@ -79,8 +99,8 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
 AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                           uint16_t minimumInstances, uint16_t maximumInstances);
 
-AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * objectName,
-                                                       AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                       AwaObjectID objectID, AwaResourceID resourceID, ResourceTypeEnum resourceType,
                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                        AwaStaticClientHandler handler);
 
@@ -97,7 +117,7 @@ AwaError AwaStaticClient_RegisterResourceWithArbitraryData(AwaStaticClient * cli
 void * AwaStaticClient_GetResourceInstancePointer(AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID);
 
 AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
-AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstance);
+AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
 
 AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
 AwaError AwaStaticClient_ObjectInstanceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
