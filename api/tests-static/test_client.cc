@@ -855,15 +855,14 @@ const AwaResourceID TEST_RESOURCE_OBJECTLINKARRAY = 7;
 struct TestWriteStaticResource
 {
     AwaStaticClientHandler handler;
-    AwaError expectedAddResult;
-    AwaError expectedProcessResult;
 
     AwaObjectID objectID;
     AwaObjectInstanceID objectInstanceID;
     AwaResourceID resourceID;
 
     const void * value;
-    const size_t valueCount;
+    const int valueCount;
+    const int valueSize;
     AwaResourceType type;
 
     bool complete;
@@ -987,6 +986,10 @@ Lwm2mResult TestWriteValueStaticClient_handler(void * context, LWM2MOperation op
             EXPECT_EQ(data->objectInstanceID, objectInstanceID);
             EXPECT_EQ(data->resourceID, resourceID);
             EXPECT_EQ(0, resourceInstanceID);
+
+            EXPECT_EQ(data->valueSize, *dataSize);
+            EXPECT_EQ(0, memcmp(data->value, *dataPointer, data->valueSize));
+
             data->complete = true;
             result = Lwm2mResult_SuccessChanged;
             break;
@@ -1017,25 +1020,25 @@ TEST_P(TestWriteValueStaticClient, TestWriteValueSingle)
     switch(data.type)
     {
         case AwaResourceType_String:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsCString(writeOperation, path, (const char *)data.value));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, path, (const char *)data.value));
             break;
         case AwaResourceType_Integer:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, *((AwaInteger*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, *((AwaInteger*)data.value)));
             break;
         case AwaResourceType_Float:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsFloat(writeOperation, path, *((AwaFloat*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsFloat(writeOperation, path, *((AwaFloat*)data.value)));
             break;
         case AwaResourceType_Boolean:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsBoolean(writeOperation, path, *((AwaBoolean*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation, path, *((AwaBoolean*)data.value)));
             break;
         case AwaResourceType_Opaque:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsOpaque(writeOperation, path, *((AwaOpaque*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation, path, *((AwaOpaque*)data.value)));
             break;
         case AwaResourceType_Time:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsTime(writeOperation, path, *((AwaTime*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, path, *((AwaTime*)data.value)));
             break;
         case AwaResourceType_ObjectLink:
-            ASSERT_EQ(data.expectedAddResult, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation, path, *((AwaObjectLink*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation, path, *((AwaObjectLink*)data.value)));
             break;
         default:
             ASSERT_TRUE(false);
@@ -1052,7 +1055,6 @@ INSTANTIATE_TEST_CASE_P(
         TestWriteValueStaticClient,
         TestWriteValueStaticClient,
         ::testing::Values(
-        TestWriteStaticResource {TestWriteValueStaticClient_handler, AwaError_Success,          AwaError_Success,          writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1,1,     AwaResourceType_String,   false}
-));
-
+        TestWriteStaticResource {TestWriteValueStaticClient_handler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1, 1, static_cast<int>(strlen(writeDetail::dummyString1)), AwaResourceType_String,   true}
+        ));
 } // namespace Awa
