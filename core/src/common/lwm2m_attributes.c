@@ -35,12 +35,12 @@
 
 const static AttributeCharacteristics AttributeCharacteristicsTable[] =
 {
-    {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = ResourceTypeEnum_TypeInteger},
-    {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = ResourceTypeEnum_TypeInteger},
-    {.Type = AttributeTypeEnum_GreaterThan,     .Name = "Greater Than",    .CoRELinkParam = "gt",      .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_LessThan,        .Name = "Less Than",       .CoRELinkParam = "lt",      .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_Step,            .Name = "Step",            .CoRELinkParam = "stp",     .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_Cancel,          .Name = "Cancel",          .CoRELinkParam = "cancel",  .ValueType = ResourceTypeEnum_TypeNone},
+    {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = AwaStaticResourceType_Integer},
+    {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = AwaStaticResourceType_Integer},
+    {.Type = AttributeTypeEnum_GreaterThan,     .Name = "Greater Than",    .CoRELinkParam = "gt",      .ValueType = AwaStaticResourceType_Float},
+    {.Type = AttributeTypeEnum_LessThan,        .Name = "Less Than",       .CoRELinkParam = "lt",      .ValueType = AwaStaticResourceType_Float},
+    {.Type = AttributeTypeEnum_Step,            .Name = "Step",            .CoRELinkParam = "stp",     .ValueType = AwaStaticResourceType_Float},
+    {.Type = AttributeTypeEnum_Cancel,          .Name = "Cancel",          .CoRELinkParam = "cancel",  .ValueType = AwaStaticResourceType_None},
 };
 
 const AttributeCharacteristics * Lwm2mAttributes_GetAttributeCharacteristics(char * coreLinkParam)

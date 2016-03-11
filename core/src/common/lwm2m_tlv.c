@@ -670,8 +670,8 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
     {
         switch (definition->Type)
         {
-            case ResourceTypeEnum_TypeString:  // no break
-            case ResourceTypeEnum_TypeOpaque:
+            case AwaStaticResourceType_String:  // no break
+            case AwaStaticResourceType_Opaque:
                 size = 0; // This is ok: just means we have an empty string.
                 break;
             default:
@@ -694,16 +694,16 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 
     switch (definition->Type)
     {
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             valueLength = TlvEncodeString(buffer, len, type, id, (char*)value);
             break;
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
             valueLength = TlvEncodeBoolean(buffer, len, type, id, *(bool*)value);
             break;
 
-        case ResourceTypeEnum_TypeTime: // no break
-        case ResourceTypeEnum_TypeInteger:
+        case AwaStaticResourceType_Time: // no break
+        case AwaStaticResourceType_Integer:
             switch (size)
             {
                 case sizeof(int8_t):
@@ -723,7 +723,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             switch (size)
             {
                 case sizeof(float):
@@ -738,11 +738,11 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
 
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             valueLength = TlvEncodeOpaque(buffer, len, type, id, (uint8_t*)value, size);
             break;
 
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
             {
                 ObjectLink * objectLink = (ObjectLink *) value;
                 valueLength = TlvEncodeObjectLink(buffer, len, type, id, objectLink->ObjectID, objectLink->ObjectInstanceID);
@@ -932,12 +932,12 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
     Lwm2mTreeNode_SetID(*dest, resID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ResourceInstance);
 
-    ResourceTypeEnum resourceType = Definition_GetResourceType(registry, objectID, resourceID);
+    AwaStaticResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
     switch (resourceType)
     {
-        case ResourceTypeEnum_TypeInteger:
-        case ResourceTypeEnum_TypeTime:
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Integer:
+        case AwaStaticResourceType_Time:
+        case AwaStaticResourceType_Boolean:
             {
                 int64_t temp = 0;
                 result = TlvDecodeInteger((int64_t*)&temp, buffer, len);
@@ -955,7 +955,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 }
             }
             break;
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             {
                 double temp = 0;
                 result = TlvDecodeFloat((double*)&temp, buffer, len);
@@ -965,17 +965,17 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 }
             }
             break;
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             {
                 Lwm2mTreeNode_SetValue(*dest, buffer, len);
                 result = 0;
             }
             break;
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             Lwm2mTreeNode_SetValue(*dest, buffer, len);
             result = 0;
             break;
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
             {
                 ObjectLink temp;
                 result = TlvDecodeObjectLink(&temp.ObjectID, &temp.ObjectInstanceID, buffer, len);

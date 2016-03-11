@@ -219,7 +219,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
         Lwm2m_Info("xmlif_ResourceOperation: %s\n", (char *)inValueBuffer);
         if (inValueBuffer != NULL)
         {
-            base64content = xmlif_EncodeValue(ResourceTypeEnum_TypeOpaque, inValueBuffer, inValueBufferLen);
+            base64content = xmlif_EncodeValue(AwaStaticResourceType_Opaque, inValueBuffer, inValueBufferLen);
         }
 
         do
@@ -624,8 +624,8 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     char * dataValue = NULL;
     const char * buffer = NULL;
 
-    ResourceTypeType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
-    if (dataType != ResourceTypeEnum_TypeNone)
+    AwaStaticResourceType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
+    if (dataType != AwaStaticResourceType_None)
     {
         int dataLength = 0;
 

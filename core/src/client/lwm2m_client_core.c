@@ -221,7 +221,7 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
 
-    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != ResourceTypeEnum_TypeNone)
+    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != AwaStaticResourceType_None)
     {
         Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
         Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
@@ -246,7 +246,7 @@ static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType object
     int nullTerminator = 0;
 
     // If the type is a string, add a NULL terminator.
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == ResourceTypeEnum_TypeString)
+    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaStaticResourceType_String)
     {
         nullTerminator = 1;
     }
@@ -297,7 +297,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
                 if (definition->Handler != NULL)
                 {
                     //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
-                    Lwm2mResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , LWM2MOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+                    Lwm2mResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , AwaOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
                     Lwm2mResult_SetResult(lwm2mResult);
 
                     if (lwm2mResult == Lwm2mResult_SuccessCreated)
@@ -451,7 +451,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
         }
         else
         {
-            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
+            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
             Lwm2mResult_SetResult(result);
 
             if (result == Lwm2mResult_SuccessCreated)
@@ -827,13 +827,13 @@ error:
  * @param[in] handlers pointer to ResourceOperationsHandlers, use &defaultResourceOperationHandlers if custom behaviour is not required
  * @return -1 on error 0 on success
  */
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
 }
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
@@ -916,10 +916,10 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         if (definition->Handler != NULL)
         {
             Lwm2mResult result = Lwm2mResult_InternalError;
-            LWM2MOperation operation = LWM2MOperation_DeleteObjectInstance;
+            AwaOperation operation = AwaOperation_DeleteObjectInstance;
             if (resourceID != -1)
             {
-                operation = LWM2MOperation_DeleteResource;
+                operation = AwaOperation_DeleteResource;
             }
 
             result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, -1, NULL, NULL, NULL);
@@ -1017,7 +1017,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
         {
             if (definition->Handler != NULL)
             {
-                if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
+                if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
                 {
                     Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
                     if (changed)
@@ -1072,7 +1072,7 @@ int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID,
             {
                 if (definition->Handler != NULL)
                 {
-                    Lwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
+                    Lwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
 
                     if (res == Lwm2mResult_Success)
                         result = 1;
@@ -1149,7 +1149,7 @@ int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     {
         if (definition->Handler != NULL)
         {
-            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)Value, ValueBufferSize, NULL) == Lwm2mResult_SuccessContent)
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)Value, ValueBufferSize, NULL) == Lwm2mResult_SuccessContent)
             {
                 return *ValueBufferSize;
             }
@@ -1587,7 +1587,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
 
                     switch (characteristics->ValueType)
                     {
-                        case ResourceTypeEnum_TypeInteger:
+                        case AwaStaticResourceType_Integer:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24d", &integerValue) == 0))
                             {
@@ -1599,7 +1599,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             }
                             break;
                         }
-                        case ResourceTypeEnum_TypeFloat:
+                        case AwaStaticResourceType_Float:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24f", &floatValue) == 0))
                             {
@@ -1611,7 +1611,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             }
                             break;
                         }
-                        case ResourceTypeEnum_TypeNone:
+                        case AwaStaticResourceType_None:
                             break;
                         default:
                             Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);

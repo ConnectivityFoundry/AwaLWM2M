@@ -41,22 +41,22 @@ TEST_F(TestUtils, test_AwaUtils_ToString)
 
 TEST_F(TestUtils, Utils_GetResourceType)
 {
-    EXPECT_EQ(ResourceTypeEnum_TypeInvalid, Utils_GetResourceType(AwaResourceType_Invalid));
-    EXPECT_EQ(ResourceTypeEnum_TypeNone, Utils_GetResourceType(AwaResourceType_None));
-    EXPECT_EQ(ResourceTypeEnum_TypeString, Utils_GetResourceType(AwaResourceType_String));
-    EXPECT_EQ(ResourceTypeEnum_TypeInteger, Utils_GetResourceType(AwaResourceType_Integer));
-    EXPECT_EQ(ResourceTypeEnum_TypeBoolean, Utils_GetResourceType(AwaResourceType_Boolean));
-    EXPECT_EQ(ResourceTypeEnum_TypeOpaque, Utils_GetResourceType(AwaResourceType_Opaque));
-    EXPECT_EQ(ResourceTypeEnum_TypeTime, Utils_GetResourceType(AwaResourceType_Time));
-    EXPECT_EQ(ResourceTypeEnum_TypeObjectLink, Utils_GetResourceType(AwaResourceType_ObjectLink));
-    EXPECT_EQ(ResourceTypeEnum_TypeString, Utils_GetResourceType(AwaResourceType_StringArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeInteger, Utils_GetResourceType(AwaResourceType_IntegerArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeBoolean, Utils_GetResourceType(AwaResourceType_BooleanArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeOpaque, Utils_GetResourceType(AwaResourceType_OpaqueArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeTime, Utils_GetResourceType(AwaResourceType_TimeArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeObjectLink, Utils_GetResourceType(AwaResourceType_ObjectLinkArray));
-    EXPECT_EQ(ResourceTypeEnum_TypeInvalid, Utils_GetResourceType(static_cast<AwaResourceType>(-1)));
-    EXPECT_EQ(ResourceTypeEnum_TypeInvalid, Utils_GetResourceType(static_cast<AwaResourceType>(100000)));
+    EXPECT_EQ(AwaStaticResourceType_Invalid, Utils_GetResourceType(AwaResourceType_Invalid));
+    EXPECT_EQ(AwaStaticResourceType_None, Utils_GetResourceType(AwaResourceType_None));
+    EXPECT_EQ(AwaStaticResourceType_String, Utils_GetResourceType(AwaResourceType_String));
+    EXPECT_EQ(AwaStaticResourceType_Integer, Utils_GetResourceType(AwaResourceType_Integer));
+    EXPECT_EQ(AwaStaticResourceType_Boolean, Utils_GetResourceType(AwaResourceType_Boolean));
+    EXPECT_EQ(AwaStaticResourceType_Opaque, Utils_GetResourceType(AwaResourceType_Opaque));
+    EXPECT_EQ(AwaStaticResourceType_Time, Utils_GetResourceType(AwaResourceType_Time));
+    EXPECT_EQ(AwaStaticResourceType_ObjectLink, Utils_GetResourceType(AwaResourceType_ObjectLink));
+    EXPECT_EQ(AwaStaticResourceType_String, Utils_GetResourceType(AwaResourceType_StringArray));
+    EXPECT_EQ(AwaStaticResourceType_Integer, Utils_GetResourceType(AwaResourceType_IntegerArray));
+    EXPECT_EQ(AwaStaticResourceType_Boolean, Utils_GetResourceType(AwaResourceType_BooleanArray));
+    EXPECT_EQ(AwaStaticResourceType_Opaque, Utils_GetResourceType(AwaResourceType_OpaqueArray));
+    EXPECT_EQ(AwaStaticResourceType_Time, Utils_GetResourceType(AwaResourceType_TimeArray));
+    EXPECT_EQ(AwaStaticResourceType_ObjectLink, Utils_GetResourceType(AwaResourceType_ObjectLinkArray));
+    EXPECT_EQ(AwaStaticResourceType_Invalid, Utils_GetResourceType(static_cast<AwaResourceType>(-1)));
+    EXPECT_EQ(AwaStaticResourceType_Invalid, Utils_GetResourceType(static_cast<AwaResourceType>(100000)));
 }
 
 } // namespace Awa

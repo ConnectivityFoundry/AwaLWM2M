@@ -115,7 +115,9 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
             {
                 switch (definition->Type)
                 {
-                    case ResourceTypeEnum_TypeInteger: case ResourceTypeEnum_TypeFloat: case ResourceTypeEnum_TypeTime:
+                    case AwaStaticResourceType_Integer:
+                    case AwaStaticResourceType_Float:
+                    case AwaStaticResourceType_Time:
                     {
                         NotificationAttributes * greaterThanAttributes = GetHighestValidAttributesForType(AttributeTypeEnum_GreaterThan, resourceAttributes,
                                                                                                           objectInstanceAttributes, objectAttributes);
@@ -127,7 +129,8 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                         switch (definition->Type)
                         {
                             // FIXME: Remove duplication if possible
-                            case ResourceTypeEnum_TypeInteger: case ResourceTypeEnum_TypeTime:
+                            case AwaStaticResourceType_Integer: 
+                            case AwaStaticResourceType_Time:
                             {
                                 int64_t oldValueAsInteger = *((int64_t *)observer->OldValue);
                                 int64_t newValueAsInteger = *((int64_t *)newValue);
@@ -152,7 +155,7 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                                 }
                                 break;
                             }
-                            case ResourceTypeEnum_TypeFloat:
+                            case AwaStaticResourceType_Float:
                             {
                                 double oldValueAsFloat = *((double *)observer->OldValue);
                                 double newValueAsFloat = *((double *)newValue);

@@ -55,7 +55,7 @@ protected:
         client_ = AwaStaticClient_New();
         EXPECT_TRUE(client_ != NULL);
 
-        BootstrapInfo bootstrapinfo = { 0 };
+        AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
 
         sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", serverURI.c_str());
         bootstrapinfo.SecurityInfo.Bootstrap = false;
@@ -108,14 +108,14 @@ public:
         return complete;
     }
 
-    virtual Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)    {
+    virtual Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed) {
         return Lwm2mResult_InternalError;
     };
 };
 
-Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
 {
-    AwaStaticClient * client = (AwaStaticClient *)context;
+//    AwaStaticClient * client = (AwaStaticClient *)context;
     Lwm2mResult result = Lwm2mResult_InternalError;
 
     std::cerr << "Handler for " << std::to_string(operation) << std::endl;
@@ -125,7 +125,7 @@ Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objec
     if (callback)
     {
         auto * callbackClass = static_cast<StaticClientCallbackPollCondition*>(callback);
-        result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
+        result = callbackClass->handler(client, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
     }
 
     std::cerr << "Handler result " << std::to_string(result) << std::endl;
@@ -402,22 +402,22 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
         {
 
             Lwm2mResult result = Lwm2mResult_InternalError;
-            EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_Write) || (operation == LWM2MOperation_Read));
+            EXPECT_TRUE((operation == AwaOperation_CreateResource) || (operation == AwaOperation_CreateObjectInstance) || (operation == AwaOperation_Write) || (operation == AwaOperation_Read));
 
             switch(operation)
             {
-                case LWM2MOperation_CreateObjectInstance:
+                case AwaOperation_CreateObjectInstance:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_CreateResource:
+                case AwaOperation_CreateResource:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
@@ -425,7 +425,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_Write:
+                case AwaOperation_Write:
                 {
                     EXPECT_TRUE(dataPointer != NULL);
                     AwaInteger * integerPtr = (AwaInteger *)(*dataPointer);
@@ -436,7 +436,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
                     result = Lwm2mResult_SuccessChanged;
                     break;
                 }
-                case LWM2MOperation_Read:
+                case AwaOperation_Read:
                 {
                     EXPECT_TRUE(dataPointer != NULL);
                     EXPECT_TRUE(dataSize != NULL);
@@ -457,7 +457,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
     EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaStaticResourceType_Integer, 1, 1, AwaAccess_ReadWrite, handler));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
@@ -504,21 +504,22 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
 
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+
         {
             Lwm2mResult result = Lwm2mResult_InternalError;
-            EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_Read));
+            EXPECT_TRUE((operation == AwaOperation_CreateResource) || (operation == AwaOperation_CreateObjectInstance) || (operation == AwaOperation_Read));
 
             switch(operation)
             {
-                case LWM2MOperation_CreateObjectInstance:
+                case AwaOperation_CreateObjectInstance:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_CreateResource:
+                case AwaOperation_CreateResource:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
@@ -526,7 +527,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_Read:
+                case AwaOperation_Read:
                 {
                     EXPECT_TRUE(dataPointer != NULL);
                     EXPECT_TRUE(dataSize != NULL);
@@ -548,7 +549,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
     EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 1, 1, AwaAccess_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaStaticResourceType_Integer, 1, 1, AwaAccess_ReadWrite, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -594,27 +595,28 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
         AwaInteger integer = 5;
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+
         {
             Lwm2mResult result = Lwm2mResult_InternalError;
-            EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_DeleteObjectInstance) || (operation == LWM2MOperation_Read));
+            EXPECT_TRUE((operation == AwaOperation_CreateResource) || (operation == AwaOperation_CreateObjectInstance) || (operation == AwaOperation_DeleteObjectInstance) || (operation == AwaOperation_Read));
 
             switch(operation)
             {
 
-                case LWM2MOperation_CreateObjectInstance:
-                case LWM2MOperation_DeleteObjectInstance:
+                case AwaOperation_CreateObjectInstance:
+                case AwaOperation_DeleteObjectInstance:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
-                    result = operation == LWM2MOperation_CreateObjectInstance ? Lwm2mResult_SuccessCreated : Lwm2mResult_SuccessDeleted;
+                    result = operation == AwaOperation_CreateObjectInstance ? Lwm2mResult_SuccessCreated : Lwm2mResult_SuccessDeleted;
 
-                    if (operation == LWM2MOperation_DeleteObjectInstance)
+                    if (operation == AwaOperation_DeleteObjectInstance)
                         complete = true;
 
                     break;
                 }
-                case LWM2MOperation_CreateResource:
+                case AwaOperation_CreateResource:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
@@ -622,7 +624,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_Read:
+                case AwaOperation_Read:
                 {
                     EXPECT_TRUE(dataPointer != NULL);
                     EXPECT_TRUE(dataSize != NULL);
@@ -643,7 +645,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeInteger, 0, 1, AwaAccess_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaStaticResourceType_Integer, 0, 1, AwaAccess_ReadWrite, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
 
@@ -688,23 +690,23 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
     {
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
+        Lwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
         {
             Lwm2mResult result = Lwm2mResult_InternalError;
 
-            EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_Execute));
+            EXPECT_TRUE((operation == AwaOperation_CreateResource) || (operation == AwaOperation_CreateObjectInstance) || (operation == AwaOperation_Execute));
 
             switch(operation)
             {
-                case LWM2MOperation_CreateObjectInstance:
-                case LWM2MOperation_DeleteObjectInstance:
+                case AwaOperation_CreateObjectInstance:
+                case AwaOperation_DeleteObjectInstance:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
-                    result = operation == LWM2MOperation_CreateObjectInstance ? Lwm2mResult_SuccessCreated : Lwm2mResult_SuccessDeleted;
+                    result = operation == AwaOperation_CreateObjectInstance ? Lwm2mResult_SuccessCreated : Lwm2mResult_SuccessDeleted;
                     break;
                 }
-                case LWM2MOperation_CreateResource:
+                case AwaOperation_CreateResource:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
@@ -712,7 +714,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
                     result = Lwm2mResult_SuccessCreated;
                     break;
                 }
-                case LWM2MOperation_Execute:
+                case AwaOperation_Execute:
                 {
                     EXPECT_EQ(9999, objectID);
                     EXPECT_EQ(0, objectInstanceID);
@@ -733,7 +735,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
     EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, ResourceTypeEnum_TypeNone, 1, 1, AwaAccess_Execute, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaStaticResourceType_None, 1, 1, AwaAccess_Execute, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
 

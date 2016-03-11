@@ -138,16 +138,16 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
 
     switch (definition->Type)
     {
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             valueLength = PPEncodeString(valueBuffer, len - headerLen, (char*)value);
             break;
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
             valueLength = PPEncodeBoolean(valueBuffer, len - headerLen, *(bool*)value);
             break;
 
-        case ResourceTypeEnum_TypeTime:  // no break
-        case ResourceTypeEnum_TypeInteger:
+        case AwaStaticResourceType_Time:  // no break
+        case AwaStaticResourceType_Integer:
             switch (size)
             {
             case sizeof(int8_t):
@@ -167,7 +167,7 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             switch (size)
             {
             case sizeof(float):
@@ -182,7 +182,7 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             break;
 
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             valueLength = PPEncodeOpaque(valueBuffer, len - headerLen, (char*)value, size);
             break;
         default:

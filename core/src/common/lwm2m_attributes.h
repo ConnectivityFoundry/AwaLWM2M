@@ -74,7 +74,7 @@ typedef struct
     AttributeTypeEnum Type;
     const char * Name;
     const char * CoRELinkParam;
-    ResourceTypeType ValueType;
+    AwaStaticResourceType ValueType;
 
 } AttributeCharacteristics;
 

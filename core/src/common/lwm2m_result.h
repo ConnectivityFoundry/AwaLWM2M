@@ -30,10 +30,12 @@ extern "C" {
 
 #include <stdbool.h>
 
+#include "../../../api/include/awa/static.h"
 #include "lwm2m_types.h"
 #include "lwm2m_list.h"
 #include "lwm2m_observers.h"
 
+#if 0
 // LWM2M Core result codes
 typedef enum
 {
@@ -59,6 +61,7 @@ typedef enum
     Lwm2mResult_Unspecified = -1,
 
 } Lwm2mResult;
+#endif
 
 // Returns the last result code of an lwm2m related function
 Lwm2mResult Lwm2mResult_GetLastResult(void);

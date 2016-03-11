@@ -39,12 +39,12 @@
 
 #define MAX_RESOURCE_INSTANCE_STR_LEN (12)
 
-char * SetWriteCommon_EncodeValue(const void * value, size_t size, ResourceTypeType internalResourceType)
+char * SetWriteCommon_EncodeValue(const void * value, size_t size, AwaStaticResourceType internalResourceType)
 {
     char * encodedValue = NULL;
     switch (internalResourceType)
     {
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
         {
             //special case: we have to pack the object link as two unsigned short integers
             char packedValue[sizeof(int16_t) * 2];

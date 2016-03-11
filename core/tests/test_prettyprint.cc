@@ -31,7 +31,7 @@ TEST_F(PrettyPrintTestSuite, test_serialise_string)
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
 
@@ -59,8 +59,8 @@ TEST_F(PrettyPrintTestSuite, test_serialise_string_multiple)
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res2", 0, 1, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res2", 0, 1, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 1, 0, (char*)"Lightweight M2M Client", strlen("Lightweight M2M Client"));
@@ -91,7 +91,7 @@ TEST_F(PrettyPrintTestSuite, test_multiple_object_instance)
     int64_t temp2 = 55;
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 15, 2, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 15, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 15, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
 
     Lwm2mCore_CreateObjectInstance(context, 15, 1);
     Lwm2mCore_CreateObjectInstance(context, 15, 0);

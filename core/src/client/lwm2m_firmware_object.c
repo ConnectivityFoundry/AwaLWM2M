@@ -53,14 +53,14 @@ void Lwm2m_RegisterFirmwareObject(Lwm2mContextType * context)
     ResourceOperationHandlers firmwareUpdateOperationHandlers = { .Execute = executeUpdate, .CreateOptionalResource = defaultResourceOperationHandlers.CreateOptionalResource };
 
     Lwm2mCore_RegisterObjectType(context, "FirmwareUpdate",           LWM2M_FIRMWARE_OBJECT, MultipleInstancesEnum_Single, MandatoryEnum_Optional, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Package",                LWM2M_FIRMWARE_OBJECT, 0, ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_W,  &defaultResourceOperationHandlers);// FIXME: &packageOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "PackageURI",             LWM2M_FIRMWARE_OBJECT, 1, ResourceTypeEnum_TypeString,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_W,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Update",                 LWM2M_FIRMWARE_OBJECT, 2, ResourceTypeEnum_TypeNone,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_E,  &firmwareUpdateOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "State",                  LWM2M_FIRMWARE_OBJECT, 3, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "UpdateSupportedObjects", LWM2M_FIRMWARE_OBJECT, 4, ResourceTypeEnum_TypeBoolean, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "UpdateResult",           LWM2M_FIRMWARE_OBJECT, 5, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "PkgName",                LWM2M_FIRMWARE_OBJECT, 6, ResourceTypeEnum_TypeString,  MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "PkgVersion",             LWM2M_FIRMWARE_OBJECT, 7, ResourceTypeEnum_TypeString,  MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Package",                LWM2M_FIRMWARE_OBJECT, 0, AwaStaticResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_W,  &defaultResourceOperationHandlers);// FIXME: &packageOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "PackageURI",             LWM2M_FIRMWARE_OBJECT, 1, AwaStaticResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_W,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Update",                 LWM2M_FIRMWARE_OBJECT, 2, AwaStaticResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_E,  &firmwareUpdateOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "State",                  LWM2M_FIRMWARE_OBJECT, 3, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "UpdateSupportedObjects", LWM2M_FIRMWARE_OBJECT, 4, AwaStaticResourceType_Boolean, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "UpdateResult",           LWM2M_FIRMWARE_OBJECT, 5, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "PkgName",                LWM2M_FIRMWARE_OBJECT, 6, AwaStaticResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "PkgVersion",             LWM2M_FIRMWARE_OBJECT, 7, AwaStaticResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R,  &defaultResourceOperationHandlers);
 
     // Create single optional object instance
     Lwm2mCore_CreateObjectInstance(context, LWM2M_FIRMWARE_OBJECT, 0);
