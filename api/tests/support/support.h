@@ -748,7 +748,7 @@ protected:
 class PollCondition
 {
 public:
-    PollCondition(int maxCount) : pollCount(0), pollMaxCount(maxCount) {}
+    explicit PollCondition(int maxCount = 10) : pollCount(0), pollMaxCount(maxCount) {}
 
     virtual ~PollCondition() {}
 
