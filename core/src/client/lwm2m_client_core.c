@@ -1000,49 +1000,54 @@ int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, Obje
 int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                        ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
 {
+    int result = -1;
     bool changed = false;
 
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if (definition == NULL)
+    if (definition != NULL)
     {
-        return -1;
-    }
-
-    if (definition->Handlers.Write == NULL)
-    {
-        if (definition->Handler != NULL)
+        if (definition->Handlers.Write == NULL)
         {
-            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
+            if (definition->Handler != NULL)
+            {
+                if (definition->Handler(Lwm2mCore_GetApplicationContext(context), LWM2MOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == Lwm2mResult_SuccessChanged)
+                {
+                    Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                    if (changed)
+                    {
+                        Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+                    }
+                    result = 0;
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            else
+            {
+                result = -1;
+            }
+        }
+        else
+        {
+            if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
             {
                 Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
                 if (changed)
                 {
                     Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
                 }
+                result = 0;
             }
-            else
-            {
-                return -1;
-            }
-        }
-        else
-        {
-            return -1;
         }
     }
     else
     {
-        if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
-        {
-            Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
-            if (changed)
-            {
-                Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
-            }
-            return 0;
-        }
+        result = -1;
     }
-    return -1;
+
+    return result;
 }
 
 // Execute a resource and pass in the provided value. Return -1 on error, 0 or greater on success.
