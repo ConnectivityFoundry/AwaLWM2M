@@ -752,6 +752,11 @@ public:
 
     virtual ~PollCondition() {}
 
+    virtual void Reset()
+    {
+        pollCount = 0;
+    }
+
     virtual bool Wait()
     {
         while(++pollCount < pollMaxCount)
