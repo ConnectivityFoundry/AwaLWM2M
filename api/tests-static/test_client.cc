@@ -398,11 +398,12 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
+        AwaInteger integer = 5;
+
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
         Lwm2mResult handler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
         {
-            AwaInteger integer = 5;
 
             Lwm2mResult result = Lwm2mResult_InternalError;
             EXPECT_TRUE((operation == LWM2MOperation_CreateResource) || (operation == LWM2MOperation_CreateObjectInstance) || (operation == LWM2MOperation_Write) || (operation == LWM2MOperation_Read));
@@ -426,12 +427,11 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
                 }
                 case LWM2MOperation_Write:
                 {
-                    AwaInteger * integer = (AwaInteger *)(*dataPointer);
                     EXPECT_TRUE(dataPointer != NULL);
-                    EXPECT_TRUE(*dataPointer != NULL);
+                    AwaInteger * integerPtr = (AwaInteger *)(*dataPointer);
                     EXPECT_TRUE(dataSize != NULL);
                     EXPECT_EQ(static_cast<int>(sizeof(AwaInteger)), *dataSize);
-                    EXPECT_EQ(5, *integer);
+                    EXPECT_EQ(5, *integerPtr);
                     complete = true;
                     result = Lwm2mResult_SuccessChanged;
                     break;
