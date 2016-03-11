@@ -990,7 +990,7 @@ protected:
 
 Lwm2mResult TestWriteValueStaticClient_WriteHandler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
 {
-    TestWriteReadStaticResource * data = (TestWriteReadStaticResource *)context;
+    TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
     EXPECT_EQ(LWM2MOperation_Write, operation);
     EXPECT_EQ(data->objectID, objectID);
     EXPECT_EQ(data->objectInstanceID, objectInstanceID);
@@ -1010,7 +1010,7 @@ Lwm2mResult TestWriteValueStaticClient_WriteHandler(void * context, LWM2MOperati
 
 Lwm2mResult TestWriteValueStaticClient_ReadHandler(void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed)
 {
-    TestWriteReadStaticResource * data = (TestWriteReadStaticResource *)context;
+    TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
 
     EXPECT_EQ(LWM2MOperation_Read, operation);
     EXPECT_EQ(data->objectID, objectID);
