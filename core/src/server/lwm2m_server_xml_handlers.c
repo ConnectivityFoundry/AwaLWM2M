@@ -87,7 +87,7 @@ typedef struct
     RequestInfoType * Request;
     TreeNode ResponseContentNode;
     TreeNode ResponseObjectsTree;
-    Lwm2mResult Result;
+    AwaLwm2mResult Result;
     bool Reusable;
     size_t ResponseCount;
     bool AddResultTags;

@@ -297,7 +297,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
                 if (definition->Handler != NULL)
                 {
                     //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
-                    Lwm2mResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , AwaOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+                    AwaLwm2mResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , AwaOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
                     Lwm2mResult_SetResult(lwm2mResult);
 
                     if (lwm2mResult == Lwm2mResult_SuccessCreated)
@@ -451,7 +451,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
         }
         else
         {
-            Lwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
+            AwaLwm2mResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
             Lwm2mResult_SetResult(result);
 
             if (result == Lwm2mResult_SuccessCreated)
@@ -482,10 +482,10 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the resource level) and check it's permissions.
 // Return various errors on failure, Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
                                                            ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, bool createObjectInstance)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     Lwm2mTreeNode * node;
     int resourceID;
     ResourceDefinition * definition;
@@ -567,12 +567,12 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the object instance level) and check it's permissions.
 // Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectInstanceNode, int objectID, bool createObjectInstance)
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectInstanceNode, int objectID, bool createObjectInstance)
 {
     Lwm2mTreeNode * node;
     int objectInstanceID;
     ObjectDefinition * definition;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
 
     bool create = Lwm2mTreeNode_IsCreateFlagSet(objectInstanceNode) || createObjectInstance;
     bool idExists = Lwm2mTreeNode_GetID(objectInstanceNode, &objectInstanceID);
@@ -625,11 +625,11 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the object level) and check it's permissions.
 // Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance)
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance)
 {
     Lwm2mTreeNode * node;
     int objectID;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
 
     Lwm2mTreeNode_GetID(objectNode, &objectID);
     bool create = Lwm2mTreeNode_IsCreateFlagSet(objectNode) || createObjectInstance;
@@ -650,11 +650,11 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * cont
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the resource level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
 // Return various errors on failure, return Lwm2mResult_Success on success.
-static Lwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * resourceNode, ObjectIDType objectID,
+static AwaLwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * resourceNode, ObjectIDType objectID,
                                                               ObjectInstanceIDType objectInstanceID, bool createOptionalResource)
 {
     int resourceID;
-    Lwm2mResult result = Lwm2mResult_SuccessChanged;
+    AwaLwm2mResult result = Lwm2mResult_SuccessChanged;
 
     Lwm2mTreeNode_GetID(resourceNode, &resourceID);
 
@@ -700,10 +700,10 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the object instance level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
 // Return various errors on failure, return Lwm2mResult_Success on success.
-static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * instanceNode, ObjectIDType objectID,
+static AwaLwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * instanceNode, ObjectIDType objectID,
                                                                     bool createObjectInstance, bool createOptionalResources, bool replace, int * newObjectInstanceID)
 {
-    Lwm2mResult result = Lwm2mResult_SuccessChanged;
+    AwaLwm2mResult result = Lwm2mResult_SuccessChanged;
 
     Lwm2mTreeNode_GetID(instanceNode, newObjectInstanceID);
 
@@ -747,7 +747,7 @@ static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContext
     Lwm2mTreeNode * resourceNode = Lwm2mTreeNode_GetFirstChild(instanceNode);
     while (resourceNode != NULL)
     {
-        Lwm2mResult writeResourceResult = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, resourceNode, objectID, *newObjectInstanceID, createOptionalResources);
+        AwaLwm2mResult writeResourceResult = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, resourceNode, objectID, *newObjectInstanceID, createOptionalResources);
         if (!Lwm2mResult_IsSuccess(writeResourceResult))
         {
             result = writeResourceResult;
@@ -762,12 +762,12 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the object level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
 // Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance, 
+AwaLwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance, 
                                                      bool createOptionalResources, bool replace, int * newObjectInstanceID)
 {
     Lwm2mTreeNode * node;
     int objectID;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
 
     Lwm2mTreeNode_GetID(objectNode, &objectID);
     node = Lwm2mTreeNode_GetFirstChild(objectNode);
@@ -847,7 +847,7 @@ int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, c
  * @return Lwm2mResult_SuccessDeleted on success
  * @return various errors on failure
  */
-Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace)
+AwaLwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace)
 {
     // According to the standard a DELETE must be O/I, not O/I/R,
     // only the client or bootstrap server has the authorisation to delete individual resources.
@@ -915,7 +915,7 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
     {
         if (definition->Handler != NULL)
         {
-            Lwm2mResult result = Lwm2mResult_InternalError;
+            AwaLwm2mResult result = Lwm2mResult_InternalError;
             AwaOperation operation = AwaOperation_DeleteObjectInstance;
             if (resourceID != -1)
             {
@@ -1072,7 +1072,7 @@ int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID,
             {
                 if (definition->Handler != NULL)
                 {
-                    Lwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
+                    AwaLwm2mResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
 
                     if (res == Lwm2mResult_Success)
                         result = 1;
@@ -1289,7 +1289,7 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
     *responseContentType = ContentType_None;
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
 
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
@@ -1333,7 +1333,7 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
     int oir[3] = { -1, -1, -1 };
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     if (matches > 0)
@@ -1381,7 +1381,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
 
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
 
     if (acceptContentType == ContentType_ApplicationLinkFormat)
     {

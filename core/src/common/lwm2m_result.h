@@ -60,19 +60,19 @@ typedef enum
     Lwm2mResult_Unsupported,
     Lwm2mResult_Unspecified = -1,
 
-} Lwm2mResult;
+} AwaLwm2mResult;
 #endif
 
 // Returns the last result code of an lwm2m related function
-Lwm2mResult Lwm2mResult_GetLastResult(void);
+AwaLwm2mResult Lwm2mResult_GetLastResult(void);
 
 // Retrieves the last result code of an lwm2m related function
-void Lwm2mResult_SetResult(Lwm2mResult result);
+void Lwm2mResult_SetResult(AwaLwm2mResult result);
 
-bool Lwm2mResult_IsSuccess(Lwm2mResult result);
+bool Lwm2mResult_IsSuccess(AwaLwm2mResult result);
 
 // Required for returning errors to the API through the IPC
-int Lwm2mResult_ToAwaError(Lwm2mResult result, int defaultError);
+int Lwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError);
 
 #ifdef __cplusplus
 }

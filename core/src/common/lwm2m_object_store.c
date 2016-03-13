@@ -696,7 +696,7 @@ error:
 
 ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, int maxInstances)
 {
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
 
     Object * obj = CreateObject(store, objectID);
     if (obj == NULL)

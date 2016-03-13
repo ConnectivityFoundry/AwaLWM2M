@@ -80,7 +80,6 @@ typedef struct
     } ServerInfo;
 } AwaFactoryBootstrapInfo;
 
-// LWM2M Core result codes
 typedef enum
 {
     Lwm2mResult_Success = 200,
@@ -104,9 +103,9 @@ typedef enum
     Lwm2mResult_Unsupported,
     Lwm2mResult_Unspecified = -1,
 
-} Lwm2mResult;
+} AwaLwm2mResult;
 
-typedef Lwm2mResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
+typedef AwaLwm2mResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
 
 /************************************************************************************************************
  * Awa Static Client functions

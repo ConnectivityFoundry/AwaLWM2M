@@ -41,10 +41,10 @@
 #include "lwm2m_result.h"
 #include "lwm2m_request_origin.h"
 
-static Lwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
+static AwaLwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
                                                                   ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     const void * value = NULL;
     int valueLength;
@@ -70,10 +70,10 @@ error:
     return result;
 }
 
-Lwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
+AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                        ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, resourceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Resource);
@@ -142,7 +142,7 @@ error:
 int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, objectInstanceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ObjectInstance);
@@ -178,7 +178,7 @@ int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContext
 
 int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, objectID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Object);
@@ -224,9 +224,9 @@ error:
     return result;
 }
 
-Lwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength)
+AwaLwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength)
 {
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaLwm2mResult result = Lwm2mResult_Unspecified;
     if (dest != NULL)
     {
         if (OIRLength == 1)

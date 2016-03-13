@@ -25,24 +25,24 @@
 #include "lwm2m_debug.h"
 #include "../../api/include/awa/error.h"
 
-static Lwm2mResult lastResult = Lwm2mResult_Success;
+static AwaLwm2mResult lastResult = Lwm2mResult_Success;
 
-Lwm2mResult Lwm2mResult_GetLastResult(void)
+AwaLwm2mResult Lwm2mResult_GetLastResult(void)
 {
     return lastResult;
 }
 
-void Lwm2mResult_SetResult(Lwm2mResult result)
+void Lwm2mResult_SetResult(AwaLwm2mResult result)
 {
     lastResult = result;
 }
 
-bool Lwm2mResult_IsSuccess(Lwm2mResult result)
+bool Lwm2mResult_IsSuccess(AwaLwm2mResult result)
 {
     return result >= 200 && result < 300;
 }
 
-int Lwm2mResult_ToAwaError(Lwm2mResult result, int defaultError)
+int Lwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError)
 {
     switch (result)
     {

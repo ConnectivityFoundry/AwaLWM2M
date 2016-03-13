@@ -729,7 +729,7 @@ static AwaError AddObjectInstancesToGetResponse(Lwm2mContextType * context, int 
 // Called to handle a request with the type "Get".
 static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlRequestContent)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContent, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -992,7 +992,7 @@ error:
 // Called to handle a request with the type "Set".
 static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1009,7 +1009,7 @@ static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
             int objectID;
             int createdObjectInstanceID = -1;
             Lwm2mTreeNode_GetID(object, &objectID);
-            Lwm2mResult setResult = Lwm2mCore_CheckWritePermissionsForObjectNode(context, Lwm2mRequestOrigin_Client, object, false);
+            AwaLwm2mResult setResult = Lwm2mCore_CheckWritePermissionsForObjectNode(context, Lwm2mRequestOrigin_Client, object, false);
             if (Lwm2mResult_IsSuccess(setResult))
             {
                 setResult = Lwm2mCore_ParseObjectNodeAndWriteToStore(context, object, false, false, false, &createdObjectInstanceID);
@@ -1099,9 +1099,9 @@ int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int s
     return 0;
 }
 
-static Lwm2mResult xmlif_HandleObserve(void * context, RequestInfoType * request, ObjectIDType objectID, ObjectInstanceIDType instanceID, ResourceIDType resourceID)
+static AwaLwm2mResult xmlif_HandleObserve(void * context, RequestInfoType * request, ObjectIDType objectID, ObjectInstanceIDType instanceID, ResourceIDType resourceID)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     AddressType addr;
     memset(&addr, 0, sizeof(addr));
     addr.Size = sizeof(request->FromAddr);
@@ -1125,7 +1125,7 @@ error:;
 // Called to handle a request with the type "Subscribe".
 static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xmlRequestContentNode)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContentNode, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1195,7 +1195,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                     }
                     else
                     {
-                        Lwm2mResult observeResult = Lwm2mResult_Unspecified;
+                        AwaLwm2mResult observeResult = Lwm2mResult_Unspecified;
                         if ((observeResult = xmlif_HandleObserve(context, request, key.ObjectID, key.InstanceID, key.ResourceID)) == Lwm2mResult_Success)
                         {
                             IPC_AddResultTag(responseLeafNode, AwaError_Success);
@@ -1387,7 +1387,7 @@ done:
 // Called to handle a request with the type "Delete".
 static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaLwm2mResult result = Lwm2mResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1410,7 +1410,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
         TreeNode responseResourceNode = key.ResourceID != AWA_INVALID_ID? ObjectsTree_FindOrCreateChildNode(responseObjectInstanceNode, "Resource", key.ResourceID) : NULL;
         TreeNode responseLeafNode = responseResourceNode? responseResourceNode : responseObjectInstanceNode? responseObjectInstanceNode : responseObjectNode;
 
-        Lwm2mResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID, false);
+        AwaLwm2mResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID, false);
 
         IPC_AddResultTag(responseLeafNode, Lwm2mResult_ToAwaError(deleteResult, AwaError_CannotDelete));
     }
