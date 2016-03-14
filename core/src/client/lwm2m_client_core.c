@@ -371,23 +371,30 @@ static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, Ob
                     {
                         const void * defaultData = NULL;
                         int defaultLen = 0;
-                        if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+                        if (definition->MaximumInstances == 1)  // multiple instance resources should be empty by default
                         {
-                            ResourceInstanceIDType resourceInstanceID = 0;
-                            if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                            if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
                             {
-                                Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
-                                result = 0;
+                                ResourceInstanceIDType resourceInstanceID = 0;
+                                if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                                {
+                                    Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                                    result = 0;
+                                }
+                                else
+                                {
+                                    result = -1;
+                                }
                             }
                             else
                             {
-                                result = -1;
+                                Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
+                                result = -1;;
                             }
                         }
                         else
                         {
-                            Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-                            result = -1;;
+                            result = 0;
                         }
                     }
                 }
@@ -654,7 +661,7 @@ static Lwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType *
     if (createOptionalResource || Lwm2mTreeNode_IsCreateFlagSet(resourceNode))
     {
         ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-        if ((definition != NULL) && !IS_MANDATORY(definition) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+        if ((definition != NULL) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
         {
             if (Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == -1)
             {
@@ -840,11 +847,11 @@ int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, c
  * @return Lwm2mResult_SuccessDeleted on success
  * @return various errors on failure
  */
-Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace)
 {
     // According to the standard a DELETE must be O/I, not O/I/R,
     // only the client or bootstrap server has the authorisation to delete individual resources.
-    if ((resourceID != -1) && (requestOrigin == Lwm2mRequestOrigin_Server))
+    if ((resourceID != -1) && (requestOrigin == Lwm2mRequestOrigin_Server) && (!replace))
     {
         return Lwm2mResult_MethodNotAllowed;
     }
@@ -862,7 +869,7 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
             while ((objectID = Lwm2mCore_GetNextObjectID(context, objectID)) != -1)
             {
                 // Best effort attempt
-                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1);
+                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1, replace);
             }
             return Lwm2mResult_SuccessDeleted;
         }
@@ -883,7 +890,7 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         return Lwm2mResult_NotFound;
     }
 
-    if ((requestOrigin == Lwm2mRequestOrigin_Server) && !IS_MULTIPLE_INSTANCE(definition) && IS_MANDATORY(definition) && (objectInstanceID == 0))
+    if ((!replace) && (requestOrigin == Lwm2mRequestOrigin_Server) && !IS_MULTIPLE_INSTANCE(definition) && IS_MANDATORY(definition) && (Lwm2mCore_GetObjectNumInstances(context, objectID) == definition->MinimumInstances))
     {
         // If the object is marked mandatory and single-instance, we must have at least one instance.
         return Lwm2mResult_Unauthorized;
@@ -1739,7 +1746,7 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
                 case Lwm2mTreeNodeType_ObjectInstance:
                     if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == Lwm2mResult_Success)
                     {
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2]) == Lwm2mResult_SuccessDeleted)
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == Lwm2mResult_SuccessDeleted)
                         {
                             *responseCode = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, root, oir[0], true, true, false, &oir[1]);
                         }
@@ -1752,10 +1759,8 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
                 case Lwm2mTreeNodeType_Resource:
                     if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == Lwm2mResult_Success)
                     {
-                        // Unlike object instance, resource does not have to exist for PUT to succeed.
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]))
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == Lwm2mResult_SuccessDeleted)
                         {
-                            // Multiple-instance resources will be updated rather than replaced.
                             *responseCode = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, root, oir[0], oir[1], true);
                         }
                         else
@@ -1854,7 +1859,7 @@ static int Lwm2mCore_HandleDeleteRequest(void * ctxt, AddressType * addr, const 
 
     *responseContentLen = 0;
     sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
-    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2]);
+    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], false);
     return 0;
 }
 

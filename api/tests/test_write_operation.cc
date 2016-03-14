@@ -228,11 +228,11 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
 
     //create the object instance on the client
-    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
-    EXPECT_TRUE(clientSet != NULL);
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
-    AwaClientSetOperation_Free(&clientSet);
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaTime value = 123456789;
@@ -254,17 +254,72 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
 
     //create the object instance on the client
-    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
-    EXPECT_TRUE(clientSet != NULL);
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
-    AwaClientSetOperation_Free(&clientSet);
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+
+    AwaServerWriteOperation_Free(&writeOperation);
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_on_mandatory_object_instance_should_succeed)
+{
+    ObjectDescription object = { 1000, "Object1000", 1, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(1, "Resource1", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    AwaInteger value = 123456789;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+
+    AwaServerWriteOperation_Free(&writeOperation);
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_on_mandatory_resource_should_succeed)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance and mandatory resource on the client
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    AwaInteger value = 123456789;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -283,11 +338,11 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
 
     //create the object instance on the client
-    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
-    EXPECT_TRUE(clientSet != NULL);
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
-    AwaClientSetOperation_Free(&clientSet);
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
@@ -353,7 +408,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
 }
 
 
-TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_non_existent_resource_instance_should_fail)
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_non_existent_resource_should_fail)
 {
     ObjectDescription object = { 1000, "Object1000", 0, 1,
     {
@@ -365,11 +420,11 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
 
     //create the object instance on the client
-    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
-    EXPECT_TRUE(clientSet != NULL);
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
-    AwaClientSetOperation_Free(&clientSet);
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
     const char * path = "/1000/0/0";
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
@@ -386,7 +441,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
-TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_post_non_existent_resource_instance_should_succeed)
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_post_non_existent_resource_should_succeed)
 {
     ObjectDescription object = { 1000, "Object1000", 0, 1,
     {
@@ -398,11 +453,11 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
 
     //create the object instance on the client
-    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
-    EXPECT_TRUE(clientSet != NULL);
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
-    AwaClientSetOperation_Free(&clientSet);
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
     const char * path = "/1000/0/0";
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
@@ -411,6 +466,119 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_on_multiple_instance_resource_instance_should_replace)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_IntegerArray, 0, 10, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client and set the initial value
+    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(clientSet != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(clientSet, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(clientSet, "/1000/0/0", 0, 12345));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    AwaClientSetOperation_Free(&clientSet);
+    AwaInteger expectedValue = 123456789;
+
+    {
+        AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+
+        AwaIntegerArray * array = AwaIntegerArray_New();
+        AwaIntegerArray_SetValue(array, 1, expectedValue);
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsIntegerArray(writeOperation, "/1000/0/0", array));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        AwaIntegerArray_Free(&array);
+        AwaServerWriteOperation_Free(&writeOperation);
+    }
+
+    // should have replaced the entire array
+
+    AwaClientGetOperation * getOperation = AwaClientGetOperation_New(client_session_);
+    EXPECT_TRUE(getOperation != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+
+    const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+    EXPECT_TRUE(getResponse != NULL);
+
+    const AwaIntegerArray * array;
+    AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, "/1000/0/0", &array);
+    EXPECT_TRUE(NULL != array);
+
+    AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
+
+    ASSERT_TRUE(AwaIntegerArrayIterator_Next(iterator));
+    EXPECT_EQ(1u, AwaIntegerArrayIterator_GetIndex(iterator));
+    EXPECT_EQ(expectedValue, AwaIntegerArrayIterator_GetValue(iterator));
+
+    EXPECT_FALSE(AwaIntegerArrayIterator_Next(iterator));
+
+    AwaIntegerArrayIterator_Free(&iterator);
+    AwaClientGetOperation_Free(&getOperation);
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_post_on_multiple_instance_resource_instance_should_update)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_IntegerArray, 0, 10, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client and set the initial value
+    AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(clientSet != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(clientSet, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(clientSet, "/1000/0/0", 0, 12345));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    AwaClientSetOperation_Free(&clientSet);
+
+    {
+        AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
+
+        AwaIntegerArray * array = AwaIntegerArray_New();
+        AwaIntegerArray_SetValue(array, 1, 67890);
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsIntegerArray(writeOperation, "/1000/0/0", array));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        AwaServerWriteOperation_Free(&writeOperation);
+        AwaIntegerArray_Free(&array);
+    }
+
+    // A get on the resource should contain both the new and initial value.
+
+    AwaClientGetOperation * getOperation = AwaClientGetOperation_New(client_session_);
+    EXPECT_TRUE(getOperation != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+
+    const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+    EXPECT_TRUE(getResponse != NULL);
+
+    const AwaIntegerArray * array;
+    AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, "/1000/0/0", &array);
+    EXPECT_TRUE(NULL != array);
+
+    EXPECT_EQ(2u, AwaIntegerArray_GetValueCount(array));
+
+    EXPECT_EQ(12345, AwaIntegerArray_GetValue(array, 0u));
+    EXPECT_EQ(67890, AwaIntegerArray_GetValue(array, 1u));
+
+    AwaClientGetOperation_Free(&getOperation);
 }
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_handles_invalid_operation_no_content)

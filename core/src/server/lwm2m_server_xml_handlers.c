@@ -1489,7 +1489,7 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
                 Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
                 Lwm2mTreeNode_AddChild(child, resourceInstance);
 
-                Lwm2m_Error("Added default value for: %d\n", resourceID);
+                Lwm2m_Debug("Added default value to create request for resource: %d\n", resourceID);
             }
         }
         else

@@ -761,8 +761,8 @@ TEST_F(TlvTestSuite, test_multiple_instance_resource)
     ASSERT_EQ(0, Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 14, 1, 0, &defaultObjectOperationHandlers));
     ASSERT_EQ(0, Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 14, 0, ResourceTypeEnum_TypeInteger, 2, 1, Operations_RW, &defaultResourceOperationHandlers));
     Lwm2mCore_CreateObjectInstance(context, 14, 0);
-    Lwm2mCore_SetResourceInstanceValue(context, 14, 0, 0, 1, &temp2, sizeof(temp2));
     Lwm2mCore_SetResourceInstanceValue(context, 14, 0, 0, 0, &temp, sizeof(temp));
+    Lwm2mCore_SetResourceInstanceValue(context, 14, 0, 0, 1, &temp2, sizeof(temp2));
 
     Lwm2mTreeNode * dest;
     int OIR[] = {14};
