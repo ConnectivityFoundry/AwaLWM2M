@@ -801,11 +801,10 @@ const char * clientID = "TestClient1";
 
 static AwaInteger dummyInteger1 = 123456;
 static const char * dummyString1 = "Lightweight M2M Server";
-//static AwaFloat dummyFloat1 = 1.0;
-//static AwaTime dummyTime1 = 0xA20AD72B;
-//static AwaBoolean dummyBoolean1 = true;
-
-//static char dummyOpaqueData[] = {'a',0,'x','\0    ', 123};
+static AwaFloat dummyFloat1 = 1.0;
+static AwaTime dummyTime1 = 0xA20AD72B;
+static AwaBoolean dummyBoolean1 = true;
+static char dummyOpaqueData[] = {'a',0,'x','\0', 123};
 //static int dummyObjLinkData[] = {-1,-1};
 
 ObjectLink dummyObjectLink1 = { 3, 5 };
@@ -922,9 +921,13 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, cbHandler));
         EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING,     ResourceTypeEnum_TypeString,     0, 1, AwaAccess_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_INTEGER,    ResourceTypeEnum_TypeInteger,    0, 1, AwaAccess_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OBJECTLINK, ResourceTypeEnum_TypeObjectLink, 0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test String Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING,     ResourceTypeEnum_TypeString,     0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Integer Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_INTEGER,    ResourceTypeEnum_TypeInteger,    0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Float Resource",       writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_FLOAT,      ResourceTypeEnum_TypeFloat,      0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Boolean Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_BOOLEAN,    ResourceTypeEnum_TypeBoolean,    0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Opaque Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OPAQUE,     ResourceTypeEnum_TypeOpaque,     0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Time Resource",        writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_TIME,       ResourceTypeEnum_TypeTime,       0, 1, AwaAccess_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Object Link Resource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OBJECTLINK, ResourceTypeEnum_TypeObjectLink, 0, 1, AwaAccess_ReadWrite, handler));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
 
         AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -1106,26 +1109,31 @@ TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
             }
         case AwaResourceType_Float:
             {
-                AwaInteger * value;
+                AwaFloat * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsFloatPointer(readResponse, path, (const AwaFloat **)&value));
+                ASSERT_EQ(*static_cast<const AwaFloat *>(data.value), *static_cast<AwaFloat *>(value));
                 break;
             }
         case AwaResourceType_Boolean:
             {
-                AwaInteger * value;
+                AwaBoolean * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, path, (const AwaBoolean **)&value));
+                ASSERT_EQ(*static_cast<const AwaBoolean *>(data.value), *static_cast<AwaBoolean *>(value));
                 break;
             }
         case AwaResourceType_Opaque:
             {
-                AwaInteger * value;
+                AwaOpaque * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsOpaquePointer(readResponse, path, (const AwaOpaque **)&value));
+                ASSERT_EQ(data.valueSize, static_cast<int>(value->Size));
+                ASSERT_TRUE(memcmp(value->Data, data.value, data.valueSize) == 0);
                 break;
             }
         case AwaResourceType_Time:
             {
                 AwaTime * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsTimePointer(readResponse, path, (const AwaTime **)&value));
+                ASSERT_EQ(*static_cast<const AwaTime *>(data.value), *static_cast<AwaTime *>(value));
                 break;
             }
         case AwaResourceType_ObjectLink:
@@ -1148,8 +1156,12 @@ INSTANTIATE_TEST_CASE_P(
         TestWriteReadValueStaticClient,
         TestWriteReadValueStaticClient,
         ::testing::Values(
-        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler,TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1,      1, static_cast<int>(strlen(writeDetail::dummyString1)),     AwaResourceType_String,     true, false},
-        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler,TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_INTEGER,    &writeDetail::dummyInteger1,    1, static_cast<int>(sizeof(writeDetail::dummyInteger1)),    AwaResourceType_Integer,    true, false},
-        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler,TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_OBJECTLINK, &writeDetail::dummyObjectLink1, 1, static_cast<int>(sizeof(writeDetail::dummyObjectLink1)), AwaResourceType_ObjectLink, true, false}
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1,      1, static_cast<int>(strlen(writeDetail::dummyString1)),     AwaResourceType_String,     true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_INTEGER,    &writeDetail::dummyInteger1,    1, static_cast<int>(sizeof(writeDetail::dummyInteger1)),    AwaResourceType_Integer,    true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_FLOAT,      &writeDetail::dummyFloat1,      1, static_cast<int>(sizeof(writeDetail::dummyFloat1)),      AwaResourceType_Float,      true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_BOOLEAN,    &writeDetail::dummyBoolean1,    1, static_cast<int>(sizeof(writeDetail::dummyBoolean1)),    AwaResourceType_Boolean,    true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_OPAQUE,     writeDetail::dummyOpaqueData,   1, static_cast<int>(sizeof(writeDetail::dummyOpaqueData)),  AwaResourceType_Opaque,     true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_TIME,       &writeDetail::dummyTime1,       1, static_cast<int>(sizeof(writeDetail::dummyTime1)),       AwaResourceType_Time,       true, false},
+        TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_OBJECTLINK, &writeDetail::dummyObjectLink1, 1, static_cast<int>(sizeof(writeDetail::dummyObjectLink1)), AwaResourceType_ObjectLink, true, false}
         ));
 } // namespace Awa
