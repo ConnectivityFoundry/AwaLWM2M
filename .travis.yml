@@ -16,4 +16,5 @@ addons:
    - gcc-5
    - g++-5
 
-script: make
+# Travis-CI does not support IPv6 addresses:
+script: make tests TEST_FILTER=*.*:-*.*_handles_IPv6_address*
