@@ -61,7 +61,7 @@ To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to r
 INSTALL_PATH:=~/AwaLWM2M/build/install
 
 all:
-	$(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
+	$(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
 
 Now is a good time to define our objects and resources:
@@ -323,8 +323,8 @@ Now update tutorial/Makefile to include *server-tutorial.c* like so:
 INSTALL_PATH:=~/AwaLWM2M/build/install
 
 all:
-        $(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
+        $(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
+        $(CC) server-tutorial.c -o server-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
 
 Build the new application...
