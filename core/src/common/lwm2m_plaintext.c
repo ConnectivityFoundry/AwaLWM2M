@@ -53,19 +53,19 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
 
     switch (definition->Type)
     {
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             if (len >= size)
             {
                 strcpy(buf, (char*)value);
                 valueLength = strlen(buf);
             }
             break;
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
             sprintf(buf, "%s", *(bool*)value ? "1" : "0");
             valueLength = strlen(buf);
             break;
-        case ResourceTypeEnum_TypeTime:
-        case ResourceTypeEnum_TypeInteger:
+        case AwaStaticResourceType_Time:
+        case AwaStaticResourceType_Integer:
             switch (size)
             {
                 case sizeof(int8_t):
@@ -85,7 +85,7 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             valueLength = strlen(buf);
             break;
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             switch (size)
             {
             case sizeof(float):
@@ -100,13 +100,13 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             valueLength = strlen(buf);
             break;
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             Lwm2m_Error("ERROR: Opaque is not supported for plain text mode\n");
             break;
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
             {
-               ObjectLink * objectLink = (ObjectLink *) value;
-               sprintf(buf, "%" PRIu16 ":%" PRIu16, objectLink->ObjectID, objectLink->ObjectInstanceID);
+               AwaObjectLink * objectLink = (AwaObjectLink *) value;
+               sprintf(buf, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
                valueLength = strlen(buf);
             }
             break;
@@ -180,11 +180,11 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
     Lwm2mTreeNode_SetID(resourceValueNode, 0);
     Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
-    ResourceTypeEnum resourceType = Definition_GetResourceType(registry, objectID, resourceID);
+    AwaStaticResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
     switch (resourceType)
     {
-        case ResourceTypeEnum_TypeInteger:  // no break
-        case ResourceTypeEnum_TypeTime:
+        case AwaStaticResourceType_Integer:  // no break
+        case AwaStaticResourceType_Time:
             {
                 int64_t temp = 0;
                 result = sscanf((char*)buffer, "%" SCNu64, &temp);
@@ -194,7 +194,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                 }
             }
             break;
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
                 if (bufferLen == 1)
                 {
                     bool temp;
@@ -220,7 +220,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                     }
                 }
                 break;
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             {
                 double temp = 0;
                 result = sscanf((char*)buffer, "%24lf", &temp);
@@ -230,19 +230,19 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                 }
             }
             break;
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             Lwm2m_Error("Opaque is not supported for plain text\n");
             break;
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             {
                 const uint8_t * str = buffer != NULL ? buffer : (uint8_t*)"";
                 result = Lwm2mTreeNode_SetValue(resourceValueNode, str, bufferLen);
             }
             break;
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
             {
-                ObjectLink objectLink;
-                result = sscanf((char*)buffer, "%" SCNu16":%" SCNu16, &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                AwaObjectLink objectLink;
+                result = sscanf((char*)buffer, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                 if (result > 0)
                 {
                     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&objectLink, sizeof(objectLink));

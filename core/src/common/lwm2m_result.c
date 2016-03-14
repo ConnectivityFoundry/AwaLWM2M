@@ -25,34 +25,34 @@
 #include "lwm2m_debug.h"
 #include "../../api/include/awa/error.h"
 
-static Lwm2mResult lastResult = Lwm2mResult_Success;
+static AwaLwm2mResult lastResult = AwaLwm2mResult_Success;
 
-Lwm2mResult Lwm2mResult_GetLastResult(void)
+AwaLwm2mResult AwaLwm2mResult_GetLastResult(void)
 {
     return lastResult;
 }
 
-void Lwm2mResult_SetResult(Lwm2mResult result)
+void AwaLwm2mResult_SetResult(AwaLwm2mResult result)
 {
     lastResult = result;
 }
 
-bool Lwm2mResult_IsSuccess(Lwm2mResult result)
+bool AwaLwm2mResult_IsSuccess(AwaLwm2mResult result)
 {
     return result >= 200 && result < 300;
 }
 
-int Lwm2mResult_ToAwaError(Lwm2mResult result, int defaultError)
+int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError)
 {
     switch (result)
     {
-    case Lwm2mResult_Success: case Lwm2mResult_SuccessChanged:
-    case Lwm2mResult_SuccessContent: case Lwm2mResult_SuccessCreated:
-    case Lwm2mResult_SuccessDeleted:
+    case AwaLwm2mResult_Success: case AwaLwm2mResult_SuccessChanged:
+    case AwaLwm2mResult_SuccessContent: case AwaLwm2mResult_SuccessCreated:
+    case AwaLwm2mResult_SuccessDeleted:
         return AwaError_Success;
-    case Lwm2mResult_NotFound:
+    case AwaLwm2mResult_NotFound:
         return AwaError_PathNotFound;
-    case Lwm2mResult_MethodNotAllowed:
+    case AwaLwm2mResult_MethodNotAllowed:
         return AwaError_PathInvalid;
     default:
         return defaultError;

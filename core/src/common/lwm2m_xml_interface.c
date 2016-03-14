@@ -141,7 +141,7 @@ int xmlif_init(void * context, int port)
 static void HandleInvalidRequest(const RequestInfoType * request)
 {
     TreeNode responseNode = Xml_CreateNode("Response");
-    TreeNode code = Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_BadRequest);
+    TreeNode code = Xml_CreateNodeWithValue("Code", "%d", AwaLwm2mResult_BadRequest);
     TreeNode_AddChild(responseNode, code);
 
     char buffer[MAXBUFLEN];
@@ -287,7 +287,7 @@ void xmlif_destroy(int sockfd)
 TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
 {
     ObjectDefinition * objFormat = 0;
-    int result = Lwm2mResult_Success;
+    int result = AwaLwm2mResult_Success;
 
     TreeNode response = Xml_CreateNode("Response");
 
@@ -308,7 +308,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         objFormat = Definition_LookupObjectDefinition(definitionRegistry, objectID);
         if (objFormat == NULL)
         {
-            result = Lwm2mResult_NotFound;
+            result = AwaLwm2mResult_NotFound;
             goto error;
         }
 
@@ -320,7 +320,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         else
         {
             Tree_Delete(content);
-            result = Lwm2mResult_NotFound;
+            result = AwaLwm2mResult_NotFound;
         }
     }
 

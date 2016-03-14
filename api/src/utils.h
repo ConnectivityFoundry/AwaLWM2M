@@ -42,9 +42,9 @@ const char * Utils_ResourceTypeToString(AwaResourceType resourceType);
 
 size_t Utils_GetNumberOfResourceTypeStrings(void);
 
-ResourceTypeType Utils_GetResourceType(AwaResourceType resourceType);
+AwaStaticResourceType Utils_GetResourceType(AwaResourceType resourceType);
 
-AwaResourceType Utils_GetAwaResourceType(ResourceTypeType resourceType);
+AwaResourceType Utils_GetAwaResourceType(AwaStaticResourceType resourceType);
 
 Operations Utils_GetResourceTypeOperations(AwaResourceOperations operation);
 

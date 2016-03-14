@@ -63,7 +63,7 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
 
 // Encode a value into a string to be copied into a LWM2M Tree Node.
 // The encoded value that is returned must be explicitly freed by the caller.
-char * SetWriteCommon_EncodeValue(const void * value, size_t size, ResourceTypeType internalResourceType);
+char * SetWriteCommon_EncodeValue(const void * value, size_t size, AwaStaticResourceType internalResourceType);
 
 #ifdef __cplusplus
 }

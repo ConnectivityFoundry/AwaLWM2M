@@ -10,7 +10,6 @@ set (awa_clientd_SOURCES
   lwm2m_server_object.c
   lwm2m_client_xml_handlers.c
   lwm2m_client_core.c
-  lwm2m_client.c
   lwm2m_static.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_interface.c
   ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
@@ -25,7 +24,6 @@ set (awa_clientd_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_observers.c
   ${CORE_SRC_DIR}/common/lwm2m_ipc.c
   lwm2m_object_tree.c   
-  
   
   ######################## TODO REMOVE ########################
   # TODO: extract components common to both Core and API
@@ -78,23 +76,14 @@ if (ENABLE_GCOV)
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
 
-
-# Virtual library to avoid building .o files twice:
-add_library (awa_clientd_object OBJECT ${awa_clientd_SOURCES})
-target_include_directories (awa_clientd_object PRIVATE ${awa_clientd_INCLUDE_DIRS})
-set_property (TARGET awa_clientd_object PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-# static library liblwm2mclient.a
-add_library (awa_clientd_static STATIC $<TARGET_OBJECTS:awa_clientd_object>)
-set_target_properties (awa_clientd_static PROPERTIES OUTPUT_NAME "lwm2mclient")
-
-# shared library liblwm2mclient.so
-add_library (awa_clientd_shared SHARED $<TARGET_OBJECTS:awa_clientd_object>)
-set_target_properties (awa_clientd_shared PROPERTIES OUTPUT_NAME "lwm2mclient")
+# static library libawastatic.a
+add_library (awa_static STATIC  ${awa_clientd_SOURCES})
+target_include_directories (awa_static PUBLIC ${awa_clientd_INCLUDE_DIRS})
+set_property (TARGET awa_static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable (awa_clientd lwm2m_client.c)
 target_include_directories (awa_clientd PRIVATE ${awa_clientd_INCLUDE_DIRS})
-target_link_libraries (awa_clientd awa_clientd_static lwm2m_common_static libb64_static libhmac_static)
+target_link_libraries (awa_clientd awa_static lwm2m_common_static libb64_static libhmac_static)
 
 if (ENABLE_GCOV)
   target_link_libraries (awa_clientd gcov)
@@ -102,4 +91,8 @@ endif ()
 
 install (TARGETS awa_clientd
     RUNTIME DESTINATION /bin
+)
+
+install (TARGETS awa_static
+    ARCHIVE DESTINATION /usr/lib
 )

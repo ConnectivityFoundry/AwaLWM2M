@@ -25,7 +25,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
     const char * expected = "coap://bootstrap.example.com:5684/";
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+    Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), (char*)"Res1", 0, 0, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, static_cast<const char*>(expected), strlen(expected));
 
@@ -83,7 +83,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
     {
         char resourceName[100];
         snprintf(resourceName, sizeof(resourceName), "Res%d", i);
-        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, i, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, i, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
 
     }
 
@@ -136,7 +136,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
     {
         char resourceName[100];
         snprintf(resourceName, sizeof(resourceName), "Res%d", i);
-        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, it->id, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
+        Definition_RegisterResourceType(Lwm2mCore_GetDefinitions(context), static_cast<const char*>(resourceName), 0, it->id, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers, NULL);
     }
 
     Lwm2mCore_CreateObjectInstance(context, 0, 0);

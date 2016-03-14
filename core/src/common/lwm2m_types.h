@@ -24,6 +24,7 @@
 #ifndef LWM2M_TYPES_H
 #define LWM2M_TYPES_H
 
+#include "../../../api/include/awa/static.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -39,20 +40,6 @@ extern "C" {
 #endif
 
 #define LWM2M_MAX_ID (65535)
-
-typedef enum
-{
-    // These values must align with the table in lwm2m_types.c:ResourceTypeStrings
-    ResourceTypeEnum_TypeInvalid = -1,
-    ResourceTypeEnum_TypeOpaque,
-    ResourceTypeEnum_TypeInteger,
-    ResourceTypeEnum_TypeFloat,
-    ResourceTypeEnum_TypeBoolean,
-    ResourceTypeEnum_TypeString,
-    ResourceTypeEnum_TypeTime,
-    ResourceTypeEnum_TypeNone,
-    ResourceTypeEnum_TypeObjectLink,
-} ResourceTypeEnum;
 
 typedef enum
 {
@@ -75,29 +62,11 @@ typedef enum
     MultipleInstancesEnum_Multiple = LWM2M_MAX_ID,
 } MultipleInstancesEnum;
 
-
-typedef enum
-{
-    LWM2MOperation_CreateObjectInstance,
-    LWM2MOperation_DeleteObjectInstance,
-    LWM2MOperation_Read,
-    LWM2MOperation_Write,
-    LWM2MOperation_Execute,
-    LWM2MOperation_CreateResource,
-    LWM2MOperation_DeleteResource,
-} LWM2MOperation;
-
-typedef struct
-{
-    uint16_t ObjectID;
-    uint16_t ObjectInstanceID;
-} ObjectLink;
-
 typedef int ObjectIDType;
 typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;
 typedef int ResourceInstanceIDType;
-typedef int ResourceTypeType;
+//typedef int AwaStaticResourceType;
 
 #ifndef CONTIKI
 typedef struct
@@ -141,8 +110,8 @@ bool Operations_IsResourceTypeReadable(Operations operation);
 bool Operations_Contains(Operations parent, Operations child);
 
 size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void);
-const char * Lwm2mCore_ResourceTypeToString(ResourceTypeType resourceType);
-ResourceTypeType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
+const char * Lwm2mCore_ResourceTypeToString(AwaStaticResourceType resourceType);
+AwaStaticResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
 
 #ifdef __cplusplus
 }

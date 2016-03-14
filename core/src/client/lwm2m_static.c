@@ -156,7 +156,7 @@ AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const c
     return result;
 }
 
-AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const BootstrapInfo * factoryBootstrapInformation)
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const AwaFactoryBootstrapInfo * factoryBootstrapInformation)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -164,7 +164,7 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
     {
         if (!client->Running)
         {
-            Lwm2mCore_SetFactoryBootstrap(client->Context, factoryBootstrapInformation);
+            Lwm2mCore_SetFactoryBootstrap(client->Context, (BootstrapInfo*)factoryBootstrapInformation);
             result = AwaError_Success;
         }
         else
@@ -327,8 +327,7 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
 
     if ((client != NULL) && (objectName != NULL))
     {
-
-        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, handler);
+        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
 
         if (defintion != NULL)
         {
@@ -388,9 +387,9 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 }
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
-                                                       AwaObjectID objectID, AwaResourceID resourceID, ResourceTypeEnum resourceType,
-                                                       uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
-                                                       AwaStaticClientHandler handler)
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
+                                                     AwaStaticClientHandler handler)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -399,7 +398,7 @@ AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, c
         ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
         if (objFormat != NULL)
         {
-            ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, handler);
+            ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
             if (resourceDefinition != NULL)
             {
                 result = AwaError_Success;

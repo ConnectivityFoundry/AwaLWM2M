@@ -152,7 +152,7 @@ static int Lwm2mCore_BootstrapEndpointHandler(int type, void * ctxt, AddressType
         default:
             *responseContentType = ContentType_None;
             *responseContentLen = 0;
-            *responseCode = Lwm2mResult_MethodNotAllowed;
+            *responseCode = AwaLwm2mResult_MethodNotAllowed;
             break;
     }
     return -1;

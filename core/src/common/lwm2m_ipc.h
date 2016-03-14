@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-TreeNode IPC_NewResponseNode(const char * type, Lwm2mResult code);
+TreeNode IPC_NewResponseNode(const char * type, AwaLwm2mResult code);
 TreeNode IPC_NewClientsNode();
 TreeNode IPC_NewContentNode();
 TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);

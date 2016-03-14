@@ -28,102 +28,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "types.h"
 #include "error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef int AwaObjectID;
-typedef int AwaObjectInstanceID;
-typedef int AwaResourceID;
-typedef int AwaResourceInstanceID;
-
-/**
- * Used to mark an invalid object, object instance or resource ID.
- */
-#define AWA_INVALID_ID (-1)
-
-/**
- * Defines the maximum permissible object, object instance or resource ID.
- */
-#define AWA_MAX_ID (65535)
-
-// LWM2M Data Types
-
-/**
- * Corresponds to the LWM2M 64-bit Integer type.
- */
-typedef int64_t AwaInteger;
-
-/**
- * Corresponds to the LWM2M Float type.
- */
-typedef double AwaFloat;
-
-/**
- * Corresponds to the LWM2M Boolean type.
- */
-typedef bool AwaBoolean;
-
-/**
- * Corresponds to the LWM2M Time type.
- */
-typedef int64_t AwaTime;
-
-/**
- * A utility struct used to convey data pointer and size of an opaque data block.
- */
-typedef struct _AwaOpaque
-{
-    void * Data;        /**< pointer to opaque data */
-    size_t Size;        /**< size of opaque data block */
-} AwaOpaque;
-
-/**
- * A utility struct used to convey object link data.
- */
-typedef struct _AwaObjectLink
-{
-    AwaObjectID ObjectID;                  /**< Object ID */
-    AwaObjectInstanceID ObjectInstanceID;  /**< Object Instance ID */
-} AwaObjectLink;
-
-// AwaString reserved for future use (UTF-8)
-
 typedef struct _AwaChangeSet AwaChangeSet;
-
-/**
- * Supported resource types
- */
-typedef enum
-{
-    AwaResourceType_Invalid = 0,     /**< indicates an invalid resource type */
-
-    AwaResourceType_None,            /**< indicates a resource with no type */
-    AwaResourceType_String,          /**< indicates a resource capable of holding an ASCII string (UTF-8 is not supported) */
-    AwaResourceType_Integer,         /**< indicates a resource capable of holding a LWM2M Integer value */
-    AwaResourceType_Float,           /**< indicates a resource capable of holding a LWM2M Float value */
-    AwaResourceType_Boolean,         /**< indicates a resource capable of holding a LWM2M Boolean value */
-    AwaResourceType_Opaque,          /**< indicates a resource capable of holding a LWM2M Opaque value */
-    AwaResourceType_Time,            /**< indicates a resource capable of holding a LWM2M Time value */
-    AwaResourceType_ObjectLink,      /**< indicates a resource capable of holding a LWM2M ObjectLink value */
-
-    // arrays (for multiple resource instances) are their own type
-    AwaResourceType_StringArray,     /**< indicates a multiple-instance resource capable of holding a number of ASCII string values */
-    AwaResourceType_IntegerArray,    /**< indicates a multiple-instance resource capable of holding a number of LWM2M Integer values */
-    AwaResourceType_FloatArray,      /**< indicates a multiple-instance resource capable of holding a number of LWM2M Float values */
-    AwaResourceType_BooleanArray,    /**< indicates a multiple-instance resource capable of holding a number of LWM2M Boolean values */
-    AwaResourceType_OpaqueArray,     /**< indicates a multiple-instance resource capable of holding a number of LWM2M Opaque values */
-    AwaResourceType_TimeArray,       /**< indicates a multiple-instance resource capable of holding a number of LWM2M Time values */
-    AwaResourceType_ObjectLinkArray, /**< indicates a multiple-instance resource capable of holding a number of LWM2M ObjectLink values */
-
-    // sentinel, do not remove
-    AwaResourceType_LAST,            /**< Reserved value */
-
-    AwaResourceType_FirstArrayType = AwaResourceType_StringArray,
-    AwaResourceType_LastArrayType = AwaResourceType_ObjectLinkArray,
-} AwaResourceType;
 
 /**
  * Supported resource operations for management servers

@@ -29,7 +29,7 @@ set (test_core_runner_LIBRARIES
   gtest
   pthread
   libcoap_static
-  awa_clientd_static
+  awa_static
   lwm2m_common_static
 )
 

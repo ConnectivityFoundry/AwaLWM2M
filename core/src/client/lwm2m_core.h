@@ -95,10 +95,10 @@ int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objNam
                                  uint16_t MinimumInstances, ObjectOperationHandlers * Handlers);
 void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID);
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                                    ResourceOperationHandlers * Handlers, Lwm2mTreeNode * defaultValueNode);
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers);
 
@@ -106,7 +106,7 @@ ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * contex
 ResourceIDType Lwm2mCore_GetNextResourceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
-Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace);
+AwaLwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace);
 
 int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                       ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
@@ -115,15 +115,15 @@ int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, Obje
 
 bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
                                                            ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, bool createObjectInstance);
 
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin,
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin,
                                                                  Lwm2mTreeNode * objectInstanceNode, int objectID, bool createObjectInstance);
 
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance);
+AwaLwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance);
 
-Lwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance,
+AwaLwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance,
                                                      bool createOptionalResources, bool replace, int * newObjectInstanceID);
 
 ObjectIDType Lwm2mCore_GetNextObjectID(Lwm2mContextType * context, ObjectIDType  objectID);

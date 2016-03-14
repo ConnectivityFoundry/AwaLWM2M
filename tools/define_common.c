@@ -33,9 +33,9 @@ AwaResourceType ResourceTypeFromEnum(enum enum_resourceType value, bool isArray)
     {
         enum enum_resourceType Value;
         AwaResourceType Type;
-    } ResourceTypeEnumMapEntry;
+    } AwaStaticResourceTypeMapEntry;
 
-    ResourceTypeEnumMapEntry mapSingle[] = {
+    AwaStaticResourceTypeMapEntry mapSingle[] = {
             { resourceType_arg_opaque,     AwaResourceType_Opaque },
             { resourceType_arg_integer,    AwaResourceType_Integer },
             { resourceType_arg_float,      AwaResourceType_Float },
@@ -47,7 +47,7 @@ AwaResourceType ResourceTypeFromEnum(enum enum_resourceType value, bool isArray)
     };
     size_t mapSingleLen = sizeof(mapSingle) / sizeof(mapSingle[0]);
 
-    ResourceTypeEnumMapEntry mapArray[] = {
+    AwaStaticResourceTypeMapEntry mapArray[] = {
             { resourceType_arg_opaque,     AwaResourceType_OpaqueArray },
             { resourceType_arg_integer,    AwaResourceType_IntegerArray },
             { resourceType_arg_float,      AwaResourceType_FloatArray },
@@ -58,7 +58,7 @@ AwaResourceType ResourceTypeFromEnum(enum enum_resourceType value, bool isArray)
     };
     size_t mapArrayLen = sizeof(mapArray) / sizeof(mapArray[0]);
 
-    ResourceTypeEnumMapEntry * map = mapSingle;
+    AwaStaticResourceTypeMapEntry * map = mapSingle;
     size_t mapLen = mapSingleLen;
     if (isArray)
     {
@@ -86,9 +86,9 @@ AwaResourceOperations OperationsFromEnum(enum enum_resourceOperations value)
     {
         enum enum_resourceType Value;
         AwaResourceOperations Type;
-    } ResourceTypeEnumMapEntry;
+    } AwaStaticResourceTypeMapEntry;
 
-    ResourceTypeEnumMapEntry map[] = {
+    AwaStaticResourceTypeMapEntry map[] = {
             { resourceOperations_arg_r,   AwaResourceOperations_ReadOnly },
             { resourceOperations_arg_w,   AwaResourceOperations_WriteOnly },
             { resourceOperations_arg_e,   AwaResourceOperations_Execute },

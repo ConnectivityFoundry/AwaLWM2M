@@ -99,53 +99,53 @@ size_t Utils_GetNumberOfResourceTypeStrings(void)
     return numEntries;
 }
 
-ResourceTypeType Utils_GetResourceType(AwaResourceType resourceType)
+AwaStaticResourceType Utils_GetResourceType(AwaResourceType resourceType)
 {
-    ResourceTypeType result = ResourceTypeEnum_TypeInvalid;
+    AwaStaticResourceType result = AwaStaticResourceType_Invalid;
 
     switch (resourceType)
     {
         case AwaResourceType_Invalid:
-            result = ResourceTypeEnum_TypeInvalid;
+            result = AwaStaticResourceType_Invalid;
             break;
 
         case AwaResourceType_None:
-            result = ResourceTypeEnum_TypeNone;
+            result = AwaStaticResourceType_None;
             break;
 
         case AwaResourceType_StringArray:
         case AwaResourceType_String:
-            result = ResourceTypeEnum_TypeString;
+            result = AwaStaticResourceType_String;
             break;
 
         case AwaResourceType_IntegerArray:
         case AwaResourceType_Integer:
-            result = ResourceTypeEnum_TypeInteger;
+            result = AwaStaticResourceType_Integer;
             break;
 
         case AwaResourceType_FloatArray:
         case AwaResourceType_Float:
-            result = ResourceTypeEnum_TypeFloat;
+            result = AwaStaticResourceType_Float;
             break;
 
         case AwaResourceType_BooleanArray:
         case AwaResourceType_Boolean:
-            result = ResourceTypeEnum_TypeBoolean;
+            result = AwaStaticResourceType_Boolean;
             break;
 
         case AwaResourceType_OpaqueArray:
         case AwaResourceType_Opaque:
-            result = ResourceTypeEnum_TypeOpaque;
+            result = AwaStaticResourceType_Opaque;
             break;
 
         case AwaResourceType_TimeArray:
         case AwaResourceType_Time:
-            result = ResourceTypeEnum_TypeTime;
+            result = AwaStaticResourceType_Time;
             break;
 
         case AwaResourceType_ObjectLinkArray:
         case AwaResourceType_ObjectLink:
-            result = ResourceTypeEnum_TypeObjectLink;
+            result = AwaStaticResourceType_ObjectLink;
             break;
 
         default:
@@ -157,45 +157,45 @@ ResourceTypeType Utils_GetResourceType(AwaResourceType resourceType)
 }
 
 // NB: Does not support arrays!
-AwaResourceType Utils_GetAwaResourceType(ResourceTypeType resourceType)
+AwaResourceType Utils_GetAwaResourceType(AwaStaticResourceType resourceType)
 {
     AwaResourceType result = AwaResourceType_Invalid;
 
     switch (resourceType)
     {
-        case ResourceTypeEnum_TypeInvalid:
+        case AwaStaticResourceType_Invalid:
             result = AwaResourceType_Invalid;
             break;
 
-        case ResourceTypeEnum_TypeNone:
+        case AwaStaticResourceType_None:
             result = AwaResourceType_None;
             break;
 
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             result = AwaResourceType_String;
             break;
 
-        case ResourceTypeEnum_TypeInteger:
+        case AwaStaticResourceType_Integer:
             result = AwaResourceType_Integer;
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             result = AwaResourceType_Float;
             break;
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
             result = AwaResourceType_Boolean;
             break;
 
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             result = AwaResourceType_Opaque;
             break;
 
-        case ResourceTypeEnum_TypeTime:
+        case AwaStaticResourceType_Time:
             result = AwaResourceType_Time;
             break;
 
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
             result = AwaResourceType_ObjectLink;
             break;
 

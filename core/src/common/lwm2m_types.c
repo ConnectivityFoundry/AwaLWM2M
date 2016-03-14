@@ -29,7 +29,7 @@
 
 #include "lwm2m_types.h"
 
-// This table must align with lwm2m_types.h:ResourceTypeEnum
+// This table must align with lwm2m_types.h:AwaStaticResourceType
 static const char * ResourceTypeStrings[] =
 {
     "Invalid",
@@ -80,12 +80,12 @@ size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void)
     return sizeof(ResourceTypeStrings) / sizeof(ResourceTypeStrings[0]);
 }
 
-const char * Lwm2mCore_ResourceTypeToString(ResourceTypeType resourceType)
+const char * Lwm2mCore_ResourceTypeToString(AwaStaticResourceType resourceType)
 {
     static const char * result = "Unknown ResourceType";
     size_t numEntries = Lwm2mCore_GetNumberOfResourceTypeStrings();
 
-    resourceType += 1; // ResourceTypeEnum starts from -1
+    resourceType += 1; // AwaStaticResourceType starts from -1
     if ((resourceType >= 0) && (resourceType < numEntries))
     {
         result = ResourceTypeStrings[resourceType];
@@ -93,11 +93,11 @@ const char * Lwm2mCore_ResourceTypeToString(ResourceTypeType resourceType)
     return result;
 }
 
-ResourceTypeType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString)
+AwaStaticResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString)
 {
     int i;
     int numResourceTypeStrings = Lwm2mCore_GetNumberOfResourceTypeStrings();
-    ResourceTypeType resourceType = ResourceTypeEnum_TypeInvalid;
+    AwaStaticResourceType resourceType = AwaStaticResourceType_Invalid;
     for (i = 0; i < numResourceTypeStrings; ++i)
     {
         if (strcmp(ResourceTypeStrings[i], resourceTypeString) == 0)
@@ -106,5 +106,5 @@ ResourceTypeType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeStrin
             break;
         }
     }
-    return resourceType - 1; // ResourceTypeEnum starts from -1
+    return resourceType - 1; // AwaStaticResourceType starts from -1
 }

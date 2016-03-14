@@ -52,14 +52,14 @@ int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objNam
     return Definition_RegisterObjectType(context->Definitions, objName, objectID, MaximumInstances, MinimumInstances, Handlers);
 }
 
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, Handlers, NULL);
 }
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers, Lwm2mTreeNode * defaultValueNode)
 {
@@ -72,7 +72,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     int nullTerminator = 0;
     bool changed;
 
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == ResourceTypeEnum_TypeString)
+    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaStaticResourceType_String)
     {
         nullTerminator = 1;
     }
@@ -93,7 +93,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
     else
     {
         Lwm2m_Error("No definition for object ID %d\n", objectID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+        AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
     }
     return result;
 }
@@ -143,7 +143,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     {
         response->responseContentType = ContentType_None;
         response->responseContentLen = 0;
-        response->responseCode = Lwm2mResult_NotFound;
+        response->responseCode = AwaLwm2mResult_NotFound;
         return 0;
     }
 

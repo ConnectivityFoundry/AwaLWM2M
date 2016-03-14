@@ -39,33 +39,6 @@
 
 #define MAX_RESOURCE_INSTANCE_STR_LEN (12)
 
-char * SetWriteCommon_EncodeValue(const void * value, size_t size, ResourceTypeType internalResourceType)
-{
-    char * encodedValue = NULL;
-    switch (internalResourceType)
-    {
-        case ResourceTypeEnum_TypeObjectLink:
-        {
-            //special case: we have to pack the object link as two unsigned short integers
-            char packedValue[sizeof(int16_t) * 2];
-
-            AwaObjectLink *objectLink = (AwaObjectLink*)value;
-            uint16_t objectID = objectLink->ObjectID;
-            uint16_t objectInstanceID = objectLink->ObjectInstanceID;
-
-            memcpy(packedValue, &objectID, sizeof(uint16_t));
-            memcpy(packedValue + sizeof(uint16_t), &objectInstanceID, sizeof(uint16_t));
-
-            encodedValue = xmlif_EncodeValue(internalResourceType, packedValue, sizeof(packedValue));
-            break;
-        }
-        default:
-            encodedValue = xmlif_EncodeValue(internalResourceType, value, size);
-            break;
-    }
-    return encodedValue;
-}
-
 AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type)
 {
     AwaError result = AwaError_Unspecified;
@@ -120,7 +93,7 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
 
                                     if (ObjectsTree_GetNumChildrenWithName(resultNode, "ResourceInstance") < resourceDefinition->MaximumInstances)
                                     {
-                                        char * encodedValue = SetWriteCommon_EncodeValue(value, size, Utils_GetResourceType(type));
+                                        char * encodedValue = xmlif_EncodeValue(Utils_GetResourceType(type), value, size);
 
                                         if (ObjectsTree_AddPath(objectsTree, path, &resultNode) == InternalError_Success && resultNode != NULL)
                                         {

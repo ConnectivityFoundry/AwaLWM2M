@@ -143,7 +143,7 @@ TEST_F(TlvTestSuite, test_serialise_string)
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_CreateOptionalResource(context, 0, 0, 0);
     //Lwm2mCore_CreateOptionalResource(...)
@@ -173,7 +173,7 @@ TEST_F(TlvTestSuite, test_small_outputbuffer)
     Lwm2m_SetLogLevel(DebugLevel_Emerg);  // disable output
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, ResourceTypeEnum_TypeString, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_CreateOptionalResource(context, 0, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"coap://bootstrap.example.com:5684/", strlen("coap://bootstrap.example.com:5684/"));
@@ -197,7 +197,7 @@ TEST_F(TlvTestSuite, test_serialise_bool)
 {
     bool one = 1;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 1, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 1, 0, ResourceTypeEnum_TypeBoolean, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 1, 0, AwaStaticResourceType_Boolean, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 1, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 1, 0, 0, 0, &one, 1);
 
@@ -221,7 +221,7 @@ TEST_F(TlvTestSuite, test_serialise_int8)
 {
     uint64_t temp = 17;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 2, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 2, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 2, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 2, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 2, 0, 0, 0, &temp, sizeof(temp));
 
@@ -255,7 +255,7 @@ TEST_F(TlvTestSuite, test_serialise_negative_int8)
 {
     uint64_t temp = -17;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 3, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 3, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 3, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 3, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 3, 0, 0, 0, &temp, sizeof(temp));
 
@@ -297,7 +297,7 @@ TEST_F(TlvTestSuite, test_serialise_int16)
 {
     uint64_t temp = 1024;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 4, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 4, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 4, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 4, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 4, 0, 0, 0, &temp, sizeof(temp));
 
@@ -332,7 +332,7 @@ TEST_F(TlvTestSuite, test_serialise_negative_int16)
 {
     uint64_t temp = -1024;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 5, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 5, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 5, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 5, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 5, 0, 0, 0, &temp, sizeof(temp));
 
@@ -373,7 +373,7 @@ TEST_F(TlvTestSuite, test_serialise_int32)
 {
     uint64_t temp = 65536;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 6, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 6, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 6, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 6, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 6, 0, 0, 0, &temp, sizeof(temp));
 
@@ -407,7 +407,7 @@ TEST_F(TlvTestSuite, test_serialise_negative_int32)
 {
     uint64_t temp = -65536;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 7, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 7, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 7, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 7, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 7, 0, 0, 0, &temp, sizeof(temp));
 
@@ -449,7 +449,7 @@ TEST_F(TlvTestSuite, test_serialise_int64)
 {
     uint64_t temp =  8589934636;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 8, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 8, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 8, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 8, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 8, 0, 0, 0, &temp, sizeof(temp));
 
@@ -483,7 +483,7 @@ TEST_F(TlvTestSuite, test_serialise_negative_int64)
 {
     uint64_t temp =  -8589934636;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 9, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 9, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 9, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 9, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 9, 0, 0, 0, &temp, sizeof(temp));
 
@@ -523,7 +523,7 @@ TEST_F(TlvTestSuite, test_serialise_float32)
 {
     float temp = 10.56f;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 10, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 10, 0, ResourceTypeEnum_TypeFloat, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 10, 0, AwaStaticResourceType_Float, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 10, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 10, 0, 0, 0, &temp, sizeof(temp));
 
@@ -570,7 +570,7 @@ TEST_F(TlvTestSuite, test_serialise_float64)
 {
     double temp = 3.40282347E+39;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 11, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 11, 0, ResourceTypeEnum_TypeFloat, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 11, 0, AwaStaticResourceType_Float, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 11, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 11, 0, 0, 0, &temp, sizeof(temp));
 
@@ -676,7 +676,7 @@ TEST_F(TlvTestSuite, test_ident_8bit)
 {
     int32_t temp = 1;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 12, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 12, 1, ResourceTypeEnum_TypeInteger, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 12, 1, AwaStaticResourceType_Integer, 1, 0, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 12, 0);
     Lwm2mCore_CreateOptionalResource(context, 12, 0, 1);
     Lwm2mCore_SetResourceInstanceValue(context, 12, 0, 1, 0, &temp, sizeof(temp));
@@ -701,7 +701,7 @@ TEST_F(TlvTestSuite, test_ident_16bit)
 {
     int64_t temp = 1;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 13, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 13, 1024, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 13, 1024, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 13, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 13, 0, 1024, 0, &temp, sizeof(temp));
 
@@ -759,14 +759,14 @@ TEST_F(TlvTestSuite, test_multiple_instance_resource)
     int16_t temp = 0x44;
     int8_t temp2 = 0x55;
     ASSERT_EQ(0, Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 14, 1, 0, &defaultObjectOperationHandlers));
-    ASSERT_EQ(0, Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 14, 0, ResourceTypeEnum_TypeInteger, 2, 1, Operations_RW, &defaultResourceOperationHandlers));
+    ASSERT_EQ(0, Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 14, 0, AwaStaticResourceType_Integer, 2, 1, Operations_RW, &defaultResourceOperationHandlers));
     Lwm2mCore_CreateObjectInstance(context, 14, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 14, 0, 0, 0, &temp, sizeof(temp));
     Lwm2mCore_SetResourceInstanceValue(context, 14, 0, 0, 1, &temp2, sizeof(temp2));
 
     Lwm2mTreeNode * dest;
     int OIR[] = {14};
-    ASSERT_EQ(Lwm2mResult_Success, TreeBuilder_CreateTreeFromOIR(&dest, context, Lwm2mRequestOrigin_Client, OIR, 1));
+    ASSERT_EQ(AwaLwm2mResult_Success, TreeBuilder_CreateTreeFromOIR(&dest, context, Lwm2mRequestOrigin_Client, OIR, 1));
 
     uint8_t buffer[512];
     // Note: sometimes the encoding order of the last 3 bytes switches position with the previous 3 bytes
@@ -787,7 +787,7 @@ TEST_F(TlvTestSuite, test_multiple_object_instance)
     int64_t temp2 = 55;
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 15, 2, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 15, 0, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 15, 0, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
 
     Lwm2mCore_CreateObjectInstance(context, 15, 1);
     Lwm2mCore_CreateObjectInstance(context, 15, 0);
@@ -815,8 +815,8 @@ TEST_F(TlvTestSuite, test_serialise_object_with_two_resources)
 {
     int64_t temp = 77;
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 16, 1, 0, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 16, 0, ResourceTypeEnum_TypeString, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res2", 16, 1, ResourceTypeEnum_TypeInteger, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 16, 0, AwaStaticResourceType_String, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res2", 16, 1, AwaStaticResourceType_Integer, 1, 1, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 16, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 16, 0, 0, 0, (char*)"coap://bootstrap.example.com:5684/", strlen("coap://bootstrap.example.com:5684/"));
     Lwm2mCore_SetResourceInstanceValue(context, 16, 0, 1, 0, &temp, sizeof(temp));

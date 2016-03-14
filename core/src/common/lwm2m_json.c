@@ -229,7 +229,7 @@ static int JsonEncodeBoolean(char * buffer, int bufferLen, char * id, bool value
 }
 
 // Write a JSON encoded object-link to the buffer provided
-static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, uint16_t objectID, uint16_t objectInstanceID, bool last)
+static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, bool last)
 {
     sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%d:%d\"}", id, objectID, objectInstanceID);
     if (!last)
@@ -259,14 +259,14 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
     value = (uint8_t * )Lwm2mTreeNode_GetValue(node, &size);
     switch (definition->Type)
     {
-        case ResourceTypeEnum_TypeString:
+        case AwaStaticResourceType_String:
             valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, last);
             break;
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaStaticResourceType_Boolean:
             valueLength = JsonEncodeBoolean((char *)buffer, len, id, *(bool*)value, last);
             break;
-        case ResourceTypeEnum_TypeTime:  // no break
-        case ResourceTypeEnum_TypeInteger:
+        case AwaStaticResourceType_Time:  // no break
+        case AwaStaticResourceType_Integer:
             switch (size)
             {
                case sizeof(int8_t):
@@ -285,7 +285,7 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
                    break;
             }
             break;
-        case ResourceTypeEnum_TypeFloat:
+        case AwaStaticResourceType_Float:
             switch (size)
             {
                 case sizeof(float):
@@ -299,12 +299,12 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
                     break;
             }
             break;
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaStaticResourceType_Opaque:
             valueLength = JsonEncodeOpaque((char *)buffer, len, id, (char *)value, size, last);
             break;
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaStaticResourceType_ObjectLink:
            {
-               ObjectLink * objectLink = (ObjectLink *) value;
+               AwaObjectLink * objectLink = (AwaObjectLink *) value;
                valueLength = JsonEncodeObjectLink((char *)buffer, len, id, objectLink->ObjectID, objectLink->ObjectInstanceID, last);
                break;
            }
@@ -769,7 +769,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
             int resourceType = Definition_GetResourceType(registry, objectID, resourceID);
             switch (resourceType)
             {
-                case ResourceTypeEnum_TypeTime:
+                case AwaStaticResourceType_Time:
                     if (jsonDataType == JSON_TYPE_FLOAT)
                     {
                         int64_t temp = 0;
@@ -788,8 +788,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeFloat:  // no break
-                case ResourceTypeEnum_TypeInteger:
+                case AwaStaticResourceType_Float:  // no break
+                case AwaStaticResourceType_Integer:
 
                     if (jsonDataType != JSON_TYPE_FLOAT)
                     {
@@ -797,7 +797,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         return -1;
                     }
 
-                    if (resourceType == ResourceTypeEnum_TypeFloat)
+                    if (resourceType == AwaStaticResourceType_Float)
                     {
                         double temp = 0;
                         result = sscanf((char *)value, "%24lf", &temp);
@@ -817,7 +817,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeBoolean:
+                case AwaStaticResourceType_Boolean:
                     if (jsonDataType == JSON_TYPE_BOOLEAN)
                     {
                         int64_t temp = (strcmp(value, "true")) ? 1: 0;
@@ -830,7 +830,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeOpaque:
+                case AwaStaticResourceType_Opaque:
                     {
                         if (jsonDataType != JSON_TYPE_STRING)
                         {
@@ -851,7 +851,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeString:
+                case AwaStaticResourceType_String:
                     if (jsonDataType != JSON_TYPE_STRING)
                     {
                         Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
@@ -861,7 +861,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&value[0], strlen(value) + 1);
                     break;
 
-                case ResourceTypeEnum_TypeObjectLink:
+                case AwaStaticResourceType_ObjectLink:
                     {
                         if (jsonDataType != JSON_TYPE_OBJECT_LINK)
                         {
@@ -869,8 +869,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                             return -1;
                         }
 
-                        ObjectLink objectLink;
-                        result = sscanf(value, "%24" SCNu16":%24" SCNu16, &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                        AwaObjectLink objectLink;
+                        result = sscanf(value, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                         if (result > 0)
                         {
                             result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&objectLink, sizeof(objectLink));

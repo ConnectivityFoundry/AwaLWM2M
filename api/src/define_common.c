@@ -78,7 +78,7 @@ AwaError ObjectDefinition_AddResourceDefinition(AwaObjectDefinition * objectDefi
             if (Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID) == NULL)
             {
                 Operations coreOperations = Utils_GetResourceTypeOperations(operations);
-                ResourceTypeType coreResourceType = Utils_GetResourceType(resourceType);
+                AwaStaticResourceType coreResourceType = Utils_GetResourceType(resourceType);
 
                 if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, coreOperations, RESOURCE_HANDLER, defaultValueNode))
                 {
@@ -311,31 +311,31 @@ AwaResourceType AwaResourceDefinition_GetType(const AwaResourceDefinition * reso
 
             switch (resourceDefinition->Type)
             {
-                case ResourceTypeEnum_TypeInvalid:
+                case AwaStaticResourceType_Invalid:
                     resourceType = AwaResourceType_Invalid;
                     break;
-                case ResourceTypeEnum_TypeOpaque:
+                case AwaStaticResourceType_Opaque:
                     resourceType = AwaResourceType_Opaque;
                     break;
-                case ResourceTypeEnum_TypeInteger:
+                case AwaStaticResourceType_Integer:
                     resourceType = AwaResourceType_Integer;
                     break;
-                case ResourceTypeEnum_TypeFloat:
+                case AwaStaticResourceType_Float:
                     resourceType = AwaResourceType_Float;
                     break;
-                case ResourceTypeEnum_TypeBoolean:
+                case AwaStaticResourceType_Boolean:
                     resourceType = AwaResourceType_Boolean;
                     break;
-                case ResourceTypeEnum_TypeString:
+                case AwaStaticResourceType_String:
                     resourceType = AwaResourceType_String;
                     break;
-                case ResourceTypeEnum_TypeTime:
+                case AwaStaticResourceType_Time:
                     resourceType = AwaResourceType_Time;
                     break;
-                case ResourceTypeEnum_TypeNone:
+                case AwaStaticResourceType_None:
                     resourceType = AwaResourceType_None;
                     break;
-                case ResourceTypeEnum_TypeObjectLink:
+                case AwaStaticResourceType_ObjectLink:
                     resourceType = AwaResourceType_ObjectLink;
                     break;
                 default:
@@ -347,25 +347,25 @@ AwaResourceType AwaResourceDefinition_GetType(const AwaResourceDefinition * reso
         {
             switch (resourceDefinition->Type)
             {
-                case ResourceTypeEnum_TypeOpaque:
+                case AwaStaticResourceType_Opaque:
                     resourceType = AwaResourceType_OpaqueArray;
                     break;
-                case ResourceTypeEnum_TypeInteger:
+                case AwaStaticResourceType_Integer:
                     resourceType = AwaResourceType_IntegerArray;
                     break;
-                case ResourceTypeEnum_TypeFloat:
+                case AwaStaticResourceType_Float:
                     resourceType = AwaResourceType_FloatArray;
                     break;
-                case ResourceTypeEnum_TypeBoolean:
+                case AwaStaticResourceType_Boolean:
                     resourceType = AwaResourceType_BooleanArray;
                     break;
-               case ResourceTypeEnum_TypeString:
+               case AwaStaticResourceType_String:
                     resourceType = AwaResourceType_StringArray;
                     break;
-               case ResourceTypeEnum_TypeTime:
+               case AwaStaticResourceType_Time:
                     resourceType = AwaResourceType_TimeArray;
                     break;
-               case ResourceTypeEnum_TypeObjectLink:
+               case AwaStaticResourceType_ObjectLink:
                     resourceType = AwaResourceType_ObjectLinkArray;
                     break;
                default:
