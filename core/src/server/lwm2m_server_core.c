@@ -105,7 +105,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     {
         response->responseContentType = ContentType_None;
         response->responseContentLen = 0;
-        response->responseCode = Lwm2mResult_NotFound;
+        response->responseCode = AwaLwm2mResult_NotFound;
     }
 
     return result;

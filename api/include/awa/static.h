@@ -82,26 +82,26 @@ typedef struct
 
 typedef enum
 {
-    Lwm2mResult_Success = 200,
-    Lwm2mResult_SuccessCreated = 201,
-    Lwm2mResult_SuccessDeleted = 202,
-    Lwm2mResult_SuccessChanged = 204,
-    Lwm2mResult_SuccessContent = 205,
+    AwaLwm2mResult_Success = 200,
+    AwaLwm2mResult_SuccessCreated = 201,
+    AwaLwm2mResult_SuccessDeleted = 202,
+    AwaLwm2mResult_SuccessChanged = 204,
+    AwaLwm2mResult_SuccessContent = 205,
 
-    Lwm2mResult_BadRequest = 400,
-    Lwm2mResult_Unauthorized = 401,
-    Lwm2mResult_Forbidden = 403,
-    Lwm2mResult_NotFound = 404,
-    Lwm2mResult_MethodNotAllowed = 405,
+    AwaLwm2mResult_BadRequest = 400,
+    AwaLwm2mResult_Unauthorized = 401,
+    AwaLwm2mResult_Forbidden = 403,
+    AwaLwm2mResult_NotFound = 404,
+    AwaLwm2mResult_MethodNotAllowed = 405,
 
-    Lwm2mResult_InternalError = 500,
+    AwaLwm2mResult_InternalError = 500,
 
-    Lwm2mResult_OutOfMemory = 999,
-    Lwm2mResult_AlreadyRegistered,
-    Lwm2mResult_MismatchedRegistration,
-    Lwm2mResult_AlreadyCreated,
-    Lwm2mResult_Unsupported,
-    Lwm2mResult_Unspecified = -1,
+    AwaLwm2mResult_OutOfMemory = 999,
+    AwaLwm2mResult_AlreadyRegistered,
+    AwaLwm2mResult_MismatchedRegistration,
+    AwaLwm2mResult_AlreadyCreated,
+    AwaLwm2mResult_Unsupported,
+    AwaLwm2mResult_Unspecified = -1,
 
 } AwaLwm2mResult;
 

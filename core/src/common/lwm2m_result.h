@@ -35,44 +35,16 @@ extern "C" {
 #include "lwm2m_list.h"
 #include "lwm2m_observers.h"
 
-#if 0
-// LWM2M Core result codes
-typedef enum
-{
-    Lwm2mResult_Success = 200,
-    Lwm2mResult_SuccessCreated = 201,
-    Lwm2mResult_SuccessDeleted = 202,
-    Lwm2mResult_SuccessChanged = 204,
-    Lwm2mResult_SuccessContent = 205,
-
-    Lwm2mResult_BadRequest = 400,
-    Lwm2mResult_Unauthorized = 401,
-    Lwm2mResult_Forbidden = 403,
-    Lwm2mResult_NotFound = 404,
-    Lwm2mResult_MethodNotAllowed = 405,
-
-    Lwm2mResult_InternalError = 500,
-
-    Lwm2mResult_OutOfMemory = 999,
-    Lwm2mResult_AlreadyRegistered,
-    Lwm2mResult_MismatchedRegistration,
-    Lwm2mResult_AlreadyCreated,
-    Lwm2mResult_Unsupported,
-    Lwm2mResult_Unspecified = -1,
-
-} AwaLwm2mResult;
-#endif
-
 // Returns the last result code of an lwm2m related function
-AwaLwm2mResult Lwm2mResult_GetLastResult(void);
+AwaLwm2mResult AwaLwm2mResult_GetLastResult(void);
 
 // Retrieves the last result code of an lwm2m related function
-void Lwm2mResult_SetResult(AwaLwm2mResult result);
+void AwaLwm2mResult_SetResult(AwaLwm2mResult result);
 
-bool Lwm2mResult_IsSuccess(AwaLwm2mResult result);
+bool AwaLwm2mResult_IsSuccess(AwaLwm2mResult result);
 
 // Required for returning errors to the API through the IPC
-int Lwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError);
+int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError);
 
 #ifdef __cplusplus
 }

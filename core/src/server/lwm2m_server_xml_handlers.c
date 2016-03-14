@@ -348,35 +348,35 @@ const char * xmlif_GetURIForClient(Lwm2mClientType * client, ObjectInstanceResou
 static int xmlif_ParseRequest(RequestInfoType * request, TreeNode content, Lwm2mClientType ** client,
                               ObjectInstanceResourceKey * key, TreeNode * objectNode)
 {
-    int result = Lwm2mResult_Success;
+    int result = AwaLwm2mResult_Success;
     TreeNode instance;
     TreeNode property;
 
     TreeNode clientNode = TreeNode_Navigate(content, "Content/Client");
     if (clientNode == NULL)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
     TreeNode clientIDNode = TreeNode_Navigate(clientNode, "Client/ClientID");
     if (clientIDNode == NULL)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
     const char * clientID = TreeNode_GetValue(clientIDNode);
     if (clientID == NULL)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
     *client = Lwm2m_LookupClientByName(request->Context, clientID);
     if (*client == NULL)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
     request->Client = *client;
@@ -384,13 +384,13 @@ static int xmlif_ParseRequest(RequestInfoType * request, TreeNode content, Lwm2m
     TreeNode object = TreeNode_Navigate(clientNode, "Client/Object");
     if (object == NULL)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
     if ((key->ObjectID = xmlif_GetInteger(object, "Object/ObjectID")) == -1)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -408,7 +408,7 @@ static int xmlif_ParseRequest(RequestInfoType * request, TreeNode content, Lwm2m
 
     if ((key->InstanceID = xmlif_GetInteger(instance, "Instance/InstanceID")) == -1)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -421,7 +421,7 @@ static int xmlif_ParseRequest(RequestInfoType * request, TreeNode content, Lwm2m
 
     if ((key->ResourceID = xmlif_GetInteger(property, "Property/PropertyID")) == -1)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 done:
@@ -431,7 +431,7 @@ error:
 
 static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta)
 {
-    int result = Lwm2mResult_Success;
+    int result = AwaLwm2mResult_Success;
     int res;
     ObjectIDType objectID = -1;
     const char * objectName = NULL;
@@ -484,7 +484,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
     res = Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), objectName ? objectName : "", objectID, maximumInstances, minimumInstances, NULL);
     if (res < 0)
     {
-        result = Lwm2mResult_Forbidden;
+        result = AwaLwm2mResult_Forbidden;
         goto error;
     }
 
@@ -626,7 +626,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
             if (res < 0)
             {
-                result = Lwm2mResult_Forbidden;
+                result = AwaLwm2mResult_Forbidden;
                 goto error;
             }
 
@@ -651,7 +651,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     {
         response = Xml_CreateNode("Response");
         TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT));
-        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_BadRequest));
+        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaLwm2mResult_BadRequest));
     }
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
@@ -670,7 +670,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT));
 
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_Success));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaLwm2mResult_Success));
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
     xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
@@ -729,7 +729,7 @@ static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content)
     TreeNode contentNode = IPC_NewContentNode();
     TreeNode_AddChild(contentNode, clientsNode);
 
-    TreeNode responseNode = IPC_NewResponseNode(MSGTYPE_LIST_CLIENTS, Lwm2mResult_Success);
+    TreeNode responseNode = IPC_NewResponseNode(MSGTYPE_LIST_CLIENTS, AwaLwm2mResult_Success);
     TreeNode_AddChild(responseNode, contentNode);
 
     rc = IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
@@ -750,7 +750,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
     int successCount = 0;
     while (objectDefinition != NULL)
     {
-        if (xmlif_RegisterObjectFromXML(context, objectDefinition) == Lwm2mResult_Success)
+        if (xmlif_RegisterObjectFromXML(context, objectDefinition) == AwaLwm2mResult_Success)
         {
             ++successCount;
         }
@@ -759,7 +759,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
 
     TreeNode response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DEFINE));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_Success));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaLwm2mResult_Success));
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
     xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
@@ -823,7 +823,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
 
     memset(*requestContext, 0, sizeof(IpcCoapRequestContext));
     (*requestContext)->Request = request;
-    (*requestContext)->Result = Lwm2mResult_Unspecified;
+    (*requestContext)->Result = AwaLwm2mResult_Unspecified;
     (*requestContext)->ResponseContentNode = IPC_NewContentNode();
     (*requestContext)->Reusable = false;
     (*requestContext)->ResponseCount = 0;
@@ -833,7 +833,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
     if (requestClientsNode == NULL)
     {
         Lwm2m_Error("No <Clients> node in request content");
-        (*requestContext)->Result = Lwm2mResult_BadRequest;
+        (*requestContext)->Result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -841,7 +841,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
     if (requestClientNode == NULL)
     {
         Lwm2m_Error("No <Client> node in request content");
-        (*requestContext)->Result = Lwm2mResult_BadRequest;
+        (*requestContext)->Result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -849,7 +849,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
     if (clientID == NULL)
     {
         Lwm2m_Error("No Client ID in request content");
-        (*requestContext)->Result = Lwm2mResult_BadRequest;
+        (*requestContext)->Result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -872,7 +872,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
     if (*requestObjectsNode == NULL)
     {
         Lwm2m_Error("No <Objects> node in request content");
-        (*requestContext)->Result = Lwm2mResult_BadRequest;
+        (*requestContext)->Result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -915,8 +915,8 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
         xmlif_BackupPartiallyBuiltResponseTree(requestContext->ResponseContentNode, requestContext->ResponseObjectsTree, &backupResponseContentNode, &backupResponseObjectsTree);
     }
 
-    int responseCode = Lwm2mResult_Success;
-    if (requestContext->Result == Lwm2mResult_Success || requestContext->Result == Lwm2mResult_SuccessDeleted)
+    int responseCode = AwaLwm2mResult_Success;
+    if (requestContext->Result == AwaLwm2mResult_Success || requestContext->Result == AwaLwm2mResult_SuccessDeleted)
     {
         // IPC was parsed correctly and we sent a CoAP request. Note that this doesn't guarantee the CoAP request succeeded.
         // Modify response content based on the CoAP response received.
@@ -935,7 +935,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
             InternalError result = ObjectsTree_FindPathNode(requestContext->ResponseObjectsTree, responsePathWithoutQueryString, &pathNode);
             if (result == InternalError_Success)
             {
-                if (Lwm2mResult_IsSuccess(coapResponseCode))
+                if (AwaLwm2mResult_IsSuccess(coapResponseCode))
                 {
                     successCallback(requestContext, responsePathWithoutQueryString, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
                 }
@@ -958,7 +958,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
     else
     {
         Lwm2m_Error("Bad response code: %d\n", requestContext->Result);
-        responseCode = Lwm2mResult_BadRequest;
+        responseCode = AwaLwm2mResult_BadRequest;
     }
 
     // Build response
@@ -993,9 +993,9 @@ static void xmlif_HandlerDefaultSuccessfulResponse(IpcCoapRequestContext * reque
 static int xmlif_HandleError(IpcCoapRequestContext * requestContext, Lwm2mClientType * client, TransactionCallback callback, int numCoapRequests)
 {
     int rc = 0;
-    if ((!Lwm2mResult_IsSuccess(requestContext->Result)) || (client == NULL) || (numCoapRequests == 0))
+    if ((!AwaLwm2mResult_IsSuccess(requestContext->Result)) || (client == NULL) || (numCoapRequests == 0))
     {
-        if (!Lwm2mResult_IsSuccess(requestContext->Result))
+        if (!AwaLwm2mResult_IsSuccess(requestContext->Result))
         {
             // complete bad request, so delete our response and send a 400
             Tree_Delete(requestContext->ResponseContentNode);
@@ -1025,7 +1025,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
     if (ObjectsTree_GetLeafCount(requestObjectsNode) > 1)
     {
         Lwm2m_Error("Unsupported: Requested multiple resources in single request");
-        requestContext->Result = Lwm2mResult_Unsupported;
+        requestContext->Result = AwaLwm2mResult_Unsupported;
         goto error;
     }
 
@@ -1039,7 +1039,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
         if (key.ObjectID == AWA_INVALID_ID)
         {
             Lwm2m_Error("No object specified: /%d/%d/%d\n", key.ObjectID, key.InstanceID, key.ResourceID);
-            requestContext->Result = Lwm2mResult_BadRequest;
+            requestContext->Result = AwaLwm2mResult_BadRequest;
             goto error;
         }
 
@@ -1125,7 +1125,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
         }
     }
 
-    requestContext->Result = Lwm2mResult_Success;
+    requestContext->Result = AwaLwm2mResult_Success;
 
 error:
     return xmlif_HandleError(requestContext, client, responseCallback, numCoapRequests);
@@ -1245,7 +1245,7 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
         Lwm2m_Error("No <Observe> or <CancelObserve> tag within leaf node\n");
         if (requestContext != NULL)
         {
-            requestContext->Result = Lwm2mResult_BadRequest;
+            requestContext->Result = AwaLwm2mResult_BadRequest;
         }
         result = false;
     }
@@ -1308,7 +1308,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
     if (ObjectsTree_GetLeafCount(requestObjectsNode) > 1)
     {
         Lwm2m_Error("Unsupported: Requested multiple resources in single request");
-        requestContext->Result = Lwm2mResult_Unsupported;
+        requestContext->Result = AwaLwm2mResult_Unsupported;
         goto error;
     }
 
@@ -1349,7 +1349,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
             IPC_AddServerResultTag(responseObjectNode, AwaError_LWM2MError, AwaLWM2MError_MethodNotAllowed);
         }
     }
-    requestContext->Result = Lwm2mResult_SuccessDeleted;
+    requestContext->Result = AwaLwm2mResult_SuccessDeleted;
 
 error:
     return xmlif_HandleError(requestContext, client, xmlif_HandlerDeleteResponse, numCoapRequests);
@@ -1368,7 +1368,7 @@ static int xmlif_HandlerDiscoverRequest(RequestInfoType * request, TreeNode cont
     Lwm2mClientType * client;
 
     result = xmlif_ParseRequest(request, content, &client, &key, NULL);
-    if (result == Lwm2mResult_Success)
+    if (result == AwaLwm2mResult_Success)
     {
         coap_GetRequest(request, xmlif_GetURIForClient(client, &key), ContentType_ApplicationLinkFormat, xmlif_HandlerDiscoverResponse);
     }
@@ -1388,14 +1388,14 @@ static void xmlif_HandlerDiscoverResponse(void * ctxt, AddressType* address, con
 
 static int xmlif_DecodeValueNode(TreeNode source, Lwm2mTreeNode * destination, ResourceDefinition * resourceDefinition)
 {
-    int result = Lwm2mResult_Success;
+    int result = AwaLwm2mResult_Success;
     const char * data;
     int dataLength;
     char * dataValue = NULL;
     if ((data = (char*)TreeNode_GetValue(source)) == NULL)
     {
         Lwm2m_Error("Missing value data for resource\n");
-        result = Lwm2mResult_BadRequest;
+        result = AwaLwm2mResult_BadRequest;
         goto error;
     }
 
@@ -1405,7 +1405,7 @@ static int xmlif_DecodeValueNode(TreeNode source, Lwm2mTreeNode * destination, R
         char path[MAX_PATH_LENGTH];
         Lwm2m_Error("Failed to decode value data for resource %s\n", ObjectsTree_GetPath(source, path, sizeof(path)));
         free(dataValue);
-        result = Lwm2mResult_GetLastResult();
+        result = AwaLwm2mResult_GetLastResult();
         goto error;
     }
     Lwm2mTreeNode_SetValue(destination, dataValue, dataLength);
@@ -1670,7 +1670,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
             {
                 // Both object ID and instance ID are required for a standard write.
                 Lwm2m_Error("No object instance specified: /%d/%d/%d\n", key.ObjectID, key.InstanceID, key.ResourceID);
-                requestContext->Result = Lwm2mResult_BadRequest;
+                requestContext->Result = AwaLwm2mResult_BadRequest;
                 goto error;
             }
         }
@@ -1735,7 +1735,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                             Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
                             Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
                             Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
-                            if ((requestContext->Result = xmlif_DecodeValueNode(valueNode, resourceInstanceNode, resourceDefinition)) != Lwm2mResult_Success)
+                            if ((requestContext->Result = xmlif_DecodeValueNode(valueNode, resourceInstanceNode, resourceDefinition)) != AwaLwm2mResult_Success)
                             {
                                 Lwm2m_Error("Failed to decode resource value");
                                 goto error;
@@ -1744,7 +1744,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                         else
                         {
                             Lwm2m_Error("No Value node in resource");
-                            requestContext->Result = Lwm2mResult_BadRequest;
+                            requestContext->Result = AwaLwm2mResult_BadRequest;
                             goto error;
                         }
                     }
@@ -1760,7 +1760,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                             if (resourceInstanceID < 0)
                             {
                                 Lwm2m_Error("No ID node in resource instance");
-                                requestContext->Result = Lwm2mResult_BadRequest;
+                                requestContext->Result = AwaLwm2mResult_BadRequest;
                                 goto error;
                             }
                             TreeNode valueNode = NULL;
@@ -1771,7 +1771,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                                 Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
                                 Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
 
-                                if ((requestContext->Result = xmlif_DecodeValueNode(valueNode, resourceInstanceNode, resourceDefinition)) != Lwm2mResult_Success)
+                                if ((requestContext->Result = xmlif_DecodeValueNode(valueNode, resourceInstanceNode, resourceDefinition)) != AwaLwm2mResult_Success)
                                 {
                                     Lwm2m_Error("Failed to decode resource instance value");
                                     goto error;
@@ -1780,7 +1780,7 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                             else
                             {
                                 Lwm2m_Error("No Value node in resource instance");
-                                requestContext->Result = Lwm2mResult_BadRequest;
+                                requestContext->Result = AwaLwm2mResult_BadRequest;
                                 goto error;
                             }
                         }
@@ -1822,12 +1822,12 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
         if (numObjectInstances > 1)
         {
             Lwm2m_Error("Unsupported: Multiple object instances in single request");
-            requestContext->Result = Lwm2mResult_Unsupported;
+            requestContext->Result = AwaLwm2mResult_Unsupported;
             goto error;
         }
     }
 
-    requestContext->Result = Lwm2mResult_Success;
+    requestContext->Result = AwaLwm2mResult_Success;
 
     if (client != NULL)
     {
@@ -1881,7 +1881,7 @@ static void xmlif_HandlerCreateResponse(void * ctxt, AddressType* address, const
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
 
-    if ((coapResponseCode == Lwm2mResult_SuccessCreated) && (!ObjectsTree_ContainsPath(requestContext->ResponseObjectsTree, responsePath)))
+    if ((coapResponseCode == AwaLwm2mResult_SuccessCreated) && (!ObjectsTree_ContainsPath(requestContext->ResponseObjectsTree, responsePath)))
     {
         // add path to response
         TreeNode resultNode;
@@ -1946,7 +1946,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
                 if ((encodedValueString = (char*)TreeNode_GetValue(valueNode)) == NULL)
                 {
                     Lwm2m_Error("Missing value data for value node\n");
-                    requestContext->Result = Lwm2mResult_BadRequest;
+                    requestContext->Result = AwaLwm2mResult_BadRequest;
                     result = false;
                     goto error;
                 }
@@ -1956,7 +1956,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
                 {
                     Lwm2m_Error("Failed to decode value data for attribute link %s\n", encodedValueString);
                     free(dataValue);
-                    requestContext->Result = Lwm2mResult_BadRequest;
+                    requestContext->Result = AwaLwm2mResult_BadRequest;
                     result = false;
                     goto error;
                 }
@@ -1981,7 +1981,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
                     {
                         Lwm2m_Error("Unsupported write attribute resource type: %s\n", valueTypeString);
                         free(dataValue);
-                        requestContext->Result = Lwm2mResult_BadRequest;
+                        requestContext->Result = AwaLwm2mResult_BadRequest;
                         result = false;
                         goto error;
                     }
@@ -1995,7 +1995,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
             else
             {
                 Lwm2m_Error("Unsupported write attribute resource type: %s\n", valueTypeString);
-                requestContext->Result = Lwm2mResult_BadRequest;
+                requestContext->Result = AwaLwm2mResult_BadRequest;
                 result = false;
                 goto error;
             }
@@ -2003,7 +2003,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
         else
         {
             Lwm2m_Error("No link in attribute node\n");
-            requestContext->Result = Lwm2mResult_BadRequest;
+            requestContext->Result = AwaLwm2mResult_BadRequest;
             result = false;
             goto error;
         }
@@ -2018,7 +2018,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
     else
     {
         Lwm2m_Error("No attributes in query on path %s\n", xmlif_GetURIForClient(client, key));
-        requestContext->Result = Lwm2mResult_BadRequest;
+        requestContext->Result = AwaLwm2mResult_BadRequest;
         result = false;
     }
 error:
@@ -2061,7 +2061,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
             if ((data = (char*)TreeNode_GetValue(valueNode)) == NULL)
             {
                 Lwm2m_Error("Missing value data for value node\n");
-                requestContext->Result = Lwm2mResult_BadRequest;
+                requestContext->Result = AwaLwm2mResult_BadRequest;
                 result = false;
                 goto error;
             }
@@ -2071,7 +2071,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
             {
                 Lwm2m_Error("Failed to decode execute value data for resource %s\n", xmlif_GetURIForClient(client, key));
                 free(dataValue);
-                requestContext->Result = Lwm2mResult_BadRequest;
+                requestContext->Result = AwaLwm2mResult_BadRequest;
                 result = false;
                 goto error;
             }
@@ -2084,7 +2084,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
     else
     {
         Lwm2m_Error("Execute attempt on non-resource path: %s\n", xmlif_GetURIForClient(client, key));
-        requestContext->Result = Lwm2mResult_BadRequest;
+        requestContext->Result = AwaLwm2mResult_BadRequest;
         result = false;
     }
 error:

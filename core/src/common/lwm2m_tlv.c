@@ -943,7 +943,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 result = TlvDecodeInteger((int64_t*)&temp, buffer, len);
                 if (result >= 0)
                 {
-                    if(resourceType != ResourceTypeEnum_TypeBoolean)
+                    if (resourceType != AwaStaticResourceType_Boolean)
                     {
                         Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(int64_t));
                     }

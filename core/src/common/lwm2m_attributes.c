@@ -115,7 +115,7 @@ AttributeStore * AttributeStore_Create(void)
     AttributeStore * store = (AttributeStore *)malloc(sizeof(AttributeStore));
     if (store == NULL)
     {
-        Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
         return NULL;
     }
 
@@ -123,7 +123,7 @@ AttributeStore * AttributeStore_Create(void)
 
     ListInit(&store->ServerNotificationAttributes);
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
     return store;
 }
 

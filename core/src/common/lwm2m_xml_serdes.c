@@ -131,7 +131,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             dataValue = malloc(outLength + 1);
             if (dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             dataValue[outLength] = '\0';
@@ -157,7 +157,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_InternalError);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_InternalError);
                 goto error;
             }
             break;
@@ -186,7 +186,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
 
@@ -197,7 +197,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             break;
@@ -208,18 +208,18 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             break;
 
         case AwaStaticResourceType_None:
         default:
-            Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+            AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
             goto error;
     }
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
 error:
     return dataValue;
 }
@@ -237,14 +237,14 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             *dataValue = malloc(outLength);
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
 
             if (dataLength == -1)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
                 goto error;
             }
             else
@@ -264,13 +264,13 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             *dataValue = malloc(outLength);
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
             if (dataLength == -1)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
                 goto error;
             }
             break;
@@ -281,7 +281,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             *dataValue = malloc(sizeof(double));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             sscanf(buffer, "%20lf", &d);
@@ -297,7 +297,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             *dataValue = malloc(sizeof(uint64_t));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             sscanf(buffer, "%"SCNd64, &u);
@@ -310,7 +310,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             *dataValue = malloc(sizeof(bool));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             (*dataValue)[0] = (strcmp(buffer, "True") == 0);
@@ -324,7 +324,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
 
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
             ObjectLink * objectLink = (ObjectLink *)*dataValue;
@@ -335,11 +335,11 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
 
         //case AwaStaticResourceType_None:
         default:
-            Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+            AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
             goto error;
     }
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
 error:
     return dataLength;
 }
