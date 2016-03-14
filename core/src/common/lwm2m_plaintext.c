@@ -242,7 +242,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
         case AwaStaticResourceType_ObjectLink:
             {
                 AwaObjectLink objectLink;
-                result = sscanf((char*)buffer, "%d:%d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                result = sscanf((char*)buffer, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                 if (result > 0)
                 {
                     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&objectLink, sizeof(objectLink));

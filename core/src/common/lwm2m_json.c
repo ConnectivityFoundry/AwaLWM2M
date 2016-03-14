@@ -870,7 +870,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         }
 
                         AwaObjectLink objectLink;
-                        result = sscanf(value, "%d:%d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                        result = sscanf(value, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                         if (result > 0)
                         {
                             result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&objectLink, sizeof(objectLink));
