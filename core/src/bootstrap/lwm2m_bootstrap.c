@@ -153,7 +153,7 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
 
 static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
 {
-    if (responseCode >= AwaLwm2mResult_Success && responseCode <= AwaLwm2mResult_SuccessContent)
+    if ((responseCode >= AwaLwm2mResult_Success) && (responseCode <= AwaLwm2mResult_SuccessContent))
     {
         Lwm2mBootstrapClient * client = (Lwm2mBootstrapClient *)context;
         char uri[MAX_URI_LENGTH];

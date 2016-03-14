@@ -916,7 +916,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
     }
 
     int responseCode = AwaLwm2mResult_Success;
-    if (requestContext->Result == AwaLwm2mResult_Success || requestContext->Result == AwaLwm2mResult_SuccessDeleted)
+    if ((requestContext->Result == AwaLwm2mResult_Success) || (requestContext->Result == AwaLwm2mResult_SuccessDeleted))
     {
         // IPC was parsed correctly and we sent a CoAP request. Note that this doesn't guarantee the CoAP request succeeded.
         // Modify response content based on the CoAP response received.

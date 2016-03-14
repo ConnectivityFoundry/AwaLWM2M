@@ -23,7 +23,7 @@
 
 #include "lwm2m_result.h"
 #include "lwm2m_debug.h"
-#include "../../api/include/awa/error.h"
+#include <awa/error.h>
 
 static AwaLwm2mResult lastResult = AwaLwm2mResult_Success;
 
@@ -46,8 +46,10 @@ int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError)
 {
     switch (result)
     {
-    case AwaLwm2mResult_Success: case AwaLwm2mResult_SuccessChanged:
-    case AwaLwm2mResult_SuccessContent: case AwaLwm2mResult_SuccessCreated:
+    case AwaLwm2mResult_Success: 
+    case AwaLwm2mResult_SuccessChanged:
+    case AwaLwm2mResult_SuccessContent: 
+    case AwaLwm2mResult_SuccessCreated:
     case AwaLwm2mResult_SuccessDeleted:
         return AwaError_Success;
     case AwaLwm2mResult_NotFound:

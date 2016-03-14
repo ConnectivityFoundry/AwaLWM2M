@@ -30,8 +30,7 @@
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_debug.h"
 
-#include "../../api/include/awa/error.h"
-#include "../../api/include/awa/common.h"
+#include <awa/static.h>
 
 TreeNode IPC_NewResponseNode(const char * type, AwaLwm2mResult code)
 {

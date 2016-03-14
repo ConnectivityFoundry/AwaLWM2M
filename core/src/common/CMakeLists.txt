@@ -16,6 +16,7 @@ set (lwm2m_common_SOURCES
 set (lwm2m_common_INCLUDE_DIRS
   ${LIBCOAP_INCLUDE_DIR}
   ${LIBJSMN_INCLUDE_DIR}
+  ${API_INCLUDE_DIR}
 )
 
 # Virtual library to avoid building .o files twice:
