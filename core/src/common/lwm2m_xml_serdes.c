@@ -203,8 +203,8 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             break;
 
         case AwaStaticResourceType_ObjectLink:;
-            ObjectLink * objectLink = (ObjectLink *) buffer;
-            outLength = asprintf(&dataValue, "%"PRIu16":%"PRIu16, objectLink->ObjectID, objectLink->ObjectInstanceID);
+            AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
+            outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
@@ -319,7 +319,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
 
         case AwaStaticResourceType_ObjectLink:
         {
-            dataLength = sizeof(ObjectLink);
+            dataLength = sizeof(AwaObjectLink);
             *dataValue = malloc(dataLength);
 
             if (*dataValue == NULL)
@@ -327,8 +327,10 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
                 AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
                 goto error;
             }
-            ObjectLink * objectLink = (ObjectLink *)*dataValue;
-            sscanf(buffer, "%"SCNu16":%"SCNu16,&objectLink->ObjectID, &objectLink->ObjectInstanceID);
+            AwaObjectLink * objectLink = (AwaObjectLink *)*dataValue;
+            sscanf(buffer, "%10d:%10d", &objectLink->ObjectID, &objectLink->ObjectInstanceID);
+
+            Lwm2m_Debug("objectID: %d objectInstanceID %d\n", objectLink->ObjectID, objectLink->ObjectInstanceID);
 
             break;
         }

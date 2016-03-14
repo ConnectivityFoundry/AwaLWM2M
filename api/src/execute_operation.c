@@ -125,7 +125,7 @@ AwaError AwaServerExecuteOperation_AddPath(AwaServerExecuteOperation * operation
                     char * encodedValue = NULL;
                     if (arguments != NULL && arguments->Size > 0)
                     {
-                        encodedValue = SetWriteCommon_EncodeValue(arguments->Data, arguments->Size, AwaStaticResourceType_Opaque);
+                        encodedValue = xmlif_EncodeValue(AwaStaticResourceType_Opaque, arguments->Data, arguments->Size);
                     }
 
                     if (encodedValue == NULL || SetWriteCommon_SetResourceNodeValue(resultNode, encodedValue) == InternalError_Success)

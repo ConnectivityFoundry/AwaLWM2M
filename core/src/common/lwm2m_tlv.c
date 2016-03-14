@@ -408,7 +408,7 @@ static int TlvEncodeBoolean(uint8_t * buffer, int bufferLen, int type, int id, b
  * @param[in] objectInstanceID objectInstanceID value to write to buffer
  * @return int length of header + 4 byte object link value
  */
-static int TlvEncodeObjectLink(uint8_t * buffer, int bufferLen, int type, int id, uint16_t objectID, uint16_t objectInstanceID)
+static int TlvEncodeObjectLink(uint8_t * buffer, int bufferLen, int type, int id, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
 {
     uint8_t valueBuffer[4];
 
@@ -617,7 +617,7 @@ static int TlvDecodeInteger(int64_t * dest, const uint8_t * buffer, int size)
  * @param[in] size length of buffer to decode, must be 4 bytes
  * @return 0 on success or -1 on error
  */
-static int TlvDecodeObjectLink(uint16_t * objectID, uint16_t * objectInstanceID, const uint8_t * buffer, int size)
+static int TlvDecodeObjectLink(AwaObjectID * objectID, AwaObjectInstanceID * objectInstanceID, const uint8_t * buffer, int size)
 {
     if ((objectID == NULL) || (objectInstanceID == NULL) || (buffer == NULL))
     {
@@ -744,7 +744,8 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 
         case AwaStaticResourceType_ObjectLink:
             {
-                ObjectLink * objectLink = (ObjectLink *) value;
+                AwaObjectLink * objectLink = (AwaObjectLink *) value;
+                Lwm2m_Debug("Object ID %d Object Instance %d\n", objectLink->ObjectID, objectLink->ObjectInstanceID);
                 valueLength = TlvEncodeObjectLink(buffer, len, type, id, objectLink->ObjectID, objectLink->ObjectInstanceID);
             }
             break;
@@ -977,12 +978,12 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
             break;
         case AwaStaticResourceType_ObjectLink:
             {
-                ObjectLink temp;
+                AwaObjectLink temp;
                 result = TlvDecodeObjectLink(&temp.ObjectID, &temp.ObjectInstanceID, buffer, len);
 
                 if(result >= 0)
                 {
-                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(ObjectLink));
+                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(AwaObjectLink));
                 }
                 break;
             }

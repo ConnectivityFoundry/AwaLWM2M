@@ -1030,7 +1030,9 @@ AwaLwm2mResult TestWriteValueStaticClient_ReadHandler(void * context, AwaOperati
     *dataSize = data->valueSize;
 
     if(data->testRead == true)
+    {
         data->complete = true;
+    }
 
     return AwaLwm2mResult_SuccessContent;
 }
@@ -1039,7 +1041,6 @@ TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
 {
     TestWriteReadStaticResource data = GetParam();
     char path[128] = {0};
-
 
     EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
 
@@ -1058,15 +1059,18 @@ TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
             EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation_, path, *((AwaBoolean*)data.value)));
             break;
         case AwaStaticResourceType_Opaque:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation_, path, *((AwaOpaque*)data.value)));
-            break;
+            {
+                AwaOpaque opaque = { (void *)data.value, static_cast<size_t>(data.valueSize) };
+                EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation_, path, opaque));
+                break;
+            }
         case AwaStaticResourceType_Time:
             EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation_, path, *((AwaTime*)data.value)));
             break;
         case AwaStaticResourceType_ObjectLink:
             {
-                AwaObjectLink objectlink = { (*((AwaObjectLink *)data.value)).ObjectID, (*((AwaObjectLink *)data.value)).ObjectInstanceID };
-                EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation_, path, objectlink));
+                AwaObjectLink * objectlink = (AwaObjectLink *)data.value;
+                EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation_, path, *objectlink));
                 break;
             }
         default:
@@ -1140,11 +1144,11 @@ TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
             }
         case AwaStaticResourceType_ObjectLink:
             {
-                AwaObjectLink expectedObjectLink = { (*((AwaObjectLink *)data.value)).ObjectID, (*((AwaObjectLink *)data.value)).ObjectInstanceID };
+                AwaObjectLink * expectedObjectLink = (AwaObjectLink *)data.value;
                 const AwaObjectLink * receivedObjectLinkPointer;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsObjectLinkPointer(readResponse, path, (const AwaObjectLink **)&receivedObjectLinkPointer));
-                EXPECT_EQ(0, memcmp(&expectedObjectLink, receivedObjectLinkPointer, sizeof(AwaObjectLink)));
-
+                EXPECT_EQ(expectedObjectLink->ObjectID, receivedObjectLinkPointer->ObjectID);
+                EXPECT_EQ(expectedObjectLink->ObjectInstanceID, receivedObjectLinkPointer->ObjectInstanceID);
                 break;
             }
     default:

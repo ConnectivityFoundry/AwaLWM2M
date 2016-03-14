@@ -229,7 +229,7 @@ static int JsonEncodeBoolean(char * buffer, int bufferLen, char * id, bool value
 }
 
 // Write a JSON encoded object-link to the buffer provided
-static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, uint16_t objectID, uint16_t objectInstanceID, bool last)
+static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, bool last)
 {
     sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%d:%d\"}", id, objectID, objectInstanceID);
     if (!last)
@@ -304,7 +304,7 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
             break;
         case AwaStaticResourceType_ObjectLink:
            {
-               ObjectLink * objectLink = (ObjectLink *) value;
+               AwaObjectLink * objectLink = (AwaObjectLink *) value;
                valueLength = JsonEncodeObjectLink((char *)buffer, len, id, objectLink->ObjectID, objectLink->ObjectInstanceID, last);
                break;
            }
@@ -869,8 +869,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                             return -1;
                         }
 
-                        ObjectLink objectLink;
-                        result = sscanf(value, "%24" SCNu16":%24" SCNu16, &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                        AwaObjectLink objectLink;
+                        result = sscanf(value, "%d:%d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                         if (result > 0)
                         {
                             result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&objectLink, sizeof(objectLink));

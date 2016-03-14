@@ -68,18 +68,6 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                             // Success
                             switch(type)
                             {
-                                case AwaResourceType_ObjectLink:
-                                {
-                                    // Special case: we have to unpack the object link as two unsigned short integers (API stores object links as two standard integers)
-                                    ObjectLink * internalObjectLink = (ObjectLink * )dataValue;
-                                    AwaObjectLink * objectLink = Awa_MemAlloc(sizeof(*objectLink));
-                                    objectLink->ObjectID = internalObjectLink->ObjectID;
-                                    objectLink->ObjectInstanceID = internalObjectLink->ObjectInstanceID;
-                                    value->Length = sizeof(*objectLink);
-                                    value->Data = (void *)objectLink;
-                                    free(dataValue);
-                                    break;
-                                }
                                 case AwaResourceType_None:  // no break
                                 case AwaResourceType_Opaque:
                                 {
@@ -152,14 +140,6 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                         {
                             switch(type)
                             {
-                                case AwaResourceType_ObjectLinkArray:
-                                {
-                                    // Special case: we have to unpack the object link as two unsigned short integers (API stores object links as two standard integers)
-                                    ObjectLink * internalObjectLink = (ObjectLink * )dataValue;
-                                    AwaObjectLink objectLink = {internalObjectLink->ObjectID, internalObjectLink->ObjectInstanceID};
-                                    Array_SetValue(array, index, (void *)&objectLink, sizeof(objectLink));
-                                    break;
-                                }
                                 case AwaResourceType_OpaqueArray:
                                 {
                                     AwaOpaque opaque;

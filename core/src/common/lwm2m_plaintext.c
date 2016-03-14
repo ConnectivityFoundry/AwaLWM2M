@@ -105,8 +105,8 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             break;
         case AwaStaticResourceType_ObjectLink:
             {
-               ObjectLink * objectLink = (ObjectLink *) value;
-               sprintf(buf, "%" PRIu16 ":%" PRIu16, objectLink->ObjectID, objectLink->ObjectInstanceID);
+               AwaObjectLink * objectLink = (AwaObjectLink *) value;
+               sprintf(buf, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
                valueLength = strlen(buf);
             }
             break;
@@ -241,8 +241,8 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
             break;
         case AwaStaticResourceType_ObjectLink:
             {
-                ObjectLink objectLink;
-                result = sscanf((char*)buffer, "%" SCNu16":%" SCNu16, &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                AwaObjectLink objectLink;
+                result = sscanf((char*)buffer, "%d:%d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                 if (result > 0)
                 {
                     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&objectLink, sizeof(objectLink));

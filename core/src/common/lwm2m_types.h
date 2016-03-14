@@ -62,12 +62,6 @@ typedef enum
     MultipleInstancesEnum_Multiple = LWM2M_MAX_ID,
 } MultipleInstancesEnum;
 
-typedef struct
-{
-    uint16_t ObjectID;
-    uint16_t ObjectInstanceID;
-} ObjectLink;
-
 typedef int ObjectIDType;
 typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;

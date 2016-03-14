@@ -47,7 +47,7 @@ static AwaLwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm
     AwaLwm2mResult result = AwaLwm2mResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     const void * value = NULL;
-    int valueLength;
+    int valueLength = 0;
 
     Lwm2mTreeNode_SetID(*dest, resourceInstanceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ResourceInstance);

@@ -555,7 +555,7 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
     static const int64_t defaultInt = 0;
     static const float defaultFloat = 0.0f;
     static const bool defaultBool = false;
-    static const ObjectLink defaultObjectLink = {0, 0};
+    static const AwaObjectLink defaultObjectLink = {0, 0};
 
     int result = 0;
     if (resourceDefinition != NULL)
