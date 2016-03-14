@@ -24,7 +24,7 @@
 #ifndef LWM2M_TYPES_H
 #define LWM2M_TYPES_H
 
-#include "../../../api/include/awa/static.h"
+#include <awa/static.h>
 #include <stdint.h>
 #include <stdbool.h>
 

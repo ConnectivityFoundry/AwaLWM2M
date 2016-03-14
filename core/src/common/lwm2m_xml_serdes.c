@@ -329,9 +329,6 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             }
             AwaObjectLink * objectLink = (AwaObjectLink *)*dataValue;
             sscanf(buffer, "%10d:%10d", &objectLink->ObjectID, &objectLink->ObjectInstanceID);
-
-            Lwm2m_Debug("objectID: %d objectInstanceID %d\n", objectLink->ObjectID, objectLink->ObjectInstanceID);
-
             break;
         }
 

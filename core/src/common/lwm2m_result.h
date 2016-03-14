@@ -30,7 +30,7 @@ extern "C" {
 
 #include <stdbool.h>
 
-#include "../../../api/include/awa/static.h"
+#include <awa/static.h>
 #include "lwm2m_types.h"
 #include "lwm2m_list.h"
 #include "lwm2m_observers.h"
