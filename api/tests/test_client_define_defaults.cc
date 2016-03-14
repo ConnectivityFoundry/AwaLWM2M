@@ -8,7 +8,6 @@
 #include "get_response.h"
 #include "support/support.h"
 #include "support/definition.h"
-#include "support/mock_malloc.h"
 #include "arrays.h"
 
 namespace Awa {
@@ -56,15 +55,6 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     ASSERT_TRUE(NULL != value);
     EXPECT_STREQ(expected, value);
     AwaClientGetOperation_Free(&getOperation);
-}
-
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientDefineOperation_New_handles_out_of_memory)
-{
-    mockMallocFailCounter = 1;
-    ASSERT_EQ(NULL, AwaClientDefineOperation_New(session_));
-
-    mockMallocFailCounter = 2;
-    ASSERT_EQ(NULL, AwaClientDefineOperation_New(session_));
 }
 
 TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_created_custom_object_instance_integer_resource)

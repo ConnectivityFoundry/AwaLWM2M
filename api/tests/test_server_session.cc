@@ -5,7 +5,6 @@
 
 #include "log.h"
 #include "support/support.h"
-#include "support/mock_malloc.h"
 
 namespace Awa {
 
@@ -16,17 +15,6 @@ TEST_F(TestServerSession, AwaServerSession_New_returns_valid_session)
     AwaServerSession * session = AwaServerSession_New();
     ASSERT_TRUE(NULL != session);
     AwaServerSession_Free(&session);
-}
-
-TEST_F(TestServerSession, AwaServerSession_New_handles_out_of_memory)
-{
-    // fail the Session malloc
-    mockMallocFailCounter = 1;
-    ASSERT_EQ(NULL, AwaServerSession_New());
-
-    // fail the SessionCommon malloc
-    mockMallocFailCounter = 2;
-    ASSERT_EQ(NULL, AwaServerSession_New());
 }
 
 TEST_F(TestServerSession, AwaServerSession_Free_frees_memory)
