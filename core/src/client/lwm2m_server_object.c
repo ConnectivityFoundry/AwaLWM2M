@@ -188,6 +188,10 @@ static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID
                 *bufferLen = -1;
         }
     }
+    else
+    {
+        *bufferLen = -1;
+    }
     return *bufferLen;
 }
 
@@ -334,7 +338,7 @@ void Lwm2mCore_SetServerUpdateRegistration(Lwm2mContextType * context, int serve
 
 int Lwm2mServerObject_GetDefaultMinimumPeriod(Lwm2mContextType * context, int shortServerID)
 {
-    int64_t defaultMinimumPeriod = -1;
+    int64_t defaultMinimumPeriod = 0;
     Lwm2mServerType * server = GetServerObjectByShortServerID(context, shortServerID);
     if (server != NULL)
     {
