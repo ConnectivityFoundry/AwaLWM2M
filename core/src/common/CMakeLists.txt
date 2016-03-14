@@ -13,6 +13,10 @@ set (lwm2m_common_SOURCES
   lwm2m_types.c
 )
 
+# currently the API and core are a little tangled so we need to define the include
+# path here. the API tests depend on core, which depends on the API.
+set (API_INCLUDE_DIR ../../../api/include CACHE INTERNAL "API_INCLUDE_DIR")
+
 set (lwm2m_common_INCLUDE_DIRS
   ${LIBCOAP_INCLUDE_DIR}
   ${LIBJSMN_INCLUDE_DIR}
