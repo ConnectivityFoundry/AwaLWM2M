@@ -863,6 +863,69 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSession_AwaChangeSet_
     ASSERT_TRUE(NULL == operation);
 }
 
+TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Subscribe_to_multiple_instance_resource_changes)
+{
+    struct ChangeCallbackHandler2 : public TestSubscribeToChangeWithConnectedSession
+    {
+        int count;
+
+        ChangeCallbackHandler2() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            ASSERT_TRUE(NULL != changeSet);
+            AwaPathIterator * iterator = AwaChangeSet_NewPathIterator(changeSet);
+            ASSERT_TRUE(NULL != iterator);
+            EXPECT_TRUE(AwaPathIterator_Next(iterator));
+            EXPECT_STREQ("/3/0/6", AwaPathIterator_Get(iterator));
+            EXPECT_FALSE(AwaPathIterator_Next(iterator));
+
+            const AwaIntegerArray * valueArray = NULL;
+            AwaChangeSet_GetValuesAsIntegerArrayPointer(changeSet, "/3/0/6", &valueArray);
+            ASSERT_TRUE(NULL != valueArray);
+            EXPECT_EQ(12345, AwaIntegerArray_GetValue(valueArray, 0));
+            EXPECT_EQ(54321, AwaIntegerArray_GetValue(valueArray, 1));
+
+            AwaPathIterator_Free(&iterator);
+
+        }
+        void TestBody() {}
+    };
+    ChangeCallbackHandler2 cbHandler;
+
+    AwaClientSubscribeOperation * operation = AwaClientSubscribeOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/6", ChangeCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+
+    // set via client api to trigger notification.
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 0, 12345));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 1, 54321));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaClientSession_DispatchCallbacks(session_);
+    ASSERT_EQ(1, cbHandler.count);
+
+
+    ASSERT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
+    ASSERT_TRUE(NULL == changeSubscription);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+}
+
 
 
 // Test ChangeSet functions

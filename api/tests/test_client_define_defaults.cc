@@ -589,8 +589,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientGetOperation_Free(&getOperation);
 }
 
-// FIXME
-TEST_F(TestClientDefineDefaultsWithDaemon, DISABLED_AwaClient_get_default_value_from_created_custom_object_instance_objectlink_array_resource)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_created_custom_object_instance_objectlink_array_resource)
 {
     //Define our custom object
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -836,8 +835,8 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_string_array_resource_has_se
 
     const AwaStringArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaStringArray_GetValueCount(valueArray));
-    EXPECT_STREQ("", AwaStringArray_GetValueAsCString(valueArray, 0));
+    EXPECT_EQ(0u, AwaStringArray_GetValueCount(valueArray));
+    //EXPECT_STREQ("", AwaStringArray_GetValueAsCString(valueArray, 0));
 
     AwaClientGetOperation_Free(&getOperation);
 }
@@ -864,8 +863,8 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_integer_array_resource_has_s
 
     const AwaIntegerArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaIntegerArray_GetValueCount(valueArray));
-    EXPECT_EQ(0, AwaIntegerArray_GetValue(valueArray, 0));
+    EXPECT_EQ(0u, AwaIntegerArray_GetValueCount(valueArray));
+    //EXPECT_EQ(0, AwaIntegerArray_GetValue(valueArray, 0));
 
     AwaClientGetOperation_Free(&getOperation);
 }
@@ -892,8 +891,8 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_float_array_resource_has_sen
 
     const AwaFloatArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaFloatArray_GetValueCount(valueArray));
-    EXPECT_EQ(0.0f, AwaFloatArray_GetValue(valueArray, 0));
+    EXPECT_EQ(0u, AwaFloatArray_GetValueCount(valueArray));
+    //EXPECT_EQ(0.0f, AwaFloatArray_GetValue(valueArray, 0));
 
     AwaClientGetOperation_Free(&getOperation);
 }
@@ -920,8 +919,8 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_boolean_array_resource_has_s
 
     const AwaBooleanArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaBooleanArray_GetValueCount(valueArray));
-    EXPECT_FALSE(AwaBooleanArray_GetValue(valueArray, 0));
+    EXPECT_EQ(0u, AwaBooleanArray_GetValueCount(valueArray));
+    //EXPECT_FALSE(AwaBooleanArray_GetValue(valueArray, 0));
 
     AwaClientGetOperation_Free(&getOperation);
 }
@@ -948,13 +947,12 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_time_array_resource_has_sens
 
     const AwaTimeArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaTimeArray_GetValueCount(valueArray));
-    EXPECT_EQ(0, AwaTimeArray_GetValue(valueArray, 0));
+    EXPECT_EQ(0u, AwaTimeArray_GetValueCount(valueArray));
+    //EXPECT_EQ(0, AwaTimeArray_GetValue(valueArray, 0));
 
     AwaClientGetOperation_Free(&getOperation);
 }
 
-// FIXME:
 TEST_F(TestClientDefineDefaultsWithDaemon, optional_opaque_array_resource_has_sensible_default)
 {
     ObjectDescription object = { 1000, "Object1000", 0, 1, {
@@ -977,10 +975,10 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_opaque_array_resource_has_se
 
     const AwaOpaqueArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaOpaqueArray_GetValueCount(valueArray));
-    AwaOpaque value = AwaOpaqueArray_GetValue(valueArray, 0);
-    EXPECT_EQ(NULL, value.Data);
-    EXPECT_EQ(0u, value.Size);
+    EXPECT_EQ(0u, AwaOpaqueArray_GetValueCount(valueArray));
+//    AwaOpaque value = AwaOpaqueArray_GetValue(valueArray, 0);
+//    EXPECT_EQ(NULL, value.Data);
+//    EXPECT_EQ(0u, value.Size);
 
     AwaClientGetOperation_Free(&getOperation);
 }
@@ -1007,10 +1005,10 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_objectlink_array_resource_ha
 
     const AwaObjectLinkArray * valueArray = NULL;
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, "/1000/0/0", &valueArray));
-    EXPECT_EQ(1u, AwaObjectLinkArray_GetValueCount(valueArray));
-    AwaObjectLink value = AwaObjectLinkArray_GetValue(valueArray, 0);
-    EXPECT_EQ(0, value.ObjectID);
-    EXPECT_EQ(0, value.ObjectInstanceID);
+    EXPECT_EQ(0u, AwaObjectLinkArray_GetValueCount(valueArray));
+//    AwaObjectLink value = AwaObjectLinkArray_GetValue(valueArray, 0);
+//    EXPECT_EQ(0, value.ObjectID);
+//    EXPECT_EQ(0, value.ObjectInstanceID);
 
     AwaClientGetOperation_Free(&getOperation);
 }

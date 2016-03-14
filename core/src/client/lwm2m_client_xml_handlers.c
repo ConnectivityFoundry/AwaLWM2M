@@ -1410,7 +1410,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
         TreeNode responseResourceNode = key.ResourceID != AWA_INVALID_ID? ObjectsTree_FindOrCreateChildNode(responseObjectInstanceNode, "Resource", key.ResourceID) : NULL;
         TreeNode responseLeafNode = responseResourceNode? responseResourceNode : responseObjectInstanceNode? responseObjectInstanceNode : responseObjectNode;
 
-        Lwm2mResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID);
+        Lwm2mResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID, false);
 
         IPC_AddResultTag(responseLeafNode, Lwm2mResult_ToAwaError(deleteResult, AwaError_CannotDelete));
     }
