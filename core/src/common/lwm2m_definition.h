@@ -98,6 +98,12 @@ struct  _ResourceDefinition
     LWM2MHandler Handler;
 
     Lwm2mTreeNode * DefaultValueNode;
+
+    // When using "static" mode, these values are used to
+    // determine where to locate the memory for this resource type
+    void * DataPointer;  
+    size_t DataElementSize;
+    size_t DataStepSize;
 };
 
 struct _ObjectDefinition
@@ -130,24 +136,24 @@ int DefinitionRegistry_Destroy(DefinitionRegistry * registry);
 ObjectDefinition * Definition_LookupObjectDefinition(const DefinitionRegistry * registry, ObjectIDType objectID);
 ResourceDefinition * Definition_LookupResourceDefinition(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID);
 ResourceDefinition * Definition_LookupResourceDefinitionFromObjectDefinition(const ObjectDefinition * objFormat, ResourceIDType resourceID);
-ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
-                                            uint16_t MinimumInstances, const ObjectOperationHandlers * Handlers);
-ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t MinimumInstances,
-                                            uint16_t MaximumInstances, LWM2MHandler Handler);
+ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers);
+ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t minimumInstances,
+                                            uint16_t maximumInstances, LWM2MHandler handler);
 void Definition_FreeObjectType(ObjectDefinition * definition);
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat);
 ObjectDefinition * Definition_CopyObjectDefinition(const ObjectDefinition * definition);
-int Definition_RegisterObjectType(DefinitionRegistry * registry, const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
-                                  uint16_t MinimumInstances, ObjectOperationHandlers * Handlers);
+int Definition_RegisterObjectType(DefinitionRegistry * registry, const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                  uint16_t minimumInstances, ObjectOperationHandlers * handlers);
 int Definition_GetNextObjectType(DefinitionRegistry * registry, ObjectIDType objectID);
 ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaStaticResourceType resourceType,
-                                                uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
-                                                ResourceOperationHandlers * Handlers, Lwm2mTreeNode * DefaultValueNode);
+                                                uint16_t maximumInstances, uint16_t minimumInstances, Operations operations,
+                                                ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode);
 ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaStaticResourceType resourceType,
-                                                           uint16_t MinimumInstances, uint16_t MaximumInstances,  Operations operations, LWM2MHandler Handler);
+                                                           uint16_t minimumInstances, uint16_t maximumInstances,  Operations operations, LWM2MHandler handler);
 int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
-                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
-                                    ResourceOperationHandlers * Handlers, Lwm2mTreeNode * DefaultValueNode);
+                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations,
+                                    ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode);
 int Definition_GetNextResourceTypeFromObjectType(const ObjectDefinition * objFormat, ResourceIDType resourceID);
 int Definition_GetNextResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID);
 int Definition_GetFormatName(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID, const char ** name);
