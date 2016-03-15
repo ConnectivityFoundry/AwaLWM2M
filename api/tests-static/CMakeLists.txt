@@ -23,7 +23,7 @@ set (test_static_api_runner_LIBRARIES
   gtest
   pthread
   awa_static
-  lwm2m_common_static
+  awa_common_static
   Awa_static
   libb64_static
 )

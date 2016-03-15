@@ -48,8 +48,10 @@ const static SerdesMapEntry serdesList[] =
         { ContentType_CustomPrettyPrint,         &ppSerDes        },
 
 #ifndef CONTIKI
+#ifdef WITH_JSON
         { ContentType_ApplicationOmaLwm2mJson,   &jsonSerDes      },
-#endif
+#endif // WITH_JSON
+#endif // CONTIKI
         { ContentType_ApplicationOmaLwm2mTLV,    &tlvSerDes       },
         { ContentType_ApplicationPlainText,      &plainTextSerDes },
         { ContentType_ApplicationOctetStream,    &opaqueSerDes    },
@@ -57,8 +59,10 @@ const static SerdesMapEntry serdesList[] =
         // Mapping for old types
         { ContentType_ApplicationOmaLwm2mText,   &plainTextSerDes },
 #ifndef CONTIKI
+#ifdef WITH_JSON
         { ContentType_ApplicationJson,           &jsonSerDes      },
-#endif
+#endif // WITH_JSON
+#endif // CONTIKI
         { ContentType_ApplicationOmaLwm2mOpaque, &opaqueSerDes    },
 };
 #define NUM_SERIALISERS (sizeof(serdesList)/sizeof(SerdesMapEntry))

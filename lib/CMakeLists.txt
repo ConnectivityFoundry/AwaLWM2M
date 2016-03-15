@@ -2,7 +2,10 @@ add_subdirectory (b64)
 add_subdirectory (hmac)
 add_subdirectory (libcoap)
 add_subdirectory (xml)
-add_subdirectory (jsmn)
+
+if (WITH_JSON)
+  add_subdirectory (jsmn)
+endif ()
 
 if (BUILD_TESTS)
   # gtest is CMake-enabled

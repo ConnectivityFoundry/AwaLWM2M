@@ -18,13 +18,12 @@ set (awa_clientd_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_tlv.c
   ${CORE_SRC_DIR}/common/lwm2m_plaintext.c
   ${CORE_SRC_DIR}/common/lwm2m_prettyprint.c
-  ${CORE_SRC_DIR}/common/lwm2m_json.c
   ${CORE_SRC_DIR}/common/lwm2m_opaque.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
   ${CORE_SRC_DIR}/common/lwm2m_observers.c
   ${CORE_SRC_DIR}/common/lwm2m_ipc.c
-  lwm2m_object_tree.c   
-  
+  lwm2m_object_tree.c
+
   ######################## TODO REMOVE ########################
   # TODO: extract components common to both Core and API
   # FIXME: API_SRC_DIR is not in the cmake cache at the time this is read
@@ -46,14 +45,12 @@ set (awa_clientd_SOURCES
 # (it is not possible to link with an OBJECT library, so these are not automatic)
 get_property (LIB_XML_INCLUDE_DIR TARGET libxml_static PROPERTY INCLUDE_DIRECTORIES)
 get_property (LIB_B64_INCLUDE_DIR TARGET libb64_static PROPERTY INCLUDE_DIRECTORIES)
-get_property (LIB_JSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
 get_property (LIB_HMAC_INCLUDE_DIR TARGET libhmac_static PROPERTY INCLUDE_DIRECTORIES)
 
 set (awa_clientd_INCLUDE_DIRS
   ${LIB_XML_INCLUDE_DIR}
   ${LIB_B64_INCLUDE_DIR}
   ${LIB_HMAC_INCLUDE_DIR}
-  ${LIBJSMN_INCLUDE_DIR}
 
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
@@ -69,6 +66,16 @@ set (awa_clientd_INCLUDE_DIRS
   #############################################################
 )
 
+if (WITH_JSON)
+  list (APPEND awa_clientd_SOURCES
+    ${CORE_SRC_DIR}/common/lwm2m_json.c
+  )
+  # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
+  list (APPEND awa_clientd_INCLUDE_DIRS
+    ${LIBJSMN_INCLUDE_DIR}
+  )
+endif ()
+
 add_definitions (-DLWM2M_CLIENT)
 
 if (ENABLE_GCOV)
@@ -83,7 +90,7 @@ set_property (TARGET awa_static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable (awa_clientd lwm2m_client.c)
 target_include_directories (awa_clientd PRIVATE ${awa_clientd_INCLUDE_DIRS})
-target_link_libraries (awa_clientd awa_static lwm2m_common_static libb64_static libhmac_static)
+target_link_libraries (awa_clientd awa_static awa_common_static libb64_static libhmac_static)
 
 if (ENABLE_GCOV)
   target_link_libraries (awa_clientd gcov)
