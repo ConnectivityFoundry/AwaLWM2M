@@ -39,8 +39,12 @@ endif
 BUILD_DIR_ABS:=$(shell pwd)/$(BUILD_DIR)
 
 all: $(BUILD_DIR)/Makefile
-	make -C $(BUILD_DIR) --no-print-directory
+	$(MAKE) -C $(BUILD_DIR) --no-print-directory
 	@echo "Build complete in directory $(BUILD_DIR)"
+
+install: all
+	cd $(BUILD_DIR); $(MAKE) install DESTDIR=./install
+	@echo "AwaLWM2M installed to $(BUILD_DIR)/install"
 
 $(BUILD_DIR)/Makefile:
 	mkdir -p $(BUILD_DIR)
