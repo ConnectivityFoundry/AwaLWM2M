@@ -468,7 +468,7 @@ Client: AwaStaticClient1
   /1/0     LWM2MServer
 ```
 
-### Add a custom object using the static API
+### Add a custom object using the Awa static API.
 
 The following code expands on the previous example, by demonstrating how to add a custom object
 
@@ -537,13 +537,14 @@ int main(void)
 
 ```
 
-## Example: Create a standalone LWM2M client within a contiki environment
+## Example: Create a standalone LWM2M client within a contiki environment.
 
 Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree 
 for a contiki environment. 
 
 The following instructions act as an example of how to build a LWM2M client for contiki.
-*Note: in this case we will use the contiki simulated environment, hardware specific configuration
+
+*Note: In this case we will use the contiki simulated environment, hardware specific configuration
  is outside of the scope of this tutorial*
 
 Create a new directory *contiki-example*:
@@ -564,7 +565,7 @@ AwaLWM2M
 contiki
 ```
 
-copy the following code into contiki-example/*Makefile*:
+Copy the following code into contiki-example/*Makefile*:
 
 ```make
 CONTIKI_PROJECT=static-client-tutorial
