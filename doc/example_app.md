@@ -537,5 +537,146 @@ int main(void)
 
 ```
 
+## Example: Create a standalone LWM2M client within a contiki environment
+
+Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree 
+for a contiki environment. 
+
+The following instructions act as an example of how to build a LWM2M client for contiki.
+*Note: in this case we will use the contiki simulated environment, hardware specific configuration
+ is outside of the scope of this tutorial*
+
+Create a new directory *contiki-example*:
+
+```
+$ mkdir contiki-example
+```
+
+Clone AwaLWM2M and contiki into this directory:
+
+```
+$ cd contiki-example
+contiki-example$ git clone https://github.com/FlowM2M/AwaLWM2M.git 
+contiki-example$ git clone https://github.com/contiki-os/contiki.git 
+
+contiki-example$ ls
+AwaLWM2M
+contiki
+```
+
+copy the following code into contiki-example/*Makefile*:
+
+```make
+CONTIKI_PROJECT=static-client-tutorial
+CONTIKI=contiki
+LWM2M_DIR=AwaLWM2M
+
+CFLAGS += -Wall -Wno-pointer-sign
+CFLAGS += -I$(LWM2M_DIR)/api/include -DLWM2M_CLIENT
+
+CFLAGS += -DUIP_CONF_BUFFER_SIZE=4096
+CFLAGS += -DREST_MAX_CHUNK_SIZE=512
+
+APPS += er-coap
+APPS += rest-engine
+
+APPDIRS += $(LWM2M_DIR)/core/src
+APPS += client
+APPS += common
+
+CONTIKI_WITH_IPV6 = 1
+CONTIKI_WITH_RPL = 0
+
+all: static-client-tutorial
+
+include $(CONTIKI)/Makefile.include
+```
+
+Copy the following code to contiki-example/*static-client-tutorial.c*:
+
+```c
+#include <stdio.h>
+#include "contiki.h"
+#include "awa/static.h"
+
+#define HEATER_INSTANCES 1
+
+typedef struct
+{
+    char Manufacturer[64];
+    float Temperature;
+
+} HeaterObject;
+
+static HeaterObject heater[HEATER_INSTANCES];
+
+static void DefineHeaterObject(AwaStaticClient * awaClient)
+{
+    AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaAccess_Read,
+                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaAccess_Read,
+                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
+}
+
+static void SetInitialValues(AwaStaticClient * awaClient)
+{
+    int instance = 0;
+
+    AwaStaticClient_CreateObjectInstance(awaClient, 1000, instance);
+
+    AwaStaticClient_CreateResource(awaClient, 1000, instance, 101);
+    strcpy(heater[instance].Manufacturer, "HotAir Systems Inc");
+
+    AwaStaticClient_CreateResource(awaClient, 1000, instance, 104);
+    heater[instance].Temperature = 0.0;
+}
+
+PROCESS(lwm2m_client, "Awa LWM2M Example Client");
+AUTOSTART_PROCESSES(&lwm2m_client);
+
+PROCESS_THREAD(lwm2m_client, ev, data)
+{
+    PROCESS_BEGIN();
+
+    static AwaStaticClient * awaClient;
+
+    awaClient = AwaStaticClient_New();
+
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCOAPListenAddressPort(awaClient, "", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");
+
+    AwaStaticClient_Init(awaClient);
+
+    DefineHeaterObject(awaClient);
+    SetInitialValues(awaClient);
+
+    while (1)
+    {
+        static struct etimer et;
+        static int waitTime;
+
+        waitTime = AwaStaticClient_Process(awaClient);
+
+        //heater[0].Temperature = value from hardware
+
+        etimer_set(&et, (waitTime * CLOCK_SECOND) / 1000);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        waitTime = 0;
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    PROCESS_END();
+}
+```
+
+Build your contiki application:
+
+```
+contiki-example$ make TARGET=minimal-net
+```
+
 ----
 ----
