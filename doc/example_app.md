@@ -448,6 +448,7 @@ Start the bootstrap and server daemons:
 ```
 $ ./build/install/bin/awa_bootstrapd -d --config core/bootstrap-localhost.config
 $ ./build/install/bin/awa_serverd -d
+```
 
 Run your new application:
 
