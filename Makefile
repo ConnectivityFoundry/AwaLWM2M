@@ -118,9 +118,9 @@ VALGRIND_LOG_OPTIONS:=--xml=yes --xml-file=$(VALGRIND_LOG_DIR)/valgrind.%p.xml -
 .PHONY: valgrind_comprehensive
 valgrind_comprehensive: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
 	mkdir -p $(VALGRIND_LOG_DIR)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_SRC_BIN)   $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)   $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_TOOLS_BIN) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_SRC_BIN)   $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)   $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_TOOLS_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
 
 .PHONY: cppcheck
 cppcheck:
