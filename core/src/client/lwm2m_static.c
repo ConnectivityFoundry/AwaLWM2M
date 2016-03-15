@@ -83,7 +83,7 @@ void AwaStaticClient_Free(AwaStaticClient ** client)
     {
         Lwm2mCore_Destroy((*client)->Context);
 
-        if((*client)->COAP != NULL)
+        if ((*client)->COAP != NULL)
         {
             coap_Destroy();
         }
@@ -322,18 +322,25 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                                                     AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, 
                                                     void ** dataPointer, uint16_t * dataSize, bool * changed)
 {
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID, resourceID);
-    uint8_t * offset;
     AwaLwm2mResult result;
 
-    // check instance range
-    if ((objectInstanceID >= 0) && (objectInstanceID < definition->MaximumInstances))
+    ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+    if (objectDefinition != NULL)
     {
-        switch (operation)
+        uint8_t * offset;
+        ResourceDefinition * resourceDefinition;
+
+        // check instance range
+        if ((objectInstanceID >= 0) && (objectInstanceID < objectDefinition->MaximumInstances))
         {
+            switch (operation)
+            {
             case AwaOperation_CreateObjectInstance:
-            case AwaOperation_DeleteObjectInstance:
                 result = AwaLwm2mResult_SuccessCreated;
+                break;
+
+            case AwaOperation_DeleteObjectInstance:
+                result = AwaLwm2mResult_SuccessDeleted;
                 break;
 
             case AwaOperation_CreateResource:
@@ -342,33 +349,54 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
 
             case AwaOperation_DeleteResource:
                 break;
+
             case AwaOperation_Write:
+            
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
                 // TODO: check dataSize vs definition->DataElementSize
-
                 // TODO: what do we do about storing the length.. for opaque etc...
-
-                offset = definition->DataPointer + (definition->DataStepSize * objectInstanceID);
-                memcpy(offset, *dataPointer, *dataSize);
-                result = AwaLwm2mResult_SuccessChanged;
+                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    memcpy(offset, *dataPointer, *dataSize);
+                    result = AwaLwm2mResult_SuccessChanged;
+                }
+                else
+                {
+                    result = AwaLwm2mResult_BadRequest;
+                }
                 break;
 
             case AwaOperation_Read:
-                offset = definition->DataPointer + (definition->DataStepSize * objectInstanceID);
-                memcpy(*dataPointer, offset, definition->DataElementSize);
-                *dataSize = definition->DataElementSize;
-                result = AwaLwm2mResult_SuccessContent;
+
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
+                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    *dataPointer = offset;
+                    *dataSize = resourceDefinition->DataElementSize;
+                    result = AwaLwm2mResult_SuccessContent;
+                }
+                else
+                {
+                    result = AwaLwm2mResult_BadRequest;
+                }
                 break;
 
             case AwaOperation_Execute:
                 result = AwaLwm2mResult_BadRequest;
                 break;
+            }
+        }
+        else
+        {
+            result = AwaLwm2mResult_BadRequest;
         }
     }
     else
     {
         result = AwaLwm2mResult_BadRequest;
     }
-
     return result;
 }
 
