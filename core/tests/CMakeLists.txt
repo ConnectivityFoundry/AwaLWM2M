@@ -5,7 +5,6 @@ set (test_core_runner_SOURCES
   test_object_store_interface.cc
   test_template.cc
   test_tlv.cc
-  test_json.cc
   test_definition_registry.cc
   test_plaintext.cc
   test_prettyprint.cc
@@ -30,8 +29,14 @@ set (test_core_runner_LIBRARIES
   pthread
   libcoap_static
   awa_static
-  lwm2m_common_static
+  awa_common_static
 )
+
+if (WITH_JSON)
+  list (APPEND test_core_runner_SOURCES
+    test_json.cc
+  )
+endif ()
 
 set (CMAKE_CXX_FLAGS "-Wall -Werror -g -std=c++11")
 

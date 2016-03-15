@@ -11,7 +11,6 @@ set (awa_serverd_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_tlv.c
   ${CORE_SRC_DIR}/common/lwm2m_plaintext.c
   ${CORE_SRC_DIR}/common/lwm2m_prettyprint.c
-  ${CORE_SRC_DIR}/common/lwm2m_json.c
   ${CORE_SRC_DIR}/common/lwm2m_opaque.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
   ${CORE_SRC_DIR}/common/lwm2m_ipc.c
@@ -38,12 +37,10 @@ set (awa_serverd_SOURCES
 # (it is not possible to link with an OBJECT library, so these are not automatic)
 get_property (LIB_XML_INCLUDE_DIR TARGET libxml_static PROPERTY INCLUDE_DIRECTORIES)
 get_property (LIB_B64_INCLUDE_DIR TARGET libb64_static PROPERTY INCLUDE_DIRECTORIES)
-get_property (LIB_JSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
 
 set (awa_serverd_INCLUDE_DIRS
   ${LIB_XML_INCLUDE_DIR}
   ${LIB_B64_INCLUDE_DIR}
-  ${LIBJSMN_INCLUDE_DIR}
 
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
@@ -58,6 +55,15 @@ set (awa_serverd_INCLUDE_DIRS
   ${CORE_SRC_DIR}/../../api/include
   #############################################################
 )
+
+if (WITH_JSON)
+  list (APPEND awa_serverd_SOURCES
+    ${CORE_SRC_DIR}/common/lwm2m_json.c
+  )
+  get_property (LIBJSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
+  list (APPEND awa_serverd_INCLUDE_DIRS
+    ${LIBJSMN_INCLUDE_DIR})
+endif ()
 
 add_definitions (-DLWM2M_SERVER)
 
@@ -81,7 +87,7 @@ set_target_properties (awa_serverd_shared PROPERTIES OUTPUT_NAME "lwm2mserver")
 
 add_executable (awa_serverd lwm2m_server.c)
 target_include_directories (awa_serverd PRIVATE ${awa_serverd_INCLUDE_DIRS})
-target_link_libraries (awa_serverd awa_serverd_static lwm2m_common_static)
+target_link_libraries (awa_serverd awa_serverd_static awa_common_static)
 
 if (ENABLE_GCOV)
    target_link_libraries (awa_serverd gcov)
