@@ -117,10 +117,10 @@ ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType o
      return NewObjectType(objName, objectID, maximumInstances, minimumInstances, handlers, NULL);
 }
 
-ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t MinimumInstances,
-                                            uint16_t MaximumInstances, LWM2MHandler Handler)
+ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t minimumInstances,
+                                            uint16_t maximumInstances, LWM2MHandler handler)
 {
-    return NewObjectType(objName, objectID, MaximumInstances, MinimumInstances, NULL, Handler);
+    return NewObjectType(objName, objectID, maximumInstances, minimumInstances, NULL, handler);
 }
 
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat)
@@ -605,3 +605,4 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
     }
     return result;
 }
+

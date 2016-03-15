@@ -83,7 +83,7 @@ void AwaStaticClient_Free(AwaStaticClient ** client)
     {
         Lwm2mCore_Destroy((*client)->Context);
 
-        if((*client)->COAP != NULL)
+        if ((*client)->COAP != NULL)
         {
             coap_Destroy();
         }
@@ -318,6 +318,93 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     return result;
 }
 
+static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, 
+                                                    AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, 
+                                                    void ** dataPointer, uint16_t * dataSize, bool * changed)
+{
+    AwaLwm2mResult result;
+
+    ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+    if (objectDefinition != NULL)
+    {
+        uint8_t * offset;
+        ResourceDefinition * resourceDefinition;
+
+        // check instance range
+        if ((objectInstanceID >= 0) && (objectInstanceID < objectDefinition->MaximumInstances))
+        {
+            switch (operation)
+            {
+            case AwaOperation_CreateObjectInstance:
+                result = AwaLwm2mResult_SuccessCreated;
+                break;
+
+            case AwaOperation_DeleteObjectInstance:
+                result = AwaLwm2mResult_SuccessDeleted;
+                break;
+
+            case AwaOperation_CreateResource:
+                result = AwaLwm2mResult_SuccessCreated;
+                break;
+
+            case AwaOperation_DeleteResource:
+                break;
+
+            case AwaOperation_Write:
+            
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
+                // TODO: check dataSize vs definition->DataElementSize
+                // TODO: what do we do about storing the length.. for opaque etc...
+                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    memcpy(offset, *dataPointer, *dataSize);
+                    result = AwaLwm2mResult_SuccessChanged;
+                }
+                else
+                {
+                    result = AwaLwm2mResult_BadRequest;
+                }
+                break;
+
+            case AwaOperation_Read:
+
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
+                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    *dataPointer = offset;
+                    *dataSize = resourceDefinition->DataElementSize;
+                    result = AwaLwm2mResult_SuccessContent;
+                }
+                else
+                {
+                    result = AwaLwm2mResult_BadRequest;
+                }
+                break;
+
+            case AwaOperation_Execute:
+                result = AwaLwm2mResult_BadRequest;
+                break;
+            }
+        }
+        else
+        {
+            result = AwaLwm2mResult_BadRequest;
+        }
+    }
+    else
+    {
+        result = AwaLwm2mResult_BadRequest;
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                        uint16_t minimumInstances, uint16_t maximumInstances)
+{
+    return AwaStaticClient_RegisterObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, AwaStaticClientDefaultHandler);
+}
 
 AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                                      uint16_t minimumInstances, uint16_t maximumInstances,
@@ -386,10 +473,10 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
     return result;
 }
 
-AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
-                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
-                                                     AwaStaticClientHandler handler)
+static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const char * resourceName,
+                                                 AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                 uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
+                                                 AwaStaticClientHandler handler,  void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -401,6 +488,11 @@ AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, c
             ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
             if (resourceDefinition != NULL)
             {
+                // TODO: perhaps a better option would be to bind some opaque data
+                //       to the resource definition, rather than using individual variables.
+                resourceDefinition->DataPointer = dataPointer;
+                resourceDefinition->DataElementSize = dataElementSize;
+                resourceDefinition->DataStepSize = dataStepSize;
                 result = AwaError_Success;
             }
             else
@@ -419,6 +511,29 @@ AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, c
     }
 
     return result;
+}
+
+AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, const char * resourceName,
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     void * dataPointer, size_t dataElementSize, size_t dataStepSize)
+{
+    return AwaStaticClient_RegisterResource(client, resourceName,
+                                            objectID, resourceID, resourceType,
+                                            minimumInstances, maximumInstances, access, AwaStaticClientDefaultHandler,
+                                            dataPointer, dataElementSize, dataStepSize);
+
+}
+
+AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     AwaStaticClientHandler handler)
+{
+    return AwaStaticClient_RegisterResource(client, resourceName,
+                                            objectID, resourceID, resourceType,
+                                            minimumInstances, maximumInstances, access, handler,
+                                            NULL, 0 , 0);
 }
 
 
