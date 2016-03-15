@@ -22,8 +22,8 @@ set (awa_clientd_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
   ${CORE_SRC_DIR}/common/lwm2m_observers.c
   ${CORE_SRC_DIR}/common/lwm2m_ipc.c
-  lwm2m_object_tree.c   
-  
+  lwm2m_object_tree.c
+
   ######################## TODO REMOVE ########################
   # TODO: extract components common to both Core and API
   # FIXME: API_SRC_DIR is not in the cmake cache at the time this is read
@@ -70,10 +70,10 @@ if (WITH_JSON)
   list (APPEND awa_clientd_SOURCES
     ${CORE_SRC_DIR}/common/lwm2m_json.c
   )
-  get_property (LIBJSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
+  # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
   list (APPEND awa_clientd_INCLUDE_DIRS
     ${LIBJSMN_INCLUDE_DIR}
-  )  
+  )
 endif ()
 
 add_definitions (-DLWM2M_CLIENT)

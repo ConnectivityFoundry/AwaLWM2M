@@ -29,13 +29,13 @@ set (awa_common_LIBS
 )
 
 if (WITH_JSON)
-  get_property (LIBJSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
+  # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
   list (APPEND awa_common_INCLUDE_DIRS
     ${LIBJSMN_INCLUDE_DIR}
   )
   list (APPEND awa_common_LIBS
     libjsmn_static
-  )  
+  )
 endif ()
 
 # Virtual library to avoid building .o files twice:

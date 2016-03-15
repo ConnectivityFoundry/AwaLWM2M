@@ -18,9 +18,10 @@ ExternalProject_Add(libjsmn
     PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in ${CMAKE_BINARY_DIR}/libjsmn-src/CMakeLists.txt
 )
 
-# for now use a global variable for this until we find a way of setting the property on the libjsmn_static target
+# target properties are not allowed for imported targets, so for now use a global variable
+# for this until we find a way of setting the property on the libjsmn_static target
 set (LIBJSMN_INCLUDE_DIR ${CMAKE_BINARY_DIR}/libjsmn-src ${CMAKE_BINARY_DIR}/libjsmn-build CACHE INTERNAL "")
 
 add_library(libjsmn_static STATIC IMPORTED GLOBAL)
 set_target_properties(libjsmn_static PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libjsmn-build/libjsmn.a")
-#set_target_properties(libjsmn_static PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${LIBJSMN_INCLUDE_DIR})
+

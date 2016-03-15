@@ -22,10 +22,10 @@ if (WITH_JSON)
   list (APPEND awa_bootstrapd_SOURCES
     ${CORE_SRC_DIR}/common/lwm2m_json.c
   )
-  get_property (LIBJSMN_INCLUDE_DIR TARGET libjsmn_static PROPERTY INCLUDE_DIRECTORIES)
+  # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
   list (APPEND awa_bootstrapd_INCLUDE_DIRS
     ${LIBJSMN_INCLUDE_DIR}
-  )  
+  )
 endif ()
 
 add_definitions (-DLWM2M_BOOTSTRAP)
