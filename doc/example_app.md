@@ -393,5 +393,148 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
+## Example: Create a standalone LWM2M client on a gateway device using the Awa Static API.
+
+This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
+
+Create a new directory *static-client-tutorial*
+
+Copy the following code into static-client-tutorial/*Makefile*:
+
+```make
+INSTALL_PATH:=../build/install
+
+all:
+	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa_static
+```
+
+Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
+
+```c
+#include <string.h>
+#include <stdio.h>
+#include "awa/static.h"
+
+int main(void)
+{
+    AwaStaticClient * awaClient = AwaStaticClient_New();
+
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+
+    AwaStaticClient_Init(awaClient);
+
+    while (1)
+    {
+        AwaStaticClient_Process(awaClient);
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    return 0;
+}
+```
+
+Run "make" and specify the install path to Awa LWM2M:
+
+```
+$ cd static-client-tutorial
+static-client-tutorial $ make INSTALL_PATH=~/AwaLWM2M/build/install
+```
+
+Start the bootstrap and server daemons:
+
+```
+$ ./build/install/bin/awa_bootstrapd -d --config core/bootstrap-localhost.config
+$ ./build/install/bin/awa_serverd -d
+
+Run your new application:
+
+```
+$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./static-client-tutorial
+```
+
+Query the server for connected clients:
+
+```
+$ ./build/install/bin/awa-server-list-clients -o
+Client: AwaStaticClient1
+  /2/0     LWM2MAccessControl
+  /2/1     LWM2MAccessControl
+  /2/2     LWM2MAccessControl
+  /2/3     LWM2MAccessControl
+  /1/0     LWM2MServer
+```
+
+### Add a custom object using the static API
+
+The following code expands on the previous example, by demonstrating how to add a custom object
+
+```c
+#include <string.h>
+#include <stdio.h>
+#include "awa/static.h"
+
++#define HEATER_INSTANCES 1
+
++typedef struct
++{
++    char Manufacturer[64];
++    float Temperature;
++
++} HeaterObject;
+
+static HeaterObject heater[HEATER_INSTANCES];
+
++static void DefineHeaterObject(AwaStaticClient * awaClient)
++{
++    AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaAccess_Read,
++                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaAccess_Read,
++                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
++}
+
++static void SetInitialValues(AwaStaticClient * awaClient)
++{
++    int instance = 0;
++
++    AwaStaticClient_CreateObjectInstance(awaClient, 1000, instance);
++
++    AwaStaticClient_CreateResource(awaClient, 1000, instance, 101);
++    strcpy(heater[instance].Manufacturer, "HotAir Systems Inc");
++
++    AwaStaticClient_CreateResource(awaClient, 1000, instance, 104);
++    heater[instance].Temperature = 0.0;
++}
+
+int main(void)
+{
+    AwaStaticClient * awaClient = AwaStaticClient_New();
+
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+
+    AwaStaticClient_Init(awaClient);
+
++   DefineHeaterObject(awaClient);
++   SetInitialValues(awaClient);
+
+    while (1)
+    {
+        AwaStaticClient_Process(awaClient);
+
++       //heater[0].Temperature = value from hardware
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    return 0;
+}
+
+```
+
 ----
 ----
