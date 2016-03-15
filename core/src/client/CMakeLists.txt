@@ -83,10 +83,18 @@ if (ENABLE_GCOV)
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
 
-# static library libawastatic.a
+# static library libawa_static.a
 add_library (awa_static STATIC  ${awa_clientd_SOURCES})
 target_include_directories (awa_static PUBLIC ${awa_clientd_INCLUDE_DIRS})
 set_property (TARGET awa_static PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries (awa_static lwm2m_common_static libb64_static libhmac_static)
+
+# libawa_static.so
+add_library (awa_static_shared SHARED ${awa_clientd_SOURCES})
+set_target_properties (awa_static_shared PROPERTIES OUTPUT_NAME "awa_static")
+target_include_directories (awa_static_shared PUBLIC ${awa_clientd_INCLUDE_DIRS})
+set_property (TARGET awa_static_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries (awa_static_shared lwm2m_common_static libb64_static libhmac_static)
 
 add_executable (awa_clientd lwm2m_client.c)
 target_include_directories (awa_clientd PRIVATE ${awa_clientd_INCLUDE_DIRS})
@@ -100,6 +108,6 @@ install (TARGETS awa_clientd
     RUNTIME DESTINATION /bin
 )
 
-install (TARGETS awa_static
-    ARCHIVE DESTINATION /usr/lib
+install (TARGETS awa_static_shared
+    LIBRARY DESTINATION /usr/lib
 )
