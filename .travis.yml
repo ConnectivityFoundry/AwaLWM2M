@@ -2,9 +2,6 @@ sudo: false
 language: cpp
 compiler: gcc
 
-install:
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-
 addons:
  apt:
   sources:
@@ -15,6 +12,14 @@ addons:
    - cmake-data
    - gcc-5
    - g++-5
+   - python-virtualenv
+
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+    - virtualenv --system-site-packages venv
+    - source venv/bin/activate
+    - pip install nose
+    - pip install lxml
 
 # Travis-CI does not support IPv6 addresses:
 script: make tests TEST_FILTER=*.*:-*.*_handles_IPv6_address*
