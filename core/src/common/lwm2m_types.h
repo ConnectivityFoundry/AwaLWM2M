@@ -66,7 +66,6 @@ typedef int ObjectIDType;
 typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;
 typedef int ResourceInstanceIDType;
-//typedef int AwaResourceType;
 
 #ifndef CONTIKI
 typedef struct
