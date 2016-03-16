@@ -4,6 +4,7 @@
 #include "awa/server.h"
 #include "../tests/support/support.h"
 #include "../tests/support/daemon.h"
+#include "../../core/src/common/lwm2m_debug.h"
 
 namespace StaticClient {
 int staticClientProcessBootstrapTimeout = 10;
@@ -243,14 +244,18 @@ TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invalid_input)
 
 TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_valid_input)
 {
-    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_None));
-    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_Debug));
+    DebugLevel oldLogLevel = Lwm2m_GetLogLevel();
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_None));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_Debug));
+    Lwm2m_SetLogLevel(oldLogLevel);
 }
 
 TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_invalid_input)
 {
-    ASSERT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_None - 1)));
-    ASSERT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_Debug + 1)));
+    DebugLevel oldLogLevel = Lwm2m_GetLogLevel();
+    EXPECT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_None - 1)));
+    EXPECT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_Debug + 1)));
+    Lwm2m_SetLogLevel(oldLogLevel);
 }
 
 
