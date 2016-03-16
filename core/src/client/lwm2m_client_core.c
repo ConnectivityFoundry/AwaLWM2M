@@ -221,7 +221,7 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
     Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
 
-    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != AwaStaticResourceType_None)
+    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != AwaResourceType_None)
     {
         Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
         Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
@@ -246,7 +246,7 @@ static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType object
     int nullTerminator = 0;
 
     // If the type is a string, add a NULL terminator.
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaStaticResourceType_String)
+    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaResourceType_String)
     {
         nullTerminator = 1;
     }
@@ -827,13 +827,13 @@ error:
  * @param[in] handlers pointer to ResourceOperationsHandlers, use &defaultResourceOperationHandlers if custom behaviour is not required
  * @return -1 on error 0 on success
  */
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
 }
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
@@ -1587,7 +1587,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
 
                     switch (characteristics->ValueType)
                     {
-                        case AwaStaticResourceType_Integer:
+                        case AwaResourceType_Integer:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24d", &integerValue) == 0))
                             {
@@ -1599,7 +1599,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             }
                             break;
                         }
-                        case AwaStaticResourceType_Float:
+                        case AwaResourceType_Float:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24f", &floatValue) == 0))
                             {
@@ -1611,7 +1611,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                             }
                             break;
                         }
-                        case AwaStaticResourceType_None:
+                        case AwaResourceType_None:
                             break;
                         default:
                             Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);

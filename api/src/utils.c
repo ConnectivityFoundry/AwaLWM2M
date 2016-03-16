@@ -99,103 +99,52 @@ size_t Utils_GetNumberOfResourceTypeStrings(void)
     return numEntries;
 }
 
-AwaStaticResourceType Utils_GetResourceType(AwaResourceType resourceType)
-{
-    AwaStaticResourceType result = AwaStaticResourceType_Invalid;
-
-    switch (resourceType)
-    {
-        case AwaResourceType_Invalid:
-            result = AwaStaticResourceType_Invalid;
-            break;
-
-        case AwaResourceType_None:
-            result = AwaStaticResourceType_None;
-            break;
-
-        case AwaResourceType_StringArray:
-        case AwaResourceType_String:
-            result = AwaStaticResourceType_String;
-            break;
-
-        case AwaResourceType_IntegerArray:
-        case AwaResourceType_Integer:
-            result = AwaStaticResourceType_Integer;
-            break;
-
-        case AwaResourceType_FloatArray:
-        case AwaResourceType_Float:
-            result = AwaStaticResourceType_Float;
-            break;
-
-        case AwaResourceType_BooleanArray:
-        case AwaResourceType_Boolean:
-            result = AwaStaticResourceType_Boolean;
-            break;
-
-        case AwaResourceType_OpaqueArray:
-        case AwaResourceType_Opaque:
-            result = AwaStaticResourceType_Opaque;
-            break;
-
-        case AwaResourceType_TimeArray:
-        case AwaResourceType_Time:
-            result = AwaStaticResourceType_Time;
-            break;
-
-        case AwaResourceType_ObjectLinkArray:
-        case AwaResourceType_ObjectLink:
-            result = AwaStaticResourceType_ObjectLink;
-            break;
-
-        default:
-            LogError("Invalid resource type %d", resourceType);
-            break;
-    }
-
-    return result;
-}
-
-// NB: Does not support arrays!
-AwaResourceType Utils_GetAwaResourceType(AwaStaticResourceType resourceType)
+AwaResourceType Utils_GetPrimativeResourceType(AwaResourceType resourceType)
 {
     AwaResourceType result = AwaResourceType_Invalid;
 
     switch (resourceType)
     {
-        case AwaStaticResourceType_Invalid:
+        case AwaResourceType_Invalid:
             result = AwaResourceType_Invalid;
             break;
 
-        case AwaStaticResourceType_None:
+        case AwaResourceType_None:
             result = AwaResourceType_None;
             break;
 
-        case AwaStaticResourceType_String:
+        case AwaResourceType_StringArray:
+        case AwaResourceType_String:
             result = AwaResourceType_String;
             break;
 
-        case AwaStaticResourceType_Integer:
+        case AwaResourceType_IntegerArray:
+        case AwaResourceType_Integer:
             result = AwaResourceType_Integer;
             break;
 
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_FloatArray:
+        case AwaResourceType_Float:
             result = AwaResourceType_Float;
             break;
 
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_BooleanArray:
+        case AwaResourceType_Boolean:
             result = AwaResourceType_Boolean;
             break;
 
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_OpaqueArray:
+        case AwaResourceType_Opaque:
             result = AwaResourceType_Opaque;
             break;
 
-        case AwaStaticResourceType_Time:
+        case AwaResourceType_TimeArray:
+        case AwaResourceType_Time:
             result = AwaResourceType_Time;
             break;
 
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLinkArray:
+        case AwaResourceType_ObjectLink:
             result = AwaResourceType_ObjectLink;
             break;
 

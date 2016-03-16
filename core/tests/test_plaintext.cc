@@ -31,7 +31,7 @@ TEST_F(PlainTextTestSuite, test_serialise_string)
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
 
@@ -58,7 +58,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_string)
     Lwm2m_SetLogLevel(DebugLevel_Debug);
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, (char*)"Open Mobile Alliance", strlen("Open Mobile Alliance"));
 
@@ -87,7 +87,7 @@ TEST_F(PlainTextTestSuite, test_serialise_float)
     double expected = 0.12345;
 
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_Float, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaResourceType_Float, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, &expected, sizeof(expected));
 
@@ -114,7 +114,7 @@ TEST_F(PlainTextTestSuite, test_deserialise_float)
     char buffer[512];
     snprintf(buffer,sizeof(buffer),"%lf",expected);
     Definition_RegisterObjectType(Lwm2mCore_GetDefinitions(context), (char*)"Test", 0, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaStaticResourceType_Float, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, (char*)"Res1", 0, 0, AwaResourceType_Float, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
     Lwm2mCore_CreateObjectInstance(context, 0, 0);
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, &expected, sizeof(expected));
 

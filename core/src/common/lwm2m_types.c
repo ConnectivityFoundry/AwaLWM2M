@@ -29,18 +29,27 @@
 
 #include "lwm2m_types.h"
 
-// This table must align with lwm2m_types.h:AwaStaticResourceType
+// This table must align with awa/common.h:AwaResourceType
 static const char * ResourceTypeStrings[] =
 {
-    "Invalid",
-    "Opaque",
-    "Integer",
-    "Float",
-    "Boolean",
-    "String",
-    "Time",
-    "None",
-    "ObjectLink",
+        "Invalid",
+        "None",
+        "String",
+        "Integer",
+        "Float",
+        "Boolean",
+        "Opaque",
+        "Time",
+        "ObjectLink",
+#if 0
+        "String Array",
+        "Integer Array",
+        "Float Array",
+        "Boolean Array",
+        "Opaque Array",
+        "Time Array",
+        "ObjectLink Array"
+#endif
 };
 
 bool Operations_IsResourceTypeExecutable(Operations operation)
@@ -80,12 +89,11 @@ size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void)
     return sizeof(ResourceTypeStrings) / sizeof(ResourceTypeStrings[0]);
 }
 
-const char * Lwm2mCore_ResourceTypeToString(AwaStaticResourceType resourceType)
+const char * Lwm2mCore_ResourceTypeToString(AwaResourceType resourceType)
 {
     static const char * result = "Unknown ResourceType";
     size_t numEntries = Lwm2mCore_GetNumberOfResourceTypeStrings();
 
-    resourceType += 1; // AwaStaticResourceType starts from -1
     if ((resourceType >= 0) && (resourceType < numEntries))
     {
         result = ResourceTypeStrings[resourceType];
@@ -93,11 +101,11 @@ const char * Lwm2mCore_ResourceTypeToString(AwaStaticResourceType resourceType)
     return result;
 }
 
-AwaStaticResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString)
+AwaResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString)
 {
     int i;
     int numResourceTypeStrings = Lwm2mCore_GetNumberOfResourceTypeStrings();
-    AwaStaticResourceType resourceType = AwaStaticResourceType_Invalid;
+    AwaResourceType resourceType = AwaResourceType_Invalid;
     for (i = 0; i < numResourceTypeStrings; ++i)
     {
         if (strcmp(ResourceTypeStrings[i], resourceTypeString) == 0)
@@ -106,5 +114,5 @@ AwaStaticResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceType
             break;
         }
     }
-    return resourceType - 1; // AwaStaticResourceType starts from -1
+    return resourceType;
 }

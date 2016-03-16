@@ -89,21 +89,6 @@ typedef struct _AwaObjectLink
 
 // AwaString reserved for future use (UTF-8)
 
-typedef enum
-{
-    // These values must align with the table in lwm2m_types.c:ResourceTypeStrings
-    AwaStaticResourceType_Invalid = -1,
-    AwaStaticResourceType_Opaque,
-    AwaStaticResourceType_Integer,
-    AwaStaticResourceType_Float,
-    AwaStaticResourceType_Boolean,
-    AwaStaticResourceType_String,
-    AwaStaticResourceType_Time,
-    AwaStaticResourceType_None,
-    AwaStaticResourceType_ObjectLink,
-
-} AwaStaticResourceType;
-
 /**
  * Supported resource types
  */

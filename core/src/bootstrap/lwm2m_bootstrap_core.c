@@ -52,14 +52,14 @@ int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objNam
     return Definition_RegisterObjectType(context->Definitions, objName, objectID, MaximumInstances, MinimumInstances, Handlers);
 }
 
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, Handlers, NULL);
 }
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers, Lwm2mTreeNode * defaultValueNode)
 {
@@ -72,7 +72,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     int nullTerminator = 0;
     bool changed;
 
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaStaticResourceType_String)
+    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaResourceType_String)
     {
         nullTerminator = 1;
     }

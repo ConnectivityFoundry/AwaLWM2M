@@ -144,9 +144,9 @@ static AwaError ServerWriteAttributesOperation_AddAttribute(AwaServerWriteAttrib
                                             TreeNode attributeNode = Xml_CreateNode("Attribute");
 
                                             TreeNode linkNode = Xml_CreateNodeWithValue("Link", "%s", link);
-                                            TreeNode valueTypeNode = Xml_CreateNodeWithValue("ValueType", "%s", Lwm2mCore_ResourceTypeToString(Utils_GetResourceType(resourceType)));
+                                            TreeNode valueTypeNode = Xml_CreateNodeWithValue("ValueType", "%s", Lwm2mCore_ResourceTypeToString(Utils_GetPrimativeResourceType(resourceType)));
 
-                                            char * encodedValue = xmlif_EncodeValue(Utils_GetResourceType(resourceType), value, valueSize);
+                                            char * encodedValue = xmlif_EncodeValue(Utils_GetPrimativeResourceType(resourceType), value, valueSize);
                                             TreeNode valueNode = Xml_CreateNodeWithValue("Value", "%s", encodedValue);
                                             Awa_MemSafeFree(encodedValue);
 

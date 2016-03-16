@@ -74,10 +74,10 @@ void Lwm2m_AddACLObject(Lwm2mContextType * context, int instanceID, int aclObjec
 void Lwm2m_RegisterACLObject(Lwm2mContextType * context)
 {
     Lwm2mCore_RegisterObjectType(context, "LWM2MAccessControl" , LWM2M_ACL_OBJECT, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ObjectID", LWM2M_ACL_OBJECT, 0, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ObjectInstanceID", LWM2M_ACL_OBJECT, 1, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ACL", LWM2M_ACL_OBJECT, 2, AwaStaticResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional, Operations_RW, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "AccessControlOwner", LWM2M_ACL_OBJECT, 3, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ObjectID", LWM2M_ACL_OBJECT, 0, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ObjectInstanceID", LWM2M_ACL_OBJECT, 1, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ACL", LWM2M_ACL_OBJECT, 2, AwaResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional, Operations_RW, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "AccessControlOwner", LWM2M_ACL_OBJECT, 3, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &defaultResourceOperationHandlers);
 
     /// Populate ACL
     ACL table30[1] = {{101, LWM2M_TABLE30_ACL_101}};

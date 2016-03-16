@@ -670,8 +670,8 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
     {
         switch (definition->Type)
         {
-            case AwaStaticResourceType_String:  // no break
-            case AwaStaticResourceType_Opaque:
+            case AwaResourceType_String:  // no break
+            case AwaResourceType_Opaque:
                 size = 0; // This is ok: just means we have an empty string.
                 break;
             default:
@@ -694,16 +694,16 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 
     switch (definition->Type)
     {
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
             valueLength = TlvEncodeString(buffer, len, type, id, (char*)value);
             break;
 
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Boolean:
             valueLength = TlvEncodeBoolean(buffer, len, type, id, *(bool*)value);
             break;
 
-        case AwaStaticResourceType_Time: // no break
-        case AwaStaticResourceType_Integer:
+        case AwaResourceType_Time: // no break
+        case AwaResourceType_Integer:
             switch (size)
             {
                 case sizeof(int8_t):
@@ -723,7 +723,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
 
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
             switch (size)
             {
                 case sizeof(float):
@@ -738,11 +738,11 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
 
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_Opaque:
             valueLength = TlvEncodeOpaque(buffer, len, type, id, (uint8_t*)value, size);
             break;
 
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLink:
             {
                 AwaObjectLink * objectLink = (AwaObjectLink *) value;
                 Lwm2m_Debug("Object ID %d Object Instance %d\n", objectLink->ObjectID, objectLink->ObjectInstanceID);
@@ -933,18 +933,18 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
     Lwm2mTreeNode_SetID(*dest, resID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ResourceInstance);
 
-    AwaStaticResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
+    AwaResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
     switch (resourceType)
     {
-        case AwaStaticResourceType_Integer:
-        case AwaStaticResourceType_Time:
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Integer:
+        case AwaResourceType_Time:
+        case AwaResourceType_Boolean:
             {
                 int64_t temp = 0;
                 result = TlvDecodeInteger((int64_t*)&temp, buffer, len);
                 if (result >= 0)
                 {
-                    if (resourceType != AwaStaticResourceType_Boolean)
+                    if (resourceType != AwaResourceType_Boolean)
                     {
                         Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(int64_t));
                     }
@@ -956,7 +956,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 }
             }
             break;
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
             {
                 double temp = 0;
                 result = TlvDecodeFloat((double*)&temp, buffer, len);
@@ -966,17 +966,17 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
                 }
             }
             break;
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
             {
                 Lwm2mTreeNode_SetValue(*dest, buffer, len);
                 result = 0;
             }
             break;
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_Opaque:
             Lwm2mTreeNode_SetValue(*dest, buffer, len);
             result = 0;
             break;
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLink:
             {
                 AwaObjectLink temp;
                 result = TlvDecodeObjectLink(&temp.ObjectID, &temp.ObjectInstanceID, buffer, len);

@@ -78,7 +78,7 @@ AwaError ObjectDefinition_AddResourceDefinition(AwaObjectDefinition * objectDefi
             if (Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID) == NULL)
             {
                 Operations coreOperations = Utils_GetResourceTypeOperations(operations);
-                AwaStaticResourceType coreResourceType = Utils_GetResourceType(resourceType);
+                AwaResourceType coreResourceType = Utils_GetPrimativeResourceType(resourceType);
 
                 if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, coreOperations, RESOURCE_HANDLER, defaultValueNode))
                 {
@@ -308,64 +308,31 @@ AwaResourceType AwaResourceDefinition_GetType(const AwaResourceDefinition * reso
     {
         if (!IS_MULTIPLE_INSTANCE(resourceDefinition))
         {
-
-            switch (resourceDefinition->Type)
-            {
-                case AwaStaticResourceType_Invalid:
-                    resourceType = AwaResourceType_Invalid;
-                    break;
-                case AwaStaticResourceType_Opaque:
-                    resourceType = AwaResourceType_Opaque;
-                    break;
-                case AwaStaticResourceType_Integer:
-                    resourceType = AwaResourceType_Integer;
-                    break;
-                case AwaStaticResourceType_Float:
-                    resourceType = AwaResourceType_Float;
-                    break;
-                case AwaStaticResourceType_Boolean:
-                    resourceType = AwaResourceType_Boolean;
-                    break;
-                case AwaStaticResourceType_String:
-                    resourceType = AwaResourceType_String;
-                    break;
-                case AwaStaticResourceType_Time:
-                    resourceType = AwaResourceType_Time;
-                    break;
-                case AwaStaticResourceType_None:
-                    resourceType = AwaResourceType_None;
-                    break;
-                case AwaStaticResourceType_ObjectLink:
-                    resourceType = AwaResourceType_ObjectLink;
-                    break;
-                default:
-                    LogError("Invalid resource type %d", resourceDefinition->Type);
-                    resourceType = AwaResourceType_Invalid;
-            }
+            resourceType = resourceDefinition->Type;
         }
         else
         {
             switch (resourceDefinition->Type)
             {
-                case AwaStaticResourceType_Opaque:
+                case AwaResourceType_Opaque:
                     resourceType = AwaResourceType_OpaqueArray;
                     break;
-                case AwaStaticResourceType_Integer:
+                case AwaResourceType_Integer:
                     resourceType = AwaResourceType_IntegerArray;
                     break;
-                case AwaStaticResourceType_Float:
+                case AwaResourceType_Float:
                     resourceType = AwaResourceType_FloatArray;
                     break;
-                case AwaStaticResourceType_Boolean:
+                case AwaResourceType_Boolean:
                     resourceType = AwaResourceType_BooleanArray;
                     break;
-               case AwaStaticResourceType_String:
+               case AwaResourceType_String:
                     resourceType = AwaResourceType_StringArray;
                     break;
-               case AwaStaticResourceType_Time:
+               case AwaResourceType_Time:
                     resourceType = AwaResourceType_TimeArray;
                     break;
-               case AwaStaticResourceType_ObjectLink:
+               case AwaResourceType_ObjectLink:
                     resourceType = AwaResourceType_ObjectLinkArray;
                     break;
                default:
