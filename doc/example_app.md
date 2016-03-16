@@ -419,6 +419,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -514,6 +515,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -644,6 +646,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
 
     awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");

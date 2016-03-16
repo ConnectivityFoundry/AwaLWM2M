@@ -240,6 +240,20 @@ TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invalid_input)
     EXPECT_TRUE(client == NULL);
 }
 
+
+TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_valid_input)
+{
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_None));
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetLogLevel(AwaLogLevel_Debug));
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_invalid_input)
+{
+    ASSERT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_None - 1)));
+    ASSERT_EQ(AwaError_LogLevelInvalid, AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(AwaLogLevel_Debug + 1)));
+}
+
+
 TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationContext_invalid_inputs)
 {
     ASSERT_TRUE(NULL == AwaStaticClient_GetApplicationContext(NULL));

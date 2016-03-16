@@ -53,6 +53,7 @@ struct _AwaStaticClient
 
 AwaStaticClient * AwaStaticClient_New()
 {
+    AwaStaticClient_SetLogLevel(AwaLogLevel_None);
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
 
     if (client != NULL)
@@ -134,7 +135,6 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
 AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
 {
     AwaError result = AwaError_Unspecified;
-    AwaError AwaStaticClient_SetLogLevel(AwaLogLevel );
     if ((level >= AwaLogLevel_None) && (level <= AwaLogLevel_Debug))
     {
         Lwm2m_SetAwaLogLevel(level);
