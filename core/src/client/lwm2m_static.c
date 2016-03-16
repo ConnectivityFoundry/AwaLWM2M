@@ -135,7 +135,7 @@ AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
 {
     AwaError result = AwaError_Unspecified;
     AwaError AwaStaticClient_SetLogLevel(AwaLogLevel );
-    if (level >= AwaLogLevel_None && level <= AwaLogLevel_Debug)
+    if ((level >= AwaLogLevel_None) && (level <= AwaLogLevel_Debug))
     {
         Lwm2m_SetAwaLogLevel(level);
         coap_SetLogLevel(level);

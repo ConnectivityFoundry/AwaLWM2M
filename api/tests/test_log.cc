@@ -2,6 +2,7 @@
 
 #include "log.h"
 #include "support/support.h"
+#include "awa/types.h"
 
 namespace Awa {
 
@@ -46,12 +47,23 @@ protected:
     }
 };
 
+TEST_F(TestLogCaptureFile, test_Log_level_None)
+{
+    const char * inputString = "Hello, World!";
+    SetLogLevel(AwaLogLevel_None);
+    Log(AwaLogLevel_Error, outFile_, "%s", inputString);
+    EXPECT_STREQ("", Read());
+    Log(AwaLogLevel_Warning, outFile_, "%s", inputString);
+    EXPECT_STREQ("", Read());
+    Log(AwaLogLevel_Verbose, outFile_, "%s", inputString);
+    EXPECT_STREQ("", Read());
+}
 
-TEST_F(TestLogCaptureFile, test_Log_level_0)
+TEST_F(TestLogCaptureFile, test_Log_level_Error)
 {
     const char * inputString = "Hello, World!";
     const char * expectedString = "Hello, World!\n";
-    SetLogLevel(0);
+    SetLogLevel(AwaLogLevel_Error);
     Log(0, outFile_, "%s", inputString);
     EXPECT_STREQ(expectedString, Read());
     Log(1, outFile_, "%s", inputString);
@@ -60,7 +72,7 @@ TEST_F(TestLogCaptureFile, test_Log_level_0)
     EXPECT_STREQ("", Read());
 }
 
-TEST_F(TestLogCaptureFile, test_Log_level_1)
+TEST_F(TestLogCaptureFile, test_Log_level_Warning)
 {
     const char * inputString = "ABCDEFG\nHIJKL";
     const char * expectedString = "ABCDEFG\nHIJKL\n";
@@ -73,7 +85,7 @@ TEST_F(TestLogCaptureFile, test_Log_level_1)
     EXPECT_STREQ("", Read());
 }
 
-TEST_F(TestLogCaptureFile, test_Log_level_2)
+TEST_F(TestLogCaptureFile, test_Log_level_Verbose)
 {
     const char * inputString = "The quick brown fox blah blah blah";
     const char * expectedString = "The quick brown fox blah blah blah\n";

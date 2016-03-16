@@ -77,6 +77,7 @@ static const char * ErrorStrings[] =
     // 31
     "AwaError_StaticClientInvalid",
     "AwaError_StaticClientNotConfigured",
+    "AwaError_LogLevelInvalid",
 };
 
 const char * AwaError_ToString(AwaError error)

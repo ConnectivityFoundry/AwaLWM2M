@@ -141,7 +141,7 @@ typedef enum
  */
 typedef enum
 {
-    AwaLogLevel_None = 0,    /**< No log information is reported. */
+    AwaLogLevel_None = -1,  /**< No log information is reported. */
     AwaLogLevel_Error,      /**< Only errors are reported. */
     AwaLogLevel_Warning,    /**< Warnings are reported, in addition to Error. */
     AwaLogLevel_Verbose,    /**< High-level information is reported, in addition to Warning. */
