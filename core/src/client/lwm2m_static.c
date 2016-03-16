@@ -348,6 +348,7 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                 break;
 
             case AwaOperation_DeleteResource:
+                result = AwaLwm2mResult_SuccessDeleted;
                 break;
 
             case AwaOperation_Write:
@@ -384,6 +385,7 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                 break;
 
             case AwaOperation_Execute:
+            default:
                 result = AwaLwm2mResult_BadRequest;
                 break;
             }
