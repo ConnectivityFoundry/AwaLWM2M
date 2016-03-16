@@ -482,7 +482,7 @@ The following code expands on the previous example, by demonstrating how to add 
 +typedef struct
 +{
 +    char Manufacturer[64];
-+    float Temperature;
++    AwaFloat Temperature;
 +
 +} HeaterObject;
 
@@ -605,7 +605,7 @@ Copy the following code to contiki-example/*static-client-tutorial.c*:
 typedef struct
 {
     char Manufacturer[64];
-    float Temperature;
+    AwaFloat Temperature;
 
 } HeaterObject;
 
