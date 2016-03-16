@@ -53,7 +53,6 @@ struct _AwaStaticClient
 
 AwaStaticClient * AwaStaticClient_New()
 {
-    AwaStaticClient_SetLogLevel(AwaLogLevel_None);
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
 
     if (client != NULL)

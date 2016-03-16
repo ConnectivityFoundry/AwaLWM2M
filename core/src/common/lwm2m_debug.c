@@ -26,7 +26,7 @@
 
 #include "lwm2m_debug.h"
 
-static DebugLevel debugLevel = DebugLevel_Info;
+static DebugLevel debugLevel = DebugLevel_Error;
 static FILE * g_outFile = NULL;
 
 static const char * logLabels[] = { "EMER", "ALERT", "CRIT", "ERROR", "WARN", "NOTICE", "INFO", "DEBUG" };
