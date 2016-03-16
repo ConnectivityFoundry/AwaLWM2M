@@ -73,9 +73,12 @@ typedef struct
 } CoapInfo;
 
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel);
+
 int coap_Destroy(void);
 void coap_Process(void);
 void coap_HandleMessage(void);
+
+void coap_SetLogLevel(int logLevel);
 
 void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback);
 void coap_PostRequest(void * context, const char * uri, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);

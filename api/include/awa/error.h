@@ -82,6 +82,8 @@ typedef enum
     // 31
     AwaError_StaticClientInvalid,        /**< Indicates an operation was attempted in the context of an invalid Static Client */
     AwaError_StaticClientNotConfigured,  /**< Indicates a Static Client was initialised without being configured */
+    AwaError_LogLevelInvalid,            /**< Indicates an attempt to set an unknown log level  */
+
 
     AwaError_LAST                        /**< Reserved value */
 } AwaError;

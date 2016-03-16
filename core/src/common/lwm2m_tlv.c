@@ -548,7 +548,7 @@ static int TlvDecodeFloat(double * dest, const uint8_t * buffer, int size)
     }
     else
     {
-        Lwm2m_Error("Invalid size, should be either 4 or 8 bytes\n");
+        Lwm2m_Error("Invalid size, should be either 4 or 8 bytes: received %d\n", size);
         return -1;
     }
 
@@ -733,7 +733,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(double*)value);
                     break;
                 default:
-                    Lwm2m_Error("Invalid length for float\n");
+                    Lwm2m_Error("Invalid length for float: %d\n", size);
                     break;
             }
             break;

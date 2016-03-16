@@ -74,17 +74,6 @@ typedef enum
 } AwaChangeType;
 
 /**
- * Supported log levels for a log command
- */
-typedef enum
-{
-    AwaLogLevel_Error = 0,  /**< Only errors are reported. */
-    AwaLogLevel_Warning,    /**< Warnings are reported, in addition to Error. */
-    AwaLogLevel_Verbose,    /**< High-level information is reported, in addition to Warning. */
-    AwaLogLevel_Debug,      /**< Low-level information is reported, in addition to Verbose. */
-} AwaLogLevel;
-
-/**
  * Represents a timeout value, in milliseconds
  */
 typedef int AwaTimeout;
