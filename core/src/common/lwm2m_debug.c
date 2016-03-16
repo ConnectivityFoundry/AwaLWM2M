@@ -26,7 +26,7 @@
 
 #include "lwm2m_debug.h"
 
-static DebugLevel debugLevel = DebugLevel_Info;
+static DebugLevel debugLevel = DebugLevel_Error;
 static FILE * g_outFile = NULL;
 
 static const char * logLabels[] = { "EMER", "ALERT", "CRIT", "ERROR", "WARN", "NOTICE", "INFO", "DEBUG" };
@@ -97,4 +97,34 @@ void Lwm2m_SetOutput(FILE * outFile)
 void Lwm2m_SetLogLevel(DebugLevel level)
 {
     debugLevel = level;
+}
+
+DebugLevel Lwm2m_GetLogLevel()
+{
+    return debugLevel;
+}
+
+void Lwm2m_SetAwaLogLevel(AwaLogLevel level)
+{
+    switch (level)
+    {
+    case AwaLogLevel_None:
+        Lwm2m_SetLogLevel(DebugLevel_Emerg);
+        break;
+    case AwaLogLevel_Error:
+        Lwm2m_SetLogLevel(DebugLevel_Error);
+        break;
+    case AwaLogLevel_Warning:
+        Lwm2m_SetLogLevel(DebugLevel_Warning);
+        break;
+    case AwaLogLevel_Verbose:
+        Lwm2m_SetLogLevel(DebugLevel_Info);
+        break;
+    case AwaLogLevel_Debug:
+        Lwm2m_SetLogLevel(DebugLevel_Debug);
+        break;
+    default:
+        Lwm2m_Error("Unknown Awa LogLevel: %d\n", level);
+        break;
+    }
 }

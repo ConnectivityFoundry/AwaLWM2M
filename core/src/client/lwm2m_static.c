@@ -101,7 +101,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     {
         if (client->COAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
-            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, DebugLevel_Debug);
+            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, Lwm2m_GetLogLevel());
 
             if (client->COAP != NULL)
             {
@@ -126,6 +126,24 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     else
     {
         result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
+{
+    AwaError result = AwaError_Unspecified;
+    if ((level >= AwaLogLevel_None) && (level <= AwaLogLevel_Debug))
+    {
+        Lwm2m_SetAwaLogLevel(level);
+        coap_SetLogLevel(level);
+
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_LogLevelInvalid;
     }
 
     return result;

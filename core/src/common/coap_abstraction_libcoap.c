@@ -1112,7 +1112,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
     char port_str[32];
 
-    coap_set_log_level(logLevel);
+    coap_SetLogLevel(logLevel);
 
     sprintf(port_str, "%d", port);
 
@@ -1131,6 +1131,11 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     ListInit(&notifyCallbackList);
 
     return &coapInfo;
+}
+
+void coap_SetLogLevel(int logLevel)
+{
+    coap_set_log_level(logLevel);
 }
 
 static void DestroyLists(void)

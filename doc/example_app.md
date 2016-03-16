@@ -39,7 +39,13 @@ Use the commands below to build and install Awa LightweightM2M to the  *./build/
 ```
 ~/AwaLWM2M$ make
 ~/AwaLWM2M$ cd build
-~/AwaLWM2M/build$ cmake DESTDIR=./install install
+~/AwaLWM2M/build$ make install DESTDIR=./install
+```
+
+Alternatively, you can use the following command to install into the default directory given above:
+
+```
+~/AwaLWM2M$ make install
 ```
 
 ----
@@ -58,8 +64,6 @@ $ cd ~/tutorial
 To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to retain the ````<TAB>```` character preceding *$(CC) client-tutorial.c* :
 
 ```make
-INSTALL_PATH:=~/AwaLWM2M/build/install
-
 all:
 	$(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
@@ -320,8 +324,6 @@ int main(void)
 Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
-INSTALL_PATH:=~/AwaLWM2M/build/install
-
 all:
         $(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
         $(CC) server-tutorial.c -o server-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
@@ -402,8 +404,6 @@ Create a new directory *static-client-tutorial*
 Copy the following code into static-client-tutorial/*Makefile*:
 
 ```make
-INSTALL_PATH:=../build/install
-
 all:
 	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa_static
 ```
@@ -419,6 +419,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -482,11 +483,11 @@ The following code expands on the previous example, by demonstrating how to add 
 +typedef struct
 +{
 +    char Manufacturer[64];
-+    float Temperature;
++    AwaFloat Temperature;
 +
 +} HeaterObject;
 
-static HeaterObject heater[HEATER_INSTANCES];
++static HeaterObject heater[HEATER_INSTANCES];
 
 +static void DefineHeaterObject(AwaStaticClient * awaClient)
 +{
@@ -514,6 +515,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -605,7 +607,7 @@ Copy the following code to contiki-example/*static-client-tutorial.c*:
 typedef struct
 {
     char Manufacturer[64];
-    float Temperature;
+    AwaFloat Temperature;
 
 } HeaterObject;
 
@@ -644,6 +646,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
 
     awaClient = AwaStaticClient_New();
 
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCOAPListenAddressPort(awaClient, "", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");
