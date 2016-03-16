@@ -11,17 +11,17 @@ class Lwm2mTypesTestSuite : public testing::Test
 
 TEST_F(Lwm2mTypesTestSuite, ResourceType_Strings_are_consistent)
 {
-    ASSERT_EQ(static_cast<size_t>(AwaStaticResourceType_ObjectLink + 2), Lwm2mCore_GetNumberOfResourceTypeStrings()); // + 1 for invalid=-1, +1 for starting at 0
+    ASSERT_EQ(static_cast<size_t>(AwaResourceType_ObjectLink + 1), Lwm2mCore_GetNumberOfResourceTypeStrings()); // +1 for starting at 0
 }
 
 TEST_F(Lwm2mTypesTestSuite, ResourceType_ToString)
 {
-    EXPECT_STREQ("Invalid", Lwm2mCore_ResourceTypeToString(AwaStaticResourceType_Invalid));
-    EXPECT_STREQ("ObjectLink", Lwm2mCore_ResourceTypeToString(AwaStaticResourceType_ObjectLink));
+    EXPECT_STREQ("Invalid", Lwm2mCore_ResourceTypeToString(AwaResourceType_Invalid));
+    EXPECT_STREQ("ObjectLink", Lwm2mCore_ResourceTypeToString(AwaResourceType_ObjectLink));
 }
 
 TEST_F(Lwm2mTypesTestSuite, ResourceType_FromString)
 {
-    EXPECT_EQ(AwaStaticResourceType_Invalid, Lwm2mCore_ResourceTypeFromString("Invalid"));
-    EXPECT_EQ(AwaStaticResourceType_ObjectLink, Lwm2mCore_ResourceTypeFromString("ObjectLink"));
+    EXPECT_EQ(AwaResourceType_Invalid, Lwm2mCore_ResourceTypeFromString("Invalid"));
+    EXPECT_EQ(AwaResourceType_ObjectLink, Lwm2mCore_ResourceTypeFromString("ObjectLink"));
 }

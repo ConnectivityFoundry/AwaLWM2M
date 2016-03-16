@@ -93,7 +93,7 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
 
                                     if (ObjectsTree_GetNumChildrenWithName(resultNode, "ResourceInstance") < resourceDefinition->MaximumInstances)
                                     {
-                                        char * encodedValue = xmlif_EncodeValue(Utils_GetResourceType(type), value, size);
+                                        char * encodedValue = xmlif_EncodeValue(Utils_GetPrimativeResourceType(type), value, size);
 
                                         if (ObjectsTree_AddPath(objectsTree, path, &resultNode) == InternalError_Success && resultNode != NULL)
                                         {

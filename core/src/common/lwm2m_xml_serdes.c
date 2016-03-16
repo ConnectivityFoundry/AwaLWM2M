@@ -28,12 +28,12 @@
 #include "lwm2m_xml_serdes.h"
 #include "xml.h"
 
-static const char * TypeStrings[] = { "Opaque", "Integer", "Float", "Boolean", "String", "DateTime", "None", "ObjectLink" };
+static const char * TypeStrings[] = { "Invalid", "None", "String", "Integer", "Float", "Boolean", "Opaque", "DateTime", "ObjectLink" };
 static const char * OperationStrings[] = { "None", "Read", "Write", "ReadWrite", "Execute", "ReadExecute", "WriteExecute", "ReadWriteExecute" };
 
 #define NUM_TYPES (sizeof(TypeStrings) / sizeof(const char *))
 
-AwaStaticResourceType xmlif_StringToDataType(const char * value)
+AwaResourceType xmlif_StringToDataType(const char * value)
 {
     int i;
 
@@ -47,7 +47,7 @@ AwaStaticResourceType xmlif_StringToDataType(const char * value)
     return -1;
 }
 
-const char * xmlif_DataTypeToString(AwaStaticResourceType type)
+const char * xmlif_DataTypeToString(AwaResourceType type)
 {
     if ((type < 0) || (type >= NUM_TYPES))
     {
@@ -103,7 +103,7 @@ const char * xmlif_GetOpaque(TreeNode content, const char * name)
     return NULL;
 }
 
-char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, int bufferLength)
+char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int bufferLength)
 {
     int outLength = 0;
     char * dataValue = NULL;
@@ -115,7 +115,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
     switch(dataType)
     {
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
         {
             // adjust string length because object store expects Pascal strings
             if (bufferLength > 0 && buffer[bufferLength - 1] == 0)
@@ -126,7 +126,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
         }
         // no break - intentional fall-through
 
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_Opaque:
             outLength = (((bufferLength + 2) * 4) / 3);
             dataValue = malloc(outLength + 1);
             if (dataValue == NULL)
@@ -138,7 +138,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             outLength = b64Encode(dataValue, outLength, (char*)buffer, bufferLength);
             break;
 
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
 
             if (bufferLength == sizeof(double))
             {
@@ -162,8 +162,8 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             }
             break;
 
-        case AwaStaticResourceType_Integer:  // no break
-        case AwaStaticResourceType_Time:
+        case AwaResourceType_Integer:  // no break
+        case AwaResourceType_Time:
 
             switch (bufferLength)
             {
@@ -192,7 +192,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
 
             break;
 
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Boolean:
             outLength = asprintf(&dataValue, "%s", (*(bool*)&buffer[0]) ? "True" : "False");
 
             if ((outLength <= 0) || (dataValue == NULL))
@@ -202,7 +202,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             }
             break;
 
-        case AwaStaticResourceType_ObjectLink:;
+        case AwaResourceType_ObjectLink:;
             AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
             outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
 
@@ -213,7 +213,7 @@ char * xmlif_EncodeValue(AwaStaticResourceType dataType, const char * buffer, in
             }
             break;
 
-        case AwaStaticResourceType_None:
+        case AwaResourceType_None:
         default:
             AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
             goto error;
@@ -224,14 +224,14 @@ error:
     return dataValue;
 }
 
-int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const char * buffer, int bufferLength)
+int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * buffer, int bufferLength)
 {
     int dataLength = -1;
     int outLength;
 
     switch(dataType)
     {
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
             //
             outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes,
             *dataValue = malloc(outLength);
@@ -258,8 +258,8 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             }
             break;
 
-        case AwaStaticResourceType_Opaque: 
-        case AwaStaticResourceType_None: // TypeNone for Executable payload which is an Opaque
+        case AwaResourceType_Opaque: 
+        case AwaResourceType_None: // TypeNone for Executable payload which is an Opaque
             outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes
             *dataValue = malloc(outLength);
             if (*dataValue == NULL)
@@ -275,7 +275,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             }
             break;
 
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
         {
             double d;
             *dataValue = malloc(sizeof(double));
@@ -290,8 +290,8 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             break;
         }
 
-        case AwaStaticResourceType_Integer:  // no break
-        case AwaStaticResourceType_Time:
+        case AwaResourceType_Integer:  // no break
+        case AwaResourceType_Time:
         {
             uint64_t u;
             *dataValue = malloc(sizeof(uint64_t));
@@ -306,7 +306,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             break;
         }
 
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Boolean:
             *dataValue = malloc(sizeof(bool));
             if (*dataValue == NULL)
             {
@@ -317,7 +317,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             dataLength = sizeof(bool);
             break;
 
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLink:
         {
             dataLength = sizeof(AwaObjectLink);
             *dataValue = malloc(dataLength);
@@ -332,7 +332,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaStaticResourceType dataType, const c
             break;
         }
 
-        //case AwaStaticResourceType_None:
+        //case AwaResourceType_None:
         default:
             AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
             goto error;

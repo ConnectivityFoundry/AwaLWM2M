@@ -66,7 +66,7 @@ typedef int ObjectIDType;
 typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;
 typedef int ResourceInstanceIDType;
-//typedef int AwaStaticResourceType;
+//typedef int AwaResourceType;
 
 #ifndef CONTIKI
 typedef struct
@@ -110,8 +110,8 @@ bool Operations_IsResourceTypeReadable(Operations operation);
 bool Operations_Contains(Operations parent, Operations child);
 
 size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void);
-const char * Lwm2mCore_ResourceTypeToString(AwaStaticResourceType resourceType);
-AwaStaticResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
+const char * Lwm2mCore_ResourceTypeToString(AwaResourceType resourceType);
+AwaResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
 
 #ifdef __cplusplus
 }

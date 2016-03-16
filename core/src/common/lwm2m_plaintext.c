@@ -53,19 +53,19 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
 
     switch (definition->Type)
     {
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
             if (len >= size)
             {
                 strcpy(buf, (char*)value);
                 valueLength = strlen(buf);
             }
             break;
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Boolean:
             sprintf(buf, "%s", *(bool*)value ? "1" : "0");
             valueLength = strlen(buf);
             break;
-        case AwaStaticResourceType_Time:
-        case AwaStaticResourceType_Integer:
+        case AwaResourceType_Time:
+        case AwaResourceType_Integer:
             switch (size)
             {
                 case sizeof(int8_t):
@@ -85,7 +85,7 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             valueLength = strlen(buf);
             break;
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
             switch (size)
             {
             case sizeof(float):
@@ -100,10 +100,10 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             }
             valueLength = strlen(buf);
             break;
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_Opaque:
             Lwm2m_Error("ERROR: Opaque is not supported for plain text mode\n");
             break;
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLink:
             {
                AwaObjectLink * objectLink = (AwaObjectLink *) value;
                sprintf(buf, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
@@ -180,11 +180,11 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
     Lwm2mTreeNode_SetID(resourceValueNode, 0);
     Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
-    AwaStaticResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
+    AwaResourceType resourceType = Definition_GetResourceType(registry, objectID, resourceID);
     switch (resourceType)
     {
-        case AwaStaticResourceType_Integer:  // no break
-        case AwaStaticResourceType_Time:
+        case AwaResourceType_Integer:  // no break
+        case AwaResourceType_Time:
             {
                 int64_t temp = 0;
                 result = sscanf((char*)buffer, "%" SCNu64, &temp);
@@ -194,7 +194,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                 }
             }
             break;
-        case AwaStaticResourceType_Boolean:
+        case AwaResourceType_Boolean:
                 if (bufferLen == 1)
                 {
                     bool temp;
@@ -220,7 +220,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                     }
                 }
                 break;
-        case AwaStaticResourceType_Float:
+        case AwaResourceType_Float:
             {
                 double temp = 0;
                 result = sscanf((char*)buffer, "%24lf", &temp);
@@ -230,16 +230,16 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
                 }
             }
             break;
-        case AwaStaticResourceType_Opaque:
+        case AwaResourceType_Opaque:
             Lwm2m_Error("Opaque is not supported for plain text\n");
             break;
-        case AwaStaticResourceType_String:
+        case AwaResourceType_String:
             {
                 const uint8_t * str = buffer != NULL ? buffer : (uint8_t*)"";
                 result = Lwm2mTreeNode_SetValue(resourceValueNode, str, bufferLen);
             }
             break;
-        case AwaStaticResourceType_ObjectLink:
+        case AwaResourceType_ObjectLink:
             {
                 AwaObjectLink objectLink;
                 result = sscanf((char*)buffer, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);

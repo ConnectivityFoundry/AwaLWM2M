@@ -268,9 +268,9 @@ done:
     return nextObjectID;
 }
 
-AwaStaticResourceType Definition_GetResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
+AwaResourceType Definition_GetResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
 {
-    AwaStaticResourceType resourceType = AwaStaticResourceType_Invalid;
+    AwaResourceType resourceType = AwaResourceType_Invalid;
     AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
     ResourceDefinition * resFormat = Definition_LookupResourceDefinition(registry, objectID, resourceID);
     if (resFormat != NULL)
@@ -321,7 +321,7 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
 }
 
 ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
-                                                AwaStaticResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
+                                                AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
                                                 Operations operations, ResourceOperationHandlers * handlers, LWM2MHandler handler, Lwm2mTreeNode * defaultValueNode)
 {
     ResourceDefinition * resFormat = (ResourceDefinition *)malloc(sizeof(*resFormat));
@@ -331,7 +331,7 @@ ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * 
         resFormat->ResourceName = strdup(resName);
         resFormat->ResourceID = resourceID;
         resFormat->Operation = operations;
-        resFormat->Type = (AwaStaticResourceType)resourceType;
+        resFormat->Type = (AwaResourceType)resourceType;
         resFormat->MaximumInstances = maximumInstances;
         resFormat->MinimumInstances = minimumInstances;
         resFormat->DefaultValueNode = (defaultValueNode != NULL) ? Lwm2mTreeNode_CopyRecursive(defaultValueNode) : NULL;
@@ -352,19 +352,19 @@ ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * 
 }
 
 ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
-                                                AwaStaticResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
+                                                AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
                                                 Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL, defaultValueNode);
 }
 
-ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaResourceType resourceType,
                                                            uint16_t MinimumInstances, uint16_t MaximumInstances, Operations operations, LWM2MHandler Handler)
 {
     return NewResourceType(objFormat, resName, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, NULL, Handler, NULL);
 }
 
-int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                     uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     int result = -1;
@@ -381,7 +381,7 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
         goto error;
     }
 
-    if (Operations_IsResourceTypeExecutable(operations) && resourceType != AwaStaticResourceType_None)
+    if (Operations_IsResourceTypeExecutable(operations) && resourceType != AwaResourceType_None)
     {
         AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
         goto error;
@@ -568,34 +568,34 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
                 *dataLen = 0;
                 switch (resourceDefinition->Type)
                 {
-                    case AwaStaticResourceType_Opaque:     // no break
-                    case AwaStaticResourceType_None:
+                    case AwaResourceType_Opaque:     // no break
+                    case AwaResourceType_None:
                         break;
-                    case AwaStaticResourceType_Integer:
+                    case AwaResourceType_Integer:
                         *dataLen = sizeof(defaultInt);
                         *data = &defaultInt;
                         break;
-                    case AwaStaticResourceType_Float:
+                    case AwaResourceType_Float:
                         *dataLen = sizeof(defaultFloat);
                         *data = &defaultFloat;
                         break;
-                    case AwaStaticResourceType_Boolean:
+                    case AwaResourceType_Boolean:
                         *dataLen = sizeof(defaultBool);
                         *data = &defaultBool;
                         break;
-                    case AwaStaticResourceType_String:
+                    case AwaResourceType_String:
                         *data = defaultString;
                         *dataLen = strlen(*data) + 1;
                         break;
-                    case AwaStaticResourceType_Time:
+                    case AwaResourceType_Time:
                         *dataLen = sizeof(defaultInt);
                         *data = &defaultInt;
                         break;
-                    case AwaStaticResourceType_ObjectLink:
+                    case AwaResourceType_ObjectLink:
                         *dataLen = sizeof(defaultObjectLink);
                         *data = &defaultObjectLink;
                         break;
-                    case AwaStaticResourceType_Invalid:  // no break
+                    case AwaResourceType_Invalid:  // no break
                     default:
                         Lwm2m_Error("Invalid resource type %d\n", resourceDefinition->Type);
                         break;

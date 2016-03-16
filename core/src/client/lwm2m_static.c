@@ -476,7 +476,7 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 }
 
 static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const char * resourceName,
-                                                 AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                 AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
                                                  uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
                                                  AwaStaticClientHandler handler,  void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
@@ -516,7 +516,7 @@ static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const
 }
 
 AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, const char * resourceName,
-                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
                                                      uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
                                                      void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
@@ -528,7 +528,7 @@ AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, c
 }
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
-                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaStaticResourceType resourceType,
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
                                                      uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
                                                      AwaStaticClientHandler handler)
 {

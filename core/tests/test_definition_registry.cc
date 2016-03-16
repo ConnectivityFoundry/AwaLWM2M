@@ -28,10 +28,10 @@ TEST_F(Lwm2mDefinitionRegistryTestSuite, test_register_lookup_object)
     // test register definition twice but with different definition
     ASSERT_EQ(-1, Definition_RegisterObjectType(registry, "test object 1", 1000, MultipleInstancesEnum_Single, MandatoryEnum_Optional, NULL));
 
-    ASSERT_EQ(-1, Definition_RegisterResourceType(NULL, "test resource", 1000, 101, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
-    ASSERT_EQ(-1, Definition_RegisterResourceType(registry, "test resource", 2000, 101, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
-    ASSERT_EQ(0, Definition_RegisterResourceType(registry, "test resource", 1000, 101, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
-    ASSERT_EQ(-1, Definition_RegisterResourceType(registry, "test resource 1", 1000, 101, AwaStaticResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
+    ASSERT_EQ(-1, Definition_RegisterResourceType(NULL, "test resource", 1000, 101, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
+    ASSERT_EQ(-1, Definition_RegisterResourceType(registry, "test resource", 2000, 101, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
+    ASSERT_EQ(0, Definition_RegisterResourceType(registry, "test resource", 1000, 101, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
+    ASSERT_EQ(-1, Definition_RegisterResourceType(registry, "test resource 1", 1000, 101, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, Operations_R, NULL, NULL));
     
 
     ASSERT_EQ(-1, DefinitionRegistry_Destroy(NULL));

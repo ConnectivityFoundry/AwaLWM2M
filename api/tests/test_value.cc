@@ -41,7 +41,7 @@ TEST_F(TestValue, DISABLED_Value_New_handles_integer_value_node)
 
 TEST_F(TestValue, DISABLED_Value_New_handles_string_value_node)
 {
-    char * encodedString = xmlif_EncodeValue(AwaStaticResourceType_String, "Hello!", strlen("Hello!"));
+    char * encodedString = xmlif_EncodeValue(AwaResourceType_String, "Hello!", strlen("Hello!"));
     TreeNode node = Xml_CreateNodeWithValue("Value", "%s", encodedString);
     free(encodedString);
     Value * value = Value_New(node, AwaResourceType_String);

@@ -58,7 +58,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
 
                     const char * data = (const char *)TreeNode_GetValue(valueNode);
                     char * dataValue = NULL;
-                    AwaStaticResourceType lwm2mType = Utils_GetResourceType(type);
+                    AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
                     int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
                     if (dataLength >= 0)
                     {
@@ -133,7 +133,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
 
                         const char * data = (const char *)TreeNode_GetValue(valueNode);
                         char * dataValue = NULL;
-                        AwaStaticResourceType lwm2mType = Utils_GetResourceType(type);
+                        AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
                         int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
 
                         if (dataValue)

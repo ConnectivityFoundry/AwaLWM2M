@@ -47,7 +47,7 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
 
     ResourceDefinition * definition = (ResourceDefinition *)Lwm2mTreeNode_GetDefinition(node);
 
-    if (definition->Type != AwaStaticResourceType_Opaque)
+    if (definition->Type != AwaResourceType_Opaque)
     {
         Lwm2m_Error("ERROR: opaque data format requested, but the requested resource is not of opaque type\n");
         return -1;
@@ -107,7 +107,7 @@ static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNod
         return -1;
     }
 
-    if (Definition_GetResourceType(registry, objectID, resourceID) != AwaStaticResourceType_Opaque)
+    if (Definition_GetResourceType(registry, objectID, resourceID) != AwaResourceType_Opaque)
     {
         Lwm2m_Error("ERROR: opaque data format requested, but the requested resource is not of opaque type\n");
         return -1;

@@ -1440,7 +1440,7 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
         ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
         if (resourceDefinition != NULL)
         {
-            if (resourceDefinition->Type == AwaStaticResourceType_None)
+            if (resourceDefinition->Type == AwaResourceType_None)
                 continue;
 
             Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
@@ -1922,11 +1922,11 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
         const char * linkString = (char*)TreeNode_GetValue(linkNode);
         const char * encodedValueString = (char*)TreeNode_GetValue(valueNode);
         const char * valueTypeString = (char*)TreeNode_GetValue(valueTypeNode);
-        AwaStaticResourceType valueType = Lwm2mCore_ResourceTypeFromString(valueTypeString);
+        AwaResourceType valueType = Lwm2mCore_ResourceTypeFromString(valueTypeString);
 
         if (linkString != NULL)
         {
-            if (valueType == AwaStaticResourceType_Integer || valueType == AwaStaticResourceType_Float)
+            if (valueType == AwaResourceType_Integer || valueType == AwaResourceType_Float)
             {
                 char * temp = NULL;
                 if (numValidAttributes > 0)
@@ -1963,14 +1963,14 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
 
                 switch(valueType)
                 {
-                    case AwaStaticResourceType_Integer:
+                    case AwaResourceType_Integer:
                     {
                         int64_t value;
                         memcpy(&value, dataValue, sizeof(value));
                         msprintf(&temp, "%s%" PRId64, query, value);
                         break;
                     }
-                    case AwaStaticResourceType_Float:
+                    case AwaResourceType_Float:
                     {
                         double value;
                         memcpy(&value, dataValue, sizeof(value));
@@ -2066,7 +2066,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
                 goto error;
             }
 
-            dataLength = xmlif_DecodeValue(&dataValue, AwaStaticResourceType_None, data, strlen(data));
+            dataLength = xmlif_DecodeValue(&dataValue, AwaResourceType_None, data, strlen(data));
             if (dataLength < 0)
             {
                 Lwm2m_Error("Failed to decode execute value data for resource %s\n", xmlif_GetURIForClient(client, key));

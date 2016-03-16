@@ -95,10 +95,10 @@ int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objNam
                                  uint16_t MinimumInstances, ObjectOperationHandlers * Handlers);
 void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID);
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                                    ResourceOperationHandlers * Handlers, Lwm2mTreeNode * defaultValueNode);
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaStaticResourceType resourceType,
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
                                    uint16_t MaximumInstances, uint16_t MinimumInstances, Operations operations,
                                    ResourceOperationHandlers * Handlers);
 

@@ -115,9 +115,9 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
             {
                 switch (definition->Type)
                 {
-                    case AwaStaticResourceType_Integer: // no-break
-                    case AwaStaticResourceType_Float:   // no-break
-                    case AwaStaticResourceType_Time:
+                    case AwaResourceType_Integer: // no-break
+                    case AwaResourceType_Float:   // no-break
+                    case AwaResourceType_Time:
                     {
                         NotificationAttributes * greaterThanAttributes = GetHighestValidAttributesForType(AttributeTypeEnum_GreaterThan, resourceAttributes,
                                                                                                           objectInstanceAttributes, objectAttributes);
@@ -129,8 +129,8 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                         switch (definition->Type)
                         {
                             // FIXME: Remove duplication if possible
-                            case AwaStaticResourceType_Integer: // no-break
-                            case AwaStaticResourceType_Time:
+                            case AwaResourceType_Integer: // no-break
+                            case AwaResourceType_Time:
                             {
                                 int64_t oldValueAsInteger = *((int64_t *)observer->OldValue);
                                 int64_t newValueAsInteger = *((int64_t *)newValue);
@@ -155,7 +155,7 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                                 }
                                 break;
                             }
-                            case AwaStaticResourceType_Float:
+                            case AwaResourceType_Float:
                             {
                                 double oldValueAsFloat = *((double *)observer->OldValue);
                                 double newValueAsFloat = *((double *)newValue);
