@@ -24,6 +24,7 @@
 #include "lwm2m_result.h"
 #include "lwm2m_debug.h"
 #include <awa/error.h>
+#include <awa/common.h>
 
 static AwaLwm2mResult lastResult = AwaLwm2mResult_Success;
 
@@ -59,4 +60,31 @@ int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError)
     default:
         return defaultError;
     }
+}
+
+int AwaLwm2mResult_ToAwaLwm2mError(AwaLwm2mResult result)
+{
+    AwaLWM2MError error = AwaLWM2MError_Unspecified;
+    switch (result)
+    {
+    case AwaLwm2mResult_Success:
+    case AwaLwm2mResult_SuccessChanged:
+    case AwaLwm2mResult_SuccessContent:
+    case AwaLwm2mResult_SuccessCreated:
+    case AwaLwm2mResult_SuccessDeleted:
+        return AwaLWM2MError_Success;
+    case AwaLwm2mResult_BadRequest:
+        return AwaLWM2MError_BadRequest;
+    case AwaLwm2mResult_Unauthorized:
+        return AwaLWM2MError_Unauthorized;
+    case AwaLwm2mResult_NotFound:
+        return AwaLWM2MError_NotFound;
+    case AwaLwm2mResult_MethodNotAllowed:
+        return AwaLWM2MError_MethodNotAllowed;
+    case AwaLwm2mResult_NotAcceptable:
+        return AwaLWM2MError_NotAcceptable;
+    default:
+        break;
+    }
+    return error;
 }
