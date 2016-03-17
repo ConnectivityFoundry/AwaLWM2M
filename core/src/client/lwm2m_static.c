@@ -335,8 +335,9 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     }
 
     if (result == timeout)
+    {
         coap_Process();
-
+    }
 #else
     result = Lwm2mCore_Process(client->Context);
 #endif
@@ -508,13 +509,20 @@ AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID ob
 {
     AwaError result = AwaError_Unspecified;
 
-    if (Lwm2mCore_CreateOptionalResource(client->Context, objectID, objectInstanceID, resourceID) == 0)
+    if (client != NULL)
     {
-        result = AwaError_Success;
+        if (Lwm2mCore_CreateOptionalResource(client->Context, objectID, objectInstanceID, resourceID) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_CannotCreate;
+        }
     }
     else
     {
-        result = AwaError_CannotCreate;
+        result = AwaError_StaticClientInvalid;
     }
 
     return result;
@@ -522,15 +530,22 @@ AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID ob
 
 AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
 {
-    AwaError result = AwaError_Unspecified;
+    AwaError result;
 
-    if (objectInstanceID == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID))
+    if (client != NULL)
     {
-        result = AwaError_Success;
+        if (objectInstanceID == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID))
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_CannotCreate;
+        }
     }
     else
     {
-        result = AwaError_CannotCreate;
+        result = AwaError_StaticClientInvalid;
     }
 
     return result;
@@ -543,20 +558,27 @@ static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const
 {
     AwaError result = AwaError_Unspecified;
 
-    if ((client != NULL) && (resourceName != NULL) && (handler != NULL))
+    if (client != NULL)
     {
-        ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
-        if (objFormat != NULL)
+        if ((resourceName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
         {
-            ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
-            if (resourceDefinition != NULL)
+            ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+            if (objFormat != NULL)
             {
-                // TODO: perhaps a better option would be to bind some opaque data
-                //       to the resource definition, rather than using individual variables.
-                resourceDefinition->DataPointer = dataPointer;
-                resourceDefinition->DataElementSize = dataElementSize;
-                resourceDefinition->DataStepSize = dataStepSize;
-                result = AwaError_Success;
+                ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
+                if (resourceDefinition != NULL)
+                {
+                    // TODO: perhaps a better option would be to bind some opaque data
+                    //       to the resource definition, rather than using individual variables.
+                    resourceDefinition->DataPointer = dataPointer;
+                    resourceDefinition->DataElementSize = dataElementSize;
+                    resourceDefinition->DataStepSize = dataStepSize;
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_DefinitionInvalid;
+                }
             }
             else
             {
@@ -581,11 +603,20 @@ AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, c
                                                      uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
                                                      void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
-    return AwaStaticClient_RegisterResource(client, resourceName,
-                                            objectID, resourceID, resourceType,
-                                            minimumInstances, maximumInstances, access, AwaStaticClientDefaultHandler,
-                                            dataPointer, dataElementSize, dataStepSize);
+    AwaError result;
 
+    if ((dataPointer == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    } 
+    else
+    {
+        result = AwaStaticClient_RegisterResource(client, resourceName,
+                                                  objectID, resourceID, resourceType,
+                                                  minimumInstances, maximumInstances, access, AwaStaticClientDefaultHandler,
+                                                  dataPointer, dataElementSize, dataStepSize);
+    }
+    return result;
 }
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
