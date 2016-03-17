@@ -683,7 +683,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_
 
     AwaServerWriteOperation_Free(&writeOperation);
 
-    ASSERT_EQ(5, opaque.Size);
+    ASSERT_EQ(5, static_cast<int>(opaque.Size));
     ASSERT_EQ(0, memcmp(opaque.Data, "Hello", opaque.Size));
 
     AwaStaticClient_Process(client_);
