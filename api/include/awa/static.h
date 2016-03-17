@@ -33,6 +33,12 @@
 extern "C" {
 #endif
 
+#define AWA_OPAQUE(name, size)     \
+  struct name##_t {                \
+      size_t Size;                 \
+      uint8_t Data[size];          \
+  } name
+
 typedef enum
 {
     AwaOperation_CreateObjectInstance,
@@ -104,6 +110,8 @@ typedef enum
     AwaLwm2mResult_Unspecified = -1,
 
 } AwaLwm2mResult;
+
+
 
 typedef AwaLwm2mResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
 

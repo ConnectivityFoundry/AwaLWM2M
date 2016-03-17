@@ -51,6 +51,13 @@ struct _AwaStaticClient
     void * ApplicationContext;
 };
 
+// must line up with AWA_OPAQUE macro
+typedef struct 
+{ 
+    size_t Size;
+    uint8_t Data[];
+} AwaStaticOpaque;
+
 AwaStaticClient * AwaStaticClient_New()
 {
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
@@ -374,11 +381,37 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                 resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
                 if (resourceDefinition != NULL)
                 {
-                // TODO: check dataSize vs definition->DataElementSize
-                // TODO: what do we do about storing the length.. for opaque etc...
                     offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
-                    memcpy(offset, *dataPointer, *dataSize);
-                    result = AwaLwm2mResult_SuccessChanged;
+
+                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    {
+                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
+
+                        // dataSize equals the size of the opaque data and the bytes used to store
+                        // the length, so subtract that during the comparision.
+                        if (*dataSize <= (resourceDefinition->DataElementSize - sizeof(temp->Size)))
+                        {
+                            memcpy(temp->Data, *dataPointer, *dataSize);
+                            temp->Size = *dataSize;
+                            result = AwaLwm2mResult_SuccessChanged;
+                        }
+                        else
+                        {
+                            result = AwaLwm2mResult_BadRequest;
+                        }
+                    }
+                    else
+                    {
+                        if (*dataSize <= resourceDefinition->DataElementSize)
+                        {
+                            memcpy(offset, *dataPointer, *dataSize);
+                            result = AwaLwm2mResult_SuccessChanged;
+                        }
+                        else
+                        {
+                            result = AwaLwm2mResult_BadRequest;
+                        }
+                    }
                 }
                 else
                 {
@@ -392,8 +425,18 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                 if (resourceDefinition != NULL)
                 {
                     offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
-                    *dataPointer = offset;
-                    *dataSize = resourceDefinition->DataElementSize;
+
+                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    {
+                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
+                        *dataPointer = temp->Data;
+                        *dataSize = temp->Size;
+                    }
+                    else
+                    {
+                        *dataPointer = offset;
+                        *dataSize = resourceDefinition->DataElementSize;
+                    }
                     result = AwaLwm2mResult_SuccessContent;
                 }
                 else
