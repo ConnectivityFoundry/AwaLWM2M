@@ -5,6 +5,9 @@
 
 ## Awa LightweightM2M.
 
+[![Build Status](https://travis-ci.org/FlowM2M/AwaLWM2M.svg?branch=master)](https://travis-ci.org/FlowM2M/AwaLWM2M)
+[![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg?style=flat-square)](http://opensource.org/licenses/BSD-3-Clause)
+
 The Internet of Things (IoT) is currently fragmented by numerous proprietary methods of device management. In order for the IoT to reach its full potential, devices from different vendors must be able to communicate effectively with each other. This is where open standards such as the Open Mobile Alliance's (OMA) Lightweight Machine to Machine protocol (LWM2M) become important.
  
 The LWM2M protocol has been designed to be highly efficient in terms of data transfer and memory footprint, making it  suitable for deployment on larger gateway devices as well as the more constrained devices.
