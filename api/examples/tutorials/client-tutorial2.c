@@ -55,7 +55,7 @@ int main(void)
         float temperature; 
  
         printf("enter temperature or any other key to exit:");
-        if (scanf("%f", &temperature) == 0)
+        if (scanf("%8f", &temperature) == 0)
         {
             break;
         }
