@@ -608,27 +608,21 @@ AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID o
         ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID, resourceID);
         if (definition != NULL)
         {
-            if (definition->Handlers.Read == NULL)
+            if (definition->Handler != NULL)
             {
-                if (definition->Handler != NULL)
+                void * valueBuffer = NULL;
+                int valueBufferSize = 0;
+                int resourceInstanceID = 0;  // Note: This will only work for single-instance resources.
+                AwaLwm2mResult lwm2mResult = AwaLwm2mResult_Unspecified;
+                if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaLwm2mResult_SuccessContent)
                 {
-                    void * valueBuffer = NULL;
-                    int valueBufferSize = 0;
-                    int resourceInstanceID = 0;  // FIXME
-
-                    if (definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL) == AwaLwm2mResult_SuccessContent)
-                    {
-                        Lwm2m_MarkObserversChanged(client->Context, objectID, objectInstanceID, resourceID, valueBuffer, valueBufferSize);
-                        result = AwaError_Success;
-                    }
-                    else
-                    {
-                        result = AwaError_Internal;
-                    }
+                    Lwm2m_MarkObserversChanged(client->Context, objectID, objectInstanceID, resourceID, valueBuffer, valueBufferSize);
+                    result = AwaError_Success;
                 }
                 else
                 {
-                    result = AwaError_DefinitionInvalid;
+                    Lwm2m_Debug("Read handler for /%d/%d/%d returned %d\n", objectID, objectInstanceID, resourceID, lwm2mResult);
+                    result = AwaError_Internal;
                 }
             }
             else
