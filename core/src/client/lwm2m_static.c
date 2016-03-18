@@ -476,25 +476,32 @@ AwaError AwaStaticClient_RegisterObjectWithHandler(AwaStaticClient * client, con
 {
     AwaError result = AwaError_Unspecified;
 
-    if ((client != NULL) && (objectName != NULL))
+    if (client != NULL)
     {
-        ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
-
-        if (defintion != NULL)
+        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
         {
-            if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+            ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+
+            if (defintion != NULL)
             {
-                Lwm2mCore_ObjectCreated(client->Context, objectID);
-                result = AwaError_Success;
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+                {
+                    Lwm2mCore_ObjectCreated(client->Context, objectID);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_Internal;
+                }
             }
             else
             {
-                result = AwaError_Internal;
+                result = AwaError_OutOfMemory;
             }
         }
         else
         {
-            result = AwaError_OutOfMemory;
+            result = AwaError_DefinitionInvalid;
         }
     }
     else
@@ -534,7 +541,7 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 
     if (client != NULL)
     {
-        if (objectInstanceID == Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID))
+        if (Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID) != -1)
         {
             result = AwaError_Success;
         }
