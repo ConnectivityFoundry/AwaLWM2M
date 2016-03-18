@@ -1137,7 +1137,7 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
     return Lwm2mObjectTree_GetNextResourceInstanceID(&context->ObjectTree, &iterator);
 }
 
-int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** Value, int * ValueBufferSize)
+int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** value, int * valueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
     if (definition == NULL)
@@ -1149,9 +1149,9 @@ int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     {
         if (definition->Handler != NULL)
         {
-            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)Value, ValueBufferSize, NULL) == AwaLwm2mResult_SuccessContent)
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)value, valueBufferSize, NULL) == AwaLwm2mResult_SuccessContent)
             {
-                return *ValueBufferSize;
+                return *valueBufferSize;
             }
             else
             {
@@ -1165,7 +1165,7 @@ int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     }
     else
     {
-        return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+        return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, value, valueBufferSize);
     }
 
     return -1;

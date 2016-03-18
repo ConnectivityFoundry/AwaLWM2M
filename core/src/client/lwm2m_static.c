@@ -144,7 +144,7 @@ AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
     if ((level >= AwaLogLevel_None) && (level <= AwaLogLevel_Debug))
     {
         Lwm2m_SetAwaLogLevel(level);
-        coap_SetLogLevel(level);
+        coap_SetLogLevel(Lwm2m_GetLogLevel());
 
         result = AwaError_Success;
     }
@@ -597,6 +597,49 @@ AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, c
                                             objectID, resourceID, resourceType,
                                             minimumInstances, maximumInstances, access, handler,
                                             NULL, 0 , 0);
+}
+
+AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID, resourceID);
+        if (definition != NULL)
+        {
+            if (definition->Handler != NULL)
+            {
+                void * valueBuffer = NULL;
+                int valueBufferSize = 0;
+                int resourceInstanceID = 0;  // Note: This will only work for single-instance resources.
+                AwaLwm2mResult lwm2mResult = AwaLwm2mResult_Unspecified;
+                if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaLwm2mResult_SuccessContent)
+                {
+                    Lwm2m_MarkObserversChanged(client->Context, objectID, objectInstanceID, resourceID, valueBuffer, valueBufferSize);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    Lwm2m_Debug("Read handler for /%d/%d/%d returned %d\n", objectID, objectInstanceID, resourceID, lwm2mResult);
+                    result = AwaError_Internal;
+                }
+            }
+            else
+            {
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    return result;
 }
 
 

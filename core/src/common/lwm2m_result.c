@@ -24,6 +24,7 @@
 #include "lwm2m_result.h"
 #include "lwm2m_debug.h"
 #include <awa/error.h>
+#include <awa/common.h>
 
 static AwaLwm2mResult lastResult = AwaLwm2mResult_Success;
 

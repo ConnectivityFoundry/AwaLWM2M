@@ -46,6 +46,9 @@ bool AwaLwm2mResult_IsSuccess(AwaLwm2mResult result);
 // Required for returning errors to the API through the IPC
 int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError);
 
+// Temporary mapping between two incompatible enums
+int AwaLwm2mResult_ToAwaLwm2mError(AwaLwm2mResult result);
+
 #ifdef __cplusplus
 }
 #endif

@@ -99,6 +99,7 @@ typedef enum
     AwaLwm2mResult_Forbidden = 403,
     AwaLwm2mResult_NotFound = 404,
     AwaLwm2mResult_MethodNotAllowed = 405,
+    AwaLwm2mResult_NotAcceptable = 406,
 
     AwaLwm2mResult_InternalError = 500,
 
