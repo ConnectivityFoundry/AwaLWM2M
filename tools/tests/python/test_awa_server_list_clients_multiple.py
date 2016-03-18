@@ -32,10 +32,10 @@ class TestSpawnMultipleClients(unittest.TestCase):
             print "Creating client %i" % (i,)
             clientEndpointName = self.config.clientEndpointName + str(i);
             clientIPCPort = self.config.clientIpcPort + i;
-            clientCOAPPort = self.config.clientCoapPort + i;
+            clientCoapPort = self.config.clientCoapPort + i;
 
             client = overlord.LWM2MClientDaemon(clientIPCPort,
-                                                clientCOAPPort,
+                                                clientCoapPort,
                                                 self.config.clientLogFile,
                                                 clientEndpointName,
                                                 self.config.bootstrapConfigFile)

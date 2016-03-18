@@ -76,7 +76,7 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client_, ""));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client_, global::clientEndpointName));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client_, "0.0.0.0", global::clientLocalCoapPort));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client_, "0.0.0.0", global::clientLocalCoapPort));
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client_));
 
@@ -218,24 +218,24 @@ TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_long_name)
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_valid_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
-    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "::", 5683));
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "::", 5683));
 
     AwaStaticClient_Free(&client);
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_invalid_input)
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_invalid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
-    ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetCOAPListenAddressPort(NULL, "test", 5683));
-    ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetCOAPListenAddressPort(client, NULL, 5683));
+    ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetCoAPListenAddressPort(NULL, "test", 5683));
+    ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetCoAPListenAddressPort(client, NULL, 5683));
 
     AwaStaticClient_Free(&client);
     EXPECT_TRUE(client == NULL);
@@ -279,12 +279,12 @@ TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationCon
     EXPECT_TRUE(client == NULL);
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetCOAPListenAddressPort_long_name)
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_long_name)
 {
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
-    ASSERT_EQ(AwaError_OutOfMemory, AwaStaticClient_SetCOAPListenAddressPort(client, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", 5683));
+    ASSERT_EQ(AwaError_OutOfMemory, AwaStaticClient_SetCoAPListenAddressPort(client, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", 5683));
 
     AwaStaticClient_Free(&client);
     EXPECT_TRUE(client == NULL);
@@ -309,7 +309,7 @@ TEST_F(TestStaticClient, AwaStaticClient_Init_valid_inputs)
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
 
     ASSERT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 
@@ -325,7 +325,7 @@ TEST_F(TestStaticClient, AwaStaticClient_Process)
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 
@@ -369,7 +369,7 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, bootstrapURI.c_str()));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, clientEndpointName.c_str()));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCOAPListenAddressPort(client, "0.0.0.0", 5683));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
 
