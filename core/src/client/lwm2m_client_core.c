@@ -367,7 +367,7 @@ static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, Ob
                     // load new resource with a sensible default
                     Lwm2mObjectTree * objectTree = &((Lwm2mContextType *)context)->ObjectTree;
 
-                    if(objectTree)
+                    if (objectTree)
                     {
                         const void * defaultData = NULL;
                         int defaultLen = 0;
@@ -443,6 +443,12 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
         goto error;
     }
 
+    if (Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+    {
+        Lwm2m_Error("Resource already exists %d/%d/%d\n", objectID, objectInstanceID, resourceID);
+        goto error;
+    }
+
     if (definition->Handlers.CreateOptionalResource == NULL)
     {
         if (definition->Handler == NULL)
@@ -471,7 +477,6 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
             Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
         }
     }
-
 
     return 0;
 error:
