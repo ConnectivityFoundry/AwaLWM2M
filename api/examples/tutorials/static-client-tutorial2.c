@@ -54,6 +54,7 @@ int main(void)
         AwaStaticClient_Process(awaClient);
 
         //heater[0].Temperature = value from hardware
+        AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
     }
 
     AwaStaticClient_Free(&awaClient);

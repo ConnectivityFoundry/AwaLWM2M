@@ -530,6 +530,7 @@ int main(void)
         AwaStaticClient_Process(awaClient);
 
 +       //heater[0].Temperature = value from hardware
++       AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
     }
 
     AwaStaticClient_Free(&awaClient);
@@ -664,6 +665,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
         waitTime = AwaStaticClient_Process(awaClient);
 
         //heater[0].Temperature = value from hardware
+        AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
 
         etimer_set(&et, (waitTime * CLOCK_SECOND) / 1000);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
