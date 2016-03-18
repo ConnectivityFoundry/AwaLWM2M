@@ -951,7 +951,7 @@ const AwaResourceID TEST_RESOURCE_OBJECTLINK = 7;
 typedef struct
 {
     AwaServerObserveOperation * ObserveOperation;
-    bool * ObserveThreadAlive;
+    volatile bool * ObserveThreadAlive;
 } ServerObserveThreadContext;
 
 void * do_observe_operation(void * attr)
@@ -1009,7 +1009,7 @@ public:
             return complete;
         }
     public:
-        bool observeThreadAlive_ = true;
+        volatile bool observeThreadAlive_ = true;
     private:
         AwaServerSession * session_;
     };
