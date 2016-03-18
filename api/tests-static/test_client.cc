@@ -959,7 +959,7 @@ void * do_observe_operation(void * attr)
     ServerObserveThreadContext * context = (ServerObserveThreadContext *)attr;
     AwaError result = AwaServerObserveOperation_Perform(context->ObserveOperation, defaults::timeout);
     Lwm2m_Debug("AwaServerObserveOperation_Perform: %s\n", AwaError_ToString(result));
-    *(context->ObserveThreadAlive) = false;
+    *(context)->ObserveThreadAlive = false;
     return 0;
 }
 
