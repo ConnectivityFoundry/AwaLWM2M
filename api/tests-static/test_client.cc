@@ -1352,7 +1352,7 @@ struct TestWriteReadStaticResource
     bool testRead;
 };
 
-class TestWriteReadValueStaticClient : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestWriteReadStaticResource >
+class TestStaticClientWriteReadValue : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestWriteReadStaticResource >
 {
 
 protected:
@@ -1527,7 +1527,7 @@ AwaLwm2mResult TestWriteValueStaticClient_ReadHandler(void * context, AwaOperati
     return AwaLwm2mResult_SuccessContent;
 }
 
-TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
+TEST_P(TestStaticClientWriteReadValue, TestWriteReadValueSingle)
 {
     TestWriteReadStaticResource data = GetParam();
     char path[128] = {0};
@@ -1649,8 +1649,8 @@ TEST_P(TestWriteReadValueStaticClient, TestWriteReadValueSingle)
 }
 
 INSTANTIATE_TEST_CASE_P(
-        TestWriteReadValueStaticClient,
-        TestWriteReadValueStaticClient,
+        TestStaticClientWriteReadValue,
+        TestStaticClientWriteReadValue,
         ::testing::Values(
         TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_STRING,     writeDetail::dummyString1,      1, static_cast<int>(strlen(writeDetail::dummyString1)),     AwaResourceType_String,     true, false},
         TestWriteReadStaticResource {TestWriteValueStaticClient_WriteHandler, TestWriteValueStaticClient_ReadHandler, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, writeDetail::TEST_RESOURCE_INTEGER,    &writeDetail::dummyInteger1,    1, static_cast<int>(sizeof(writeDetail::dummyInteger1)),    AwaResourceType_Integer,    true, false},
