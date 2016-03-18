@@ -29,7 +29,9 @@
   #include "contiki-net.h"
 #endif
 
-#include "lwm2m_static.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <awa/static.h>
 #include "lwm2m_security_object.h"
 #include "lwm2m_server_object.h"
 #include "lwm2m_acl_object.h"
