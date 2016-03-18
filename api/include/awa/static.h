@@ -128,7 +128,7 @@ int AwaStaticClient_Process(AwaStaticClient * client);
 //AwaError AwaStaticClient_SetLogLevel(AwaStaticClient * client, DebugLevel level);
 AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level);
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * endPointName);
-AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port);
+AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, const char * address, int port);
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const AwaFactoryBootstrapInfo * factoryBootstrapInformation);
 

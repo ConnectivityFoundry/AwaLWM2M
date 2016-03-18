@@ -42,14 +42,14 @@
 struct _AwaStaticClient
 {
     Lwm2mContextType * Context;
-    CoapInfo * COAP;
+    CoapInfo * CoAPInfo;
     bool BootstrapConfigured;
     bool EndpointNameConfigured;
-    bool COAPConfigured;
+    bool CoAPConfigured;
     bool Running;
     const char * BootstrapServerURI;
-    char COAPListenAddress[MAX_ADDRESS_LENGTH];
-    int COAPListenPort;
+    char CoAPListenAddress[MAX_ADDRESS_LENGTH];
+    int CoAPListenPort;
     void * ApplicationContext;
 };
 
@@ -73,7 +73,7 @@ AwaStaticClient * AwaStaticClient_New()
         {
             client->BootstrapConfigured = false;
             client->EndpointNameConfigured = false;
-            client->COAPConfigured = false;
+            client->CoAPConfigured = false;
             client->Running = false;
         }
         else
@@ -92,7 +92,7 @@ void AwaStaticClient_Free(AwaStaticClient ** client)
     {
         Lwm2mCore_Destroy((*client)->Context);
 
-        if ((*client)->COAP != NULL)
+        if ((*client)->CoAPInfo != NULL)
         {
             coap_Destroy();
         }
@@ -108,13 +108,13 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
 
     if (client != NULL)
     {
-        if (client->COAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
+        if (client->CoAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
-            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, Lwm2m_GetLogLevel());
+            client->CoAPInfo = coap_Init(client->CoAPListenAddress, client->CoAPListenPort, Lwm2m_GetLogLevel());
 
-            if (client->COAP != NULL)
+            if (client->CoAPInfo != NULL)
             {
-                Lwm2mCore_SetCoapInfo(client->Context, client->COAP);
+                Lwm2mCore_SetCoapInfo(client->Context, client->CoAPInfo);
                 Lwm2m_RegisterACLObject(client->Context);
                 Lwm2m_RegisterServerObject(client->Context);
                 Lwm2m_RegisterSecurityObject(client->Context);
@@ -239,7 +239,7 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
     return result;
 }
 
-AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port)
+AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, const char * address, int port)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -249,9 +249,9 @@ AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, cons
         {
             if (strlen(address) < MAX_ADDRESS_LENGTH)
             {
-                strcpy(client->COAPListenAddress, address);
-                client->COAPListenPort = port;
-                client->COAPConfigured = true;
+                strcpy(client->CoAPListenAddress, address);
+                client->CoAPListenPort = port;
+                client->CoAPConfigured = true;
                 result = AwaError_Success;
             }
             else
@@ -309,7 +309,7 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     int nfds = 1;
     int timeout;
 
-    fds[0].fd = client->COAP->fd;
+    fds[0].fd = client->CoAPInfo->fd;
     fds[0].events = POLLIN;
 
     timeout = Lwm2mCore_Process(client->Context);
