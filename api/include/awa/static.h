@@ -33,34 +33,44 @@
 extern "C" {
 #endif
 
+/**
+ * Represents a named Opaque struct containing an array of Data
+ * of the given size.
+ */
 #define AWA_OPAQUE(name, size)     \
   struct name##_t {                \
       size_t Size;                 \
       uint8_t Data[size];          \
   } name
 
+
+/**
+ * Supported operations for resource and object handlers
+ * registered with AwaStaticClient_RegisterObjectWithHandler and
+ * AwaStaticClient_RegisterResourceWithHandler
+ */
 typedef enum
 {
-    AwaOperation_CreateObjectInstance,
-    AwaOperation_DeleteObjectInstance,
-    AwaOperation_Read,
-    AwaOperation_Write,
-    AwaOperation_Execute,
-    AwaOperation_CreateResource,
-    AwaOperation_DeleteResource,
+    AwaOperation_CreateObjectInstance,  /**< indicates a request to create an object instance */
+    AwaOperation_DeleteObjectInstance,  /**< indicates a request to delete an object instance */
+    AwaOperation_Read,                  /**< indicates a request to read from a resource */
+    AwaOperation_Write,                 /**< indicates a request to write to a resource */
+    AwaOperation_Execute,               /**< indicates a request to write to a resource */
+    AwaOperation_CreateResource,        /**< indicates a request to create a resource */
+    AwaOperation_DeleteResource,        /**< indicates a request to delete a resource */
 } AwaOperation;
 
-typedef enum
-{
-    AwaAccess_None = 0,
-    AwaAccess_Read,
-    AwaAccess_Write,
-    AwaAccess_ReadWrite,
-    AwaAccess_Execute,
-} AwaAccess;
-
+/**
+ * Represents an Awa Static Client context, holding the necessary information
+ * to initialise the client daemon, register objects and resources, and handle
+ * callbacks.
+ */
 typedef struct _AwaStaticClient AwaStaticClient;
 
+
+/**
+ * Information required to bootstrap from a factory configuration.
+ */
 typedef struct
 {
     struct
@@ -148,17 +158,17 @@ AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * o
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
                                                      AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                      AwaStaticClientHandler handler);
 
 AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, const char * resourceName,
                                                      AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                      void * dataPointer, size_t dataElementSize, size_t dataStepSize);
 
 AwaError AwaStaticClient_RegisterResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
                                                           AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                          uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                          uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                           void * dataPointers[], size_t dataElementSize);
 
 void * AwaStaticClient_GetResourceInstancePointer(AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID);

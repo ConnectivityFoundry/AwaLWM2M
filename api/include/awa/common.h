@@ -38,23 +38,6 @@ extern "C" {
 typedef struct _AwaChangeSet AwaChangeSet;
 
 /**
- * Supported resource operations for management servers
- */
-typedef enum
-{
-    AwaResourceOperations_Invalid = 0,  /**< indicates an invalid resource operation */
-
-    AwaResourceOperations_None,         /**< indicates no operations are permitted to a management server */
-    AwaResourceOperations_ReadOnly,     /**< indicates the resource is read-only to a management server */
-    AwaResourceOperations_WriteOnly,    /**< indicates the resource is write-only to a management server */
-    AwaResourceOperations_ReadWrite,    /**< indicates the resource can be read and written by a management server */
-    AwaResourceOperations_Execute,      /**< indicates the resource can be executed by a management server */
-
-    // sentinel, do not remove
-    AwaResourceOperations_LAST          /**< Reserved value */
-} AwaResourceOperations;
-
-/**
  * Supported change types for a change subscription
  */
 typedef enum

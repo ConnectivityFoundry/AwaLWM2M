@@ -562,7 +562,7 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 
 static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const char * resourceName,
                                                  AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                 uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess operations,
+                                                 uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                  AwaStaticClientHandler handler,  void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result = AwaError_Unspecified;
@@ -609,7 +609,7 @@ static AwaError AwaStaticClient_RegisterResource(AwaStaticClient * client, const
 
 AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, const char * resourceName,
                                                      AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                      void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result;
@@ -622,7 +622,7 @@ AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, c
     {
         result = AwaStaticClient_RegisterResource(client, resourceName,
                                                   objectID, resourceID, resourceType,
-                                                  minimumInstances, maximumInstances, access, AwaStaticClientDefaultHandler,
+                                            minimumInstances, maximumInstances, operations, AwaStaticClientDefaultHandler,
                                                   dataPointer, dataElementSize, dataStepSize);
     }
     return result;
@@ -630,12 +630,12 @@ AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, c
 
 AwaError AwaStaticClient_RegisterResourceWithHandler(AwaStaticClient * client, const char * resourceName,
                                                      AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaAccess access,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                      AwaStaticClientHandler handler)
 {
     return AwaStaticClient_RegisterResource(client, resourceName,
                                             objectID, resourceID, resourceType,
-                                            minimumInstances, maximumInstances, access, handler,
+                                            minimumInstances, maximumInstances, operations, handler,
                                             NULL, 0 , 0);
 }
 
