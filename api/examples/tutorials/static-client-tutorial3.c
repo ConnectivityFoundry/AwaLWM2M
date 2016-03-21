@@ -13,11 +13,11 @@ typedef struct
 
 static HeaterObject heater[HEATER_INSTANCES];
 
-AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
+AwaResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
                        AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
                        void ** dataPointer, uint16_t * dataSize, bool * changed)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_InternalError;
+    AwaResult result = AwaResult_InternalError;
 
     if ((objectID == 1000) && (objectInstanceID >= 0) && (objectInstanceID < HEATER_INSTANCES))
     {
@@ -25,7 +25,7 @@ AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObje
         {
             case AwaOperation_CreateObjectInstance:
             {
-                result = AwaLwm2mResult_SuccessCreated;
+                result = AwaResult_SuccessCreated;
                 memset(&heater[objectInstanceID], 0, sizeof(heater[objectInstanceID]));
                 break;
             }
@@ -42,7 +42,7 @@ AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObje
                 default:
                     break;
                 }
-                result = AwaLwm2mResult_SuccessCreated;
+                result = AwaResult_SuccessCreated;
                 break;
             }
             case AwaOperation_Write:
@@ -72,7 +72,7 @@ AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObje
                     default:
                         break;
                 }
-                result = AwaLwm2mResult_SuccessChanged;
+                result = AwaResult_SuccessChanged;
                 break;
             }
             case AwaOperation_Read:
@@ -94,11 +94,11 @@ AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObje
                     default:
                         break;
                 }
-                result = AwaLwm2mResult_SuccessContent;
+                result = AwaResult_SuccessContent;
                 break;
             }
             default:
-                result = AwaLwm2mResult_InternalError;
+                result = AwaResult_InternalError;
                 break;
         }
     }

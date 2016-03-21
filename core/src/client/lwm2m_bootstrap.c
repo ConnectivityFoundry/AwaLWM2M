@@ -78,7 +78,7 @@ static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, con
 {
     Lwm2mContextType * context = ctxt;
 
-    if (responseCode == AwaLwm2mResult_SuccessChanged)
+    if (responseCode == AwaResult_SuccessChanged)
     {
         Lwm2m_Info("Waiting for bootstrap to finish\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFinishPending);
@@ -121,7 +121,7 @@ static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * pat
         Lwm2m_Info("Bootstrap finished\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
-        *responseCode = AwaLwm2mResult_SuccessChanged;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else if ((state == Lwm2mBootStrapState_BootStrapPending) ||
              (state == Lwm2mBootStrapState_ClientHoldOff))
@@ -129,11 +129,11 @@ static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * pat
         Lwm2m_Info("Server initiated bootstrap\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
-        *responseCode = AwaLwm2mResult_SuccessChanged;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else
     {
-        *responseCode = AwaLwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
     }
     return 0;
 }
@@ -152,7 +152,7 @@ static int Lwm2mCore_BootstrapEndpointHandler(int type, void * ctxt, AddressType
         default:
             *responseContentType = ContentType_None;
             *responseContentLen = 0;
-            *responseCode = AwaLwm2mResult_MethodNotAllowed;
+            *responseCode = AwaResult_MethodNotAllowed;
             break;
     }
     return -1;

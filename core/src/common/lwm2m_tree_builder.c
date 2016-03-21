@@ -41,10 +41,10 @@
 #include "lwm2m_result.h"
 #include "lwm2m_request_origin.h"
 
-static AwaLwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
+static AwaResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
                                                                   ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     const void * value = NULL;
     int valueLength = 0;
@@ -55,25 +55,25 @@ static AwaLwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm
     if (Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, &value, &valueLength) < 0)
     {
         Lwm2m_Error("ERROR: Failed to retrieve resource instance from object store\n");
-        result = AwaLwm2mResult_NotFound;
+        result = AwaResult_NotFound;
         goto error;
     }
 
     if (Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)value, valueLength) != 0)
     {
         Lwm2m_Error("ERROR: Failed to set value for resource instance node\n");
-        result = AwaLwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
         goto error;
     }
-    result = AwaLwm2mResult_Success;
+    result = AwaResult_Success;
 error:
     return result;
 }
 
-AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
+AwaResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                        ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, resourceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Resource);
@@ -82,21 +82,21 @@ AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mCo
     if (definition == NULL)
     {
         Lwm2m_Error("ERROR: Failed to determine resource definition Object %d Resource %d\n", objectID, resourceID);
-        result = AwaLwm2mResult_NotFound;
+        result = AwaResult_NotFound;
         goto error;
     }
 
     if (Lwm2mTreeNode_SetDefinition(*dest, definition) != 0)
     {
         Lwm2m_Error("ERROR: Failed to set definition Object %d Resource %d\n", objectID, resourceID);
-        result = AwaLwm2mResult_InternalError;
+        result = AwaResult_InternalError;
         goto error;
     }
 
     if (requestOrigin == Lwm2mRequestOrigin_Server && !Operations_IsResourceTypeReadable(definition->Operation))
     {
         Lwm2m_Error("ERROR: Request origin is server and resource operation is %d\n", definition->Operation);
-        result = AwaLwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -107,7 +107,7 @@ AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mCo
         {
             Lwm2mTreeNode * resourceValueNode;
 
-            if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaLwm2mResult_Success)
+            if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
             {
                 Lwm2mTreeNode_AddChild(*dest, resourceValueNode);
             }
@@ -123,7 +123,7 @@ AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mCo
     {
         Lwm2mTreeNode * resourceValueNode;
         int resourceInstanceID = 0;
-        if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaLwm2mResult_Success)
+        if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
         {
             Lwm2mTreeNode_AddChild(*dest, resourceValueNode);
         }
@@ -134,7 +134,7 @@ AwaLwm2mResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mCo
             goto error;
         }
     }
-    result = AwaLwm2mResult_Success;
+    result = AwaResult_Success;
 error:
     return result;
 }
@@ -142,7 +142,7 @@ error:
 int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin,
                                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, objectInstanceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ObjectInstance);
@@ -155,7 +155,7 @@ int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContext
         {
             Lwm2mTreeNode * resourceNode;
 
-            if ((result = TreeBuilder_CreateTreeFromResource(&resourceNode, context, requestOrigin, objectID, objectInstanceID, resourceID)) == AwaLwm2mResult_Success)
+            if ((result = TreeBuilder_CreateTreeFromResource(&resourceNode, context, requestOrigin, objectID, objectInstanceID, resourceID)) == AwaResult_Success)
             {
                 Lwm2mTreeNode_AddChild(*dest, resourceNode);
             }
@@ -168,9 +168,9 @@ int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContext
         }
     }
 
-    if ((result == AwaLwm2mResult_Success) && (!Lwm2mTreeNode_HasChildren(*dest)))
+    if ((result == AwaResult_Success) && (!Lwm2mTreeNode_HasChildren(*dest)))
     {
-        result = AwaLwm2mResult_NotFound;
+        result = AwaResult_NotFound;
     }
 
     return result;
@@ -178,7 +178,7 @@ int TreeBuilder_CreateTreeFromObjectInstance(Lwm2mTreeNode ** dest, Lwm2mContext
 
 int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     *dest = Lwm2mTreeNode_Create();
     Lwm2mTreeNode_SetID(*dest, objectID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Object);
@@ -188,14 +188,14 @@ int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * c
     if (definition == NULL)
     {
        Lwm2m_Error("ERROR: Failed to determine object definition Object %d\n", objectID);
-       result = AwaLwm2mResult_NotFound;
+       result = AwaResult_NotFound;
        goto error;
     }
 
     if (Lwm2mTreeNode_SetDefinition(*dest, definition) != 0)
     {
         Lwm2m_Error("ERROR: Failed to set definition Object %d\n", objectID);
-        result = AwaLwm2mResult_InternalError;
+        result = AwaResult_InternalError;
         goto error;
     }
 
@@ -203,7 +203,7 @@ int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * c
     while ((instanceID = Lwm2mCore_GetNextObjectInstanceID(context, objectID, instanceID)) != -1)
     {
         Lwm2mTreeNode * objectInstanceNode;
-        if ((result = TreeBuilder_CreateTreeFromObjectInstance(&objectInstanceNode, context, requestOrigin, objectID, instanceID)) == AwaLwm2mResult_Success)
+        if ((result = TreeBuilder_CreateTreeFromObjectInstance(&objectInstanceNode, context, requestOrigin, objectID, instanceID)) == AwaResult_Success)
         {
             Lwm2mTreeNode_AddChild(*dest, objectInstanceNode);
         }
@@ -215,18 +215,18 @@ int TreeBuilder_CreateTreeFromObject(Lwm2mTreeNode ** dest, Lwm2mContextType * c
         }
     }
 
-    if ((result == AwaLwm2mResult_Success) && (!Lwm2mTreeNode_HasChildren(*dest)))
+    if ((result == AwaResult_Success) && (!Lwm2mTreeNode_HasChildren(*dest)))
     {
-        result = AwaLwm2mResult_NotFound;
+        result = AwaResult_NotFound;
     }
 
 error:
     return result;
 }
 
-AwaLwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength)
+AwaResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, int OIR[], int OIRLength)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
     if (dest != NULL)
     {
         if (OIRLength == 1)
@@ -244,14 +244,14 @@ AwaLwm2mResult TreeBuilder_CreateTreeFromOIR(Lwm2mTreeNode ** dest, Lwm2mContext
         else
         {
             Lwm2m_Error("Invalid OIR, length %d\n", OIRLength);
-            result = AwaLwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             *dest = NULL;
         }
     }
     else
     {
         Lwm2m_Error("dest is NULL\n");
-        result = AwaLwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
     }
 
     return result;

@@ -32,7 +32,7 @@
 
 #include <awa/static.h>
 
-TreeNode IPC_NewResponseNode(const char * type, AwaLwm2mResult code)
+TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
 {
     TreeNode responseNode = Xml_CreateNode("Response");
     TreeNode typeNode = Xml_CreateNodeWithValue("Type", "%s", type);

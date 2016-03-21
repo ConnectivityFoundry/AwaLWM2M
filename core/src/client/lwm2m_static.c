@@ -377,11 +377,11 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     return result;
 }
 
-static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, 
+static AwaResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID, 
                                                     AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, 
                                                     void ** dataPointer, uint16_t * dataSize, bool * changed)
 {
-    AwaLwm2mResult result;
+    AwaResult result;
 
     ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
     if (objectDefinition != NULL)
@@ -395,19 +395,19 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
             switch (operation)
             {
             case AwaOperation_CreateObjectInstance:
-                result = AwaLwm2mResult_SuccessCreated;
+                result = AwaResult_SuccessCreated;
                 break;
 
             case AwaOperation_DeleteObjectInstance:
-                result = AwaLwm2mResult_SuccessDeleted;
+                result = AwaResult_SuccessDeleted;
                 break;
 
             case AwaOperation_CreateResource:
-                result = AwaLwm2mResult_SuccessCreated;
+                result = AwaResult_SuccessCreated;
                 break;
 
             case AwaOperation_DeleteResource:
-                result = AwaLwm2mResult_SuccessDeleted;
+                result = AwaResult_SuccessDeleted;
                 break;
 
             case AwaOperation_Write:
@@ -427,11 +427,11 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                         {
                             memcpy(temp->Data, *dataPointer, *dataSize);
                             temp->Size = *dataSize;
-                            result = AwaLwm2mResult_SuccessChanged;
+                            result = AwaResult_SuccessChanged;
                         }
                         else
                         {
-                            result = AwaLwm2mResult_BadRequest;
+                            result = AwaResult_BadRequest;
                         }
                     }
                     else
@@ -439,17 +439,17 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                         if (*dataSize <= resourceDefinition->DataElementSize)
                         {
                             memcpy(offset, *dataPointer, *dataSize);
-                            result = AwaLwm2mResult_SuccessChanged;
+                            result = AwaResult_SuccessChanged;
                         }
                         else
                         {
-                            result = AwaLwm2mResult_BadRequest;
+                            result = AwaResult_BadRequest;
                         }
                     }
                 }
                 else
                 {
-                    result = AwaLwm2mResult_BadRequest;
+                    result = AwaResult_BadRequest;
                 }
                 break;
 
@@ -471,28 +471,28 @@ static AwaLwm2mResult AwaStaticClientDefaultHandler(AwaStaticClient * client, Aw
                         *dataPointer = offset;
                         *dataSize = resourceDefinition->DataElementSize;
                     }
-                    result = AwaLwm2mResult_SuccessContent;
+                    result = AwaResult_SuccessContent;
                 }
                 else
                 {
-                    result = AwaLwm2mResult_BadRequest;
+                    result = AwaResult_BadRequest;
                 }
                 break;
 
             case AwaOperation_Execute:
             default:
-                result = AwaLwm2mResult_BadRequest;
+                result = AwaResult_BadRequest;
                 break;
             }
         }
         else
         {
-            result = AwaLwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
         }
     }
     else
     {
-        result = AwaLwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
     }
     return result;
 }
@@ -684,8 +684,8 @@ AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID o
                 void * valueBuffer = NULL;
                 int valueBufferSize = 0;
                 int resourceInstanceID = 0;  // Note: This will only work for single-instance resources.
-                AwaLwm2mResult lwm2mResult = AwaLwm2mResult_Unspecified;
-                if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaLwm2mResult_SuccessContent)
+                AwaResult lwm2mResult = AwaResult_Unspecified;
+                if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaResult_SuccessContent)
                 {
                     Lwm2m_MarkObserversChanged(client->Context, objectID, objectInstanceID, resourceID, valueBuffer, valueBufferSize);
                     result = AwaError_Success;

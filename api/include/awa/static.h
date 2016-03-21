@@ -150,33 +150,32 @@ typedef struct
 } AwaFactoryBootstrapInfo;
 
 /**
- * Supported result types for handler callbacks
+ * Supported result codes for handler callbacks.
  */
 typedef enum
 {
-    AwaLwm2mResult_Success = 200,           /**< indicates the requested operation completed successfully */
-    AwaLwm2mResult_SuccessCreated = 201,    /**< indicates the requested target was created successfully */
-    AwaLwm2mResult_SuccessDeleted = 202,    /**< indicates the requested target was deleted successfully */
-    AwaLwm2mResult_SuccessChanged = 204,    /**< indicates a successful write to a resource */
-    AwaLwm2mResult_SuccessContent = 205,    /**< indicates a successful read from a resource */
+    AwaResult_Success = 200,           /**< indicates the requested operation completed successfully */
+    AwaResult_SuccessCreated = 201,    /**< indicates the requested target was created successfully */
+    AwaResult_SuccessDeleted = 202,    /**< indicates the requested target was deleted successfully */
+    AwaResult_SuccessChanged = 204,    /**< indicates a successful write to a resource */
+    AwaResult_SuccessContent = 205,    /**< indicates a successful read from a resource */
 
-    AwaLwm2mResult_BadRequest = 400,        /**< indicates an invalid argument or request to create an entity that already exists */
-    AwaLwm2mResult_Unauthorized = 401,      /**< indicates an attempt to call the requested operation with insufficient authorisation */
-    AwaLwm2mResult_Forbidden = 403,         /**< indicates a request to create an object instance */
-    AwaLwm2mResult_NotFound = 404,          /**< indicates the specified object, object instance or resource does not exist */
-    AwaLwm2mResult_MethodNotAllowed = 405,  /**< indicates the requested operation is not allowed for the specified target */
-    AwaLwm2mResult_NotAcceptable = 406,     /**< indicates a requested accept-header was not acceptable by the client daemon */
+    AwaResult_BadRequest = 400,        /**< indicates an invalid argument or request to create an entity that already exists */
+    AwaResult_Unauthorized = 401,      /**< indicates an attempt to call the requested operation with insufficient authorisation */
+    AwaResult_Forbidden = 403,         /**< indicates a request to create an object instance */
+    AwaResult_NotFound = 404,          /**< indicates the specified object, object instance or resource does not exist */
+    AwaResult_MethodNotAllowed = 405,  /**< indicates the requested operation is not allowed for the specified target */
+    AwaResult_NotAcceptable = 406,     /**< indicates a requested accept-header was not acceptable by the client daemon */
 
-    AwaLwm2mResult_InternalError = 500,     /**< indicates the handler failed internally while processing a request */
+    AwaResult_InternalError = 500,     /**< indicates the handler failed internally while processing a request */
 
-    AwaLwm2mResult_OutOfMemory = 999,       /**< indicates the handler did not have sufficient memory to service the requested operation */
-    AwaLwm2mResult_AlreadyRegistered,       /**< indicates an attempt to register an already registered object or resource */
-    AwaLwm2mResult_MismatchedRegistration,  /**< indicates an attempt to register an object definition does not match the existing definition */
-    AwaLwm2mResult_AlreadyCreated,          /**< indicates an attempt to create an existing resource or object instance */
-    AwaLwm2mResult_Unsupported,             /**< indicates the requested operation is not supported by the called handler */
-    AwaLwm2mResult_Unspecified = -1,        /**< indicates the requested operation was ignored by the called handler */
-
-} AwaLwm2mResult;
+    AwaResult_OutOfMemory = 999,       /**< indicates the handler did not have sufficient memory to service the requested operation */
+    AwaResult_AlreadyRegistered,       /**< indicates an attempt to register an already registered object or resource */
+    AwaResult_MismatchedRegistration,  /**< indicates an attempt to register an object definition does not match the existing definition */
+    AwaResult_AlreadyCreated,          /**< indicates an attempt to create an existing resource or object instance */
+    AwaResult_Unsupported,             /**< indicates the requested operation is not supported by the called handler */
+    AwaResult_Unspecified = -1,        /**< indicates the requested operation was ignored by the called handler */
+} AwaResult;
 
 
 /**************************************************************************************************
@@ -203,13 +202,13 @@ typedef enum
  * @param[in,out] changed Marks whether the resource's value has been changed withing the handler
  *                by the requested operation. If set to true, a notification will be sent went possible to any observers
  *                of the target object, object instance or resource.
- * @return AwaLwm2mResult_SuccessCreated on a successful create object instance or resource operation.
- * @return AwaLwm2mResult_SuccessDeleted on a successful delete object instance or resource operation.
- * @return AwaLwm2mResult_SuccessContent on a successful read operation.
- * @return AwaLwm2mResult_SuccessChanged on a successful write or execute operation.
+ * @return AwaResult_SuccessCreated on a successful create object instance or resource operation.
+ * @return AwaResult_SuccessDeleted on a successful delete object instance or resource operation.
+ * @return AwaResult_SuccessContent on a successful read operation.
+ * @return AwaResult_SuccessChanged on a successful write or execute operation.
  * @return Various errors on failure.
  */
-typedef AwaLwm2mResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
+typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
                                                  AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
                                                  void ** dataPointer, uint16_t * dataSize, bool * changed);
 

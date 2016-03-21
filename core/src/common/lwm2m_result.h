@@ -36,18 +36,18 @@ extern "C" {
 #include "lwm2m_observers.h"
 
 // Returns the last result code of an lwm2m related function
-AwaLwm2mResult AwaLwm2mResult_GetLastResult(void);
+AwaResult AwaResult_GetLastResult(void);
 
 // Retrieves the last result code of an lwm2m related function
-void AwaLwm2mResult_SetResult(AwaLwm2mResult result);
+void AwaResult_SetResult(AwaResult result);
 
-bool AwaLwm2mResult_IsSuccess(AwaLwm2mResult result);
+bool AwaResult_IsSuccess(AwaResult result);
 
 // Required for returning errors to the API through the IPC
-int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError);
+int AwaResult_ToAwaError(AwaResult result, int defaultError);
 
 // Temporary mapping between two incompatible enums
-int AwaLwm2mResult_ToAwaLwm2mError(AwaLwm2mResult result);
+int AwaResult_ToAwaLwm2mError(AwaResult result);
 
 #ifdef __cplusplus
 }

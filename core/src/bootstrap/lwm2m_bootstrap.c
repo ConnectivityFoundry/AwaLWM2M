@@ -140,12 +140,12 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
 
             Lwm2mBootstrap_AddClientToQueue(&client);
     
-            *responseCode = AwaLwm2mResult_SuccessChanged;
+            *responseCode = AwaResult_SuccessChanged;
             break;
         }
 
         default:
-            *responseCode = AwaLwm2mResult_MethodNotAllowed;
+            *responseCode = AwaResult_MethodNotAllowed;
             break;
     }
     return 0;
@@ -153,7 +153,7 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
 
 static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
 {
-    if ((responseCode >= AwaLwm2mResult_Success) && (responseCode <= AwaLwm2mResult_SuccessContent))
+    if ((responseCode >= AwaResult_Success) && (responseCode <= AwaResult_SuccessContent))
     {
         Lwm2mBootstrapClient * client = (Lwm2mBootstrapClient *)context;
         char uri[MAX_URI_LENGTH];
@@ -226,7 +226,7 @@ void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
         // Kick start sending bootstrap with callback
         if (bootStrapQueue[i].Used && (bootStrapQueue[i].ObjectID == 0) && (bootStrapQueue[i].ObjectInstanceID == -1))
         {
-            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, AwaLwm2mResult_Success, 0, NULL, 0);
+            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, AwaResult_Success, 0, NULL, 0);
         }
     }
 }

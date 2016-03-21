@@ -384,7 +384,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     if (q.EndPointName == NULL)
     {
         *responseContentLen = 0;
-        *responseCode = AwaLwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -392,7 +392,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     if (contentType != ContentType_ApplicationLinkFormat)
     {
         *responseContentLen = 0;
-        *responseCode = AwaLwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -417,12 +417,12 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         sprintf(responseContent, "rd/%d", client->Location);
     
         *responseContentLen = strlen(responseContent);  // no content
-        *responseCode = AwaLwm2mResult_SuccessCreated;
+        *responseCode = AwaResult_SuccessCreated;
     }
     else
     {
         *responseContentLen = 0;
-        *responseCode = AwaLwm2mResult_Forbidden;  // Duplicate
+        *responseCode = AwaResult_Forbidden;  // Duplicate
     }
 
     Lwm2m_ReleaseQueryString(&q);
@@ -449,7 +449,7 @@ static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
 
     if (sscanf(path, "/rd/%10d\n", &location) != 1)
     {
-        *responseCode = AwaLwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -457,11 +457,11 @@ static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
 
     if (Lwm2m_UpdateClient(context, location, q.LifeTime, q.BindingModeValue, addr, contentType, requestContent, requestContentLen) == 0)
     {
-        *responseCode = AwaLwm2mResult_SuccessChanged;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else
     {
-        *responseCode = AwaLwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
 
     Lwm2m_ReleaseQueryString(&q);
@@ -483,19 +483,19 @@ static int Lwm2m_RegisterDelete(void * ctxt, AddressType * addr, const char * pa
 
     if (sscanf(path, "/rd/%10d\n", &location) != 1)
     {
-        *responseCode = AwaLwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
     Lwm2mClientType * client = Lwm2m_LookupClientByLocation(context, location);
     if (client == NULL)
     {
-        *responseCode = AwaLwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
     else
     {
         Lwm2m_DeregisterClient(context, client);
-        *responseCode = AwaLwm2mResult_SuccessDeleted;
+        *responseCode = AwaResult_SuccessDeleted;
     }
 done:
     return 0;
@@ -528,7 +528,7 @@ static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * 
 
    *responseContentType = ContentType_None;
    *responseContentLen = 0;
-   *responseCode = AwaLwm2mResult_MethodNotAllowed;
+   *responseCode = AwaResult_MethodNotAllowed;
     return 0;
 }
 
@@ -547,7 +547,7 @@ static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressT
 
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
-    *responseCode = AwaLwm2mResult_MethodNotAllowed;
+    *responseCode = AwaResult_MethodNotAllowed;
     return 0;
 }
 

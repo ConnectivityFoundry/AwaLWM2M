@@ -65,7 +65,7 @@ typedef int (*CreateInstanceHandler)(void * context, ObjectIDType objectID, Obje
 // handler to call to create an optional resource
 typedef int (*CreateOptionalResourceHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-typedef AwaLwm2mResult (*LWM2MHandler)(void * context, AwaOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed);
+typedef AwaResult (*LWM2MHandler)(void * context, AwaOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed);
 
 typedef struct
 {

@@ -136,7 +136,7 @@ static Resource * CreateResource(const ObjectStore * store, ObjectInstance * ins
     if (resource)
     {
         // already exists
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         return resource;
     }
 
@@ -144,7 +144,7 @@ static Resource * CreateResource(const ObjectStore * store, ObjectInstance * ins
     resource = (Resource*)malloc(sizeof(Resource));
     if (resource == NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         return NULL;
     }
 
@@ -154,7 +154,7 @@ static Resource * CreateResource(const ObjectStore * store, ObjectInstance * ins
     // Add to instance.
     ListAdd(&resource->list, &instance->Resource);
 
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
     return resource;
 }
 
@@ -186,7 +186,7 @@ ResourceIDType ObjectStore_GetNextResourceID(ObjectStore * store, ObjectIDType o
             Resource * resource = ListEntry(i, Resource, list);
             if (found)
             {
-                AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+                AwaResult_SetResult(AwaResult_Success);
                 return resource->ID;
             }
 
@@ -196,7 +196,7 @@ ResourceIDType ObjectStore_GetNextResourceID(ObjectStore * store, ObjectIDType o
             }
         }
     }
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
     return -1;
 }
 
@@ -205,15 +205,15 @@ Object * CreateObject(ObjectStore * store, ObjectIDType objectID)
     Object * object = LookupObject(store, objectID);
     if (object != NULL)
     {
-        //AwaLwm2mResult_SetResult(AwaLwm2mResult_AlreadyCreated);
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        //AwaResult_SetResult(AwaResult_AlreadyCreated);
+        AwaResult_SetResult(AwaResult_Success);
         return object;
     }
 
     object = (Object*)malloc(sizeof(Object));
     if (object == NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         return NULL;
     }
 
@@ -222,7 +222,7 @@ Object * CreateObject(ObjectStore * store, ObjectIDType objectID)
 
     ListAdd(&object->list, &store->objectList);
 
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
     return object;
 }
 
@@ -231,7 +231,7 @@ static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * objec
     ObjectInstance * instance = GetObjectInstance(object, objectInstanceID);
     if (instance != NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_AlreadyCreated);
+        AwaResult_SetResult(AwaResult_AlreadyCreated);
         return NULL;
     }
 
@@ -239,7 +239,7 @@ static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * objec
     instance = (ObjectInstance*)malloc(sizeof(ObjectInstance));
     if (instance == NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         return NULL;
     }
 
@@ -251,7 +251,7 @@ static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * objec
 
     Lwm2m_Debug("CreateObjectInstance %d %d\n", object->ID, objectInstanceID);
 
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
     return instance;
 }
 
@@ -342,22 +342,22 @@ int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
         ResourceInstance * instance = GetResourceInstance(resource, resourceInstanceID);
         if (instance == NULL)
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+            AwaResult_SetResult(AwaResult_NotFound);
             return -1;
         }
         else if (ValueBuffer == NULL || ValueBufferSize == NULL)
         {
             Lwm2m_Error("ValueBuffer or ValueBufferSize is NULL\n");
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_InternalError);
+            AwaResult_SetResult(AwaResult_InternalError);
             return -1;
         }
 
         *ValueBuffer = instance->Value;
         *ValueBufferSize = instance->Size;
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         return instance->Size;
     }
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
     return -1;
 }
 
@@ -401,7 +401,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
         if (rInst == NULL)
         {
             Lwm2m_Error("Failed to allocate memory\n");
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+            AwaResult_SetResult(AwaResult_OutOfMemory);
             return -1;
         }
 
@@ -413,7 +413,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
         {
             free(rInst);
             Lwm2m_Error("Failed to allocate memory\n");
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+            AwaResult_SetResult(AwaResult_OutOfMemory);
             return -1;
         }
 
@@ -432,7 +432,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
             if (temp == NULL)
             {
                 Lwm2m_Error("Failed to realloc memory\n");
-                AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 return -1;
             }
 
@@ -451,11 +451,11 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
             *changed = true;
         }
 
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         return valueBufferLen;
     }
 
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
+    AwaResult_SetResult(AwaResult_BadRequest);
     return -1;
 }
 
@@ -464,7 +464,7 @@ ObjectStore * ObjectStore_Create(void)
     ObjectStore * store = (ObjectStore*)malloc(sizeof(ObjectStore));
     if (store == NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         return NULL;
     }
 
@@ -472,7 +472,7 @@ ObjectStore * ObjectStore_Create(void)
 
     ListInit(&store->objectList);
 
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
     return store;
 }
 
@@ -616,7 +616,7 @@ ObjectInstanceIDType ObjectStore_GetNextObjectInstanceID(ObjectStore * store, Ob
             ObjectInstance * instance = ListEntry(i, ObjectInstance, list);
             if (found)
             {
-                AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+                AwaResult_SetResult(AwaResult_Success);
                 return instance->ID;
             }
 
@@ -626,7 +626,7 @@ ObjectInstanceIDType ObjectStore_GetNextObjectInstanceID(ObjectStore * store, Ob
             }
         }
     }
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
     return -1;
 }
 
@@ -643,7 +643,7 @@ ResourceInstanceIDType ObjectStore_GetNextResourceInstanceID(ObjectStore * store
             ResourceInstance * instance = ListEntry(i, ResourceInstance, list);
             if (found)
             {
-                AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+                AwaResult_SetResult(AwaResult_Success);
                 return instance->ID;
             }
 
@@ -653,7 +653,7 @@ ResourceInstanceIDType ObjectStore_GetNextResourceInstanceID(ObjectStore * store
             }
         }
     }
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
     return -1;
 }
 
@@ -681,7 +681,7 @@ ResourceIDType ObjectStore_CreateResource(ObjectStore * store, ObjectIDType obje
     if (instance == NULL)
     {
         Lwm2m_Error("Failed to lookup object instance\n");
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+        AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
     Resource * resource = CreateResource(store, instance, objectID, resourceID);
@@ -696,20 +696,20 @@ error:
 
 ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, int maxInstances)
 {
-    AwaLwm2mResult result = AwaLwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
 
     Object * obj = CreateObject(store, objectID);
     if (obj == NULL)
     {
         Lwm2m_Error("Failed to create object\n");
-        result = AwaLwm2mResult_GetLastResult();
+        result = AwaResult_GetLastResult();
         goto error;
     }
 
     if (ObjectStore_GetObjectNumInstances(store, objectID) + 1 > maxInstances)
     {
         Lwm2m_Error("Cannot create object instance: object %d already contains a maximum number of instances\n", objectID);
-        result = AwaLwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -727,7 +727,7 @@ ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, Objec
     else if (ObjectStore_Exists(store, objectID, objectInstanceID, -1))
     {
         Lwm2m_Error("Object instance already exists %d\n", objectID);
-        result = AwaLwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -736,19 +736,19 @@ ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, Objec
     if (instance == NULL)
     {
         Lwm2m_Error("Failed to create object instance\n");
-        result = AwaLwm2mResult_OutOfMemory;
+        result = AwaResult_OutOfMemory;
         goto error;
     }
     else
     {
         Lwm2m_Debug("Created new object instance ID: %d for object %d\n", objectInstanceID, objectID);
-        result = AwaLwm2mResult_Success;
+        result = AwaResult_Success;
         goto done;
     }
 
 error:
     objectInstanceID = -1;
 done:
-    AwaLwm2mResult_SetResult(result);
+    AwaResult_SetResult(result);
     return objectInstanceID;
 }

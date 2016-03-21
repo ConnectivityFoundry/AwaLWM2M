@@ -93,7 +93,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
     else
     {
         Lwm2m_Error("No definition for object ID %d\n", objectID);
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+        AwaResult_SetResult(AwaResult_NotFound);
     }
     return result;
 }
@@ -143,7 +143,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     {
         response->responseContentType = ContentType_None;
         response->responseContentLen = 0;
-        response->responseCode = AwaLwm2mResult_NotFound;
+        response->responseCode = AwaResult_NotFound;
         return 0;
     }
 
