@@ -833,13 +833,13 @@ error:
  * @return -1 on error 0 on success
  */
 int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
-                                   uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers)
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
 }
 
 int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
-                                   uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
 }

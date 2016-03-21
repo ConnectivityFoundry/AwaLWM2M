@@ -226,7 +226,7 @@ static bool SessionCommon_RegisterObjectFromXML(DefinitionRegistry * definitions
             const char * resourceName = NULL;
             uint16_t ResourceMaximumInstances = 1;
             uint16_t ResourceMinimumInstances = 0;
-            Operations operation = Operations_None;
+            AwaResourceOperations operation = AwaResourceOperations_None;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
             resNode = TreeNode_Navigate(property, "Property/PropertyID");

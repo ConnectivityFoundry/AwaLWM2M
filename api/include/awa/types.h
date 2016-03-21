@@ -126,7 +126,7 @@ typedef enum
  */
 typedef enum
 {
-    AwaResourceOperations_Invalid = 0,  /**< indicates an invalid resource operation */
+    AwaResourceOperations_Invalid = -1,  /**< indicates an invalid resource operation */
 
     AwaResourceOperations_None,         /**< indicates no operations are permitted to a management server */
     AwaResourceOperations_ReadOnly,     /**< indicates the resource is read-only to a management server */

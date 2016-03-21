@@ -359,7 +359,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             uint16_t resourceMinimumInstances = 0;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
-            Operations operation = Operations_None;
+            AwaResourceOperations operation = AwaResourceOperations_None;
 
             resNode = TreeNode_Navigate(property, "Property/PropertyID");
             if (resNode != NULL)
@@ -484,7 +484,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 }
             }
 
-            if (operation & Operations_E)
+            if (operation & AwaResourceOperations_Execute)
             {
                 // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
                 res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, &xmlifResourceOperationHandlers, defaultValueNode);
@@ -1224,7 +1224,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                             if (resFormat != NULL)
                             {
                                  // Cancel SubscribeToExecute or SubscribeToChange
-                                 if (resFormat->Operation == Operations_E)
+                                 if (resFormat->Operation == AwaResourceOperations_Execute)
                                  {
                                      if (xmlif_RemoveExecuteHandler(&key, request) >= 0)
                                      {

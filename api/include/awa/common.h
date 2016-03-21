@@ -35,7 +35,9 @@
 extern "C" {
 #endif
 
-typedef struct _AwaChangeSet AwaChangeSet;
+/**************************************************************************************************
+ * Public Types and Enumerations
+ *************************************************************************************************/
 
 /**
  * Supported change types for a change subscription
@@ -722,6 +724,8 @@ AwaLWM2MError AwaPathResult_GetLWM2MError(const AwaPathResult * result);
 /**************************************************************************************************
  * ChangeSet Functions for Change Subscriptions and Observations
  *************************************************************************************************/
+
+typedef struct _AwaChangeSet AwaChangeSet;
 
 /**
  * @brief Create a new Path Iterator for a ChangeSet, used to iterate through the list of resource paths

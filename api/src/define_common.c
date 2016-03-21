@@ -77,10 +77,9 @@ AwaError ObjectDefinition_AddResourceDefinition(AwaObjectDefinition * objectDefi
         {
             if (Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID) == NULL)
             {
-                Operations coreOperations = Utils_GetResourceTypeOperations(operations);
                 AwaResourceType coreResourceType = Utils_GetPrimativeResourceType(resourceType);
 
-                if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, coreOperations, RESOURCE_HANDLER, defaultValueNode))
+                if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, operations, RESOURCE_HANDLER, defaultValueNode))
                 {
                     result = AwaError_Success;
                 }
@@ -387,27 +386,7 @@ AwaResourceOperations AwaResourceDefinition_GetSupportedOperations(const AwaReso
 
     if (resourceDefinition != NULL)
     {
-        switch (resourceDefinition->Operation)
-        {
-            case Operations_None:
-                operations = AwaResourceOperations_None;
-                break;
-            case Operations_R:
-                operations = AwaResourceOperations_ReadOnly;
-                break;
-            case Operations_W:
-                operations = AwaResourceOperations_WriteOnly;
-                break;
-            case Operations_RW:
-                operations = AwaResourceOperations_ReadWrite;
-                break;
-            case Operations_E:
-                operations = AwaResourceOperations_Execute;
-                break;
-            default:
-                LogError("Invalid operation %d", resourceDefinition->Operation);
-                operations = AwaResourceOperations_None;
-        }
+        operations = resourceDefinition->Operation;
     }
 
     return operations;
