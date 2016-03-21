@@ -422,7 +422,6 @@ AwaError AwaStaticClient_RegisterResourceWithPointer(AwaStaticClient * client, c
  * @param[in] operations The allowed operations on the registered resource.
  * @param[in] dataPointers An array of pointers, each containing the location of the resource's data for a single object instance.
  * @param[in] dataElementSize The size in bytes of the resource's data.
- * @param[in] dataStepSize The step size in bytes between the resource's data per object instance.
  * @return AwaError_Success on success.
  * @return AwaError_DefinitionInvalid if the resourceName is invalid or the objectID, resourceID, minimumInstances, or
  *         maximumInstances are out of range, dataPointers is NULL, empty or dataElementSize is less than 1.
