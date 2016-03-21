@@ -43,15 +43,6 @@ extern "C" {
 
 typedef enum
 {
-    Operations_None = 0,
-    Operations_R = 1,
-    Operations_W = 2,
-    Operations_RW = 3,
-    Operations_E = 4,
-} Operations;
-
-typedef enum
-{
     MandatoryEnum_Optional = 0,
     MandatoryEnum_Mandatory = 1,
 } MandatoryEnum;
@@ -103,10 +94,10 @@ typedef enum
     ContentType_CustomPrettyPrint = 999,
 } ContentType;
 
-bool Operations_IsResourceTypeExecutable(Operations operation);
-bool Operations_IsResourceTypeWritable(Operations operation);
-bool Operations_IsResourceTypeReadable(Operations operation);
-bool Operations_Contains(Operations parent, Operations child);
+bool Operations_IsResourceTypeExecutable(AwaResourceOperations operation);
+bool Operations_IsResourceTypeWritable(AwaResourceOperations operation);
+bool Operations_IsResourceTypeReadable(AwaResourceOperations operation);
+bool Operations_Contains(AwaResourceOperations parent, AwaResourceOperations child);
 
 size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void);
 const char * Lwm2mCore_ResourceTypeToString(AwaResourceType resourceType);

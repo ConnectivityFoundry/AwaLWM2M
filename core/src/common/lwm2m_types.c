@@ -52,22 +52,22 @@ static const char * ResourceTypeStrings[] =
 #endif
 };
 
-bool Operations_IsResourceTypeExecutable(Operations operation)
+bool Operations_IsResourceTypeExecutable(AwaResourceOperations operation)
 {
-    return (operation & Operations_E);
+    return (operation & AwaResourceOperations_Execute);
 }
 
-bool Operations_IsResourceTypeWritable(Operations operation)
+bool Operations_IsResourceTypeWritable(AwaResourceOperations operation)
 {
-    return (operation & Operations_W);
+    return (operation & AwaResourceOperations_WriteOnly);
 }
 
-bool Operations_IsResourceTypeReadable(Operations operation)
+bool Operations_IsResourceTypeReadable(AwaResourceOperations operation)
 {
-    return ((operation == Operations_R) || (operation == Operations_RW));
+    return (operation & AwaResourceOperations_ReadOnly);
 }
 
-bool Operations_Contains(Operations parent, Operations child)
+bool Operations_Contains(AwaResourceOperations parent, AwaResourceOperations child)
 {
     if (Operations_IsResourceTypeReadable(child) && !Operations_IsResourceTypeReadable(parent))
     {

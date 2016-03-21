@@ -57,10 +57,10 @@ AwaResourceType xmlif_StringToDataType(const char * value);
 const char * xmlif_DataTypeToString(AwaResourceType type);
 
 // Convert a string to a Operations enum used by LWM2M
-Operations xmlif_StringToOperation(const char * value);
+AwaResourceOperations xmlif_StringToOperation(const char * value);
 
 // Convert from an Operations enum to a string representation
-const char * xmlif_OperationToString(Operations operation);
+const char * xmlif_OperationToString(AwaResourceOperations operation);
 
 int xmlif_GetInteger(TreeNode content, const char * name);
 

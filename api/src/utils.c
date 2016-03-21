@@ -156,33 +156,3 @@ AwaResourceType Utils_GetPrimativeResourceType(AwaResourceType resourceType)
     return result;
 }
 
-Operations Utils_GetResourceTypeOperations(AwaResourceOperations operation)
-{
-    Operations result = Operations_None;
-
-    switch (operation)
-    {
-        case AwaResourceOperations_None:
-            result = Operations_None;
-            break;
-        case AwaResourceOperations_ReadOnly:
-            result = Operations_R;
-            break;
-        case AwaResourceOperations_WriteOnly:
-            result = Operations_W;
-            break;
-        case AwaResourceOperations_ReadWrite:
-            result = Operations_RW;
-            break;
-        case AwaResourceOperations_Execute:
-            result = Operations_E;
-            break;
-        default:
-            LogError("Invalid operation %d", operation);
-            result = Operations_None;
-            break;
-    }
-
-    return result;
-}
-

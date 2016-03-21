@@ -48,3 +48,7 @@ make BUILD_DIR=.build_x86 CMAKE_OPTIONS="-DENABLE_GCOV=ON" tests
 
 # run cppcheck
 make cppcheck BUILD_DIR=.build_x86
+
+# check docs build
+make docs
+

@@ -81,7 +81,6 @@ static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
 {
-    Lwm2m_Debug("Exit triggered\n");
     quit = 1;
 }
 
@@ -278,6 +277,7 @@ static int Lwm2mClient_Start(Options * options)
         }
         coap_Process();
     }
+    Lwm2m_Debug("Exit triggered\n");
 
     xmlif_DestroyExecuteHandlers();
     xmlif_destroy(xmlFd);

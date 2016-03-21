@@ -99,6 +99,7 @@ typedef struct _AwaClientSubscription AwaClientChangeSubscription;
 typedef struct _AwaClientSubscription AwaClientExecuteSubscription;
 /// @endcond
 
+
 /**************************************************************************************************
  * Callbacks
  *************************************************************************************************/
@@ -525,7 +526,6 @@ AwaError AwaClientGetResponse_GetValueAsOpaque(const AwaClientGetResponse * resp
  * @return AwaError_PathInvalid if the specified path is invalid or does not correspond to a resource path.
  */
 AwaError AwaClientGetResponse_GetValueAsObjectLink(const AwaClientGetResponse * response, const char * path, AwaObjectLink * value);
-
 
 /**
  * @defgroup GetResponse_GetValuesAsArray AwaClientGetResponse_GetValuesAs___ArrayPointer

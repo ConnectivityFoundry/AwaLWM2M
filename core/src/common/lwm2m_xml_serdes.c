@@ -56,7 +56,7 @@ const char * xmlif_DataTypeToString(AwaResourceType type)
     return TypeStrings[type];
 }
 
-Operations xmlif_StringToOperation(const char * value)
+AwaResourceOperations xmlif_StringToOperation(const char * value)
 {
     int i;
 
@@ -67,12 +67,12 @@ Operations xmlif_StringToOperation(const char * value)
             return i;
         }
     }
-    return Operations_None;
+    return AwaResourceOperations_None;
 }
 
-const char * xmlif_OperationToString(Operations operation)
+const char * xmlif_OperationToString(AwaResourceOperations operation)
 {
-    if ((operation < Operations_None) || (operation > Operations_E))
+    if ((operation < AwaResourceOperations_None) || (operation > AwaResourceOperations_Execute))
     {
         return "None";
     }

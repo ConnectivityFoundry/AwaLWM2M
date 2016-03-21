@@ -69,7 +69,6 @@ static void PrintOptions(const Options * options);
 
 static void CtrlCSignalHandler(int dummy)
 {
-    Lwm2m_Debug("Exit triggered\n");
     quit = 1;
 }
 
@@ -230,6 +229,7 @@ static int Bootstrap_Start(Options * options)
         }
         coap_Process();
     }
+    Lwm2m_Debug("Exit triggered\n");
 
 error_destroy:
     Lwm2mBootstrap_Destroy();
