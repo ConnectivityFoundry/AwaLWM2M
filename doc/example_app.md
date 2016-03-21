@@ -492,9 +492,9 @@ The following code expands on the previous example, by demonstrating how to add 
 +static void DefineHeaterObject(AwaStaticClient * awaClient)
 +{
 +    AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
-+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaAccess_Read,
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
 +                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
-+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaAccess_Read,
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
 +                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
 +}
 
@@ -617,9 +617,9 @@ static HeaterObject heater[HEATER_INSTANCES];
 static void DefineHeaterObject(AwaStaticClient * awaClient)
 {
     AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
-    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaAccess_Read,
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
                                                 &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
-    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaAccess_Read,
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
                                                 &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
 }
 

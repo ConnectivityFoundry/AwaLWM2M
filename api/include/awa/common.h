@@ -35,24 +35,9 @@
 extern "C" {
 #endif
 
-typedef struct _AwaChangeSet AwaChangeSet;
-
-/**
- * Supported resource operations for management servers
- */
-typedef enum
-{
-    AwaResourceOperations_Invalid = 0,  /**< indicates an invalid resource operation */
-
-    AwaResourceOperations_None,         /**< indicates no operations are permitted to a management server */
-    AwaResourceOperations_ReadOnly,     /**< indicates the resource is read-only to a management server */
-    AwaResourceOperations_WriteOnly,    /**< indicates the resource is write-only to a management server */
-    AwaResourceOperations_ReadWrite,    /**< indicates the resource can be read and written by a management server */
-    AwaResourceOperations_Execute,      /**< indicates the resource can be executed by a management server */
-
-    // sentinel, do not remove
-    AwaResourceOperations_LAST          /**< Reserved value */
-} AwaResourceOperations;
+/**************************************************************************************************
+ * Public Types and Enumerations
+ *************************************************************************************************/
 
 /**
  * Supported change types for a change subscription
@@ -739,6 +724,8 @@ AwaLWM2MError AwaPathResult_GetLWM2MError(const AwaPathResult * result);
 /**************************************************************************************************
  * ChangeSet Functions for Change Subscriptions and Observations
  *************************************************************************************************/
+
+typedef struct _AwaChangeSet AwaChangeSet;
 
 /**
  * @brief Create a new Path Iterator for a ChangeSet, used to iterate through the list of resource paths

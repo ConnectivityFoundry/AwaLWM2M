@@ -305,15 +305,15 @@ void Lwm2m_RegisterServerObject(Lwm2mContextType * context)
 
     Lwm2mCore_RegisterObjectType(context, "LWM2MServer" , LWM2M_SERVER_OBJECT, MultipleInstancesEnum_Multiple, MandatoryEnum_Mandatory, &serverObjectOperationHandlers);
 
-    Lwm2mCore_RegisterResourceType(context, "ShortServerID",                            LWM2M_SERVER_OBJECT, 0, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Lifetime",                                 LWM2M_SERVER_OBJECT, 1, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DefaultMinimumPeriod",                     LWM2M_SERVER_OBJECT, 2, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DefaultMaximumPeriod",                     LWM2M_SERVER_OBJECT, 3, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Disable",                                  LWM2M_SERVER_OBJECT, 4, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_E,  &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DisableTimeout",                           LWM2M_SERVER_OBJECT, 5, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "NotificationStoringWhenDisabledorOffline", LWM2M_SERVER_OBJECT, 6, AwaResourceType_Boolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Binding",                                  LWM2M_SERVER_OBJECT, 7, AwaResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "RegistrationUpdateTrigger",                LWM2M_SERVER_OBJECT, 8, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_E,  &registrationUpdateTriggerOperationHandler);
+    Lwm2mCore_RegisterResourceType(context, "ShortServerID",                            LWM2M_SERVER_OBJECT, 0, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly,  &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Lifetime",                                 LWM2M_SERVER_OBJECT, 1, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DefaultMinimumPeriod",                     LWM2M_SERVER_OBJECT, 2, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DefaultMaximumPeriod",                     LWM2M_SERVER_OBJECT, 3, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Disable",                                  LWM2M_SERVER_OBJECT, 4, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_Execute,  &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DisableTimeout",                           LWM2M_SERVER_OBJECT, 5, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "NotificationStoringWhenDisabledorOffline", LWM2M_SERVER_OBJECT, 6, AwaResourceType_Boolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Binding",                                  LWM2M_SERVER_OBJECT, 7, AwaResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "RegistrationUpdateTrigger",                LWM2M_SERVER_OBJECT, 8, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_Execute,  &registrationUpdateTriggerOperationHandler);
 }
 
 // Add a server entry to our list of servers or updates an existing one triggers a Registration request.

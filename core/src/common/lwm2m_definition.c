@@ -322,7 +322,7 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
 
 ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
                                                 AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
-                                                Operations operations, ResourceOperationHandlers * handlers, LWM2MHandler handler, Lwm2mTreeNode * defaultValueNode)
+                                                AwaResourceOperations operations, ResourceOperationHandlers * handlers, LWM2MHandler handler, Lwm2mTreeNode * defaultValueNode)
 {
     ResourceDefinition * resFormat = (ResourceDefinition *)malloc(sizeof(*resFormat));
     if (resFormat != NULL)
@@ -353,19 +353,19 @@ ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * 
 
 ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
                                                 AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
-                                                Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+                                                AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL, defaultValueNode);
 }
 
 ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaResourceType resourceType,
-                                                           uint16_t MinimumInstances, uint16_t MaximumInstances, Operations operations, LWM2MHandler Handler)
+                                                           uint16_t MinimumInstances, uint16_t MaximumInstances, AwaResourceOperations operations, LWM2MHandler Handler)
 {
     return NewResourceType(objFormat, resName, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, NULL, Handler, NULL);
 }
 
 int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
-                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+                                    uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     int result = -1;
 

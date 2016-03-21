@@ -108,8 +108,8 @@ AwaLwm2mResult handler(AwaStaticClient * client, AwaOperation operation, AwaObje
 static void DefineHeaterObject(AwaStaticClient * awaClient)
 {
     AwaStaticClient_RegisterObjectWithHandler(awaClient, "Heater", 1000, 0, HEATER_INSTANCES, handler);
-    AwaStaticClient_RegisterResourceWithHandler(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaAccess_ReadWrite, handler);
-    AwaStaticClient_RegisterResourceWithHandler(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaAccess_ReadWrite, handler);
+    AwaStaticClient_RegisterResourceWithHandler(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadWrite, handler);
+    AwaStaticClient_RegisterResourceWithHandler(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadWrite, handler);
 }
 
 static void CreateHeaterObject(AwaStaticClient * awaClient)

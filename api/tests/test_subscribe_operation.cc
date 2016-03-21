@@ -259,6 +259,56 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     EXPECT_TRUE(NULL == operation);
 }
 
+TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_ChangeSet_handles_wrong_session_type)
+{
+    struct ChangeCallbackHandler1 : public TestSubscribeToChangeWithConnectedSession
+    {
+        int count;
+
+        ChangeCallbackHandler1() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            const AwaClientSession * clientSession = AwaChangeSet_GetClientSession(changeSet);
+            EXPECT_TRUE(NULL != clientSession);
+            const AwaServerSession * serverSession = AwaChangeSet_GetServerSession(changeSet);
+            EXPECT_TRUE(NULL == serverSession);
+        }
+        void TestBody() {}
+    };
+    ChangeCallbackHandler1 cbHandler;
+
+    AwaClientSubscribeOperation * operation = AwaClientSubscribeOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/16", ChangeCallbackRunner, &cbHandler);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+
+    // set via client api to trigger notification.
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaClientSession_DispatchCallbacks(session_);
+    EXPECT_EQ(1, cbHandler.count);
+
+    EXPECT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
+    EXPECT_TRUE(NULL == changeSubscription);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Free(&operation));
+    EXPECT_TRUE(NULL == operation);
+}
+
 TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Perform_handles_valid_operation_on_multiple_instance_resource_with_callback)
 {
     struct ChangeCallbackHandler1 : public TestSubscribeToChangeWithConnectedSession

@@ -101,6 +101,7 @@ typedef struct _AwaServerObservation AwaServerObservation;
 typedef struct _AwaServerObserveResponse AwaServerObserveResponse;
 /// @endcond
 
+
 /**************************************************************************************************
  * Callbacks
  *************************************************************************************************/
@@ -114,6 +115,7 @@ typedef struct _AwaServerObserveResponse AwaServerObserveResponse;
  * @param[in] context A pointer to user-specified data passed to AwaServerObservation_New
  */
 typedef void (*AwaServerObservationCallback)(const AwaChangeSet * changeSet, void * context);
+
 
 /**************************************************************************************************
  * Server Session Management

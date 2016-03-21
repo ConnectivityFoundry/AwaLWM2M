@@ -44,8 +44,6 @@ size_t Utils_GetNumberOfResourceTypeStrings(void);
 
 AwaResourceType Utils_GetPrimativeResourceType(AwaResourceType resourceType);
 
-Operations Utils_GetResourceTypeOperations(AwaResourceOperations operation);
-
 #ifdef __cplusplus
 }
 #endif

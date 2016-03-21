@@ -211,6 +211,62 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(NULL == operation);
 }
 
+TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_wrong_session_type)
+{
+    // start a client
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    sleep(1);
+
+    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    {
+        int count;
+
+        CallbackHandler1() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            const AwaClientSession * clientSession = AwaChangeSet_GetClientSession(changeSet);
+            EXPECT_TRUE(NULL == clientSession);
+            const AwaServerSession * serverSession = AwaChangeSet_GetServerSession(changeSet);
+            EXPECT_TRUE(NULL != serverSession);
+        }
+        void TestBody() {}
+    };
+    CallbackHandler1 cbHandler;
+
+    AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
+
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+
+    // set via server api to trigger notification.
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    sleep(1); // otherwise we can miss the second notify
+
+    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_EQ(2, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
+    ASSERT_TRUE(NULL == observation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+}
+
 
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_step_attribute)
 {

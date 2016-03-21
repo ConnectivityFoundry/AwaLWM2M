@@ -501,7 +501,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             const char * resourceName = NULL;
             uint16_t resourceMaximumInstances = 1;
             uint16_t resourceMinimumInstances = 0;
-            Operations operation = Operations_None;
+            AwaResourceOperations operation = AwaResourceOperations_None;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
             resNode = TreeNode_Navigate(property, "Property/PropertyID");
@@ -1009,7 +1009,7 @@ static int xmlif_HandleError(IpcCoapRequestContext * requestContext, Lwm2mClient
 }
 
 static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode content,
-                                      SendCoapRequestHandler requestCallback, TransactionCallback responseCallback, Operations validOperations)
+                                      SendCoapRequestHandler requestCallback, TransactionCallback responseCallback, AwaResourceOperations validOperations)
 {
     int numCoapRequests = 0;
     Lwm2mContextType * context = (Lwm2mContextType * )request->Context;
@@ -1133,7 +1133,7 @@ error:
 
 static int xmlif_HandlerReadRequest(RequestInfoType * request, TreeNode content)
 {
-    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapReadRequest, xmlif_HandlerReadResponse, Operations_RW);
+    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapReadRequest, xmlif_HandlerReadResponse, AwaResourceOperations_ReadWrite);
 }
 
 static bool xmlif_HandlerSendCoapReadRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
@@ -1219,7 +1219,7 @@ static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestC
 
 static int xmlif_HandlerObserveRequest(RequestInfoType * request, TreeNode content)
 {
-    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapObserveRequest, xmlif_HandlerObserveResponse, Operations_RW);
+    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapObserveRequest, xmlif_HandlerObserveResponse, AwaResourceOperations_ReadWrite);
 }
 
 static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
@@ -1899,7 +1899,7 @@ static void xmlif_HandlerWriteResponse(void * ctxt, AddressType* address, const 
 
 static int xmlif_HandlerWriteAttributesRequest(RequestInfoType * request, TreeNode content)
 {
-    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapWriteAttributesRequest, xmlif_HandlerWriteAttributesResponse, Operations_RW);
+    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapWriteAttributesRequest, xmlif_HandlerWriteAttributesResponse, AwaResourceOperations_ReadWrite);
 }
 
 static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
@@ -2041,7 +2041,7 @@ static void xmlif_HandlerSuccessfulWriteAttributesResponse(IpcCoapRequestContext
 
 static int xmlif_HandlerExecuteRequest(RequestInfoType * request, TreeNode content)
 {
-    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapExecuteRequest, xmlif_HandlerExecuteResponse, Operations_E);
+    return xmlif_HandleContentRequest(request, content, xmlif_HandlerSendCoapExecuteRequest, xmlif_HandlerExecuteResponse, AwaResourceOperations_Execute);
 }
 
 static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
