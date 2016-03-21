@@ -59,17 +59,13 @@ protected:
         AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
 
         sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", serverURI.c_str());
-        bootstrapinfo.SecurityInfo.Bootstrap = false;
-        bootstrapinfo.SecurityInfo.SecurityMode = 0;
-        sprintf(bootstrapinfo.SecurityInfo.PublicKey, "[PublicKey]");
+        bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+        sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
         sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
-        bootstrapinfo.SecurityInfo.ServerID = 1;
-        bootstrapinfo.SecurityInfo.HoldOffTime = 30;
 
-        bootstrapinfo.ServerInfo.ShortServerID = 1;
-        bootstrapinfo.ServerInfo.LifeTime = 30;
-        bootstrapinfo.ServerInfo.MinPeriod = 1;
-        bootstrapinfo.ServerInfo.MaxPeriod = -1;
+        bootstrapinfo.ServerInfo.Lifetime = 30;
+        bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+        bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
         bootstrapinfo.ServerInfo.DisableTimeout = 86400;
         bootstrapinfo.ServerInfo.Notification = false;
         sprintf(bootstrapinfo.ServerInfo.Binding, "U");
@@ -1012,7 +1008,7 @@ struct TestObserveStaticResource
     AwaResourceType type;
 };
 
-class TestObserveValueStaticClient : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestObserveStaticResource >
+class TestStaticClientObserveValue : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestObserveStaticResource >
 {
 public:
 
@@ -1140,12 +1136,12 @@ void (ChangeCallbackRunner)(const AwaChangeSet * changeSet, void * context)
 {
     if (context)
     {
-        auto * that = static_cast<TestObserveValueStaticClient*>(context);
+        auto * that = static_cast<TestStaticClientObserveValue*>(context);
         that->callbackHandler(changeSet);
     }
 }
 
-TEST_P(TestObserveValueStaticClient, TestObserveValueSingle)
+TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
 {
     TestObserveStaticResource data = GetParam();
 
@@ -1244,8 +1240,8 @@ TEST_P(TestObserveValueStaticClient, TestObserveValueSingle)
 }
 
 INSTANTIATE_TEST_CASE_P(
-        TestObserveValueStaticClient,
-        TestObserveValueStaticClient,
+        TestStaticClientObserveValue,
+        TestStaticClientObserveValue,
         ::testing::Values(
         TestObserveStaticResource {observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, observeDetail::TEST_RESOURCE_STRING, (void *)observeDetail::dummyInitialString1, (void *)observeDetail::dummyExpectedString1, strlen(observeDetail::dummyInitialString1) + 1,     AwaResourceType_String},
         TestObserveStaticResource {observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, observeDetail::TEST_RESOURCE_INTEGER,    &observeDetail::dummyInitialInteger1, &observeDetail::dummyExpectedInteger1, sizeof(observeDetail::dummyInitialInteger1),    AwaResourceType_Integer},

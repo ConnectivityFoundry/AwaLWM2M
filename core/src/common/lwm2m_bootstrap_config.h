@@ -28,6 +28,7 @@
 #include <stdbool.h>
 
 #include "lwm2m_context.h"
+#include "awa/static.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,11 +37,11 @@ extern "C" {
 // Opaque container for bootstrap information
 typedef struct
 {
-    char ServerURI[255];
+    char ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE];
     bool Bootstrap;
-    int SecurityMode ;
-    char PublicKey[255];
-    char SecretKey[255];
+    int SecurityMode;
+    char PublicKey[BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE];
+    char SecretKey[BOOTSTRAP_CONFIG_SECRET_KEY_SIZE];
     int ServerID;
     int HoldOffTime;
 } Lwm2mSecurityInfo;
@@ -54,7 +55,7 @@ typedef struct
     //char * Disable;
     int DisableTimeout;
     bool Notification;
-    char Binding[10];
+    char Binding[BOOTSTRAP_CONFIG_BINDING_SIZE];
     //char * UpdateTrigger;
 } Lwm2mServerInfo;
 

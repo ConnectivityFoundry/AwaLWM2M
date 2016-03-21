@@ -31,13 +31,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <awa/static.h>
+
+#include "awa/static.h"
 #include "lwm2m_security_object.h"
 #include "lwm2m_server_object.h"
 #include "lwm2m_acl_object.h"
 #include "lwm2m_debug.h"
 
-#define MAX_ADDRESS_LENGTH      50
+#define MAX_ADDRESS_LENGTH           (50)
+#define DEFAULT_CLIENT_HOLD_OFF_TIME (30)
 
 struct _AwaStaticClient
 {
@@ -191,7 +193,30 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
     {
         if (!client->Running)
         {
-            Lwm2mCore_SetFactoryBootstrap(client->Context, (BootstrapInfo*)factoryBootstrapInformation);
+            // Mandatory resources only
+            BootstrapInfo info = { 0 };
+
+            // Assign an arbitrary server ID
+            static int serverID = 1000;
+            ++serverID;
+            info.SecurityInfo.ServerID = serverID;
+
+            strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
+            info.SecurityInfo.Bootstrap = false;
+            info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
+            memcpy(info.SecurityInfo.PublicKey, factoryBootstrapInformation->SecurityInfo.PublicKeyOrIdentity, BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE);
+            memcpy(info.SecurityInfo.SecretKey, factoryBootstrapInformation->SecurityInfo.SecretKey, BOOTSTRAP_CONFIG_SECRET_KEY_SIZE);
+            info.SecurityInfo.HoldOffTime = DEFAULT_CLIENT_HOLD_OFF_TIME;
+
+            info.ServerInfo.ShortServerID = serverID;
+            info.ServerInfo.LifeTime = factoryBootstrapInformation->ServerInfo.Lifetime;
+            info.ServerInfo.MinPeriod = factoryBootstrapInformation->ServerInfo.DefaultMinPeriod;
+            info.ServerInfo.MaxPeriod = factoryBootstrapInformation->ServerInfo.DefaultMaxPeriod;
+            info.ServerInfo.DisableTimeout = factoryBootstrapInformation->ServerInfo.DisableTimeout;
+            info.ServerInfo.Notification = factoryBootstrapInformation->ServerInfo.Notification;
+            strncpy(info.ServerInfo.Binding, factoryBootstrapInformation->ServerInfo.Binding, BOOTSTRAP_CONFIG_BINDING_SIZE);
+
+            Lwm2mCore_SetFactoryBootstrap(client->Context, &info);
             result = AwaError_Success;
         }
         else

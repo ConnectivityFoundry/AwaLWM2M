@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -70,7 +70,7 @@ extern "C" {
  *************************************************************************************************/
 
 /**
- * Represents a named Opaque struct containing an array of Data
+ * Creates a locally scoped Opaque struct containing an array of Data
  * of the given size.
  */
 #define AWA_OPAQUE(name, size)     \
@@ -81,8 +81,7 @@ extern "C" {
 
 /**
  * Supported operations for resource and object handlers
- * registered with AwaStaticClient_RegisterObjectWithHandler
- * AwaStaticClient_RegisterResourceWithHandler.
+ * registered with ::AwaStaticClient_RegisterResourceWithHandler.
  */
 typedef enum
 {
@@ -102,39 +101,51 @@ typedef enum
  */
 typedef struct _AwaStaticClient AwaStaticClient;
 
+typedef enum
+{
+  AwaSecurityMode_PreSharedKey,   /**< indicates pre-shared key security mode (PSK) */
+  AwaSecurityMode_RawPublicKey,   /**< indicates raw public key security mode (RPK) */
+  AwaSecurityMode_Certificate,    /**< indicates certicate-based security mode */
+  AwaSecurityMode_NoSec,          /**< indicates no security mode */
+} AwaSecurityMode;
+
+#define BOOTSTRAP_CONFIG_SERVER_URI_SIZE (256)
+#define BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE (128)
+#define BOOTSTRAP_CONFIG_SERVER_KEY_SIZE (128)
+#define BOOTSTRAP_CONFIG_SECRET_KEY_SIZE (128)
+#define BOOTSTRAP_CONFIG_BINDING_SIZE     (10)
+
 /**
  * Information required to bootstrap the client daemon from a factory configuration.
+ * The format of this information is directly drawn from the LWM2M specification.
  */
 typedef struct
 {
     /**
      * LWM2M Security Object information, required to securely bootstrap and
-     * connect to LWM2M servers.
+     * connect to LWM2M servers. See the LWM2M specification for the Security object.
      */
     struct
     {
-        char ServerURI[255];
-        bool Bootstrap;
-        int SecurityMode;
-        char PublicKey[255];
-        char SecretKey[255];
-        int ServerID;
-        int HoldOffTime;
+        char ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE];           /**< Specifies the URI of the LWM2M Server for the client to register with. For example: `coap://127.0.0.1:5683` */
+        AwaSecurityMode SecurityMode;                               /**< Specifies the LWM2M Security Mode. */
+        char PublicKeyOrIdentity[BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE]; /**< Specifies the LWM2M Client's certificate (Certificate mode), public key (RPK mode), or PSK identity (PSK mode). See the LWM2M specification for details of the required format for each mode. */
+        char ServerPublicKey[BOOTSTRAP_CONFIG_SERVER_KEY_SIZE];     /**< Specifies the LWM2M Server’s or LWM2M Bootstrap Server’s Certificate (Certificate mode), public key (RPK mode). See the LWM2M specification for details of the required format for each mode. */
+        char SecretKey[BOOTSTRAP_CONFIG_SECRET_KEY_SIZE];           /**< Specifies the secret key or private key of the security mode. See the LWM2M specification for details of the required format for each mode. */
     } SecurityInfo;
 
     /**
-     * LWM2M Server Object information, providing the data
-     * related to an LWM2M Server.
+     * LWM2M Server Object information, providing the data related to an LWM2M Server.
+     * See the LWM2M specification for the Server object.
      */
-    struct 
+    struct
     {
-        int ShortServerID;
-        int LifeTime;
-        int MinPeriod;
-        int MaxPeriod;
-        int DisableTimeout;
-        bool Notification;
-        char Binding[10];
+        int Lifetime;                                /**< Specify the lifetime of the registration in seconds. */
+        int DefaultMinPeriod;                        /**< Specify the default value the LWM2M Client should use for the Minimum Period of an Observation in the absence of this parameter being included in an Observation. */
+        int DefaultMaxPeriod;                        /**< Specify the default value the LWM2M Client should use for the Maximum Period of an Observation in the absence of this parameter being included in an Observation. */
+        int DisableTimeout;                          /**< Specify the period to disable the Server. After this period, the LWM2M Client MUST perform registration process to the Server. */
+        bool Notification;                           /**< Specify Notification Storing When Disabled or Offline: if true, the LWM2M Client stores “Notify” operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline. After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored “Notify” operations to the Server. If false, the LWM2M Client discards all the “Notify” operationsor temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline. */
+        char Binding[BOOTSTRAP_CONFIG_BINDING_SIZE]; /**< Specifies the transport binding configured for the LWM2M Client. See the LWM2M specification for details of the required format. */
     } ServerInfo;
 } AwaFactoryBootstrapInfo;
 

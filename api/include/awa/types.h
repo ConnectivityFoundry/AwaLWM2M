@@ -119,8 +119,8 @@ typedef enum
     // sentinel, do not remove
     AwaResourceType_LAST,            /**< Reserved value */
 
-    AwaResourceType_FirstArrayType = AwaResourceType_StringArray,
-    AwaResourceType_LastArrayType = AwaResourceType_ObjectLinkArray,
+    AwaResourceType_FirstArrayType = AwaResourceType_StringArray,    /**< Reserved value */
+    AwaResourceType_LastArrayType = AwaResourceType_ObjectLinkArray, /**< Reserved value */
 } AwaResourceType;
 
 /**
@@ -128,7 +128,7 @@ typedef enum
  */
 typedef enum
 {
-    AwaResourceOperations_Invalid = -1,  /**< indicates an invalid resource operation */
+    AwaResourceOperations_Invalid = -1, /**< indicates an invalid resource operation */
 
     AwaResourceOperations_None,         /**< indicates no operations are permitted to a management server */
     AwaResourceOperations_ReadOnly,     /**< indicates the resource is read-only to a management server */
