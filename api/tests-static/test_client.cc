@@ -105,12 +105,12 @@ public:
         return complete;
     }
 
-    virtual AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed) {
+    virtual AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed) {
         return AwaResult_InternalError;
     };
 };
 
-AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
 {
     AwaStaticClient * client = (AwaStaticClient *)context;
     AwaResult result = AwaResult_InternalError;
@@ -417,7 +417,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
         {
 
             AwaResult result = AwaResult_InternalError;
@@ -445,7 +445,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
                     EXPECT_TRUE(dataPointer != NULL);
                     AwaInteger * integerPtr = (AwaInteger *)(*dataPointer);
                     EXPECT_TRUE(dataSize != NULL);
-                    EXPECT_EQ(static_cast<int>(sizeof(AwaInteger)), *dataSize);
+                    EXPECT_EQ(static_cast<size_t>(sizeof(AwaInteger)), *dataSize);
                     EXPECT_EQ(5, *integerPtr);
                     complete = true;
                     result = AwaResult_SuccessChanged;
@@ -519,7 +519,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
 
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
         {
             AwaResult result = AwaResult_InternalError;
             EXPECT_TRUE((operation == AwaOperation_CreateResource) || (operation == AwaOperation_CreateObjectInstance) || (operation == AwaOperation_Read));
@@ -752,7 +752,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
         AwaInteger integer = 5;
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
 
         {
             AwaResult result = AwaResult_InternalError;
@@ -848,7 +848,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
     {
         callback1(AwaStaticClient * StaticClient, int maxCount) : StaticClientCallbackPollCondition(StaticClient, maxCount) {};
 
-        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
         {
             AwaResult result = AwaResult_InternalError;
 
@@ -1328,7 +1328,7 @@ const AwaResourceID TEST_RESOURCE_OBJECTLINKARRAY = 7;
 
 }
 
-typedef AwaResult (*TestHandler)(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed);
+typedef AwaResult (*TestHandler)(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed);
 
 struct TestWriteReadStaticResource
 {
@@ -1361,7 +1361,7 @@ protected:
 
         callback1(AwaStaticClient * StaticClient, int maxCount, TestWriteReadStaticResource data) : StaticClientCallbackPollCondition(StaticClient, maxCount), data(data) {};
 
-        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+        AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
         {
             AwaResult result = AwaResult_InternalError;
 
@@ -1479,7 +1479,7 @@ protected:
     AwaServerReadOperation * readOperation_;
 };
 
-AwaResult TestWriteValueStaticClient_WriteHandler(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+AwaResult TestWriteValueStaticClient_WriteHandler(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
 {
     TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
     EXPECT_EQ(AwaOperation_Write, operation);
@@ -1491,7 +1491,7 @@ AwaResult TestWriteValueStaticClient_WriteHandler(void * context, AwaOperation o
     EXPECT_TRUE(dataSize != NULL);
     EXPECT_TRUE(dataPointer != NULL);
 
-    EXPECT_EQ(data->valueSize, *dataSize);
+    EXPECT_EQ(static_cast<size_t>(data->valueSize), *dataSize);
     EXPECT_EQ(0, memcmp(data->value, *dataPointer, data->valueSize));
 
     data->complete = true;
@@ -1499,7 +1499,7 @@ AwaResult TestWriteValueStaticClient_WriteHandler(void * context, AwaOperation o
 }
 
 
-AwaResult TestWriteValueStaticClient_ReadHandler(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+AwaResult TestWriteValueStaticClient_ReadHandler(void * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
 {
     TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
 

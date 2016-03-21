@@ -183,24 +183,23 @@ typedef enum
  *************************************************************************************************/
 
 /**
- * @brief A user-specified callback handler for an LWM2M Operation on the specified /O/I/R/i path,
- *        which will be called whenever a management server performs an LWM2M operation on the
+ * @brief A user-specified callback handler for a LWM2M Operation on the specified /O/I/R/i path,
+ *        which will be called whenever a management server performs a LWM2M operation on the
  *        specified client, allowing full control of the operation on the target entity as well
  *        as the return code to be sent back to the server that performed the operation.
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] operation The requested operation to perform on the Client Daemon.
  * @param[in] objectID Identifies the object for which the query is targeted.
- * @param[in] objectInstanceID Identifies the object instance for which the query is targeted, or -1
+ * @param[in] objectInstanceID Identifies the object instance for which the query is targeted, or AWA_INVALID_ID
  *            if the request is on an object.
- * @param[in] resourceID Identifies the resource for which the query is targeted, or -1
+ * @param[in] resourceID Identifies the resource for which the query is targeted, or AWA_INVALID_ID
  *            if the request is on an object instance or object.
- * @param[in] resourceInstanceID Identifies the resource instance for which the query is targeted, or -1
+ * @param[in] resourceInstanceID Identifies the resource instance for which the query is targeted, or AWA_INVALID_ID
  *            if the request is on a single-instance resource, object instance or object.
- * @param[in,out] dataPointer A pointer to a void pointer containing data for a requested resource
- *                which can be read or modified.
- * @param[in,out] dataSize A pointer to an unsigned short integer containing the length of the requested resource.
- * @param[in,out] changed Marks whether the resource's value has been changed withing the handler
- *                by the requested operation. If set to true, a notification will be sent went possible to any observers
+ * @param[in,out] dataPointer A pointer to a void pointer containing data for the requested resource to be read or modified.
+ * @param[in,out] dataSize A pointer to an unsigned integer containing the length of the requested resource.
+ * @param[out] changed Set by the handler to indicate whether the resource's value has been changed by the handler
+ *                If set to true, a notification will be sent when possible to any observers
  *                of the target object, object instance or resource.
  * @return AwaResult_SuccessCreated on a successful create object instance or resource operation.
  * @return AwaResult_SuccessDeleted on a successful delete object instance or resource operation.
@@ -208,9 +207,9 @@ typedef enum
  * @return AwaResult_SuccessChanged on a successful write or execute operation.
  * @return Various errors on failure.
  */
-typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
-                                                 AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
-                                                 void ** dataPointer, uint16_t * dataSize, bool * changed);
+typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperation operation,
+                                            AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
+                                            void ** dataPointer, size_t * dataSize, bool * changed);
 
 
 /************************************************************************************************************
@@ -220,7 +219,7 @@ typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperati
 /**
  * @brief Allocate and return a pointer to a new Awa Static Client, that will be used to setup and process an
  *        Awa Client Daemon, register custom objects, resources and callback handlers.
- *        The Awa Static Client is owned by the caller and should eventually be freed with AwaStaticClient_Free.
+ *        The Awa Static Client is owned by the caller and should eventually be freed with ::AwaStaticClient_Free.
  * @return A pointer to a newly allocated Awa Static Client instance.
  * @return NULL on failure.
  */
