@@ -24,9 +24,11 @@
 #ifndef AWA_COMMON_H
 #define AWA_COMMON_H
 
+// @cond
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+// @endcond
 
 #include "types.h"
 #include "error.h"

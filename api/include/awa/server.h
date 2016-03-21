@@ -24,7 +24,10 @@
 #ifndef AWA_SERVER_H
 #define AWA_SERVER_H
 
+// @cond
 #include <stdbool.h>
+// @endcond
+
 #include "common.h"
 
 #ifdef __cplusplus

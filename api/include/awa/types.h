@@ -24,9 +24,11 @@
 #ifndef AWA_TYPES_H
 #define AWA_TYPES_H
 
+// @cond
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+// @endcond
 
 #include "error.h"
 
