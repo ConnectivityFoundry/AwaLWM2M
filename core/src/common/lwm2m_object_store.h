@@ -50,6 +50,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
                                          const void * valueBuffer, int valueBufferPos, int valueBufferLen, bool * changed);
 
 int ObjectStore_GetResourceNumInstances(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+bool ObjectStore_Exists(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 int ObjectStore_GetInstanceNumResources(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 int ObjectStore_GetObjectNumInstances(ObjectStore * store, ObjectIDType objectID);
 ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, int maxInstances);

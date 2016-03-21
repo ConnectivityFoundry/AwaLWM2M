@@ -134,6 +134,18 @@ DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context)
     return context->Definitions;
 }
 
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+{
+    bool result = false;
+
+    if (context != NULL)
+    {
+        result = ObjectStore_Exists(context->Store, objectID, objectInstanceID, resourceID);
+    }
+
+    return result;
+}
+
 // This function is called by the CoAP library to handle any requests
 static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * response)
 {
