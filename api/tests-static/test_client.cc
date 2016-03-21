@@ -52,6 +52,8 @@ protected:
     virtual void SetUp() {
         TestServerWithConnectedSession::SetUp();
 
+        AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(global::logLevel));
+
         std::string serverURI = std::string("coap://127.0.0.1:") + std::to_string(global::serverCoapPort) + "/";
         client_ = AwaStaticClient_New();
         EXPECT_TRUE(client_ != NULL);
@@ -930,29 +932,29 @@ namespace observeDetail
 
 struct TestObserveResource
 {
-    AwaError expectedResult;
+    AwaError ExpectedResult;
 
-    AwaObjectID objectID;
-    AwaObjectInstanceID objectInstanceID;
-    AwaResourceID resourceID;
+    AwaObjectID ObjectID;
+    AwaObjectInstanceID ObjectInstanceID;
+    AwaResourceID ResourceID;
 
-    const void * initialValue;
-    const void * expectedValue;
-    AwaResourceType type;
+    const void * InitialValue;
+    const void * ExpectedValue;
+    AwaResourceType Type;
 
-    bool useOperation;
+    bool UseOperation;
 };
 
 ::std::ostream& operator<<(::std::ostream& os, const TestObserveResource& item)
 {
-  return os << "Item: expectedResult " << item.expectedResult
-            << ", objectID " << item.objectID
-            << ", objectInstanceID " << item.objectInstanceID
-            << ", resourceID " << item.resourceID
-            << ", initialValue " << item.initialValue
-            << ", expectedValue " << item.expectedValue
-            << ", type " << item.type
-            << ", useOperation " << item.useOperation;
+  return os << "Item: ExpectedResult " << item.ExpectedResult
+            << ", ObjectID " << item.ObjectID
+            << ", ObjectInstanceID " << item.ObjectInstanceID
+            << ", ResourceID " << item.ResourceID
+            << ", InitialValue " << item.InitialValue
+            << ", ExpectedValue " << item.ExpectedValue
+            << ", Type " << item.Type
+            << ", UseOperation " << item.UseOperation;
 }
 
 static const char * dummyInitialString1 = "Lightweight M2M Server";
@@ -998,15 +1000,26 @@ void * do_observe_operation(void * attr)
 
 struct TestObserveStaticResource
 {
-    AwaObjectID objectID;
-    AwaObjectInstanceID objectInstanceID;
-    AwaResourceID resourceID;
+    AwaObjectID ObjectID;
+    AwaObjectInstanceID ObjectInstanceID;
+    AwaResourceID ResourceID;
 
-    void * value;
-    void * expectedValue;
-    const size_t valueSize;
-    AwaResourceType type;
+    void * Value;
+    void * ExpectedValue;
+    const size_t ValueSize;
+    AwaResourceType Type;
 };
+
+::std::ostream& operator<<(::std::ostream& os, const TestObserveStaticResource& item)
+{
+  return os << "Item: ObjectID " << item.ObjectID
+            << ", ObjectInstanceID " << item.ObjectInstanceID
+            << ", ResourceID " << item.ResourceID
+            << ", Value " << item.Value
+            << ", ExpectedValue " << item.ExpectedValue
+            << ", ValueSize " << item.ValueSize
+            << ", Type " << item.Type;
+}
 
 class TestStaticClientObserveValue : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestObserveStaticResource >
 {
@@ -1054,9 +1067,9 @@ public:
         const void * value = 0;
 
         char path[64];
-        AwaAPI_MakeResourcePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID);
+        AwaAPI_MakeResourcePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID);
 
-        switch(data.type)
+        switch(data.Type)
         {
             case AwaResourceType_Integer:
                 AwaChangeSet_GetValueAsIntegerPointer(changeSet, path, (const AwaInteger **)&value);
@@ -1085,10 +1098,10 @@ public:
         }
         //Lwm2m_Error("Received value: %zu\n", *value);
 
-        switch(data.type)
+        switch(data.Type)
         {
             case AwaResourceType_String:
-                EXPECT_STREQ((const char *)data.value, (const char *)value);
+                EXPECT_STREQ((const char *)data.Value, (const char *)value);
                 break;
             case AwaResourceType_Opaque:
             {
@@ -1099,22 +1112,22 @@ public:
                 break;
             }
             default:
-                EXPECT_EQ(0, memcmp(data.value, value, data.valueSize));
+                EXPECT_EQ(0, memcmp(data.Value, value, data.ValueSize));
                 break;
         }
 
         if (notificationCount_ == 0)
         {
-            switch(data.type)
+            switch(data.Type)
             {
             case AwaResourceType_Opaque:
-                memcpy(opaque_.Data, data.expectedValue, data.valueSize);
+                memcpy(opaque_.Data, data.ExpectedValue, data.ValueSize);
                 break;
             default:
-                data.value = data.expectedValue;
+                data.Value = data.ExpectedValue;
                 break;
             }
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_ResourceChanged(client_, data.objectID, data.objectInstanceID, data.resourceID));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_ResourceChanged(client_, data.ObjectID, data.ObjectInstanceID, data.ResourceID));
         }
         else
         {
@@ -1145,26 +1158,25 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
 {
     TestObserveStaticResource data = GetParam();
 
-    ASSERT_TRUE(sizeof(opaque_) - sizeof(opaque_.Size) >= data.valueSize);
-    opaque_.Size = data.valueSize;
-    memcpy(opaque_.Data, data.value, data.valueSize);
+    ASSERT_TRUE(sizeof(opaque_) - sizeof(opaque_.Size) >= data.ValueSize);
+    opaque_.Size = data.ValueSize;
+    memcpy(opaque_.Data, data.Value, data.ValueSize);
 
     AwaServerObserveOperation * observeOperation = AwaServerObserveOperation_New(session_);
 
-    //AwaStaticClient_SetLogLevel(AwaLogLevel_Debug);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler_));
     EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client_, "TestObject", observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1));
     //EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test String Resource",  observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, observeDetail::TEST_RESOURCE_STRING, AwaResourceType_String, 1, 1, AwaResourceOperations_ReadOnly, data.value, data.valueSize, 0u));
 
-    switch(data.type)
+    switch(data.Type)
     {
         case AwaResourceType_Opaque:
         {
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource",  data.objectID, data.resourceID, data.type, 1, 1, AwaResourceOperations_ReadOnly, &opaque_, sizeof(opaque_), 0));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, &opaque_, sizeof(opaque_), 0));
             break;
         }
         default:
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource",  data.objectID, data.resourceID, data.type, 1, 1, AwaResourceOperations_ReadOnly, data.value, data.valueSize, 0));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, data.Value, data.ValueSize, 0));
             break;
     }
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
@@ -1177,34 +1189,34 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
 
     AwaServerDefineOperation * defineOperation = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOperation != NULL);
-    AwaObjectDefinition * objectDefinition = AwaObjectDefinition_New(data.objectID, "TestObject", 0, 1);
+    AwaObjectDefinition * objectDefinition = AwaObjectDefinition_New(data.ObjectID, "TestObject", 0, 1);
     EXPECT_TRUE(objectDefinition != NULL);
 
-    switch (data.type)
+    switch (data.Type)
     {
         case AwaResourceType_String:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsString(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, (const char *)data.value));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsString(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, (const char *)data.Value));
             break;
         case AwaResourceType_Integer:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaInteger *)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaInteger *)data.Value)));
             break;
         case AwaResourceType_Float:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaFloat *)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaFloat *)data.Value)));
             break;
         case AwaResourceType_Boolean:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBoolean(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaBoolean *)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBoolean(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaBoolean *)data.Value)));
             break;
         case AwaResourceType_Opaque:
         {
-            AwaOpaque opaque = {data.value, data.valueSize};
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, opaque));
+            AwaOpaque opaque = {data.Value, data.ValueSize};
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, opaque));
             break;
         }
         case AwaResourceType_Time:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTime(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaTime *)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTime(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaTime *)data.Value)));
             break;
         case AwaResourceType_ObjectLink:
-            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLink(objectDefinition, data.resourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaObjectLink *)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLink(objectDefinition, data.ResourceID, "Test Resource", true, AwaResourceOperations_ReadOnly, *((AwaObjectLink *)data.Value)));
             break;
         default:
             ASSERT_TRUE(false);
@@ -1215,7 +1227,7 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
     AwaObjectDefinition_Free(&objectDefinition);
 
     char path[64];
-    AwaAPI_MakeResourcePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID);
+    AwaAPI_MakeResourcePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID);
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, path, ChangeCallbackRunner, this);
 
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(observeOperation, observation));
@@ -1257,31 +1269,31 @@ namespace writeDetail
 
 struct TestWriteResource
 {
-    AwaError expectedAddResult;
-    AwaError expectedProcessResult;
+    AwaError ExpectedAddResult;
+    AwaError ExpectedProcessResult;
 
-    AwaObjectID objectID;
-    AwaObjectInstanceID objectInstanceID;
-    AwaResourceID resourceID;
+    AwaObjectID ObjectID;
+    AwaObjectInstanceID ObjectInstanceID;
+    AwaResourceID ResourceID;
 
-    const void * value;
-    const size_t valueCount;
-    AwaResourceType type;
+    const void * Value;
+    const size_t ValueCount;
+    AwaResourceType Type;
 
-    bool useOperation;
+    bool UseOperation;
 };
 
 ::std::ostream& operator<<(::std::ostream& os, const TestWriteResource& item)
 {
-  return os << "Item: expectedAddResult " << item.expectedAddResult
-            << ", expectedProcessResult " << item.expectedProcessResult
-            << ", objectID " << item.objectID
-            << ", objectInstanceID " << item.objectInstanceID
-            << ", resourceID " << item.resourceID
-            << ", value " << item.value
-            << ", valueCount " << item.valueCount
-            << ", type " << item.type
-            << ", useOperation " << item.useOperation;
+  return os << "Item: ExpectedAddResult " << item.ExpectedAddResult
+            << ", ExpectedProcessResult " << item.ExpectedProcessResult
+            << ", ObjectID " << item.ObjectID
+            << ", ObjectInstanceID " << item.ObjectInstanceID
+            << ", ResourceID " << item.ResourceID
+            << ", Value " << item.Value
+            << ", ValueCount " << item.ValueCount
+            << ", Type " << item.Type
+            << ", UseOperation " << item.UseOperation;
 }
 
 const char * clientID = "TestClient1";
@@ -1332,21 +1344,36 @@ typedef AwaResult (*TestHandler)(void * context, AwaOperation operation, AwaObje
 
 struct TestWriteReadStaticResource
 {
-    TestHandler write_handler;
-    TestHandler read_handler;
+    TestHandler WriteHandler;
+    TestHandler ReadHandler;
 
-    AwaObjectID objectID;
-    AwaObjectInstanceID objectInstanceID;
-    AwaResourceID resourceID;
+    AwaObjectID ObjectID;
+    AwaObjectInstanceID ObjectInstanceID;
+    AwaResourceID ResourceID;
 
-    const void * value;
-    const int valueCount;
-    const int valueSize;
-    AwaResourceType type;
+    const void * Value;
+    const int ValueCount;
+    const int ValueSize;
+    AwaResourceType Type;
 
-    bool complete;
-    bool testRead;
+    bool Complete;
+    bool TestRead;
 };
+
+::std::ostream& operator<<(::std::ostream& os, const TestWriteReadStaticResource& item)
+{
+  return os << "Item: WriteHandler " << item.WriteHandler
+            << ", ReadHandler " << item.ReadHandler
+            << ", ObjectID " << item.ObjectID
+            << ", ObjectInstanceID " << item.ObjectInstanceID
+            << ", ResourceID " << item.ResourceID
+            << ", Value " << item.Value
+            << ", ValueCount " << item.ValueCount
+            << ", ValueSize " << item.ValueSize
+            << ", Type " << item.Type
+            << ", Complete " << item.Complete
+            << ", TestRead " << item.TestRead;
+}
 
 class TestStaticClientWriteReadValue : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestWriteReadStaticResource >
 {
@@ -1369,31 +1396,31 @@ protected:
             {
                     case AwaOperation_CreateObjectInstance:
                     {
-                        EXPECT_EQ(data.objectID, objectID);
-                        EXPECT_EQ(data.objectInstanceID, objectInstanceID);
+                        EXPECT_EQ(data.ObjectID, objectID);
+                        EXPECT_EQ(data.ObjectInstanceID, objectInstanceID);
                         result = AwaResult_SuccessCreated;
                         break;
                     }
                     case AwaOperation_CreateResource:
                     {
-                        EXPECT_EQ(data.objectID, objectID);
-                        EXPECT_EQ(data.objectInstanceID, objectInstanceID);
-                        EXPECT_EQ(data.resourceID, resourceID);
+                        EXPECT_EQ(data.ObjectID, objectID);
+                        EXPECT_EQ(data.ObjectInstanceID, objectInstanceID);
+                        EXPECT_EQ(data.ResourceID, resourceID);
                         result = AwaResult_SuccessCreated;
                         break;
                     }
                     case AwaOperation_Write:
-                        result = data.write_handler(&data, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
+                        result = data.WriteHandler(&data, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
                         break;
                     case AwaOperation_Read:
-                        result = data.read_handler(&data, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
+                        result = data.ReadHandler(&data, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
                         break;
                     default:
                         break;
             }
 
 
-            complete = data.complete;
+            complete = data.Complete;
             return result;
         }
     };
@@ -1483,18 +1510,18 @@ AwaResult TestWriteValueStaticClient_WriteHandler(void * context, AwaOperation o
 {
     TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
     EXPECT_EQ(AwaOperation_Write, operation);
-    EXPECT_EQ(data->objectID, objectID);
-    EXPECT_EQ(data->objectInstanceID, objectInstanceID);
-    EXPECT_EQ(data->resourceID, resourceID);
+    EXPECT_EQ(data->ObjectID, objectID);
+    EXPECT_EQ(data->ObjectInstanceID, objectInstanceID);
+    EXPECT_EQ(data->ResourceID, resourceID);
     EXPECT_EQ(0, resourceInstanceID);
 
     EXPECT_TRUE(dataSize != NULL);
     EXPECT_TRUE(dataPointer != NULL);
 
-    EXPECT_EQ(static_cast<size_t>(data->valueSize), *dataSize);
-    EXPECT_EQ(0, memcmp(data->value, *dataPointer, data->valueSize));
+    EXPECT_EQ(static_cast<size_t>(data->ValueSize), *dataSize);
+    EXPECT_EQ(0, memcmp(data->Value, *dataPointer, data->ValueSize));
 
-    data->complete = true;
+    data->Complete = true;
     return AwaResult_SuccessChanged;
 }
 
@@ -1504,20 +1531,20 @@ AwaResult TestWriteValueStaticClient_ReadHandler(void * context, AwaOperation op
     TestWriteReadStaticResource * data = static_cast<TestWriteReadStaticResource *>(context);
 
     EXPECT_EQ(AwaOperation_Read, operation);
-    EXPECT_EQ(data->objectID, objectID);
-    EXPECT_EQ(data->objectInstanceID, objectInstanceID);
-    EXPECT_EQ(data->resourceID, resourceID);
+    EXPECT_EQ(data->ObjectID, objectID);
+    EXPECT_EQ(data->ObjectInstanceID, objectInstanceID);
+    EXPECT_EQ(data->ResourceID, resourceID);
     EXPECT_EQ(0, resourceInstanceID);
 
     EXPECT_TRUE(dataSize != NULL);
     EXPECT_TRUE(dataPointer != NULL);
 
-    *dataPointer = (void*)data->value;
-    *dataSize = data->valueSize;
+    *dataPointer = (void*)data->Value;
+    *dataSize = data->ValueSize;
 
-    if(data->testRead == true)
+    if(data->TestRead == true)
     {
-        data->complete = true;
+        data->Complete = true;
     }
 
     return AwaResult_SuccessContent;
@@ -1528,34 +1555,34 @@ TEST_P(TestStaticClientWriteReadValue, TestWriteReadValueSingle)
     TestWriteReadStaticResource data = GetParam();
     char path[128] = {0};
 
-    EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
+    EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID));
 
-    switch (data.type)
+    switch (data.Type)
     {
         case AwaResourceType_String:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation_, path, (const char *)data.value));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation_, path, (const char *)data.Value));
             break;
         case AwaResourceType_Integer:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation_, path, *((AwaInteger*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation_, path, *((AwaInteger*)data.Value)));
             break;
         case AwaResourceType_Float:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsFloat(writeOperation_, path, *((AwaFloat*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsFloat(writeOperation_, path, *((AwaFloat*)data.Value)));
             break;
         case AwaResourceType_Boolean:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation_, path, *((AwaBoolean*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation_, path, *((AwaBoolean*)data.Value)));
             break;
         case AwaResourceType_Opaque:
             {
-                AwaOpaque opaque = { (void *)data.value, static_cast<size_t>(data.valueSize) };
+                AwaOpaque opaque = { (void *)data.Value, static_cast<size_t>(data.ValueSize) };
                 EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation_, path, opaque));
                 break;
             }
         case AwaResourceType_Time:
-            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation_, path, *((AwaTime*)data.value)));
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation_, path, *((AwaTime*)data.Value)));
             break;
         case AwaResourceType_ObjectLink:
             {
-                AwaObjectLink * objectlink = (AwaObjectLink *)data.value;
+                AwaObjectLink * objectlink = (AwaObjectLink *)data.Value;
                 EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation_, path, *objectlink));
                 break;
             }
@@ -1569,8 +1596,8 @@ TEST_P(TestStaticClientWriteReadValue, TestWriteReadValueSingle)
     ASSERT_TRUE(cbHandler->Wait());
     pthread_join(writeThread, NULL);
 
-    cbHandler->data.complete = false;
-    cbHandler->data.testRead = true;
+    cbHandler->data.Complete = false;
+    cbHandler->data.TestRead = true;
     cbHandler->Reset();
 
     AwaServerReadOperation_AddPath(readOperation_, global::clientEndpointName, path);
@@ -1583,54 +1610,54 @@ TEST_P(TestStaticClientWriteReadValue, TestWriteReadValueSingle)
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation_, global::clientEndpointName );
     EXPECT_TRUE(readResponse != NULL);
 
-    switch (data.type)
+    switch (data.Type)
     {
         case AwaResourceType_String:
             {
                 const char * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsCStringPointer(readResponse, path, (const char **)&value));
-                ASSERT_STREQ((char*) data.value, (char*) value);
+                ASSERT_STREQ((char*) data.Value, (char*) value);
                 break;
             }
         case AwaResourceType_Integer:
             {
                 AwaInteger * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, path, (const AwaInteger **)&value));
-                ASSERT_EQ(*static_cast<const AwaInteger *>(data.value), *static_cast<AwaInteger *>(value));
+                ASSERT_EQ(*static_cast<const AwaInteger *>(data.Value), *static_cast<AwaInteger *>(value));
                 break;
             }
         case AwaResourceType_Float:
             {
                 AwaFloat * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsFloatPointer(readResponse, path, (const AwaFloat **)&value));
-                ASSERT_EQ(*static_cast<const AwaFloat *>(data.value), *static_cast<AwaFloat *>(value));
+                ASSERT_EQ(*static_cast<const AwaFloat *>(data.Value), *static_cast<AwaFloat *>(value));
                 break;
             }
         case AwaResourceType_Boolean:
             {
                 AwaBoolean * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, path, (const AwaBoolean **)&value));
-                ASSERT_EQ(*static_cast<const AwaBoolean *>(data.value), *static_cast<AwaBoolean *>(value));
+                ASSERT_EQ(*static_cast<const AwaBoolean *>(data.Value), *static_cast<AwaBoolean *>(value));
                 break;
             }
         case AwaResourceType_Opaque:
             {
                 AwaOpaque * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsOpaquePointer(readResponse, path, (const AwaOpaque **)&value));
-                ASSERT_EQ(data.valueSize, static_cast<int>(value->Size));
-                ASSERT_TRUE(memcmp(value->Data, data.value, data.valueSize) == 0);
+                ASSERT_EQ(data.ValueSize, static_cast<int>(value->Size));
+                ASSERT_TRUE(memcmp(value->Data, data.Value, data.ValueSize) == 0);
                 break;
             }
         case AwaResourceType_Time:
             {
                 AwaTime * value;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsTimePointer(readResponse, path, (const AwaTime **)&value));
-                ASSERT_EQ(*static_cast<const AwaTime *>(data.value), *static_cast<AwaTime *>(value));
+                ASSERT_EQ(*static_cast<const AwaTime *>(data.Value), *static_cast<AwaTime *>(value));
                 break;
             }
         case AwaResourceType_ObjectLink:
             {
-                AwaObjectLink * expectedObjectLink = (AwaObjectLink *)data.value;
+                AwaObjectLink * expectedObjectLink = (AwaObjectLink *)data.Value;
                 const AwaObjectLink * receivedObjectLinkPointer;
                 EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsObjectLinkPointer(readResponse, path, (const AwaObjectLink **)&receivedObjectLinkPointer));
                 EXPECT_EQ(expectedObjectLink->ObjectID, receivedObjectLinkPointer->ObjectID);
