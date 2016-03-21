@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "../support.h"
 #include "main_cmdline.h"

@@ -194,13 +194,19 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
         if (!client->Running)
         {
             // Mandatory resources only
+#if (__GNUC__ >= 5)
             BootstrapInfo info = { 0 };
+#else
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119
+            BootstrapInfo info;
+            memset(&info, 0, sizeof(info));
+#endif
 
             // Assign an arbitrary server ID
             static int serverID = 1000;
             ++serverID;
-            info.SecurityInfo.ServerID = serverID;
 
+            info.SecurityInfo.ServerID = serverID;
             strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
             info.SecurityInfo.Bootstrap = false;
             info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
