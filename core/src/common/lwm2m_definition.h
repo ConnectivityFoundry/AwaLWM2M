@@ -101,7 +101,8 @@ struct  _ResourceDefinition
 
     // When using "static" mode, these values are used to
     // determine where to locate the memory for this resource type
-    void * DataPointer;  
+    void * DataPointers;
+    bool IsPointerArray;  
     size_t DataElementSize;
     size_t DataStepSize;
 };
