@@ -41,6 +41,7 @@ endif ()
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -g -std=c++11")
 if (ENABLE_GCOV)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
 
