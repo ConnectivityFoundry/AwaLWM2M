@@ -167,19 +167,30 @@ static int JsonEncodeOpaque(char * buffer, int bufferLen, char * id, char * valu
 }
 
 // Write a JSON encoded string to the buffer provided
-static int JsonEncodeString(char * buffer, int bufferLen, char * id, char * value, bool last)
+static int JsonEncodeString(char * buffer, int bufferLen, char * id, char * value, size_t size, bool last)
 {
-    sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%s\"}", id, value);
-    if (!last)
+    int result = 0;
+
+    char * temp = (char *)malloc(size + 1);
+    if (temp != NULL)
     {
-        strcat(buffer,",\n");
-    }
-    else
-    {
-        strcat(buffer,"]\n");
+        memcpy(temp, value, size);
+        temp[size] = '\0';
+
+        sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%s\"}", id, temp);
+        if (!last)
+        {
+            strcat(buffer,",\n");
+        }
+        else
+        {
+            strcat(buffer,"]\n");
+        }
+        free(temp);
+        result = strlen(buffer);
     }
 
-    return strlen(buffer);
+    return result;
 }
 
 // Write a JSON encoded integer to the buffer provided
@@ -260,7 +271,7 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
     switch (definition->Type)
     {
         case AwaResourceType_String:
-            valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, last);
+            valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, size, last);
             break;
         case AwaResourceType_Boolean:
             valueLength = JsonEncodeBoolean((char *)buffer, len, id, *(bool*)value, last);
