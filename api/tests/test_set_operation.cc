@@ -592,7 +592,7 @@ AwaObjectLink dummyObjectLink3 = { 0, 1 };
 
 
 const char * dummyStringArray1[] = {"Lightweight M2M Client", "test1", ""};
-const char * dummyStringArray2[] = {"Lightweight M2M Client", "test1", "", "", "", ""};
+const char * dummyStringArray2[] = {"Lightweight M2M Client", "test1", " ", " ", " ", " "};
 const AwaInteger dummyIntegerArray1[] = {55, 8732, 11};
 const AwaInteger dummyIntegerArray2[] = {55, 8732, 11, 55, 8732, 11};
 const AwaFloat dummyFloatArray1[] = {55.0, 0.0008732, 11e10};

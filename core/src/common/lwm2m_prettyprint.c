@@ -38,9 +38,20 @@
 #define PP_NUMBER_BUFFER_SIZE (20)
 #define PP_BOOLEAN_BUFFER_SIZE (6)
 
-static int PPEncodeString(uint8_t * buffer, int bufferLen, char * value)
+static int PPEncodeString(uint8_t * buffer, int bufferLen, char * value, int len)
 {
-    return snprintf((char*)buffer, bufferLen, "%s", value);
+    char * temp = (char *)malloc(len + 1);
+    int result = 0;
+
+    if (temp != NULL)
+    {
+        memcpy(temp, value, len);
+        temp[len] = '\0';
+        result =  snprintf((char*)buffer, bufferLen, "%s", temp);
+        free(temp);
+    }
+
+    return result;
 }
 
 static int PPEncodeOpaque(uint8_t * buffer, int bufferLen, char * value, int len)
@@ -60,7 +71,7 @@ static int PPEncodeOpaque(uint8_t * buffer, int bufferLen, char * value, int len
             valuePos += 3;
         }
 
-        result = PPEncodeString(buffer, bufferLen, valueBuffer);
+        result = snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
 
         free(valueBuffer);
     }
@@ -74,7 +85,7 @@ static int PPEncodeInteger(uint8_t * buffer, int bufferLen, int64_t value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%" PRId64, value))
     {
-        return PPEncodeString(buffer, bufferLen, valueBuffer);
+        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -88,7 +99,7 @@ static int PPEncodeFloat(uint8_t * buffer, int bufferLen, double value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%f", value))
     {
-        return PPEncodeString(buffer, bufferLen, valueBuffer);
+        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -102,7 +113,7 @@ static int PPEncodeBoolean(uint8_t * buffer, int bufferLen, bool value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%s", value ? "True" : "False"))
     {
-        return PPEncodeString(buffer, bufferLen, valueBuffer);
+        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -139,7 +150,7 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
     switch (definition->Type)
     {
         case AwaResourceType_String:
-            valueLength = PPEncodeString(valueBuffer, len - headerLen, (char*)value);
+            valueLength = PPEncodeString(valueBuffer, len - headerLen, (char*)value, size);
             break;
 
         case AwaResourceType_Boolean:

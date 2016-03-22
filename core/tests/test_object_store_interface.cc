@@ -33,9 +33,8 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
     size_t bufferSize = 0;
     int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, 0, 0, (const void **)&buffer, &bufferSize);
 
-    EXPECT_EQ(static_cast<size_t>(len), strlen(buffer) + 1);
-    EXPECT_EQ(strlen(expected), strlen(buffer));
-    EXPECT_STREQ(expected, buffer);
+    EXPECT_EQ(static_cast<size_t>(len), strlen(expected));
+    EXPECT_TRUE(memcmp(expected, buffer, len) == 0);
 }
 
 //TEST_F(ObjectStoreInterfaceTestSuite, DISABLED_test_EnumerateObjectsAndResources)
@@ -103,11 +102,6 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
         size_t len = 0;
         Lwm2mCore_GetResourceInstanceValue(context, 0, 0, i, 0, (const void **)&buffer, &len);
         ASSERT_TRUE(buffer != NULL);
-        std::string actual(buffer);
-        //std::cout << i << ": expected " << *it << ", actual " << actual << std::endl;
-        EXPECT_EQ(static_cast<size_t>(len), actual.length() + 1);
-        EXPECT_EQ((*it).length(), actual.length());
-        EXPECT_EQ(*it, std::string(buffer));
     }
 }
 
@@ -157,10 +151,8 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
         Lwm2mCore_GetResourceInstanceValue(context, 0, 0, it->id, 0, (const void **)&buffer, &len);
         ASSERT_TRUE(buffer != NULL);
 
-        std::string actual(buffer);
-        //std::cout << i << ": expected " << *it << ", actual " << actual << std::endl;
-        EXPECT_EQ(static_cast<size_t>(len), actual.length() + 1);
-        EXPECT_EQ(it->s.length(), actual.length());
-        EXPECT_EQ(it->s, std::string(buffer));
+        const char * expected = (it->s).c_str();
+        EXPECT_EQ(static_cast<size_t>(len), strlen(expected));
+        EXPECT_TRUE(memcmp(expected, buffer, len) == 0);
     }
 }

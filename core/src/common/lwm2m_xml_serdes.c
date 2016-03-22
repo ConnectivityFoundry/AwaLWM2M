@@ -232,32 +232,6 @@ int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * 
     switch(dataType)
     {
         case AwaResourceType_String:
-            //
-            outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes,
-            *dataValue = malloc(outLength);
-            if (*dataValue == NULL)
-            {
-                AwaResult_SetResult(AwaResult_OutOfMemory);
-                goto error;
-            }
-            dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
-
-            if (dataLength == -1)
-            {
-                AwaResult_SetResult(AwaResult_BadRequest);
-                goto error;
-            }
-            else
-            {
-                dataLength++;  // add space for null terminator
-                char * nullTerminated = malloc(dataLength);
-                memcpy(nullTerminated, *dataValue, dataLength - 1);
-                free(*dataValue);
-                nullTerminated[dataLength-1] = '\0';
-                *dataValue = nullTerminated;
-            }
-            break;
-
         case AwaResourceType_Opaque: 
         case AwaResourceType_None: // TypeNone for Executable payload which is an Opaque
             outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes

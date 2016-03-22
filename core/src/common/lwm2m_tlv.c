@@ -239,25 +239,6 @@ static int TlvEncodeOpaque(uint8_t * buffer, int bufferLen, int type, int id, ui
 }
 
 /**
- * @brief write a TLV encoded header followed by a NULL terminated string to the buffer provided
- *
- * @param[out] buffer pointer to buffer to write encoded tlv header
- * @param[in] bufferLen size of output buffer
- * @param[in] type TLV identifier type, one of: TLV_TYPE_IDENT_OBJECT_INSTANCE,
- *                                              TLV_TYPE_IDENT_MULTI_RESOURCE_VALUE,
- *                                              TLV_TYPE_IDENT_MULTIPLE_RESOURCE,
- *                                              TLV_TYPE_IDENT_RESOURCE_VALUE
- * @param[in] identifier identifier value 0-65535
- * @param[in] value pointer to buffer containing NULL terminated string
- * @return int length of header + string data or -1 on error
- */
-static int TlvEncodeString(uint8_t * buffer, int bufferLen, int type, int id, char * value)
-{
-    int len = value != NULL ? strlen(value) : 0;
-    return TlvEncodeOpaque(buffer, bufferLen, type, id, (uint8_t*)value, len);
-}
-
-/**
  * @brief write a TLV encoded header followed by a TLV encoded integer
  *
  * TLV encoded integers are represented as a binary signed integer in network byte order,
@@ -694,9 +675,6 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 
     switch (definition->Type)
     {
-        case AwaResourceType_String:
-            valueLength = TlvEncodeString(buffer, len, type, id, (char*)value);
-            break;
 
         case AwaResourceType_Boolean:
             valueLength = TlvEncodeBoolean(buffer, len, type, id, *(bool*)value);
@@ -738,6 +716,7 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             }
             break;
 
+        case AwaResourceType_String:
         case AwaResourceType_Opaque:
             valueLength = TlvEncodeOpaque(buffer, len, type, id, (uint8_t*)value, size);
             break;

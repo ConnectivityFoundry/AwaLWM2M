@@ -45,6 +45,7 @@ struct _ResponseCommon
 
     MapType * Values;
     MapType * PathResults;
+    MapType * NulledValues;
 };
 
 ResponseCommon * ResponseCommon_New(const OperationCommon * operation, TreeNode objectsNode)
@@ -82,6 +83,8 @@ ResponseCommon * ResponseCommon_New(const OperationCommon * operation, TreeNode 
                     // there was an error building values
                     LogErrorWithEnum(AwaError_ResponseInvalid, "Failed to build path results - continuing");
                 }
+
+                response->NulledValues = Map_New();
 
                 LogNew("ResponseCommon", response);
 
@@ -138,12 +141,12 @@ ResponseCommon * ResponseCommon_NewClient(const OperationCommon * operation, Tre
     return response;
 }
 
-static void FreePathResults(MapType ** pathResultsMap)
+static void FreeSimpleMap(MapType ** map)
 {
-    if ((pathResultsMap != NULL) && (*pathResultsMap != NULL))
+    if ((map != NULL) && (*map != NULL))
     {
-        Map_FreeValues(*pathResultsMap);
-        Map_Free(pathResultsMap);
+        Map_FreeValues(*map);
+        Map_Free(map);
     }
 }
 
@@ -167,7 +170,8 @@ AwaError ResponseCommon_Free(ResponseCommon ** response)
     if ((response != NULL) && (*response != NULL))
     {
         LogFree("ResponseCommon", *response);
-        FreePathResults(&((*response)->PathResults));
+        FreeSimpleMap(&((*response)->PathResults));
+        FreeSimpleMap(&((*response)->NulledValues));
         FreeValues(&((*response)->Values));
         Tree_Delete((*response)->ObjectsNode);
         Awa_MemSafeFree(*response);
@@ -351,7 +355,7 @@ AwaError ResponseCommon_BuildPathResults(ResponseCommon * response)
     AwaError result = AwaError_Success;  // success if no path results are found
     if (response != NULL)
     {
-        FreePathResults(&response->PathResults);
+        FreeSimpleMap(&response->PathResults);
         response->PathResults = Map_New();
         if (response->PathResults != NULL)
         {
@@ -534,7 +538,7 @@ static const Value * ResponseCommon_GetValue(const ResponseCommon * response, co
     return storedValue;
 }
 
-AwaError ResponseCommon_GetValuePointer(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize)
+AwaError GetValuePointer(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize, bool withNull)
 {
     AwaError result = AwaError_Unspecified;
     if (path != NULL)
@@ -560,12 +564,39 @@ AwaError ResponseCommon_GetValuePointer(const ResponseCommon * response, const c
                             }
                             else
                             {
-                                *value = (length > 0) ? data : NULL;
-                                if (valueSize != NULL)
+                                if (withNull)
                                 {
-                                    *valueSize = length;
+                                    char * nulledValue = (char *)malloc(length+1);
+
+                                    if ((nulledValue != NULL))
+                                    {
+                                        memcpy(nulledValue, data, length);
+                                        nulledValue[length] = '\0';
+                                        if (valueSize != NULL)
+                                        {
+                                            *valueSize = length + 1;
+                                        }
+
+                                        Map_Put(response->NulledValues, path, nulledValue);
+
+                                        *value = nulledValue;
+                                        result = AwaError_Success;
+                                    }
+                                    else
+                                    {
+                                        result = LogErrorWithEnum(AwaError_OutOfMemory);
+                                    }
                                 }
-                                result = AwaError_Success;
+                                else
+                                {
+                                    *value = (length > 0) ? data : NULL;
+                                    if (valueSize != NULL)
+                                    {
+                                        *valueSize = length;
+                                    }
+
+                                    result = AwaError_Success;
+                                }
                             }
                         }
                         else
@@ -599,6 +630,18 @@ AwaError ResponseCommon_GetValuePointer(const ResponseCommon * response, const c
         result = LogErrorWithEnum(AwaError_PathInvalid, "No path specified");
     }
     return result;
+}
+
+
+AwaError ResponseCommon_GetValuePointer(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize)
+{
+    return GetValuePointer(response, path, value, valueSize, resourceType, resourceSize, false);
+}
+
+
+AwaError ResponseCommon_GetValuePointerWithNull(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize)
+{
+    return GetValuePointer(response, path, value, valueSize, resourceType, resourceSize, true);
 }
 
 AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, const char * path, AwaObjectLink * value)

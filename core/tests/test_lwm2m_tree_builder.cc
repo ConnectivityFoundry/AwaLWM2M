@@ -61,8 +61,8 @@ TEST_F(Lwm2mTreeBuilderTestSuite, test_build_resource_node)
     EXPECT_EQ(0, resourceInstanceNodeID);
 
     uint16_t resourceInstanceNodeValueLength;
-    ASSERT_STREQ(expected, (char *)Lwm2mTreeNode_GetValue(child, &resourceInstanceNodeValueLength));
-    EXPECT_EQ(strlen(expected) + 1, resourceInstanceNodeValueLength);  // +1 for added null terminator
+    ASSERT_TRUE(memcmp(expected, (char *)Lwm2mTreeNode_GetValue(child, &resourceInstanceNodeValueLength),resourceInstanceNodeValueLength) == 0);
+    EXPECT_EQ(strlen(expected) , resourceInstanceNodeValueLength);  // +1 for added null terminator
 
     Lwm2mTreeNode_DeleteRecursive(dest);
 }

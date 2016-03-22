@@ -889,10 +889,10 @@ TEST_F(TestArray, AwaStringArrayIterator_New_and_Free_valid_inputs)
     AwaStringArray * array = AwaStringArray_New();
     EXPECT_TRUE(NULL != array);
 
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(array);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
     ASSERT_TRUE(NULL != iterator);
 
-    AwaStringArrayIterator_Free(&iterator);
+    AwaCStringArrayIterator_Free(&iterator);
     ASSERT_TRUE(NULL == iterator);
 
     AwaStringArray_Free(&array);
@@ -901,7 +901,7 @@ TEST_F(TestArray, AwaStringArrayIterator_New_and_Free_valid_inputs)
 
 TEST_F(TestArray, AwaStringArrayIterator_New_invalid_inputs)
 {
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(NULL);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(NULL);
     ASSERT_TRUE(NULL == iterator);
 }
 
@@ -918,23 +918,23 @@ TEST_F(TestArray, AwaStringArrayIterator_Set_Get_values)
         AwaStringArray_SetValueAsCString(array, i, temp);
     }
 
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(array);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
     for(int i = 0; i < 1000; i+=5)
     {
         char temp [64];
 
-        ASSERT_TRUE(AwaStringArrayIterator_Next(iterator));
-        ASSERT_EQ(static_cast<size_t>(i), AwaStringArrayIterator_GetIndex(iterator));
+        ASSERT_TRUE(AwaCStringArrayIterator_Next(iterator));
+        ASSERT_EQ(static_cast<size_t>(i), AwaCStringArrayIterator_GetIndex(iterator));
         sprintf(temp, "%d",  i*2);
-        ASSERT_EQ(0, strcmp(temp, AwaStringArrayIterator_GetValueAsCString(iterator)));
+        ASSERT_EQ(0, strcmp(temp, AwaCStringArrayIterator_GetValueAsCString(iterator)));
 //        ASSERT_EQ(strlen(temp) + 1, ArrayIterator_GetValueLength(iterator));
     }
 
-    ASSERT_FALSE(AwaStringArrayIterator_Next(iterator));
+    ASSERT_FALSE(AwaCStringArrayIterator_Next(iterator));
 
-    AwaStringArrayIterator_Free(&iterator);
+    AwaCStringArrayIterator_Free(&iterator);
     EXPECT_TRUE(NULL == iterator);
 
     AwaStringArray_Free(&array);

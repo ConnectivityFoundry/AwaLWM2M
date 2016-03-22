@@ -452,6 +452,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
         }
 
         AwaResult_SetResult(AwaResult_Success);
+
         return valueBufferLen;
     }
 

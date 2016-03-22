@@ -38,6 +38,7 @@ struct _ArrayItem
 struct _AwaArray
 {
     struct ListHead ValueList;
+    void * Context;
 };
 
 struct _AwaArrayIterator
@@ -64,6 +65,27 @@ AwaArray * AwaArray_New(void)
 
     return array;
 }
+
+void AwaArray_SetContext(AwaArray * array, void * context)
+{
+    if (array != NULL)
+    {
+        array->Context = context;
+    }
+}
+
+void * AwaArray_GetContext(AwaArray * array)
+{
+    void * result = NULL;
+
+    if (array != NULL)
+    {
+        result = array->Context;
+    }
+
+    return result;
+}
+
 
 void Array_FreeItemValue(ArrayItem * valueItem)
 {
