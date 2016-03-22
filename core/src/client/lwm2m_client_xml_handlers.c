@@ -464,7 +464,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                         value = xmlif_GetOpaque(resourceInstance, "ResourceInstance/Value");
 
                         const uint8_t * defaultValue = NULL;
-                        uint16_t defaultValueLength = 0;
+                        int defaultValueLength = 0;
 
                         defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
                         if (defaultValueLength != -1)
@@ -472,7 +472,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                             Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
                             Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
                             Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, defaultValueLength);
+                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
                             Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
                         }
                         else

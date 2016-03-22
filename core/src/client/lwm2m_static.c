@@ -208,6 +208,7 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
 
             info.SecurityInfo.ServerID = serverID;
             strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
+            info.SecurityInfo.ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE - 1] = '\0'; // Defensive
             info.SecurityInfo.Bootstrap = false;
             info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
             memcpy(info.SecurityInfo.PublicKey, factoryBootstrapInformation->SecurityInfo.PublicKeyOrIdentity, BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE);
@@ -221,6 +222,7 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
             info.ServerInfo.DisableTimeout = factoryBootstrapInformation->ServerInfo.DisableTimeout;
             info.ServerInfo.Notification = factoryBootstrapInformation->ServerInfo.Notification;
             strncpy(info.ServerInfo.Binding, factoryBootstrapInformation->ServerInfo.Binding, BOOTSTRAP_CONFIG_BINDING_SIZE);
+            info.ServerInfo.Binding[BOOTSTRAP_CONFIG_BINDING_SIZE - 1] = '\0'; // Defensive
 
             Lwm2mCore_SetFactoryBootstrap(client->Context, &info);
             result = AwaError_Success;

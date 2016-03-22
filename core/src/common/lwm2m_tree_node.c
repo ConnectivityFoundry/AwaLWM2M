@@ -126,21 +126,31 @@ int Lwm2mTreeNode_SetValue(Lwm2mTreeNode * node, const uint8_t * value, uint16_t
 
 const uint8_t * Lwm2mTreeNode_GetValue(Lwm2mTreeNode * node, uint16_t * length)
 {
+    uint8_t * result = NULL;
     _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
-    if ((node == NULL) || (length == NULL))
+    if ((node != NULL) && (length != NULL))
     {
-        return NULL;
+        *length = _node->Length;
+        result = _node->Value;
     }
-
-    *length = _node->Length;
-    return _node->Value;
+    else
+    {
+        if (length != NULL)
+        {
+            *length = 0;
+        }
+        result = NULL;
+    }
+    return result;
 }
 
 int Lwm2mTreeNode_SetDefinition(Lwm2mTreeNode * node, void * definition)
 {
     _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
     if ((node == NULL) || (definition == NULL))
+    {
         return -1;
+    }
 
     _node->Definition = definition;
     return 0;

@@ -681,7 +681,7 @@ static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * c
     Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(resourceNode);
     while (resourceInstanceNode)
     {
-        uint16_t length;
+        uint16_t length = 0;
         const uint8_t * value;
         int id;
 
