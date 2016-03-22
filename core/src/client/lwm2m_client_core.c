@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -137,9 +137,9 @@ static int Lwm2mCore_SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptConten
 // Deserialise the encoded buffer provided into the Object references by OIR. Return number of bytes deserialised, negative on failure
 static int Lwm2mCore_DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, int len)
 {
-    /* If the content type is not specified in the payload of a response message, 
-     * the default content type (text/plain) is assumed; otherwise the content type 
-     * MUST be specified in using one of the supported Media Types. 
+    /* If the content type is not specified in the payload of a response message,
+     * the default content type (text/plain) is assumed; otherwise the content type
+     * MUST be specified in using one of the supported Media Types.
      */
     if (contentType ==  ContentType_None)
     {
@@ -767,7 +767,7 @@ error:
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the object level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
 // Return various errors on failure, return AwaResult_Success on success.
-AwaResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance, 
+AwaResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance,
                                                      bool createOptionalResources, bool replace, int * newObjectInstanceID)
 {
     Lwm2mTreeNode * node;
@@ -1463,7 +1463,7 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
         // Handle WRITE and CREATE
         Lwm2mTreeNode * root = NULL;
         len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
-        
+
         if (len >= 0)
         {
             bool createObjectInstance = false;
@@ -1497,7 +1497,7 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
             {
                 Lwm2m_Debug("WRITE (partial update): %s\n", path);
             }
-            
+
             switch (Lwm2mTreeNode_GetType(root))
             {
                 case Lwm2mTreeNodeType_Object:
@@ -2000,7 +2000,7 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
     }
 
     Lwm2m_UpdateObservers(context);
-    return nextTick; 
+    return nextTick;
 }
 
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation)
