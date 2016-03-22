@@ -136,6 +136,8 @@ DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
 
 bool Lwm2mCore_GetUseFactoryBootstrap(Lwm2mContextType * context);
 
+AwaObjectInstanceID Lwm2mCore_AddSeverObjects(Lwm2mContextType * context);
+
 struct ListHead * Lwm2mCore_GetServerList(Lwm2mContextType * context);
 struct ListHead * Lwm2mCore_GetSecurityObjectList(Lwm2mContextType * context);
 struct ListHead * Lwm2mCore_GetObserverList(Lwm2mContextType * context);

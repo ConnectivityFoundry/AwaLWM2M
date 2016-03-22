@@ -124,12 +124,12 @@ void Lwm2m_RegisterObjectTypes(Lwm2mContextType * context)
         Lwm2mCore_RegisterResourceType(context, "PublicKeyorIDentity", objID, 3, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
         Lwm2mCore_RegisterResourceType(context, "ServerPublicKeyorIDentity", objID, 4, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
         Lwm2mCore_RegisterResourceType(context, "SecretKey", objID, 5, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
-        Lwm2mCore_RegisterResourceType(context, "SMSSecurityMode", objID, 6, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
-        Lwm2mCore_RegisterResourceType(context, "SMSBindingKeyParameters", objID, 7, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
-        Lwm2mCore_RegisterResourceType(context, "SMSBindingSecretKeys", objID, 8, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
-        Lwm2mCore_RegisterResourceType(context, "LWM2MServerSMSNumber", objID, 9, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
+        Lwm2mCore_RegisterResourceType(context, "SMSSecurityMode", objID, 6, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
+        Lwm2mCore_RegisterResourceType(context, "SMSBindingKeyParameters", objID, 7, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
+        Lwm2mCore_RegisterResourceType(context, "SMSBindingSecretKeys", objID, 8, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
+        Lwm2mCore_RegisterResourceType(context, "LWM2MServerSMSNumber", objID, 9, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
         Lwm2mCore_RegisterResourceType(context, "ShortServerID", objID, 10, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
-        Lwm2mCore_RegisterResourceType(context, "ClientHoldOffTime", objID, 11, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, NULL);
+        Lwm2mCore_RegisterResourceType(context, "ClientHoldOffTime", objID, 11, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, NULL);
     }
     {
         int objID = LWM2M_SERVER_OBJECT;

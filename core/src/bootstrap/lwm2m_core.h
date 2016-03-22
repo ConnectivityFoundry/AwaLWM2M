@@ -87,6 +87,8 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
 int Lwm2mCore_AddResourceEndPoint(Lwm2mContextType * context, const char * path, EndpointHandlerFunction handler);
 DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
 
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+
 #ifdef __cplusplus
 }
 #endif
