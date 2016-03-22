@@ -38,6 +38,11 @@ if (WITH_JSON)
   )
 endif ()
 
+if (ENABLE_GCOV)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif ()
+
 # Virtual library to avoid building .o files twice:
 #add_library(lwm2m_common_object OBJECT ${awa_common_SOURCES})
 #target_include_directories (lwm2m_common_object PRIVATE ${awa_common_INCLUDE_DIRS})
@@ -52,6 +57,10 @@ target_include_directories(awa_common_static PUBLIC ${awa_common_INCLUDE_DIRS})
 
 # Combine libxml and libcoap into awa_common_static:
 target_link_libraries (awa_common_static ${awa_common_LIBS})
+
+if (ENABLE_GCOV)
+  target_link_libraries (awa_common_static gcov)
+endif ()
 
 # Currently disabled as libxml isn't PIC
 #add_library (lwm2m_common_shared SHARED $<TARGET_OBJECTS:lwm2m_common_object>)

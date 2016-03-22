@@ -30,7 +30,7 @@ endif ()
 
 add_definitions (-DLWM2M_BOOTSTRAP)
 
-if (ENABLE_GCOV_TEST)
+if (ENABLE_GCOV)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
@@ -39,7 +39,7 @@ add_executable (awa_bootstrapd ${awa_bootstrapd_SOURCES})
 target_include_directories (awa_bootstrapd PRIVATE ${awa_bootstrapd_INCLUDE_DIRS})
 target_link_libraries (awa_bootstrapd awa_common_static)
 
-if (ENABLE_GCOV_TEST)
+if (ENABLE_GCOV)
   target_link_libraries (awa_bootstrapd gcov)
 endif ()
 

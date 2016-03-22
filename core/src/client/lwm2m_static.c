@@ -377,9 +377,9 @@ int AwaStaticClient_Process(AwaStaticClient * client)
     return result;
 }
 
-static AwaResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOperation operation,
-                                               AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
-                                               void ** dataPointer, size_t * dataSize, bool * changed)
+static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation,
+                                AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
+                                void ** dataPointer, size_t * dataSize, bool * changed)
 {
     AwaResult result;
 
@@ -415,7 +415,14 @@ static AwaResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOper
                 resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
                 if (resourceDefinition != NULL)
                 {
-                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    if (resourceDefinition->IsPointerArray)
+                    {
+                        offset = resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                    }
+                    else
+                    {
+                        offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                    }
 
                     if (resourceDefinition->Type == AwaResourceType_Opaque)
                     {
@@ -458,7 +465,14 @@ static AwaResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOper
                 resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
                 if (resourceDefinition != NULL)
                 {
-                    offset = resourceDefinition->DataPointer + (resourceDefinition->DataStepSize * objectInstanceID);
+                    if (resourceDefinition->IsPointerArray)
+                    {
+                        offset = resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                    }
+                    else
+                    {
+                        offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                    }
 
                     if (resourceDefinition->Type == AwaResourceType_Opaque)
                     {
@@ -500,7 +514,7 @@ static AwaResult AwaStaticClientDefaultHandler(AwaStaticClient * client, AwaOper
 AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                       uint16_t minimumInstances, uint16_t maximumInstances)
 {
-    return AwaStaticClient_DefineObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, AwaStaticClientDefaultHandler);
+    return AwaStaticClient_DefineObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, DefaultHandler);
 }
 
 AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
@@ -591,10 +605,11 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
     return result;
 }
 
-static AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, const char * resourceName,
-                                               AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                               uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                               AwaStaticClientHandler handler,  void * dataPointer, size_t dataElementSize, size_t dataStepSize)
+static AwaError DefineResource(AwaStaticClient * client, const char * resourceName,
+                               AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                               uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                               AwaStaticClientHandler handler,  void * dataPointers, bool isPointerArray,
+                               size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -608,9 +623,8 @@ static AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, const c
                 ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
                 if (resourceDefinition != NULL)
                 {
-                    // TODO: perhaps a better option would be to bind some opaque data
-                    //       to the resource definition, rather than using individual variables.
-                    resourceDefinition->DataPointer = dataPointer;
+                    resourceDefinition->DataPointers = dataPointers;
+                    resourceDefinition->IsPointerArray = isPointerArray;
                     resourceDefinition->DataElementSize = dataElementSize;
                     resourceDefinition->DataStepSize = dataStepSize;
                     result = AwaError_Success;
@@ -651,10 +665,45 @@ AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, con
     }
     else
     {
-        result = AwaStaticClient_DefineResource(client, resourceName,
-                                                objectID, resourceID, resourceType,
-                                                minimumInstances, maximumInstances, operations, AwaStaticClientDefaultHandler,
-                                                dataPointer, dataElementSize, dataStepSize);
+        result = DefineResource(client, resourceName,
+                                objectID, resourceID, resourceType,
+                                minimumInstances, maximumInstances, operations, DefaultHandler,
+                                dataPointer, false, dataElementSize, dataStepSize);
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
+                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                                                        void * dataPointers[], size_t dataElementSize)
+{
+    AwaError result;
+
+    if ((dataPointers == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        // check there are enough pointers in the array. There needs to be one pointer for each instance of the resource.
+        int count = 0;
+        while (dataPointers[count] != NULL)
+        {
+            count++;
+        }
+
+        if (count == maximumInstances)
+        {
+            result = DefineResource(client, resourceName,
+                                    objectID, resourceID, resourceType,
+                                    minimumInstances, maximumInstances, operations, DefaultHandler,
+                                    dataPointers, true, dataElementSize, 0);
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
     }
     return result;
 }
@@ -664,10 +713,10 @@ AwaError AwaStaticClient_DefineResourceWithHandler(AwaStaticClient * client, con
                                                    uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
                                                    AwaStaticClientHandler handler)
 {
-    return AwaStaticClient_DefineResource(client, resourceName,
-                                          objectID, resourceID, resourceType,
-                                          minimumInstances, maximumInstances, operations, handler,
-                                          NULL, 0 , 0);
+    return DefineResource(client, resourceName,
+                          objectID, resourceID, resourceType,
+                          minimumInstances, maximumInstances, operations, handler,
+                          NULL, false, 0 , 0);
 }
 
 AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
