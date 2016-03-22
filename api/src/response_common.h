@@ -66,6 +66,7 @@ AwaError ResponseCommon_GetPathResult(const ResponseCommon * response, const cha
 PathIterator * ResponseCommon_NewPathIterator(const ResponseCommon * response);
 
 AwaError ResponseCommon_GetValuePointer(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize);
+AwaError ResponseCommon_GetValuePointerWithNull(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize);
 AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, const char * path, AwaObjectLink * value);
 AwaError ResponseCommon_GetValueAsOpaque(const ResponseCommon * response, const char * path, AwaOpaque * value);
 

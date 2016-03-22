@@ -208,7 +208,9 @@ AwaObjectInstanceID FindNextFreeObjectInstanceID(Lwm2mContextType * context, Awa
     AwaObjectInstanceID result = AWA_INVALID_ID;
 
     if (StartObjectInstanceID != AWA_INVALID_ID)
+    {
         result = StartObjectInstanceID;
+    }
 
     while(Lwm2mCore_Exists(context, ObjectID, result, AWA_INVALID_ID))
     {
@@ -216,7 +218,9 @@ AwaObjectInstanceID FindNextFreeObjectInstanceID(Lwm2mContextType * context, Awa
     }
 
     if (result > AWA_MAX_ID)
+    {
         result = AWA_INVALID_ID;
+    }
 
     return result;
 }

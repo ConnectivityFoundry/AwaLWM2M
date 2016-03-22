@@ -354,6 +354,7 @@ int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
 
         *ValueBuffer = instance->Value;
         *ValueBufferSize = instance->Size;
+
         AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
         return instance->Size;
     }
@@ -452,6 +453,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
         }
 
         AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+
         return valueBufferLen;
     }
 

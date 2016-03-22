@@ -59,6 +59,8 @@ static AwaLwm2mResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm
         goto error;
     }
 
+    Lwm2m_Debug("Treebuilder length: %d\n", valueLength);
+
     if (Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)value, valueLength) != 0)
     {
         Lwm2m_Error("ERROR: Failed to set value for resource instance node\n");

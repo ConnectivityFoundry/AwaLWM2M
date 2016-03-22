@@ -243,15 +243,8 @@ static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectI
 static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
 {
-    int nullTerminator = 0;
-
-    // If the type is a string, add a NULL terminator.
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == AwaResourceType_String)
-    {
-        nullTerminator = 1;
-    }
     return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID,
-                                                resourceInstanceID, srcBufferLen + nullTerminator, srcBuffer, 0, srcBufferLen, changed);
+                                                resourceInstanceID, srcBufferLen, srcBuffer, 0, srcBufferLen, changed);
 }
 
 // This function is called when a delete is performed for an object/object instance that uses the "default" handler.

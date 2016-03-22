@@ -97,7 +97,7 @@ typedef struct _AwaTimeArray AwaTimeArray;
 typedef struct _AwaObjectLinkArray AwaObjectLinkArray;
 
 // Public Array Iterator types
-typedef struct _AwaStringArrayIterator AwaStringArrayIterator;
+typedef struct _AwaCStringArrayIterator AwaCStringArrayIterator;
 typedef struct _AwaIntegerArrayIterator AwaIntegerArrayIterator;
 typedef struct _AwaFloatArrayIterator AwaFloatArrayIterator;
 typedef struct _AwaBooleanArrayIterator AwaBooleanArrayIterator;
@@ -228,7 +228,7 @@ size_t AwaObjectLinkArray_GetValueCount(const AwaObjectLinkArray * array);
  * @return NULL on failure.
  * @{
  */
-AwaStringArrayIterator *     AwaStringArray_NewStringArrayIterator        (const AwaStringArray * array);
+AwaCStringArrayIterator *    AwaStringArray_NewCStringArrayIterator       (const AwaStringArray * array);
 AwaIntegerArrayIterator *    AwaIntegerArray_NewIntegerArrayIterator      (const AwaIntegerArray * array);
 AwaFloatArrayIterator *      AwaFloatArray_NewFloatArrayIterator          (const AwaFloatArray * array);
 AwaBooleanArrayIterator *    AwaBooleanArray_NewBooleanArrayIterator      (const AwaBooleanArray * array);
@@ -269,7 +269,7 @@ bool AwaObjectLinkArray_IsValid(const AwaObjectLinkArray * array, AwaArrayIndex 
  * @return false if the input Array Iterator is invalid, or has reached the end of its array.
  * @{
  */
-bool AwaStringArrayIterator_Next    (AwaStringArrayIterator *     iterator);
+bool AwaCStringArrayIterator_Next   (AwaCStringArrayIterator *    iterator);
 bool AwaIntegerArrayIterator_Next   (AwaIntegerArrayIterator *    iterator);
 bool AwaFloatArrayIterator_Next     (AwaFloatArrayIterator *      iterator);
 bool AwaBooleanArrayIterator_Next   (AwaBooleanArrayIterator *    iterator);
@@ -287,7 +287,7 @@ bool AwaObjectLinkArrayIterator_Next(AwaObjectLinkArrayIterator * iterator);
  * @return 0 if the input Array Iterator is invalid.
  * @{
  */
-AwaArrayIndex AwaStringArrayIterator_GetIndex    (const AwaStringArrayIterator *     iterator);
+AwaArrayIndex AwaCStringArrayIterator_GetIndex   (const AwaCStringArrayIterator *     iterator);
 AwaArrayIndex AwaIntegerArrayIterator_GetIndex   (const AwaIntegerArrayIterator *    iterator);
 AwaArrayIndex AwaFloatArrayIterator_GetIndex     (const AwaFloatArrayIterator *      iterator);
 AwaArrayIndex AwaBooleanArrayIterator_GetIndex   (const AwaBooleanArrayIterator *    iterator);
@@ -306,14 +306,14 @@ AwaArrayIndex AwaObjectLinkArrayIterator_GetIndex(const AwaObjectLinkArrayIterat
  * @{
  */
 // RESERVED for UTF8 support:
-//AwaString   AwaStringArrayIterator_GetValue         (const AwaStringArrayIterator * iterator);
-const char *      AwaStringArrayIterator_GetValueAsCString(const AwaStringArrayIterator * iterator);
-AwaInteger    AwaIntegerArrayIterator_GetValue        (const AwaIntegerArrayIterator * iterator);
-AwaFloat      AwaFloatArrayIterator_GetValue          (const AwaFloatArrayIterator * iterator);
-AwaBoolean    AwaBooleanArrayIterator_GetValue        (const AwaBooleanArrayIterator * iterator);
-AwaOpaque     AwaOpaqueArrayIterator_GetValue         (const AwaOpaqueArrayIterator * iterator);
-AwaTime       AwaTimeArrayIterator_GetValue           (const AwaTimeArrayIterator * iterator);
-AwaObjectLink AwaObjectLinkArrayIterator_GetValue     (const AwaObjectLinkArrayIterator * iterator);
+//AwaString   AwaStringArrayIterator_GetValue          (const AwaStringArrayIterator * iterator);
+const char *  AwaCStringArrayIterator_GetValueAsCString(const AwaCStringArrayIterator * iterator);
+AwaInteger    AwaIntegerArrayIterator_GetValue         (const AwaIntegerArrayIterator * iterator);
+AwaFloat      AwaFloatArrayIterator_GetValue           (const AwaFloatArrayIterator * iterator);
+AwaBoolean    AwaBooleanArrayIterator_GetValue         (const AwaBooleanArrayIterator * iterator);
+AwaOpaque     AwaOpaqueArrayIterator_GetValue          (const AwaOpaqueArrayIterator * iterator);
+AwaTime       AwaTimeArrayIterator_GetValue            (const AwaTimeArrayIterator * iterator);
+AwaObjectLink AwaObjectLinkArrayIterator_GetValue      (const AwaObjectLinkArrayIterator * iterator);
 /** @} */
 
 /**
@@ -324,7 +324,7 @@ AwaObjectLink AwaObjectLinkArrayIterator_GetValue     (const AwaObjectLinkArrayI
  * @param[in,out] Array Iterator A pointer to a Array Iterator pointer of the specified type that will be set to NULL.
  * @{
  */
-void AwaStringArrayIterator_Free    (AwaStringArrayIterator ** iterator);
+void AwaCStringArrayIterator_Free   (AwaCStringArrayIterator ** iterator);
 void AwaIntegerArrayIterator_Free   (AwaIntegerArrayIterator ** iterator);
 void AwaFloatArrayIterator_Free     (AwaFloatArrayIterator ** iterator);
 void AwaBooleanArrayIterator_Free   (AwaBooleanArrayIterator ** iterator);
