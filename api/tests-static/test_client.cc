@@ -473,8 +473,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
 
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite, handler));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_TRUE(NULL != operation);
@@ -565,8 +565,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for
     callback1 cbHandler(client_, 20);
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -608,17 +608,17 @@ void * do_delete_operation(void * attr)
 TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Invalid)
 {
     AWA_OPAQUE(o, 10);
-    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_RegisterObject(NULL, "TestObject", 7997, 0, 1));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterObject(client_, NULL, 7997, 0, 1));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterObject(client_, "TestObject", 7997, 2, 1));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObject(client_, "TestObject", 7997, 0, 1)); // valid
+    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_DefineObject(NULL, "TestObject", 7997, 0, 1));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineObject(client_, NULL, 7997, 0, 1));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 2, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 0, 1)); // valid
 
-    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_RegisterResourceWithPointer(NULL,  "TestResource", 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, sizeof(o), 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, 0, 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 7997, 1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite, NULL, 0, 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 300,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, sizeof(o), 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 7997,  1, AwaResourceType_Opaque, 2, 1, AwaResourceOperations_ReadWrite, &o, sizeof(o), 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_RegisterResourceWithPointer(client_, NULL, 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite, &o, sizeof(o), 0));
+    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_DefineResourceWithPointer(NULL,  "TestResource", 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, sizeof(o), 0));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, 0, 0));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7997, 1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite, NULL, 0, 0));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 300,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,  &o, sizeof(o), 0));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7997,  1, AwaResourceType_Opaque, 2, 1, AwaResourceOperations_ReadWrite, &o, sizeof(o), 0));
+    EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, NULL, 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite, &o, sizeof(o), 0));
 }
 
 TEST_F(TestStaticClientWithServer, AwaStaticClient_CreateObjectInstance_Resource_Invalid)
@@ -627,8 +627,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_CreateObjectInstance_Resource
 
     EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_CreateObjectInstance(NULL, 9999, 0));
 
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObject(client_, "TestObject", 205, 0, 1));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Resource", 205,  1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, &i, sizeof(i), 0));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 205, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Resource", 205,  1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, &i, sizeof(i), 0));
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 205, 0));
     EXPECT_EQ(AwaError_CannotCreate, AwaStaticClient_CreateObjectInstance(client_, 205, 0));
@@ -645,8 +645,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_
 {
     AwaInteger i = 10;
 
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client_, "TestObject", 7999, 0, 1));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 7999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite,
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", 7999, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7999, 1, AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite,
                                                                             &i, sizeof(i), 0));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -683,8 +683,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_
 {
     // Static client definition
     AWA_OPAQUE(opaque, 16) = {0};
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client_, "TestObject", 7998, 0, 1));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "TestResource", 7998, 1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", 7998, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7998, 1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite,
                                                                             &opaque, sizeof(opaque), 0));
     // Server definition
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -803,8 +803,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_f
 
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 9999, 0, 1));
 
@@ -894,8 +894,8 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_
 
     callback1 cbHandler(client_, 20);
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_None, 1, 1, AwaResourceOperations_Execute, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObjectWithHandler(client_, "TestObject", 9999, 0, 1, handler));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "TestResource", 9999, 1, AwaResourceType_None, 1, 1, AwaResourceOperations_Execute, handler));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 9999, 0));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -1165,18 +1165,18 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
     AwaServerObserveOperation * observeOperation = AwaServerObserveOperation_New(session_);
 
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, &cbHandler_));
-    EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObject(client_, "TestObject", observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1));
-    //EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test String Resource",  observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, observeDetail::TEST_RESOURCE_STRING, AwaResourceType_String, 1, 1, AwaResourceOperations_ReadOnly, data.value, data.valueSize, 0u));
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1));
+    //EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test String Resource",  observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, observeDetail::TEST_RESOURCE_STRING, AwaResourceType_String, 1, 1, AwaResourceOperations_ReadOnly, data.value, data.valueSize, 0u));
 
     switch(data.Type)
     {
         case AwaResourceType_Opaque:
         {
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, &opaque_, sizeof(opaque_), 0));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, &opaque_, sizeof(opaque_), 0));
             break;
         }
         default:
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, data.Value, data.ValueSize, 0));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadOnly, data.Value, data.ValueSize, 0));
             break;
     }
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
@@ -1435,14 +1435,14 @@ protected:
         cbHandler = new callback1(client_, 20, data);
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, cbHandler));
-        EXPECT_EQ(AwaError_Success,AwaStaticClient_RegisterObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test String Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING,     AwaResourceType_String,     0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Integer Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_INTEGER,    AwaResourceType_Integer,    0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Float Resource",       writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_FLOAT,      AwaResourceType_Float,      0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Boolean Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_BOOLEAN,    AwaResourceType_Boolean,    0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Opaque Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OPAQUE,     AwaResourceType_Opaque,     0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Time Resource",        writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_TIME,       AwaResourceType_Time,       0, 1, AwaResourceOperations_ReadWrite, handler));
-        EXPECT_EQ(AwaError_Success, AwaStaticClient_RegisterResourceWithHandler(client_, "Test Object Link Resource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OBJECTLINK, AwaResourceType_ObjectLink, 0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test String Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING,     AwaResourceType_String,     0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Integer Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_INTEGER,    AwaResourceType_Integer,    0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Float Resource",       writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_FLOAT,      AwaResourceType_Float,      0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Boolean Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_BOOLEAN,    AwaResourceType_Boolean,    0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Opaque Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OPAQUE,     AwaResourceType_Opaque,     0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Time Resource",        writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_TIME,       AwaResourceType_Time,       0, 1, AwaResourceOperations_ReadWrite, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Object Link Resource", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_OBJECTLINK, AwaResourceType_ObjectLink, 0, 1, AwaResourceOperations_ReadWrite, handler));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
 
         AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);

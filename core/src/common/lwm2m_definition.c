@@ -132,20 +132,20 @@ int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * o
     {
         if (objFormat->MaximumInstances != ExistingObjFormat->MaximumInstances)
         {
-            AwaResult_SetResult(AwaResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (strlen(ExistingObjFormat->ObjectName) != strlen(objFormat->ObjectName) ||
                  memcmp(ExistingObjFormat->ObjectName, objFormat->ObjectName, strlen(ExistingObjFormat->ObjectName)))
         {
-            AwaResult_SetResult(AwaResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (objFormat->MinimumInstances != ExistingObjFormat->MinimumInstances)
         {
-            AwaResult_SetResult(AwaResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else
         {
-            AwaResult_SetResult(AwaResult_AlreadyRegistered);
+            AwaResult_SetResult(AwaResult_AlreadyDefined);
         }
     }
     else
@@ -395,7 +395,7 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
 
     if (Definition_LookupResourceDefinition(registry, objectID, resourceID))
     {
-        AwaResult_SetResult(AwaResult_AlreadyRegistered);
+        AwaResult_SetResult(AwaResult_AlreadyDefined);
         goto error;
     }
 
