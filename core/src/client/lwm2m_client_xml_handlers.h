@@ -46,7 +46,7 @@ typedef struct
 
 
 int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                 uint8_t * inValueBuffer, int inValueBufferLen);
+                                 uint8_t * inValueBuffer, size_t inValueBufferLen);
 
 int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 

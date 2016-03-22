@@ -72,10 +72,10 @@ typedef struct
 
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen);
 
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
@@ -244,7 +244,7 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 }
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     LWM2MSecurityInfo * security = GetSecurityInfo(context, objectInstanceID);
 
@@ -336,7 +336,7 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 }
 
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
     int result = -1;
     LWM2MSecurityInfo * security =  GetSecurityInfo(context, objectInstanceID);

@@ -48,7 +48,7 @@ static int Lwm2mConnectivityStatistics_CreateOptionalResourceHandler(void * cont
     return 0;
 }
 
-static int connectivityStatisticsStartOrReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int connectivityStatisticsStartOrReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Reset/Start Connectivity Statistics");
 

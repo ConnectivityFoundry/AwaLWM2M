@@ -105,7 +105,7 @@ ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, ui
      }
      else
      {
-         AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+         AwaResult_SetResult(AwaResult_OutOfMemory);
      }
 
      return objFormat;
@@ -132,26 +132,26 @@ int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * o
     {
         if (objFormat->MaximumInstances != ExistingObjFormat->MaximumInstances)
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (strlen(ExistingObjFormat->ObjectName) != strlen(objFormat->ObjectName) ||
                  memcmp(ExistingObjFormat->ObjectName, objFormat->ObjectName, strlen(ExistingObjFormat->ObjectName)))
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (objFormat->MinimumInstances != ExistingObjFormat->MinimumInstances)
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_AlreadyRegistered);
+            AwaResult_SetResult(AwaResult_AlreadyDefined);
         }
     }
     else
     {
         ListAdd(&objFormat->list, &registry->ObjectDefinition);
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         result = 0;
     }
 
@@ -271,11 +271,11 @@ done:
 AwaResourceType Definition_GetResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
 {
     AwaResourceType resourceType = AwaResourceType_Invalid;
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
     ResourceDefinition * resFormat = Definition_LookupResourceDefinition(registry, objectID, resourceID);
     if (resFormat != NULL)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         resourceType = resFormat->Type;
     }
     return resourceType;
@@ -296,14 +296,14 @@ int Definition_IsResourceTypeWritable(const DefinitionRegistry * registry, Objec
 int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
 {
     int isMultipleInstance = -1;
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
 
     if (resourceID == -1)
     {
         ObjectDefinition * objFormat = Definition_LookupObjectDefinition(registry, objectID);
         if (objFormat != NULL)
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+            AwaResult_SetResult(AwaResult_Success);
             isMultipleInstance = IS_MULTIPLE_INSTANCE(objFormat);
         }
     }
@@ -312,7 +312,7 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
         ResourceDefinition * resFormat = Definition_LookupResourceDefinition(registry, objectID, resourceID);
         if (resFormat != NULL)
         {
-            AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+            AwaResult_SetResult(AwaResult_Success);
             isMultipleInstance = IS_MULTIPLE_INSTANCE(resFormat);
         }
     }
@@ -377,25 +377,25 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
     if ((resourceID < 0) || (resourceID > LWM2M_LIMITS_MAX_RESOURCE_ID))
     {
         Lwm2m_Error("resource ID out of range\n");
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Operations_IsResourceTypeExecutable(operations) && resourceType != AwaResourceType_None)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Operations_IsResourceTypeExecutable(operations) && maximumInstances > 1)
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Definition_LookupResourceDefinition(registry, objectID, resourceID))
     {
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_AlreadyRegistered);
+        AwaResult_SetResult(AwaResult_AlreadyDefined);
         goto error;
     }
 
@@ -403,19 +403,19 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
     if (!(objFormat = Definition_LookupObjectDefinition(registry, objectID)))
     {
         Lwm2m_Error("Failed to look up object format\n");
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_NotFound);
+        AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
 
     if (Definition_NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode) == NULL)
     {
         Lwm2m_Error("Unable to allocate memory\n");
-        AwaLwm2mResult_SetResult(AwaLwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         goto error;
     }
 
     result = 0;
-    AwaLwm2mResult_SetResult(AwaLwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
 
 error:
     return result;

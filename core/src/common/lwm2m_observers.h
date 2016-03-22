@@ -50,7 +50,7 @@ typedef struct
     int TokenLength;                       // Length of CoAP message token
     int Sequence;
     void * OldValue;                       // For Integer and Float datatypes only, used for notification attributes.
-    int OldValueLength;
+    size_t OldValueLength;
 } Lwm2mObserverType;
 
 // Send out pending notifications to any observers of objects, object instances and resources.
@@ -59,7 +59,7 @@ void Lwm2m_UpdateObservers(void * ctxt);
 void Lwm2m_FreeObservers(void * ctxt);
 
 // Set the changed bit for each observer in the observerList that matches the specified object / instance / resource
-void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const void * newValue, int newValueLength);
+void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const void * newValue, size_t newValueLength);
 
 int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                   ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);

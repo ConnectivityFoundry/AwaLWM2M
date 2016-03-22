@@ -38,7 +38,7 @@
 #define FIRMWARE_PKG_VERSION             "1.2"
 
 
-static int executeUpdate(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int executeUpdate(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Firmware Update resource executed\n");
 #ifndef CONTIKI

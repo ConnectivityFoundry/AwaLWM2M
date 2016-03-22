@@ -30,7 +30,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
     Lwm2mCore_SetResourceInstanceValue(context, 0, 0, 0, 0, static_cast<const char*>(expected), strlen(expected));
 
     const char * buffer;
-    int bufferSize = 0;
+    size_t bufferSize = 0;
     int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, 0, 0, (const void **)&buffer, &bufferSize);
 
     EXPECT_EQ(static_cast<size_t>(len), strlen(buffer) + 1);
@@ -100,7 +100,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResources)
     for(auto it = expected.begin(); it < expected.end(); ++it, ++i)
     {
         const char * buffer = NULL;
-        int len = 0;
+        size_t len = 0;
         Lwm2mCore_GetResourceInstanceValue(context, 0, 0, i, 0, (const void **)&buffer, &len);
         ASSERT_TRUE(buffer != NULL);
         std::string actual(buffer);
@@ -153,7 +153,7 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadMultipleResourcesWithSpar
     for(auto it = expected.begin(); it < expected.end(); ++it, ++i)
     {
         const char * buffer = NULL;
-        int len = 0;
+        size_t len = 0;
         Lwm2mCore_GetResourceInstanceValue(context, 0, 0, it->id, 0, (const void **)&buffer, &len);
         ASSERT_TRUE(buffer != NULL);
 

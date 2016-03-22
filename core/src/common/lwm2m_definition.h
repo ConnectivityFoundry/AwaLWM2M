@@ -43,18 +43,18 @@ extern "C" {
 
 // handler to call to retrieve a value from a resource instance
 typedef int (*ReadHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
+                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen);
 
 typedef int (*GetLengthHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                 ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 // handler to call to write a value to a resource instance
 typedef int (*WriteHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
 // handler to call to execute a resource
 typedef int (*ExecuteHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                              uint8_t * srcBuffer, int srcBufferLen);
+                              uint8_t * srcBuffer, size_t srcBufferLen);
 
 // handler to call to delete an object, or object instance and all associated resources
 typedef int (*DeleteHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
@@ -65,7 +65,7 @@ typedef int (*CreateInstanceHandler)(void * context, ObjectIDType objectID, Obje
 // handler to call to create an optional resource
 typedef int (*CreateOptionalResourceHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-typedef AwaLwm2mResult (*LWM2MHandler)(void * context, AwaOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, int * dataSize, bool * changed);
+typedef AwaResult (*LWM2MHandler)(void * context, AwaOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed);
 
 typedef struct
 {

@@ -60,7 +60,7 @@ static int DEVICE_MEMORY_TOTAL    =  42;
 
 
 // This function is called when an Execute is performed on the Reboot resource /3/X/4
-static int executeReboot(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int executeReboot(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Reboot resource executed\n");
 #ifndef CONTIKI
@@ -76,7 +76,7 @@ static int createRebootResource(void * context, ObjectIDType objectID, ObjectIns
     return 0;
 }
 
-static int executeFactoryReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int executeFactoryReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Factory Reset resource executed\n");
 #ifndef CONTIKI

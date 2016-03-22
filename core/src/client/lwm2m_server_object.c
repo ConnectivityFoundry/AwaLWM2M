@@ -26,10 +26,10 @@
 #include "lwm2m_objects.h"
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen);
 
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
 static int Lwm2mServer_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
@@ -142,7 +142,7 @@ static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID
 }
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     Lwm2mServerType * server = GetServerObjectByObjectInstanceID(context, objectInstanceID);
     if (server != NULL)
@@ -205,7 +205,7 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 }
 
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
     int result = -1;
 
@@ -292,7 +292,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
     return result;
 }
 
-static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Registration Update triggered for server %d\n", objectInstanceID);
     Lwm2mCore_SetServerUpdateRegistration(context, objectInstanceID);
@@ -301,7 +301,7 @@ static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectI
 
 void Lwm2m_RegisterServerObject(Lwm2mContextType * context)
 {
-    ResourceOperationHandlers registrationUpdateTriggerOperationHandler = {.Execute = executeRegistrationUpdateTrigger, .CreateOptionalResource = Lwm2mServer_CreateOptionalResourceHandler};
+    ResourceOperationHandlers registrationUpdateTriggerOperationHandler = { .Execute = executeRegistrationUpdateTrigger, .CreateOptionalResource = Lwm2mServer_CreateOptionalResourceHandler };
 
     Lwm2mCore_RegisterObjectType(context, "LWM2MServer" , LWM2M_SERVER_OBJECT, MultipleInstancesEnum_Multiple, MandatoryEnum_Mandatory, &serverObjectOperationHandlers);
 

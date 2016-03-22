@@ -26,36 +26,36 @@
 #include <awa/error.h>
 #include <awa/common.h>
 
-static AwaLwm2mResult lastResult = AwaLwm2mResult_Success;
+static AwaResult lastResult = AwaResult_Success;
 
-AwaLwm2mResult AwaLwm2mResult_GetLastResult(void)
+AwaResult AwaResult_GetLastResult(void)
 {
     return lastResult;
 }
 
-void AwaLwm2mResult_SetResult(AwaLwm2mResult result)
+void AwaResult_SetResult(AwaResult result)
 {
     lastResult = result;
 }
 
-bool AwaLwm2mResult_IsSuccess(AwaLwm2mResult result)
+bool AwaResult_IsSuccess(AwaResult result)
 {
     return result >= 200 && result < 300;
 }
 
-int AwaLwm2mResult_ToAwaError(AwaLwm2mResult result, int defaultError)
+int AwaResult_ToAwaError(AwaResult result, int defaultError)
 {
     switch (result)
     {
-    case AwaLwm2mResult_Success: 
-    case AwaLwm2mResult_SuccessChanged:
-    case AwaLwm2mResult_SuccessContent: 
-    case AwaLwm2mResult_SuccessCreated:
-    case AwaLwm2mResult_SuccessDeleted:
+    case AwaResult_Success: 
+    case AwaResult_SuccessChanged:
+    case AwaResult_SuccessContent: 
+    case AwaResult_SuccessCreated:
+    case AwaResult_SuccessDeleted:
         return AwaError_Success;
-    case AwaLwm2mResult_NotFound:
+    case AwaResult_NotFound:
         return AwaError_PathNotFound;
-    case AwaLwm2mResult_MethodNotAllowed:
+    case AwaResult_MethodNotAllowed:
         return AwaError_PathInvalid;
     default:
         return defaultError;

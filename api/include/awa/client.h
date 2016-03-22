@@ -39,9 +39,12 @@
 #ifndef AWA_CLIENT_H
 #define AWA_CLIENT_H
 
+// @cond
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+// @endcond
+
 #include "common.h"
 
 #ifdef __cplusplus
