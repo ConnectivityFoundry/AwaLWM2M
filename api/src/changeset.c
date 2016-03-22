@@ -284,7 +284,7 @@ TreeNode ChangeSet_GetObjectsTree(const AwaChangeSet * changeSet)
 
 AwaError AwaChangeSet_GetValueAsCStringPointer(const AwaChangeSet * changeSet, const char * path, const char ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_String, -1);
+    return ResponseCommon_GetValuePointerWithNull(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_String, -1);
 }
 
 AwaError AwaChangeSet_GetValueAsIntegerPointer(const AwaChangeSet * changeSet, const char * path, const AwaInteger ** value)

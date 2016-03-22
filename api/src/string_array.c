@@ -26,31 +26,95 @@
 #include "arrays.h"
 
 typedef struct _AwaArray _AwaStringArray;
-typedef struct _AwaArrayIterator _AwaStringArrayIterator;
+typedef struct _AwaArrayIterator _AwaCStringArrayIterator;
 
 AwaStringArray * AwaStringArray_New(void)
 {
-    return (AwaStringArray *)AwaArray_New();
+    AwaStringArray * result = NULL;
+    AwaArray * NulledStrings = AwaArray_New();
+
+    if (NulledStrings != NULL)
+    {
+        result = (AwaStringArray *)AwaArray_New();
+        AwaArray_SetContext((AwaArray *)result, NulledStrings);
+    }
+
+    return result;
 }
 
 void AwaStringArray_Free(AwaStringArray ** array)
 {
-    AwaArray_Free((AwaArray **)array, AwaResourceType_StringArray);
+    if ((array != NULL) && (*array != NULL))
+    {
+        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)*array);
+        if (NulledStrings != NULL)
+        {
+            AwaArray_Free(&NulledStrings, AwaResourceType_StringArray);
+        }
+        AwaArray_Free((AwaArray **)array, AwaResourceType_StringArray);
+    }
 }
 
 void AwaStringArray_SetValueAsCString(AwaStringArray * array, AwaArrayIndex index, const char * value)
 {
-    Array_SetValue((AwaArray *)array, index, (void *)value, strlen(value) + 1);
+    if (array != NULL)
+    {
+        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (NulledStrings != NULL)
+        {
+            Array_SetValue((AwaArray *)NulledStrings, index, (void *)value, strlen(value) + 1);
+        }
+        Array_SetValue((AwaArray *)array, index, (void *)value, strlen(value));
+    }
 }
 
 void AwaStringArray_DeleteValue(AwaStringArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_StringArray);
+    if (array != NULL)
+    {
+        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (NulledStrings != NULL)
+        {
+            Array_DeleteItem((AwaArray *)NulledStrings, index, AwaResourceType_StringArray);
+        }
+        Array_DeleteItem((AwaArray *)array, index, AwaResourceType_StringArray);
+    }
 }
 
 const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaArrayIndex index)
 {
-    return Array_GetValue((const AwaArray *)array, index);
+    char * value = NULL;
+
+    if (array != NULL)
+    {
+        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (NulledStrings != NULL)
+        {
+            value = Array_GetValue((const AwaArray *)NulledStrings, index);
+
+            if (value == NULL)
+            {
+                const char * nonNulledValue = Array_GetValue((AwaArray *)array, index);
+                int nonNulledLength = Array_GetValueLength((AwaArray *)array, index);
+                char *  nulledValue = (char *)malloc(nonNulledLength + 1);
+
+                if ((nonNulledValue != NULL) && (nulledValue != NULL))
+                {
+                    memcpy(nulledValue, nonNulledValue, nonNulledLength);
+                    nulledValue[nonNulledLength] = '\0';
+                    Array_SetValue(NulledStrings, index, nulledValue, nonNulledLength + 1);
+                    free(nulledValue);
+                    value = Array_GetValue((const AwaArray *)NulledStrings, index);
+                }
+                else
+                {
+                    free(nulledValue);
+                }
+            }
+        }
+    }
+
+    return value;
 }
 
 size_t AwaStringArray_GetValueCount(const AwaStringArray * array)
@@ -58,9 +122,18 @@ size_t AwaStringArray_GetValueCount(const AwaStringArray * array)
     return Array_GetValueCount((const AwaArray *)array);
 }
 
-AwaStringArrayIterator * AwaStringArray_NewStringArrayIterator(const AwaStringArray * array)
+AwaCStringArrayIterator * AwaStringArray_NewCStringArrayIterator(const AwaStringArray * array)
 {
-    return (AwaStringArrayIterator *)ArrayIterator_New((const AwaArray *)array);
+    AwaCStringArrayIterator * iterator = NULL;
+    if (array != NULL)
+    {
+        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (NulledStrings != NULL)
+        {
+            iterator = (AwaCStringArrayIterator *)ArrayIterator_New((const AwaArray *)NulledStrings);
+        }
+    }
+    return iterator;
 }
 
 bool AwaStringArray_IsValid(const AwaStringArray * array, AwaArrayIndex index)
@@ -68,22 +141,22 @@ bool AwaStringArray_IsValid(const AwaStringArray * array, AwaArrayIndex index)
     return (Array_GetArrayItem((const AwaArray *)array, index) == NULL) ? false : true;
 }
 
-void AwaStringArrayIterator_Free(AwaStringArrayIterator ** iterator)
+void AwaCStringArrayIterator_Free(AwaCStringArrayIterator ** iterator)
 {
     ArrayIterator_Free((AwaArrayIterator **)iterator);
 }
 
-AwaArrayIndex AwaStringArrayIterator_GetIndex(const AwaStringArrayIterator * iterator)
+AwaArrayIndex AwaCStringArrayIterator_GetIndex(const AwaCStringArrayIterator * iterator)
 {
     return ArrayIterator_GetIndex((const AwaArrayIterator *)iterator);
 }
 
-bool AwaStringArrayIterator_Next(AwaStringArrayIterator * iterator)
+bool AwaCStringArrayIterator_Next(AwaCStringArrayIterator * iterator)
 {
     return ArrayIterator_Next((AwaArrayIterator *)iterator);
 }
 
-const char * AwaStringArrayIterator_GetValueAsCString(const AwaStringArrayIterator * iterator)
+const char * AwaCStringArrayIterator_GetValueAsCString(const AwaCStringArrayIterator * iterator)
 {
     return ArrayIterator_GetValue((AwaArrayIterator *)iterator);
 }

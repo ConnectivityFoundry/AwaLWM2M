@@ -274,7 +274,7 @@ bool AwaServerReadResponse_HasValue(const AwaServerReadResponse * response, cons
 AwaError AwaServerReadResponse_GetValueAsCStringPointer(const AwaServerReadResponse * response, const char * path, const char ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_String, -1);
+    return ResponseCommon_GetValuePointerWithNull((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_String, -1);
 }
 
 AwaError AwaServerReadResponse_GetValueAsIntegerPointer(const AwaServerReadResponse * response, const char * path, const AwaInteger ** value)
