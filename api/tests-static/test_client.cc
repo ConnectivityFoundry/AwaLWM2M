@@ -102,7 +102,7 @@ public:
     bool complete;
     virtual bool Check()
     {
-        printf("Check...\n");
+        std::cout << "Check..." << std::endl;
         AwaStaticClient_Process(StaticClient);
         return complete;
     }
@@ -117,7 +117,7 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
     AwaStaticClient * client = (AwaStaticClient *)context;
     AwaResult result = AwaResult_InternalError;
 
-    std::cerr << "Handler for " << std::to_string(operation) << std::endl;
+    std::cout << "Handler for " << operation << std::endl;
 
     void * callback = AwaStaticClient_GetApplicationContext(client);
 
@@ -127,7 +127,7 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
         result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
     }
 
-    std::cerr << "Handler result " << std::to_string(result) << std::endl;
+    std::cout << "Handler result " << result << std::endl;
 
     return result;
 }

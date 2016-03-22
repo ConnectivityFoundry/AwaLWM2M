@@ -45,13 +45,13 @@ typedef struct
 
 static void DestroyObjectList(struct ListHead * objectList);
 
-static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                                 int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                                 ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
-static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                           int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                           ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static void Lwm2m_SplitUpQuery(const char * query, RegistrationQueryString * result)
 {
@@ -334,7 +334,7 @@ static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPoin
             ListAdd(&client->list, Lwm2mCore_GetClientList(context));
 
             sprintf(RegisterLocation, "/rd/%d", client->Location);
-            Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, Lwm2mCore_UpdateEndpointHandler);
+            Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, UpdateEndpointHandler);
 
             result = Lwm2m_UpdateClient(context, client->Location, lifeTime, bindingMode, addr, contentType, objectList, objectListLength);
         }
@@ -369,8 +369,8 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
                               const char * query, ContentType contentType, 
-                              const char * requestContent, int requestContentLen,
-                              char * responseContent, int * responseContentLen,
+                              const char * requestContent, size_t requestContentLen,
+                              char * responseContent, size_t * responseContentLen,
                               int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
@@ -432,11 +432,11 @@ done:
 }
 
 // handler called when a client puts to /rd/<location>
-static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
-        const char * query, ContentType contentType,
-        const char * requestContent, int requestContentLen,
-        char * responseContent, int * responseContentLen,
-        int * responseCode)
+static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
+                       const char * query, ContentType contentType,
+                       const char * requestContent, size_t requestContentLen,
+                       char * responseContent, size_t * responseContentLen,
+                       int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     RegistrationQueryString q;
@@ -470,8 +470,8 @@ done:
 }
 
 // handler called when a client sends a deregister by sending a DELETE to /rd/X
-static int Lwm2m_RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                          const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
 
@@ -506,21 +506,21 @@ done:
  * i.e when a Registration message is handled, a new endpoint is created for the client /rd/<location>. these
  * end points are handled here.
  */
-static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                           int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                           ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
    switch(type)
    {
        // The old standard used to use PUT for update requests, so we must continue to support this
        case COAP_PUT_REQUEST:
-           return Lwm2m_RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        case COAP_POST_REQUEST:
-           return Lwm2m_RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        case COAP_DELETE_REQUEST:
-           return Lwm2m_RegisterDelete(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterDelete(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        default:
            break;
@@ -533,9 +533,9 @@ static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * 
 }
 
 // This function is called when a CoAP request is made to /rd
-static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                                 int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                                 ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -576,7 +576,7 @@ int Lwm2m_RegistrationInit(Lwm2mContextType * context)
     ListInit(Lwm2mCore_GetClientList(context));
     Lwm2mCore_SetLastLocation(context, 0);
 
-    Lwm2mCore_AddResourceEndPoint(context, "/rd", Lwm2mCore_RegistrationEndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/rd", RegistrationEndpointHandler);
 
     return 0;
 }

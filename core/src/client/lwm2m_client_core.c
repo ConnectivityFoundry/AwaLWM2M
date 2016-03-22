@@ -67,40 +67,40 @@ struct _Lwm2mContextType
 
 static Lwm2mContextType Lwm2mContext;
 
-static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                            ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
-                                            const void ** buffer, int * bufferLen);
+static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
+                                  ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
+                                  const void ** buffer, size_t * bufferLen);
 
-static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                             ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
-                                             uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
+                                   ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
+                                   uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
-static int Lwm2mCore_ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
-static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
-static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
+static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-static int Lwm2mCore_DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
-                                                    const char * path, const char * query, const char * token, int tokenLength,
-                                                    ContentType contentType, const char * requestContent, int requestContentLen,
-                                                    ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
+                                          const char * path, const char * query, const char * token, int tokenLength,
+                                          ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                          ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 ObjectOperationHandlers defaultObjectOperationHandlers =
 {
-    .CreateInstance = Lwm2mCore_ObjectStoreCreateInstanceHandler,
-    .Delete = Lwm2mCore_ObjectStoreDeleteHandler,
+    .CreateInstance = ObjectStoreCreateInstanceHandler,
+    .Delete = ObjectStoreDeleteHandler,
 };
 
 ResourceOperationHandlers defaultResourceOperationHandlers =
 {
-    .Read = Lwm2mCore_ObjectStoreReadHandler,    //default handler, read from object store
-    .Write = Lwm2mCore_ObjectStoreWriteHandler,  //default handler, write to object store.
+    .Read = ObjectStoreReadHandler,    //default handler, read from object store
+    .Write = ObjectStoreWriteHandler,  //default handler, write to object store.
     .Execute = NULL,
-    .CreateOptionalResource = Lwm2mCore_ObjectStoreCreateOptionalResourceHandler,
+    .CreateOptionalResource = ObjectStoreCreateOptionalResourceHandler,
 };
 
 
 // Serialise the Object referenced by OIR into the provided buffer. Return number of bytes serialised, negative on failure
-static int Lwm2mCore_SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int oir[], int oirLength, ContentType * responseContentType, char * buffer, int size)
+static int SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int oir[], int oirLength, ContentType * responseContentType, char * buffer, size_t size)
 {
     int len = -1;
 
@@ -135,7 +135,7 @@ static int Lwm2mCore_SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptConten
 }
 
 // Deserialise the encoded buffer provided into the Object references by OIR. Return number of bytes deserialised, negative on failure
-static int Lwm2mCore_DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, int len)
+static int DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, size_t len)
 {
     /* If the content type is not specified in the payload of a response message,
      * the default content type (text/plain) is assumed; otherwise the content type
@@ -170,7 +170,7 @@ void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
     char path[LWM2M_MAX_OIR_PATH_LEN];
     sprintf(path, "/%d", objectID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObject(&context->ObjectTree, objectID);
     Lwm2m_MarkObserversChanged(context, objectID, -1, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -182,7 +182,7 @@ static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectID
     char path[32];
     sprintf(path, "/%d/%d", objectID, objectInstanceID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList,path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList,path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObjectInstance(&context->ObjectTree, objectID, objectInstanceID);
     Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -214,11 +214,11 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
 {
     char path[32];
     const void * newValue = NULL;
-    int newValueLength = 0;
+    size_t newValueLength = 0;
 
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
 
     if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != AwaResourceType_None)
@@ -231,8 +231,8 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
 // This function is called when a read is performed for a resource that uses the "default" read handler. It is responsible
 // for looking up the resource specified and copying it's contents into the buffer specified by "destBuffer".
 // Return -1 on error, or the size of the data written to destBuffer.
-static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
+                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
 }
@@ -240,8 +240,8 @@ static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectI
 // This function is called when a write is performed for a resource that uses the "default" write handler. It is responsible
 // for looking up the resource specified and populating it from the contents in srcBuffer.
 // Return -1 on error, or the size of the data written to destBuffer.
-static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
+                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
     int nullTerminator = 0;
 
@@ -256,14 +256,14 @@ static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType object
 
 // This function is called when a delete is performed for an object/object instance that uses the "default" handler.
 // Return -1 on error, or 0 on success.
-static int Lwm2mCore_ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     return ObjectStore_Delete(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID);
 }
 
 // This function is called when a create instance is performed for an object that uses the "default" handler.
 // Return -1 on error, or the ID of the created object instance on success.
-static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
+static int ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
     DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
     ObjectStore * store = ((Lwm2mContextType *)context)->Store;
@@ -349,7 +349,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
 
 // This function is called when a create optional resource is performed for a resource that uses the "default" handler.
 // Return 0 if resource created successfully, otherwise -1 on error.
-static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     int result = -1;
     if (context != NULL)
@@ -1010,7 +1010,7 @@ int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, Obje
 
 // Set the value of a resource instance. Return -1 on error, 0 or greater on success.
 int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                       ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
+                                       ResourceInstanceIDType resourceInstanceID, const void * value, size_t valueSize)
 {
     int result = -1;
     bool changed = false;
@@ -1063,7 +1063,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
 }
 
 // Execute a resource and pass in the provided value. Return -1 on error, 0 or greater on success.
-int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
+static int ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, size_t valueSize)
 {
     int result = -1;
 
@@ -1142,7 +1142,7 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
     return Lwm2mObjectTree_GetNextResourceInstanceID(&context->ObjectTree, &iterator);
 }
 
-int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** value, int * valueBufferSize)
+int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** value, size_t * valueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
     if (definition == NULL)
@@ -1249,8 +1249,8 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 }
 
 // Handler LwM2M Notifications and send them as CoAP messages. Return 0 on success, non-zero on error.
-static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength,
-                                    ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * ContextData)
+static int HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength,
+                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * ContextData)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     int oir[3];
@@ -1271,7 +1271,7 @@ static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequenc
     if (TreeBuilder_CreateTreeFromOIR(&dest, context, origin, oir, matches) == AwaResult_Success)
     {
         char payload[1024];
-        int payloadLen = Lwm2mCore_SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
+        int payloadLen = SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
         if (payloadLen >= 0)
         {
             Lwm2m_Debug("Send Notify to %s\n", path);
@@ -1283,9 +1283,9 @@ static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequenc
 }
 
 // Handle CoAP GET Requests with Observe, Maps to LWM2M Observe. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, char * token, int tokenLength,
-                                          ContentType contentType, const char * requestContent, int requestContentLen, ContentType * responseContentType,
-                                          char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, char * token, int tokenLength,
+                                ContentType contentType, const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+                                char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1307,12 +1307,12 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
     else if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]))
     {
         int len = 0;
-        if (Lwm2mCore_Observe(context, addr, token, tokenLength, oir[0], oir[1], oir[2], contentType, Lwm2m_HandleNotification, NULL) != -1)
+        if (Lwm2mCore_Observe(context, addr, token, tokenLength, oir[0], oir[1], oir[2], contentType, HandleNotification, NULL) != -1)
         {
             Lwm2mTreeNode * root;
             if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
             {
-                len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+                len = SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
             }
             Lwm2mTreeNode_DeleteRecursive(root);
         }
@@ -1329,9 +1329,9 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
 }
 
 // Handle CoAP GET Requests with Cancel Observe, Maps to LWM2M CancelObserve. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                                const char * requestContent, int requestContentLen, ContentType * responseContentType,
-                                                char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                      const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+                                      char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1350,7 +1350,7 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
         Lwm2mTreeNode * root;
         if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
         {
-            len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+            len = SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
         Lwm2mTreeNode_DeleteRecursive(root);
 
@@ -1374,9 +1374,9 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
 }
 
 // Handler CoAP GET Requests, maps onto LWM2M READ and DISCOVER operations. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const char * path, const char * query,
-                                      ContentType acceptContentType, const char * requestContent, int requestContentLen,
-                                      ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, const char * query,
+                            ContentType acceptContentType, const char * requestContent, size_t requestContentLen,
+                            ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int len = 0;
@@ -1398,7 +1398,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
         Lwm2mTreeNode * root;
         if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
         {
-            len = Lwm2mCore_SerialiseOIR(root, acceptContentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+            len = SerialiseOIR(root, acceptContentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
         else
         {
@@ -1417,8 +1417,8 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
 // Partial Update: adds or updates Resources or Resource Instances provided in the new value
 // and leaves other existing Resources or Resource Instances unchanged.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                       const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                             const char * requestContent, int requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int len = -1;
@@ -1445,7 +1445,7 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
     {
         // Handle EXECUTE
         Lwm2m_Debug("EXECUTE: %s\n", path);
-        len = Lwm2mCore_ResourceExecute(context, oir[0], oir[1], oir[2], 0, requestContent, requestContentLen);
+        len = ResourceExecute(context, oir[0], oir[1], oir[2], 0, requestContent, requestContentLen);
 
         *responseContentLen = 0;
         if (len >= 0)
@@ -1462,7 +1462,7 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
     {
         // Handle WRITE and CREATE
         Lwm2mTreeNode * root = NULL;
-        len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+        len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
 
         if (len >= 0)
         {
@@ -1547,8 +1547,8 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
 //   4.04 Not Found URI of “Write Attributes” operation is not found
 //   4.01 Unauthorized Access Right Permission Denied
 //   4.05 Method Not Allowed Target is not allowed for Write Attributes operation
-static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                                  const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                        const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int oir[3] = { -1, -1, -1 };
@@ -1717,8 +1717,8 @@ error:
 // Handle CoAP PUT Requests, maps onto LWM2M Replace WRITE and WRITE ATTRIBUTES operations.
 // LWM2M Spec 5.4.3: Replace: replaces the Object Instance or the Resource(s) with the new value provided in the “Write” operation.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                      const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                            const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1738,7 +1738,7 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
         int len;
 
         // Create new resource instance with the values provided.
-        len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+        len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
 
         if (len >= 0)
         {
@@ -1802,8 +1802,8 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
 // in using a TLV or JSON formatted payload, to populate a LWM2M Client in a single message containing serveral instances of the
 // same object.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                               const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                     const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1820,7 +1820,7 @@ static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, 
     Lwm2mTreeNode * root;
 
     // Create new resource instance with the values provided.
-    int len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+    int len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
     if (len >= 0)
     {
         switch (Lwm2mTreeNode_GetType(root))
@@ -1855,8 +1855,8 @@ static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, 
 }
 
 // Handle CoAP DELETE Requests, maps onto LWM2M DELETE operation. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                         const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                               const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int oir[3] = { -1, -1, -1 };
@@ -1869,41 +1869,41 @@ static int Lwm2mCore_HandleDeleteRequest(void * ctxt, AddressType * addr, const 
 }
 
 // Handler for all "lwm2m" endpoints
-static int Lwm2mCore_DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
+static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
                                                     const char * path, const char * query, const char * token, int tokenLength,
-                                                    ContentType contentType, const char * requestContent, int requestContentLen,
-                                                    ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+                                                    ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                                    ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
         case COAP_GET_REQUEST:
-            return Lwm2mCore_HandleGetRequest(ctxt, addr, path, query, contentType,requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleGetRequest(ctxt, addr, path, query, contentType,requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
 
         case COAP_POST_REQUEST:
-            return Lwm2mCore_HandlePostRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+            return HandlePostRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
         case COAP_PUT_REQUEST:
             if (requestContentLen == 0 && strchr(query, '?') != NULL)
             {
-                return Lwm2mCore_HandleWriteAttributesRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandleWriteAttributesRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
             else if (Lwm2mCore_ServerIsBootstrap(ctxt, addr))
             {
-                return Lwm2mCore_HandleBootstrapPutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandleBootstrapPutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
             else
             {
-                return Lwm2mCore_HandlePutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandlePutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
 
         case COAP_DELETE_REQUEST:
-            return Lwm2mCore_HandleDeleteRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+            return HandleDeleteRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
         case COAP_OBSERVE_REQUEST:
-            return Lwm2mCore_HandleObserveRequest(ctxt, addr, path, query, (char*)token, tokenLength, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleObserveRequest(ctxt, addr, path, query, (char*)token, tokenLength, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
 
         case COAP_CANCEL_OBSERVE_REQUEST:
-            return Lwm2mCore_HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
     }
 
     *responseContentType = ContentType_None;

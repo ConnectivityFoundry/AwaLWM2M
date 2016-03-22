@@ -46,28 +46,28 @@ struct _Lwm2mContextType
 static Lwm2mContextType Lwm2mContext;
 
 
-int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID, uint16_t MaximumInstances,
-                                 uint16_t MinimumInstances, ObjectOperationHandlers * Handlers)
+int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                 uint16_t minimumInstances, ObjectOperationHandlers * handlers)
 {
-    return Definition_RegisterObjectType(context->Definitions, objName, objectID, MaximumInstances, MinimumInstances, Handlers);
+    return Definition_RegisterObjectType(context->Definitions, objName, objectID, maximumInstances, minimumInstances, handlers);
 }
 
 int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
-                                   uint16_t MaximumInstances, uint16_t MinimumInstances, AwaResourceOperations operations,
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations,
                                    ResourceOperationHandlers * Handlers)
 {
-    return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, Handlers, NULL);
+    return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, Handlers, NULL);
 }
 
 int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
-                                   uint16_t MaximumInstances, uint16_t MinimumInstances, AwaResourceOperations operations,
-                                   ResourceOperationHandlers * Handlers, Lwm2mTreeNode * defaultValueNode)
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations,
+                                   ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
-    return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, Handlers, defaultValueNode);
+    return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
 }
 
 int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                        ResourceInstanceIDType resourceInstanceID, const void * srcBuffer, int srcBufferLen)
+                                        ResourceInstanceIDType resourceInstanceID, const void * value, size_t valueSize)
 {
     int nullTerminator = 0;
     bool changed;
@@ -78,7 +78,7 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
     }
 
     return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID,
-                                                 srcBufferLen + nullTerminator, srcBuffer, 0, srcBufferLen, &changed);
+                                                 valueSize + nullTerminator, value, 0, valueSize, &changed);
 }
 
 int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
@@ -104,7 +104,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
 }
 
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, 
-                                       ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+                                       ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
 }

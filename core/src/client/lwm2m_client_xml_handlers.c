@@ -207,7 +207,7 @@ void xmlif_DestroyExecuteHandlers(void)
 }
 
 int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                 uint8_t * inValueBuffer, int inValueBufferLen)
+                                 uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     ExecuteHandlerType * executeHandler = NULL;
     executeHandler = xmlif_GetExecuteHandler(objectID, objectInstanceID, resourceID);
@@ -627,7 +627,7 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     AwaResourceType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
     if (dataType != AwaResourceType_None)
     {
-        int dataLength = 0;
+        size_t dataLength = 0;
 
         outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID, (const void **)&buffer, &dataLength);
         //Lwm2m_Debug("GET /%d/%d/%d[%d]: outLength %d, dataLength %d\n", objectID, instanceID, resourceID, resourceInstanceID, outLength, dataLength);

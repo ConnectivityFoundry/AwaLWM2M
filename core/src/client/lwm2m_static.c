@@ -733,7 +733,7 @@ AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID o
             if (definition->Handler != NULL)
             {
                 void * valueBuffer = NULL;
-                int valueBufferSize = 0;
+                size_t valueBufferSize = 0;
                 int resourceInstanceID = 0;  // Note: This will only work for single-instance resources.
                 AwaResult lwm2mResult = AwaResult_Unspecified;
                 if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaResult_SuccessContent)

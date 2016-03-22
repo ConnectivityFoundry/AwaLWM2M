@@ -334,7 +334,7 @@ int ObjectStore_GetResourceInstanceLength(ObjectStore * store, ObjectIDType obje
 }
 
 int ObjectStore_GetResourceInstanceValue(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** ValueBuffer, int * ValueBufferSize)
+                                         ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** ValueBuffer, size_t * ValueBufferSize)
 {
     Resource * resource = LookupResource(store, objectID, objectInstanceID, resourceID);
     if (resource != NULL)

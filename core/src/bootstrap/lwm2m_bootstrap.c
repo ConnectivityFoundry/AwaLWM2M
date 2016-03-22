@@ -115,10 +115,10 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
     return result;
 }
 
-static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, 
-                                          const char * token, int tokenLength, ContentType contentType, const char * requestContent,
-                                          int requestContentLen, ContentType * responseContentType, char * responseContent,
-                                          int * responseContentLen, int * responseCode)
+static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query,
+                           const char * token, int tokenLength, ContentType contentType, const char * requestContent,
+                           size_t requestContentLen, ContentType * responseContentType, char * responseContent,
+                           size_t * responseContentLen, int * responseCode)
 {
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
@@ -151,7 +151,7 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
     return 0;
 }
 
-static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void BootstrapTransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     if ((responseCode >= AwaResult_Success) && (responseCode <= AwaResult_SuccessContent))
     {
@@ -200,7 +200,7 @@ static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * add
             Lwm2mTreeNode_DeleteRecursive(object);
 
             Lwm2m_Debug("Put to %s\n", uri);
-            coap_PutRequest(context, uri, ContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, Lwm2mBootstrap_TransactionCallback);
+            coap_PutRequest(context, uri, ContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, BootstrapTransactionCallback);
         }
         else
         {
@@ -226,7 +226,7 @@ void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
         // Kick start sending bootstrap with callback
         if (bootStrapQueue[i].Used && (bootStrapQueue[i].ObjectID == 0) && (bootStrapQueue[i].ObjectInstanceID == -1))
         {
-            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, AwaResult_Success, 0, NULL, 0);
+            BootstrapTransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, AwaResult_Success, 0, NULL, 0);
         }
     }
 }
@@ -237,7 +237,7 @@ bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** conf
     bool success = true;
     int i = 0;
 
-    Lwm2mCore_AddResourceEndPoint(context, "/bs", Lwm2mBootstrap_EndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/bs", EndpointHandler);
 
     for (i = 0; i < configCount; i++)
     {

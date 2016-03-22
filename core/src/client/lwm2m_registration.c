@@ -65,12 +65,12 @@
 #define REGISTRATION_TIMEOUT        (30000)
 
 
-static void Lwm2m_HandleRegisterUpdateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen);
-static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen);
-static void Lwm2m_HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen);
+static void HandleRegisterUpdateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+static void HandleRegisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
 
 
-static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, char * buffer, int len)
+static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, char * buffer, size_t len)
 {
     // Get binding from Server object in object store as a string
     enum { BINDING_MAX_SIZE = 16 };
@@ -86,7 +86,7 @@ static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, ch
     return snprintf(buffer, len, "&b=%s", binding);
 }
 
-static void GetQueryString(Lwm2mContextType * context, int shortServerID, char * buffer, int len)
+static void GetQueryString(Lwm2mContextType * context, int shortServerID, char * buffer, size_t len)
 {
     int pos = 0;
     char temp[128];
@@ -110,7 +110,7 @@ static void GetQueryString(Lwm2mContextType * context, int shortServerID, char *
 // Registration is performed when a LWM2M Client sends a “Register” operation to the LWM2M Server.
 // After the LWM2M Device is turned on and the bootstrap procedure has been completed, the LWM2M Client
 // MUST perform a “Register” operation to each LWM2M Server that the LWM2M Client has a Server Object Instance.
-static void Lwm2m_SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * server)
+static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * server)
 {
     // POST, Uri-Path: "rd", Uri-Query: "ep={ClientName}&lt={LifeTime}&sms={msisdn}&lwm2m={version}&b={binding}"
     //       PayLoad: </0/0>,</0/1>....
@@ -138,11 +138,11 @@ static void Lwm2m_SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerTyp
     sprintf(uri, "%s%s%s", serverUri, uriPath, uriQuery);
     Lwm2m_Debug("Register: POST %s\n", uri);
 
-    coap_PostRequest(server, uri, ContentType_ApplicationLinkFormat, payload, strlen(payload), Lwm2m_HandleRegisterResponse);
+    coap_PostRequest(server, uri, ContentType_ApplicationLinkFormat, payload, strlen(payload), HandleRegisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Registering;
 }
 
-static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     Lwm2mServerType * server = ctxt;
 
@@ -166,7 +166,7 @@ static void Lwm2m_HandleRegisterResponse(void * ctxt, AddressType * address, con
 // the LWM2M Client updates its registration information with a LWM2M Server by sending an “Update”
 // operation to the LWM2M Server. This “Update” operation MUST contain only the parameters listed in
 // Table 5 which have changed compared to the last registration parameters sent to the LWM2M Server.
-static void Lwm2m_SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServerType * server)
+static void SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServerType * server)
 {
     // POST /{location}?lt={Lifetime}&sms={msisdn}&b={binding}
     // success 2.04 Changed
@@ -195,13 +195,13 @@ static void Lwm2m_SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServer
 
     Lwm2m_Debug("Registration Update: PUT %s %s\n", uri, payload);
 #ifdef LWM2M_V1_0
-    coap_PutRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), Lwm2m_HandleRegisterUpdateResponse);
+    coap_PutRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
 #else
-    coap_PostRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), Lwm2m_HandleRegisterUpdateResponse);
+    coap_PostRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
 #endif
 }
 
-static void Lwm2m_HandleRegisterUpdateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void HandleRegisterUpdateResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     Lwm2mServerType * server = ctxt;
     Lwm2m_Debug("Registration Update Response %s %d\n", responsePath, responseCode);
@@ -221,7 +221,7 @@ static void Lwm2m_HandleRegisterUpdateResponse(void * ctxt, AddressType* address
 // (e.g., LWM2M Device factory reset), the LWM2M Client SHOULD send a “De-register” operation to
 // the LWM2M Server. Upon receiving this message, the LWM2M Server removes the registration information
 // from the LWM2M Server.
-static void Lwm2m_Deregister(Lwm2mContextType * context, Lwm2mServerType * server)
+static void Deregister(Lwm2mContextType * context, Lwm2mServerType * server)
 {
     // DELETE /{location}
     // success 2.02 Deleted
@@ -238,11 +238,11 @@ static void Lwm2m_Deregister(Lwm2mContextType * context, Lwm2mServerType * serve
     Lwm2m_Info("Deregister from %s\n", serverUri);
     sprintf(uri, "%s%s", serverUri, server->Location);
     Lwm2m_Debug("Deregister: DELETE %s\n", uri);
-    coap_DeleteRequest(server, uri, Lwm2m_HandleDeregisterResponse);
+    coap_DeleteRequest(server, uri, HandleDeregisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Deregistering;
 }
 
-static void Lwm2m_HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     Lwm2mServerType * server = ctxt;
     if (responseCode == 202)
@@ -295,7 +295,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
 
             case Lwm2mRegistrationState_Register:
                 // This server is in the Not registered, but a registration is expected
-                Lwm2m_SendRegisterRequest(context, server);
+                SendRegisterRequest(context, server);
                 server->LastUpdate = now;
                 server->Attempts++;
                 break;
@@ -326,7 +326,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
                 // Use 1/2 lifetime to prevent timing out.
                 if ((server->UpdateRegistration) || (now - server->LastUpdate >= ((lifeTime * 1000) / 2)))
                 {
-                    Lwm2m_SendRegistrationUpdate(context, server);
+                    SendRegistrationUpdate(context, server);
                     server->LastUpdate = now;
                     server->RegistrationState = Lwm2mRegistrationState_UpdatingRegistration;
                     server->UpdateRegistration = false;
@@ -343,7 +343,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
                 break;
 
             case Lwm2mRegistrationState_Deregister:
-                Lwm2m_Deregister(context, server);
+                Deregister(context, server);
                 server->LastUpdate = now;
                 break;
 

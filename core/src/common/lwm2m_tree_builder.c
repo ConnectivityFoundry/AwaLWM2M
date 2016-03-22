@@ -41,13 +41,13 @@
 #include "lwm2m_result.h"
 #include "lwm2m_request_origin.h"
 
-static AwaResult TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
-                                                                  ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
+static AwaResult ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** dest, Lwm2mContextType * context, ObjectIDType objectID,
+                                                            ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
     AwaResult result = AwaResult_Unspecified;
     *dest = Lwm2mTreeNode_Create();
     const void * value = NULL;
-    int valueLength = 0;
+    size_t valueLength = 0;
 
     Lwm2mTreeNode_SetID(*dest, resourceInstanceID);
     Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_ResourceInstance);
@@ -107,7 +107,7 @@ AwaResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContext
         {
             Lwm2mTreeNode * resourceValueNode;
 
-            if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
+            if ((result = ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
             {
                 Lwm2mTreeNode_AddChild(*dest, resourceValueNode);
             }
@@ -123,7 +123,7 @@ AwaResult TreeBuilder_CreateTreeFromResource(Lwm2mTreeNode ** dest, Lwm2mContext
     {
         Lwm2mTreeNode * resourceValueNode;
         int resourceInstanceID = 0;
-        if ((result = TreeBuilder_ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
+        if ((result = ReadResourceInstanceFromStoreAndCreateTree(&resourceValueNode, context, objectID, objectInstanceID, resourceID, resourceInstanceID)) == AwaResult_Success)
         {
             Lwm2mTreeNode_AddChild(*dest, resourceValueNode);
         }

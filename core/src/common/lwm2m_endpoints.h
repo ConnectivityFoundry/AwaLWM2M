@@ -38,8 +38,8 @@ extern "C" {
 #endif
 
 typedef int (*EndpointHandlerFunction)(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                       int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                       ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 typedef struct
 {
     struct ListHead     list;  // Next/Prev pointers
