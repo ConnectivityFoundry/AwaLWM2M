@@ -1,4 +1,4 @@
-/** @mainpage Awa API
+/** @mainpage Awa LWM2M C API
 @section overview Overview
 
 @e Awa @e LWM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards-compliant device management solution to simplify the development of M2M applications by providing an intuitive API that enables customization without the need for an intimate knowledge of M2M protocols.
