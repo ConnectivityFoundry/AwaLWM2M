@@ -49,6 +49,7 @@ struct _AwaStaticClient
     bool EndpointNameConfigured;
     bool CoAPConfigured;
     bool Running;
+    bool Initialised;
     const char * BootstrapServerURI;
     char CoAPListenAddress[MAX_ADDRESS_LENGTH];
     int CoAPListenPort;
@@ -77,6 +78,7 @@ AwaStaticClient * AwaStaticClient_New()
             client->EndpointNameConfigured = false;
             client->CoAPConfigured = false;
             client->Running = false;
+            client->Initialised = false;
         }
         else
         {
@@ -122,6 +124,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
                 Lwm2m_RegisterSecurityObject(client->Context);
                 Lwm2m_PopulateSecurityObject(client->Context, client->BootstrapServerURI);
                 Lwm2mCore_SetApplicationContext(client->Context, client);
+                client->Initialised = true;
                 result = AwaError_Success;
             }
             else
@@ -166,7 +169,7 @@ AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const c
 
     if ((client != NULL) && (bootstrapServerURI != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             client->BootstrapServerURI = bootstrapServerURI;
             client->BootstrapConfigured = true;
@@ -191,41 +194,50 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
 
     if ((client != NULL) && (factoryBootstrapInformation != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && client->Initialised)
         {
-            // Mandatory resources only
+
+            if(client->CoAPConfigured)
+            {
+
+                // Mandatory resources only
 #if (__GNUC__ >= 5)
-            BootstrapInfo info = { 0 };
+                BootstrapInfo info = { 0 };
 #else
-            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119
-            BootstrapInfo info;
-            memset(&info, 0, sizeof(info));
+                // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119
+                BootstrapInfo info;
+                memset(&info, 0, sizeof(info));
 #endif
 
-            // Assign an arbitrary server ID
-            static int serverID = 1000;
-            ++serverID;
+                // Assign an arbitrary server ID
+                static int serverID = 1000;
+                ++serverID;
 
-            info.SecurityInfo.ServerID = serverID;
-            strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
-            info.SecurityInfo.ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE - 1] = '\0'; // Defensive
-            info.SecurityInfo.Bootstrap = false;
-            info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
-            memcpy(info.SecurityInfo.PublicKey, factoryBootstrapInformation->SecurityInfo.PublicKeyOrIdentity, BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE);
-            memcpy(info.SecurityInfo.SecretKey, factoryBootstrapInformation->SecurityInfo.SecretKey, BOOTSTRAP_CONFIG_SECRET_KEY_SIZE);
-            info.SecurityInfo.HoldOffTime = DEFAULT_CLIENT_HOLD_OFF_TIME;
+                info.SecurityInfo.ServerID = serverID;
+                strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
+                info.SecurityInfo.ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE - 1] = '\0'; // Defensive
+                info.SecurityInfo.Bootstrap = false;
+                info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
+                memcpy(info.SecurityInfo.PublicKey, factoryBootstrapInformation->SecurityInfo.PublicKeyOrIdentity, BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE);
+                memcpy(info.SecurityInfo.SecretKey, factoryBootstrapInformation->SecurityInfo.SecretKey, BOOTSTRAP_CONFIG_SECRET_KEY_SIZE);
+                info.SecurityInfo.HoldOffTime = DEFAULT_CLIENT_HOLD_OFF_TIME;
 
-            info.ServerInfo.ShortServerID = serverID;
-            info.ServerInfo.LifeTime = factoryBootstrapInformation->ServerInfo.Lifetime;
-            info.ServerInfo.MinPeriod = factoryBootstrapInformation->ServerInfo.DefaultMinPeriod;
-            info.ServerInfo.MaxPeriod = factoryBootstrapInformation->ServerInfo.DefaultMaxPeriod;
-            info.ServerInfo.DisableTimeout = factoryBootstrapInformation->ServerInfo.DisableTimeout;
-            info.ServerInfo.Notification = factoryBootstrapInformation->ServerInfo.Notification;
-            strncpy(info.ServerInfo.Binding, factoryBootstrapInformation->ServerInfo.Binding, BOOTSTRAP_CONFIG_BINDING_SIZE);
-            info.ServerInfo.Binding[BOOTSTRAP_CONFIG_BINDING_SIZE - 1] = '\0'; // Defensive
+                info.ServerInfo.ShortServerID = serverID;
+                info.ServerInfo.LifeTime = factoryBootstrapInformation->ServerInfo.Lifetime;
+                info.ServerInfo.MinPeriod = factoryBootstrapInformation->ServerInfo.DefaultMinPeriod;
+                info.ServerInfo.MaxPeriod = factoryBootstrapInformation->ServerInfo.DefaultMaxPeriod;
+                info.ServerInfo.DisableTimeout = factoryBootstrapInformation->ServerInfo.DisableTimeout;
+                info.ServerInfo.Notification = factoryBootstrapInformation->ServerInfo.Notification;
+                strncpy(info.ServerInfo.Binding, factoryBootstrapInformation->ServerInfo.Binding, BOOTSTRAP_CONFIG_BINDING_SIZE);
+                info.ServerInfo.Binding[BOOTSTRAP_CONFIG_BINDING_SIZE - 1] = '\0'; // Defensive
 
-            Lwm2mCore_SetFactoryBootstrap(client->Context, &info);
-            result = AwaError_Success;
+                Lwm2mCore_SetFactoryBootstrap(client->Context, &info);
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_StaticClientInvalid;
+            }
         }
         else
         {
@@ -246,7 +258,7 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
 
     if ((client != NULL) && (EndPointName != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             if (Lwm2mCore_SetEndPointClientName(client->Context, EndPointName) > 0)
             {
@@ -278,7 +290,7 @@ AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, cons
 
     if ((client != NULL) && (address != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             if (strlen(address) < MAX_ADDRESS_LENGTH)
             {
@@ -336,46 +348,56 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
 
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
-    int result;
-#if !defined (CONTIKI)
-    struct pollfd fds[1];
-    int nfds = 1;
-    int timeout;
+    int result = -1;
 
-    fds[0].fd = client->CoAPInfo->fd;
-    fds[0].events = POLLIN;
-
-    timeout = Lwm2mCore_Process(client->Context);
-
-    result = poll(fds, nfds, timeout);
-    if (result < 0)
+    if (client != NULL)
     {
-        if (errno == EINTR)
+        if (!client->Running)
         {
+            client->Running = true;
+        }
+#if !defined (CONTIKI)
+        struct pollfd fds[1];
+        int nfds = 1;
+        int timeout;
+
+        fds[0].fd = client->CoAPInfo->fd;
+        fds[0].events = POLLIN;
+
+        timeout = Lwm2mCore_Process(client->Context);
+
+        result = poll(fds, nfds, timeout);
+        if (result < 0)
+        {
+            if (errno == EINTR)
+            {
+                result = timeout;
+            }
+            else
+            {
+                perror("poll:");
+            }
+        }
+        else if (result > 0)
+        {
+            if (fds[0].revents == POLLIN)
+            {
+                coap_HandleMessage();
+            }
+
             result = timeout;
         }
-        else
-        {
-            perror("poll:");
-        }
-    }
-    else if (result > 0)
-    {
-        if (fds[0].revents == POLLIN)
-        {
-            coap_HandleMessage();
-        }
 
-        result = timeout;
-    }
-
-    if (result == timeout)
-    {
-        coap_Process();
-    }
+        if (result == timeout)
+        {
+            coap_Process();
+        }
 #else
-    result = Lwm2mCore_Process(client->Context);
+        result = Lwm2mCore_Process(client->Context);
 #endif
+
+    }
+
     return result;
 }
 

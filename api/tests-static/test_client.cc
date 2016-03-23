@@ -182,6 +182,42 @@ TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_invalid_input)
     EXPECT_TRUE(client == NULL);
 }
 
+TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_after_init)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    EXPECT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.2:15683/"));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_SetBootstrapServerURI_while_running)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    AwaStaticClient_Process(client);
+
+    EXPECT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.2:15683/"));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
 TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
@@ -216,6 +252,42 @@ TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_long_name)
     EXPECT_TRUE(client == NULL);
 }
 
+TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_after_init)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    EXPECT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetEndPointName(client, "imagination12"));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_SetEndPointName_while_running)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    AwaStaticClient_Process(client);
+
+    EXPECT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetEndPointName(client, "imagination12"));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
 TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_valid_input)
 {
     AwaStaticClient * client = AwaStaticClient_New();
@@ -239,6 +311,53 @@ TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_invalid_input)
     EXPECT_TRUE(client == NULL);
 }
 
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_long_name)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    ASSERT_EQ(AwaError_OutOfMemory, AwaStaticClient_SetCoAPListenAddressPort(client, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", 5683));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
+
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_after_init)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetCoAPListenAddressPort(client, "::", 5683));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_while_running)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    AwaStaticClient_Process(client);
+
+    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetCoAPListenAddressPort(client, "::", 5683));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
 
 TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_valid_input)
 {
@@ -257,13 +376,13 @@ TEST_F(TestStaticClient, AwaStaticClient_SetLogLevel_invalid_input)
 }
 
 
-TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationContext_invalid_inputs)
+TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_invalid_inputs)
 {
     ASSERT_TRUE(NULL == AwaStaticClient_GetApplicationContext(NULL));
     ASSERT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetApplicationContext(NULL, NULL));
 }
 
-TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationContext_valid_inputs)
+TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_valid_inputs)
 {
     int dummycontext = 5;
     void * applicationContext = &dummycontext;
@@ -276,18 +395,6 @@ TEST_F(TestStaticClient, AwaStaticClient_SetApplicationContext_SetApplicationCon
     AwaStaticClient_Free(&client);
     EXPECT_TRUE(client == NULL);
 }
-
-TEST_F(TestStaticClient, AwaStaticClient_SetCoAPListenAddressPort_long_name)
-{
-    AwaStaticClient * client = AwaStaticClient_New();
-    EXPECT_TRUE(client != NULL);
-
-    ASSERT_EQ(AwaError_OutOfMemory, AwaStaticClient_SetCoAPListenAddressPort(client, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", 5683));
-
-    AwaStaticClient_Free(&client);
-    EXPECT_TRUE(client == NULL);
-}
-
 
 TEST_F(TestStaticClient, AwaStaticClient_Init_not_configured)
 {
@@ -334,6 +441,63 @@ TEST_F(TestStaticClient, AwaStaticClient_Process)
 
     AwaStaticClient_Free(&client);
     EXPECT_TRUE(client == NULL);
+}
+
+TEST_F(TestStaticClient, AwaStaticClient_Process_invalid_input)
+{
+    EXPECT_EQ(-1, AwaStaticClient_Process(NULL));
+}
+
+TEST_F(TestStaticClient, AwaStaticClinet_SetFactoryBootstrapInformation_before_init)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_Init(client));
+
+    AwaStaticClient_Process(client);
+
+    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
+
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "coap://127.0.0.1");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 30;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+
+    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
+}
+
+TEST_F(TestStaticClientWithServer,  AwaStaticClient_SetFactoryBootstrapInformation_after_process)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
+    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
+
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "coap://127.0.0.1");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 30;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+
+    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
 }
 
 TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
@@ -403,6 +567,7 @@ TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
 
     AwaServerListClientsOperation_Free(&operation);
 }
+
 
 void * do_write_operation(void * attr)
 {
