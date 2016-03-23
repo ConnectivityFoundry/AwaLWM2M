@@ -56,7 +56,8 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
         case AwaResourceType_String:
             if (len >= size)
             {
-                strcpy(buf, (char*)value);
+                memcpy(buf, (char*)value, size);
+                buf[size] = '\0';
                 valueLength = strlen(buf);
             }
             break;
