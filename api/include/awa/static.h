@@ -21,9 +21,9 @@
 ************************************************************************************************************************/
 
 
-/*
- * This interface enables an application to be statically embedded within the LWM2M Client and
- * interact with its resources.
+/**
+ * @file static.h
+ * @brief This interface enables an application to be statically embedded within the LWM2M Client and interact with its resources.
  *
  * The Client hosts resources within a data model based on Objects, Object Instances and Resources.
  * Please consult the LWM2M specification for details of this model.
@@ -105,17 +105,17 @@ typedef struct _AwaStaticClient AwaStaticClient;
  */
 typedef enum
 {
-  AwaSecurityMode_PreSharedKey,   /**< indicates pre-shared key security mode (PSK) */
-  AwaSecurityMode_RawPublicKey,   /**< indicates raw public key security mode (RPK) */
-  AwaSecurityMode_Certificate,    /**< indicates certicate-based security mode */
-  AwaSecurityMode_NoSec,          /**< indicates no security mode */
+  AwaSecurityMode_PreSharedKey,   /**< indicates Pre-Shared Key security mode (PSK) */
+  AwaSecurityMode_RawPublicKey,   /**< indicates Raw Public Key security mode (RPK) */
+  AwaSecurityMode_Certificate,    /**< indicates Certificate-based security mode */
+  AwaSecurityMode_NoSec,          /**< indicates No Security mode */
 } AwaSecurityMode;
 
-#define BOOTSTRAP_CONFIG_SERVER_URI_SIZE (256)
-#define BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE (128)
-#define BOOTSTRAP_CONFIG_SERVER_KEY_SIZE (128)
-#define BOOTSTRAP_CONFIG_SECRET_KEY_SIZE (128)
-#define BOOTSTRAP_CONFIG_BINDING_SIZE     (10)
+#define BOOTSTRAP_CONFIG_SERVER_URI_SIZE (256)  /**< Maximum size in characters of Server URI string. */
+#define BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE (128)  /**< Maximum size in bytes of Public Key / Identity opaque value. */
+#define BOOTSTRAP_CONFIG_SERVER_KEY_SIZE (128)  /**< Maximum size in bytes of Server Key opaque value. */
+#define BOOTSTRAP_CONFIG_SECRET_KEY_SIZE (128)  /**< Maximum size in bytes of Secret Key opaque value. */
+#define BOOTSTRAP_CONFIG_BINDING_SIZE     (10)  /**< Maximum length in characters of Binding string. */
 
 /**
  * Information required to bootstrap the client daemon from a factory configuration.
@@ -248,7 +248,7 @@ AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level);
  * @brief Set the client endpoint name. This is the unique ID used to identify the client
  *        from any server the client has registered with.
  *
- *        This function must be called before calling ::AwaStaticClient_Init.
+ *        This function must be called, and before calling ::AwaStaticClient_Init.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] endPointName The unique endpoint name to identify this client.
@@ -264,7 +264,7 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
  *
  *        Address "Any" (`0.0.0.0` for IPv4, `::` for IPv6) is valid.
  *
- *        This function must be called before calling ::AwaStaticClient_Init.
+ *        This function must be called, and before calling ::AwaStaticClient_Init.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] address IP address to listen on.
@@ -282,7 +282,11 @@ AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, cons
  *
  *        [address] can be an IPv4 or IPv6 address, or a resolvable DNS name.
  *
- *        This function must be called before calling ::AwaStaticClient_Init.
+ *        This function must be called, and before calling ::AwaStaticClient_Init.
+ *
+ *        If ::AwaStaticClient_SetFactoryBootstrapInformation is called, @e bootstrapServerURI is ignored.
+ *        However if the factory bootstrap information results in a failed registration, @e bootstrapServerURI will
+ *        be used to do a client-initiated bootstrap.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] bootstrapServerURI Network location of bootstrap server.
@@ -293,10 +297,14 @@ AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, cons
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI);
 
 /**
- * @brief Bypass a LWM2M bootstrap server by supplying LWM2M Server Bootstrap Information
- *        to connect to a trusted LWM2M server.
+ * @brief Configure factory bootstrap by supplying LWM2M Server Bootstrap Information to register with a LWM2M server.
  *
- *        This function must be called before calling ::AwaStaticClient_Init.
+ *        This function is optional. It should only be called @e after ::AwaStaticClient_Init and before ::AwaStaticClient_Process.
+ *
+ *        It may be called multiple times to set additional LWM2M servers.
+ *
+ *        If this factory bootstrap information results in a failed registration, @e bootstrapServerURI set
+ *        by ::AwaStaticClient_SetBootstrapServerURI will be used to do a client-initiated bootstrap.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] factoryBootstrapInformation A pointer to valid Factory Bootstrap information.
@@ -340,6 +348,14 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
  *        LWM2M server has been set.
  *
  *        This function should only be called once for each Awa Static Client.
+ *
+ *        Before calling this function, the following functions @b must be called:
+ *          - ::AwaStaticClient_SetEndPointName
+ *          - ::AwaStaticClient_SetCoAPListenAddressPort
+ *          - ::AwaStaticClient_SetBootstrapServerURI
+ *
+ *        After calling this function, the following functions @b may be called before calling ::AwaStaticClient_Process:
+ *          - ::AwaStaticClient_SetFactoryBootstrapInformation
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @return AwaError_Success on successful initialisation of the Awa Static Client.
@@ -561,7 +577,7 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 /**
  * @brief Mark the specified resource as changed, in order for the Awa Static Client to
  *        send notifications to all LWM2M servers observing that resource.
- *
+ * *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object containing the specified resource.
  * @param[in] objectInstanceID The ID of the object instance containing the specified resource.
@@ -575,6 +591,8 @@ AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID o
 /**
  * @brief Mark the specified object instance as changed, in order for the Awa Static Client to
  *        send notifications to all LWM2M servers observing that object instance.
+ *
+ *        This function should also be called when a resource is created or deleted in an object instance.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object for the specified object instance.

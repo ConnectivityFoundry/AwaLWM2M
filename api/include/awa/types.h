@@ -20,6 +20,10 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file types.h
+ * @brief Provides definitions for types and enums used by Awa LWM2M API and Static API.
+ */
 
 #ifndef AWA_TYPES_H
 #define AWA_TYPES_H
@@ -74,7 +78,7 @@ typedef int64_t AwaTime;
 /**
  * A utility struct used to convey data pointer and size of an opaque data block.
  */
-typedef struct _AwaOpaque
+typedef struct AwaOpaque
 {
     void * Data;        /**< pointer to opaque data */
     size_t Size;        /**< size of opaque data block */
@@ -83,7 +87,7 @@ typedef struct _AwaOpaque
 /**
  * A utility struct used to convey object link data.
  */
-typedef struct _AwaObjectLink
+typedef struct AwaObjectLink
 {
     AwaObjectID ObjectID;                  /**< Object ID */
     AwaObjectInstanceID ObjectInstanceID;  /**< Object Instance ID */

@@ -20,6 +20,10 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file common.h
+ * @brief Provides declarations and definitions that are common to the Awa LWM2M API and Static API.
+ */
 
 #ifndef AWA_COMMON_H
 #define AWA_COMMON_H
