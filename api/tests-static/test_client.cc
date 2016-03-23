@@ -475,6 +475,31 @@ TEST_F(TestStaticClient, AwaStaticClinet_SetFactoryBootstrapInformation_before_i
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
+    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
+
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "coap://127.0.0.1");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 30;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+
+    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
+
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
+}
+
+TEST_F(TestStaticClient,  AwaStaticClient_SetFactoryBootstrapInformation_while_running)
+{
+    AwaStaticClient * client = AwaStaticClient_New();
+    EXPECT_TRUE(client != NULL);
+
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, "coap://127.0.0.1:15683/"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, "imagination1"));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
@@ -498,28 +523,9 @@ TEST_F(TestStaticClient, AwaStaticClinet_SetFactoryBootstrapInformation_before_i
     sprintf(bootstrapinfo.ServerInfo.Binding, "U");
 
     ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
-}
 
-TEST_F(TestStaticClientWithServer,  AwaStaticClient_SetFactoryBootstrapInformation_after_process)
-{
-    AwaStaticClient * client = AwaStaticClient_New();
-    EXPECT_TRUE(client != NULL);
-
-    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
-
-    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "coap://127.0.0.1");
-    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
-    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
-    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
-
-    bootstrapinfo.ServerInfo.Lifetime = 30;
-    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
-    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
-    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
-    bootstrapinfo.ServerInfo.Notification = false;
-    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
-
-    ASSERT_EQ(AwaError_OperationInvalid, AwaStaticClient_SetFactoryBootstrapInformation(client, &bootstrapinfo));
+    AwaStaticClient_Free(&client);
+    EXPECT_TRUE(client == NULL);
 }
 
 TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
