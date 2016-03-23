@@ -20,6 +20,10 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file error.h
+ * @brief Provides definitions for Awa LWM2M Client and Server API error codes and error function declarations.
+ */
 
 #ifndef AWA_ERROR_H
 #define AWA_ERROR_H

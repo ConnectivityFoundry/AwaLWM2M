@@ -21,8 +21,10 @@
 ************************************************************************************************************************/
 
 
-/*
- * This interface enables an application to interact with the resources hosted by the LWM2M Client Core.
+/**
+ * @file client.h
+ * @brief This interface enables an application to interact with the resources hosted by the LWM2M Client Core.
+ *
  * The Core may be running as a separate process (daemon), or it may be linked with the application directly.
  *
  * The Core hosts resources within a data model based on Objects, Object Instances and Resources.
