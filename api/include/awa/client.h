@@ -104,7 +104,6 @@ typedef struct _AwaClientSubscription AwaClientChangeSubscription;
 typedef struct _AwaClientSubscription AwaClientExecuteSubscription;
 /// @endcond
 
-
 /**************************************************************************************************
  * Callbacks
  *************************************************************************************************/

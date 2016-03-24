@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include "../src/objects_tree.h"
+#include "../src/arrays.h"
 #include "support/support.h"
 #include "support/xml_support.h"
 
@@ -574,28 +575,32 @@ namespace detail
 
 struct TestSetResource
 {
-    AwaError expectedAddResult;
-    AwaError expectedProcessResult;
+    bool CreateSetOperation;
+    bool PopulateArrayWithInitialValues;
+    AwaError ExpectedAddResult;
+    AwaError ExpectedProcessResult;
 
-    AwaObjectID objectID;
-    AwaObjectInstanceID objectInstanceID;
-    AwaResourceID resourceID;
+    AwaObjectID ObjectID;
+    AwaObjectInstanceID ObjectInstanceID;
+    AwaResourceID ResourceID;
 
-    const void * value;
-    const size_t valueCount;
-    AwaResourceType type;
+    const void * Value;
+    const size_t ValueCount;
+    AwaResourceType Type;
 };
 
 ::std::ostream& operator<<(::std::ostream& os, const TestSetResource& item)
 {
-  return os << "Item: expectedAddResult " << item.expectedAddResult
-            << ", expectedProcessResult " << item.expectedProcessResult
-            << ", objectID " << item.objectID
-            << ", objectInstanceID " << item.objectInstanceID
-            << ", resourceID " << item.resourceID
-            << ", value " << item.value
-            << ", valueCount " << item.valueCount
-            << ", type" << item.type;
+  return os << "Item: expectedAddResult " << item.ExpectedAddResult
+            << ", expectedProcessResult " << item.ExpectedProcessResult
+            << ", UseSetOperation " << item.CreateSetOperation
+            << ", PopulateArrayWithInitialValues " << item.PopulateArrayWithInitialValues
+            << ", objectID " << item.ObjectID
+            << ", objectInstanceID " << item.ObjectInstanceID
+            << ", resourceID " << item.ResourceID
+            << ", value " << item.Value
+            << ", valueCount " << item.ValueCount
+            << ", type" << item.Type;
 }
 
 AwaInteger dummyInteger1 = 123456;
@@ -617,8 +622,8 @@ const char * dummyStringArray1[] = {"Lightweight M2M Client", "test1", ""};
 const char * dummyStringArray2[] = {"Lightweight M2M Client", "test1", " ", " ", " ", " "};
 const AwaInteger dummyIntegerArray1[] = {55, 8732, 11};
 const AwaInteger dummyIntegerArray2[] = {55, 8732, 11, 55, 8732, 11};
-const AwaFloat dummyFloatArray1[] = {55.0, 0.0008732, 11e10};
-const AwaFloat dummyFloatArray2[] = {55.0, 0.0008732, 11e10, 55.0, 0.0008732, 11e10};
+const AwaFloat dummyFloatArray1[] = {55.0, 0.0008, 11e10};
+const AwaFloat dummyFloatArray2[] = {55.0, 0.0008, 11e10, 55.0, 0.0008, 11e10};
 const AwaBoolean dummyBooleanArray1[] = {true, false, true};
 const AwaBoolean dummyBooleanArray2[] = {true, false, true, true, false, true};
 
@@ -658,6 +663,8 @@ class TestSetValue : public TestSetOperationWithConnectedSession, public ::testi
 protected:
 
     void SetUp() {
+
+        detail::TestSetResource data = GetParam();
         TestSetOperationWithConnectedSession::SetUp();
 
         AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -680,13 +687,15 @@ protected:
         customObjectDefinition = AwaObjectDefinition_New(detail::TEST_OBJECT_ARRAY_TYPES, "Test Object Array", 0, 1);
         EXPECT_TRUE(NULL != customObjectDefinition);
 
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsStringArray    (customObjectDefinition, detail::TEST_RESOURCE_STRING,     "Test String Array Resource",      0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray   (customObjectDefinition, detail::TEST_RESOURCE_INTEGER,    "Test Integer Array Resource",     0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloatArray     (customObjectDefinition, detail::TEST_RESOURCE_FLOAT,      "Test Float Array Resource",       0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBooleanArray   (customObjectDefinition, detail::TEST_RESOURCE_BOOLEAN,    "Test Boolean Array Resource",     0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray    (customObjectDefinition, detail::TEST_RESOURCE_OPAQUE,     "Test Opaque Array Resource",      0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTimeArray      (customObjectDefinition, detail::TEST_RESOURCE_TIME,       "Test Time Array Resource",        0,5, AwaResourceOperations_ReadWrite, NULL));
-        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, detail::TEST_RESOURCE_OBJECTLINK, "Test Object Link Array Resource", 0,5, AwaResourceOperations_ReadWrite, NULL));
+        int maximumArrayInstances = 5;
+
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsStringArray    (customObjectDefinition, detail::TEST_RESOURCE_STRING,     "Test String Array Resource",      0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray   (customObjectDefinition, detail::TEST_RESOURCE_INTEGER,    "Test Integer Array Resource",     0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloatArray     (customObjectDefinition, detail::TEST_RESOURCE_FLOAT,      "Test Float Array Resource",       0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBooleanArray   (customObjectDefinition, detail::TEST_RESOURCE_BOOLEAN,    "Test Boolean Array Resource",     0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray    (customObjectDefinition, detail::TEST_RESOURCE_OPAQUE,     "Test Opaque Array Resource",      0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTimeArray      (customObjectDefinition, detail::TEST_RESOURCE_TIME,       "Test Time Array Resource",        0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
+        EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, detail::TEST_RESOURCE_OBJECTLINK, "Test Object Link Array Resource", 0, maximumArrayInstances, AwaResourceOperations_ReadWrite, NULL));
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -694,28 +703,47 @@ protected:
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaClientDefineOperation_Free(&defineOperation);
 
-        setOperation_ = AwaClientSetOperation_New(session_);
-        EXPECT_TRUE(NULL != setOperation_);
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation_, "/10000/0"));
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation_, "/10001/0"));
+        AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+        EXPECT_TRUE(NULL != setOperation);
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10001/0"));
 
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/1"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/2"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/3"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/4"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/5"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/6"));
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation_, "/10001/0/7"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/1"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/2"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/3"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/4"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/5"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/6"));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10001/0/7"));
 
-        //ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation_, 0));
+        if (data.PopulateArrayWithInitialValues)
+        {
+            for (int i = maximumArrayInstances/2; i < maximumArrayInstances; i++)
+            {
+                char tempString[8];
+                sprintf(tempString, "%d", i * 123);
+
+                char tempOpaqueData[] = {'2',static_cast<char>(i),0,'a','c','\n'};
+
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsCString(setOperation, "/10001/0/1", i, tempString));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/10001/0/2", i, i*222));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsFloat(setOperation, "/10001/0/3", i, i*0.2));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsBoolean(setOperation, "/10001/0/4", i, i == 0));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsOpaque(setOperation, "/10001/0/5", i, {tempOpaqueData, sizeof(tempOpaqueData)}));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsTime(setOperation, "/10001/0/6", i, i*10030));
+                ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsObjectLink(setOperation, "/10001/0/7", i, {i, i*10}));
+            }
+        }
+
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, 0));
+
+        AwaClientSetOperation_Free(&setOperation);
     }
 
     void TearDown() {
         TestSetOperationWithConnectedSession::TearDown();
-        AwaClientSetOperation_Free(&setOperation_);
-    }
 
-    AwaClientSetOperation * setOperation_;
+    }
 };
 
 class TestSetValueArray : public TestSetValue {};
@@ -723,33 +751,34 @@ class TestSetValueArray : public TestSetValue {};
 TEST_P(TestSetValueArray, TestSetValueArray)
 {
     detail::TestSetResource data = GetParam();
-    AwaClientSetOperation * setOperation = data.expectedProcessResult == AwaError_Success ? this->setOperation_ : NULL;
+    AwaClientSetOperation * setOperation = data.CreateSetOperation? AwaClientSetOperation_New(session_) : NULL;
     char path[128] = {0};
 
-    if(data.objectID == AWA_INVALID_ID)
+    if(data.ObjectID == AWA_INVALID_ID)
     {
         sprintf(path, "a/n in/valid/ path");
     }
     else
     {
-        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
+        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID));
     }
 
-    switch(data.type)
+    AwaArray * setArray = NULL;
+
+    switch(data.Type)
     {
         case AwaResourceType_StringArray:
             {
                 AwaStringArray * array = AwaStringArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaStringArray_SetValueAsCString(array, i, ((const char **)data.value)[i]);
+                    AwaStringArray_SetValueAsCString(array, i, ((const char **)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsStringArray(setOperation, path, array));
-
-                AwaStringArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsStringArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_IntegerArray:
@@ -757,14 +786,13 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaIntegerArray * array = AwaIntegerArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaIntegerArray_SetValue(array, i, ((const AwaInteger *)data.value)[i]);
+                    AwaIntegerArray_SetValue(array, i, ((const AwaInteger *)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsIntegerArray(setOperation, path, array));
-
-                AwaIntegerArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsIntegerArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_FloatArray:
@@ -772,14 +800,13 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaFloatArray * array = AwaFloatArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaFloatArray_SetValue(array, i, ((const AwaFloat *)data.value)[i]);
+                    AwaFloatArray_SetValue(array, i, ((const AwaFloat *)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsFloatArray(setOperation, path, array));
-
-                AwaFloatArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsFloatArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_BooleanArray:
@@ -787,14 +814,13 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaBooleanArray * array = AwaBooleanArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaBooleanArray_SetValue(array, i, ((const AwaBoolean *)data.value)[i]);
+                    AwaBooleanArray_SetValue(array, i, ((const AwaBoolean *)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsBooleanArray(setOperation, path, array));
-
-                AwaBooleanArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsBooleanArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_OpaqueArray:
@@ -802,14 +828,13 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaOpaqueArray * array = AwaOpaqueArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaOpaqueArray_SetValue(array, i, *((AwaOpaque **)data.value)[i]);
+                    AwaOpaqueArray_SetValue(array, i, *((AwaOpaque **)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsOpaqueArray(setOperation, path, array));
-
-                AwaOpaqueArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsOpaqueArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_TimeArray:
@@ -817,14 +842,13 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaTimeArray * array = AwaTimeArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaTimeArray_SetValue(array, i, ((const AwaTime *)data.value)[i]);
+                    AwaTimeArray_SetValue(array, i, ((const AwaTime *)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsTimeArray(setOperation, path, array));
-
-                AwaTimeArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsTimeArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         case AwaResourceType_ObjectLinkArray:
@@ -832,22 +856,111 @@ TEST_P(TestSetValueArray, TestSetValueArray)
                 AwaObjectLinkArray * array = AwaObjectLinkArray_New();
                 EXPECT_TRUE(NULL != array);
 
-                for(size_t i = 0; i < data.valueCount; i++)
+                for(size_t i = 0; i < data.ValueCount; i++)
                 {
-                    AwaObjectLinkArray_SetValue(array, i, *((AwaObjectLink **)data.value)[i]);
+                    AwaObjectLinkArray_SetValue(array, i, *((AwaObjectLink **)data.Value)[i]);
                 }
 
-                ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsObjectLinkArray(setOperation, path, array));
-
-                AwaObjectLinkArray_Free(&array);
+                ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsObjectLinkArray(setOperation, path, array));
+                setArray = (AwaArray *)array;
             }
             break;
         default:
             ASSERT_TRUE(false);
             break;
     }
+    ASSERT_TRUE(NULL != setArray);
+    EXPECT_EQ(data.ExpectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
-    ASSERT_EQ(data.expectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    if (data.ExpectedProcessResult == AwaError_Success)
+    {
+        // Confirm the value was set correctly
+        AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
+        ASSERT_TRUE(NULL != getOperation);
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, path));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+        ASSERT_TRUE(NULL != getResponse);
+
+        AwaArray * getArray = NULL;
+
+        switch(data.Type)
+        {
+            case AwaResourceType_StringArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, path, (const AwaStringArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_IntegerArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, path, (const AwaIntegerArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_FloatArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, path, (const AwaFloatArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_BooleanArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, path, (const AwaBooleanArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_OpaqueArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, path, (const AwaOpaqueArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_TimeArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, path, (const AwaTimeArray **)&getArray));
+                break;
+            }
+            case AwaResourceType_ObjectLinkArray:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, path, (const AwaObjectLinkArray **)&getArray));
+                break;
+            }
+            default:
+                ASSERT_TRUE(false);
+                break;
+        }
+
+        EXPECT_EQ(0, Array_Compare(setArray, getArray, data.Type));
+        AwaClientGetOperation_Free(&getOperation);
+    }
+
+
+    switch(data.Type)
+    {
+        case AwaResourceType_StringArray:
+            AwaStringArray_Free((AwaStringArray **)&setArray);
+            break;
+        case AwaResourceType_IntegerArray:
+            AwaIntegerArray_Free((AwaIntegerArray **)&setArray);
+            break;
+        case AwaResourceType_FloatArray:
+            AwaFloatArray_Free((AwaFloatArray **)&setArray);
+            break;
+        case AwaResourceType_BooleanArray:
+            AwaBooleanArray_Free((AwaBooleanArray **)&setArray);
+            break;
+        case AwaResourceType_OpaqueArray:
+            AwaOpaqueArray_Free((AwaOpaqueArray **)&setArray);
+            break;
+        case AwaResourceType_TimeArray:
+            AwaTimeArray_Free((AwaTimeArray **)&setArray);
+            break;
+        case AwaResourceType_ObjectLinkArray:
+            AwaObjectLinkArray_Free((AwaObjectLinkArray **)&setArray);
+            break;
+        default:
+            ASSERT_TRUE(false);
+            break;
+    }
+
+
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -855,41 +968,45 @@ INSTANTIATE_TEST_CASE_P(
         TestSetValueArray,
         ::testing::Values(
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
-          detail::TestSetResource {AwaError_AddInvalid,       AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray2,6,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyStringArray1,3,     AwaResourceType_StringArray},
+          detail::TestSetResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyStringArray2,6,     AwaResourceType_StringArray},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
-          detail::TestSetResource {AwaError_AddInvalid,       AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray2,6,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyIntegerArray1,3,    AwaResourceType_IntegerArray},
+          detail::TestSetResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyIntegerArray2,6,     AwaResourceType_IntegerArray},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
-          detail::TestSetResource {AwaError_AddInvalid,       AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray2,6,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloatArray1,3,     AwaResourceType_FloatArray},
+          detail::TestSetResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloatArray2,6,      AwaResourceType_FloatArray},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
-          detail::TestSetResource {AwaError_AddInvalid,       AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray2,6,    AwaResourceType_BooleanArray}
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBooleanArray1,3,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray2,6,    AwaResourceType_BooleanArray}
 
           ));
 
@@ -898,30 +1015,33 @@ INSTANTIATE_TEST_CASE_P(
         TestSetValueArray,
         ::testing::Values(
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
-          detail::TestSetResource {AwaError_AddInvalid,       AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray2,6,    AwaResourceType_BooleanArray},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaqueArray1,3,     AwaResourceType_OpaqueArray},
+          detail::TestSetResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBooleanArray2,6,    AwaResourceType_BooleanArray},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray}
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, true, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray}
 
         ));
 
@@ -930,47 +1050,141 @@ class TestSetValueSingle : public TestSetValue {};
 TEST_P(TestSetValueSingle, TestSetValueSingle)
 {
     detail::TestSetResource data = GetParam();
-    AwaClientSetOperation * setOperation = data.expectedProcessResult == AwaError_Success ? this->setOperation_ : NULL;
+
+    AwaClientSetOperation * setOperation = data.CreateSetOperation ? AwaClientSetOperation_New(session_) : NULL;
     char path[128] = {0};
 
-    if(data.objectID == AWA_INVALID_ID)
+    if(data.ObjectID == AWA_INVALID_ID)
     {
         sprintf(path, "a/n in/valid/ path");
     }
     else
     {
-        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
+        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID));
     }
 
-    switch(data.type)
+    switch(data.Type)
     {
         case AwaResourceType_String:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsCString(setOperation, path, (const char *)data.value));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsCString(setOperation, path, (const char *)data.Value));
             break;
         case AwaResourceType_Integer:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsInteger(setOperation, path, *((AwaInteger*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsInteger(setOperation, path, *((AwaInteger*)data.Value)));
             break;
         case AwaResourceType_Float:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsFloat(setOperation, path, *((AwaFloat*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsFloat(setOperation, path, *((AwaFloat*)data.Value)));
             break;
         case AwaResourceType_Boolean:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsBoolean(setOperation, path, *((AwaBoolean*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsBoolean(setOperation, path, *((AwaBoolean*)data.Value)));
             break;
         case AwaResourceType_Opaque:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsOpaque(setOperation, path, *((AwaOpaque*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsOpaque(setOperation, path, *((AwaOpaque*)data.Value)));
             break;
         case AwaResourceType_Time:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsTime(setOperation, path, *((AwaTime*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsTime(setOperation, path, *((AwaTime*)data.Value)));
             break;
         case AwaResourceType_ObjectLink:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddValueAsObjectLink(setOperation, path, *((AwaObjectLink*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddValueAsObjectLink(setOperation, path, *((AwaObjectLink*)data.Value)));
             break;
         default:
             ASSERT_TRUE(false);
             break;
     }
 
-    ASSERT_EQ(data.expectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(data.ExpectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    if (data.ExpectedProcessResult == AwaError_Success)
+    {
+        // Confirm the value was set correctly
+        AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
+        ASSERT_TRUE(NULL != getOperation);
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, path));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+        ASSERT_TRUE(NULL != getResponse);
+
+        void * value = NULL;
+
+        AwaObjectLink receivedObjectLink = {0, 0};
+        AwaOpaque receivedOpaque = {NULL, 0};
+
+        switch(data.Type)
+        {
+        case AwaResourceType_String:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsCStringPointer(getResponse, path, (const char **)&value));
+            break;
+        case AwaResourceType_Integer:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsIntegerPointer(getResponse, path, (const AwaInteger **)&value));
+            break;
+        case AwaResourceType_Float:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsFloatPointer(getResponse, path, (const AwaFloat **)&value));
+            break;
+        case AwaResourceType_Boolean:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsBooleanPointer(getResponse, path, (const AwaBoolean **)&value));
+            break;
+        case AwaResourceType_Opaque:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsOpaque(getResponse, path, &receivedOpaque));
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsOpaquePointer(getResponse, path, (const AwaOpaque **)&value));
+            break;
+        case AwaResourceType_Time:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsTimePointer(getResponse, path, (const AwaTime **)&value));
+            break;
+        case AwaResourceType_ObjectLink:
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsObjectLink(getResponse, path, &receivedObjectLink));
+            ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsObjectLinkPointer(getResponse, path, (const AwaObjectLink **)&value));
+            break;
+        default:
+            ASSERT_TRUE(false);
+            break;
+        }
+
+
+        switch(data.Type)
+        {
+            case AwaResourceType_String:
+            {
+                ASSERT_STREQ((char*) data.Value, (char*) value);
+                break;
+            }
+            case AwaResourceType_Opaque:
+            {
+                AwaOpaque * expectedOpaque = (AwaOpaque *) data.Value;
+                AwaOpaque * receivedOpaquePointer = (AwaOpaque *) value;
+
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaquePointer->Size);
+                ASSERT_EQ(expectedOpaque->Size, receivedOpaque.Size);
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaquePointer->Data, expectedOpaque->Size));
+                ASSERT_EQ(0, memcmp(expectedOpaque->Data, receivedOpaque.Data, receivedOpaque.Size));
+                break;
+            }
+            case AwaResourceType_Integer:
+                ASSERT_EQ(*static_cast<const AwaInteger *>(data.Value), *static_cast<AwaInteger *>(value));
+                break;
+            case AwaResourceType_Float:
+                ASSERT_EQ(*static_cast<const AwaFloat *>(data.Value), *static_cast<AwaFloat *>(value));
+                break;
+            case AwaResourceType_Boolean:
+                ASSERT_EQ(*static_cast<const AwaBoolean *>(data.Value), *static_cast<AwaBoolean *>(value));
+                break;
+            case AwaResourceType_Time:
+                ASSERT_EQ(*static_cast<const AwaTime *>(data.Value), *static_cast<AwaTime *>(value));
+                break;
+            case AwaResourceType_ObjectLink:
+            {
+                const AwaObjectLink * expectedObjectLink = static_cast<const AwaObjectLink *>(data.Value);
+                const AwaObjectLink * receivedObjectLinkPointer = static_cast<AwaObjectLink *>(value);
+                ASSERT_EQ(0, memcmp(expectedObjectLink, receivedObjectLinkPointer, sizeof(AwaObjectLink)));
+                ASSERT_EQ(0, memcmp(expectedObjectLink, &receivedObjectLink, sizeof(AwaObjectLink)));
+                break;
+            }
+            default:
+                ASSERT_TRUE(false);
+        }
+
+
+        AwaClientGetOperation_Free(&getOperation);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -978,61 +1192,61 @@ INSTANTIATE_TEST_CASE_P(
         TestSetValueSingle,
         ::testing::Values(
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               detail::dummyString1,1,     AwaResourceType_String},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGER,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyInteger1,1,    AwaResourceType_Integer},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOAT,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyFloat1,1,      AwaResourceType_Float},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEAN,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUE,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIME,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyTime1,1,       AwaResourceType_Time},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink}
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,                   0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRING,     &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINK, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  0,                  AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_NON_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                   AWA_INVALID_ID, AWA_INVALID_ID,               &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink}
 
         ));
 
@@ -1041,110 +1255,183 @@ class TestSetValueArraySingle : public TestSetValue {};
 TEST_P(TestSetValueArraySingle, TestSetValueArraySingle)
 {
     detail::TestSetResource data = GetParam();
-    AwaClientSetOperation * setOperation = data.expectedProcessResult == AwaError_Success ? this->setOperation_ : NULL;
+    AwaClientSetOperation * setOperation = data.CreateSetOperation? AwaClientSetOperation_New(session_) : NULL;
     char path[128] = {0};
 
-    if(data.objectID == AWA_INVALID_ID)
+    if(data.ObjectID == AWA_INVALID_ID)
     {
         sprintf(path, "a/n in/valid/ path");
     }
     else
     {
-        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.objectID, data.objectInstanceID, data.resourceID));
+        EXPECT_EQ(AwaError_Success, AwaAPI_MakePath(path, sizeof(path), data.ObjectID, data.ObjectInstanceID, data.ResourceID));
     }
 
-    switch(data.type)
+    AwaArrayIndex resourceInstanceID = 1;
+
+    switch(data.Type)
     {
         case AwaResourceType_String:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsCString(setOperation, path, 1, (const char *)data.value));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsCString(setOperation, path, resourceInstanceID, (const char *)data.Value));
             break;
         case AwaResourceType_Integer:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, path, 1, *((AwaInteger*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, path, resourceInstanceID, *((AwaInteger*)data.Value)));
             break;
         case AwaResourceType_Float:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsFloat(setOperation, path, 1, *((AwaFloat*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsFloat(setOperation, path, resourceInstanceID, *((AwaFloat*)data.Value)));
             break;
         case AwaResourceType_Boolean:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsBoolean(setOperation, path, 1, *((AwaBoolean*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsBoolean(setOperation, path, resourceInstanceID, *((AwaBoolean*)data.Value)));
             break;
         case AwaResourceType_Opaque:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsOpaque(setOperation, path, 1, *((AwaOpaque*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsOpaque(setOperation, path, resourceInstanceID, *((AwaOpaque*)data.Value)));
             break;
         case AwaResourceType_Time:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsTime(setOperation, path, 1, *((AwaTime*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsTime(setOperation, path, resourceInstanceID, *((AwaTime*)data.Value)));
             break;
         case AwaResourceType_ObjectLink:
-            ASSERT_EQ(data.expectedAddResult, AwaClientSetOperation_AddArrayValueAsObjectLink(setOperation, path, 1, *((AwaObjectLink*)data.value)));
+            ASSERT_EQ(data.ExpectedAddResult, AwaClientSetOperation_AddArrayValueAsObjectLink(setOperation, path, resourceInstanceID, *((AwaObjectLink*)data.Value)));
             break;
         default:
             ASSERT_TRUE(false);
             break;
     }
 
-    ASSERT_EQ(data.expectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(data.ExpectedProcessResult, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
 
-    // FIXME: Check result and that the value was actually set
+    if (data.ExpectedProcessResult == AwaError_Success)
+    {
+        // Confirm the value was set correctly
+        AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
+        ASSERT_TRUE(NULL != getOperation);
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, path));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+        ASSERT_TRUE(NULL != getResponse);
+
+        AwaArray * getArray = NULL;
+
+        switch(data.Type)
+        {
+            case AwaResourceType_String:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, path, (const AwaStringArray **)&getArray));
+                EXPECT_STREQ(static_cast<const char *>(data.Value), AwaStringArray_GetValueAsCString((const AwaStringArray *)getArray, resourceInstanceID));
+                break;
+            }
+            case AwaResourceType_Integer:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, path, (const AwaIntegerArray **)&getArray));
+                EXPECT_EQ(*((AwaInteger *)data.Value), AwaIntegerArray_GetValue((const AwaIntegerArray *)getArray, resourceInstanceID));
+                break;
+            }
+            case AwaResourceType_Float:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, path, (const AwaFloatArray **)&getArray));
+                EXPECT_EQ(*((AwaFloat *)data.Value), AwaFloatArray_GetValue((const AwaFloatArray *)getArray, resourceInstanceID));
+                break;
+            }
+            case AwaResourceType_Boolean:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, path, (const AwaBooleanArray **)&getArray));
+                EXPECT_EQ(*((AwaBoolean *)data.Value), AwaBooleanArray_GetValue((const AwaBooleanArray *)getArray, resourceInstanceID));
+                break;
+            }
+            case AwaResourceType_Opaque:
+            {
+                AwaOpaque * expected = (AwaOpaque *)data.Value;
+
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, path, (const AwaOpaqueArray **)&getArray));
+                AwaOpaque actual = AwaOpaqueArray_GetValue((const AwaOpaqueArray *)getArray, resourceInstanceID);
+
+                EXPECT_EQ(expected->Size, actual.Size);
+                EXPECT_EQ(0, memcmp(expected->Data, actual.Data, expected->Size));
+                break;
+            }
+            case AwaResourceType_Time:
+            {
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, path, (const AwaTimeArray **)&getArray));
+                EXPECT_EQ(*((AwaTime *)data.Value), AwaTimeArray_GetValue((const AwaTimeArray *)getArray, resourceInstanceID));
+                break;
+            }
+            case AwaResourceType_ObjectLink:
+            {
+                AwaObjectLink * expected = (AwaObjectLink *)data.Value;
+                ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, path, (const AwaObjectLinkArray **)&getArray));
+                AwaObjectLink actual = AwaObjectLinkArray_GetValue((const AwaObjectLinkArray *)getArray, resourceInstanceID);
+
+                EXPECT_EQ(0, memcmp(expected, &actual, sizeof(*expected)));
+                break;
+            }
+            default:
+                ASSERT_TRUE(false);
+                break;
+        }
+
+        AwaClientGetOperation_Free(&getOperation);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
         TestSetValueArraySingle,
         TestSetValueArraySingle,
         ::testing::Values(
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    detail::dummyString1,1,     AwaResourceType_String},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_INTEGERARRAY,    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyInteger1,1,    AwaResourceType_Integer},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_FLOATARRAY,      &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyFloat1,1,      AwaResourceType_Float},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_BOOLEANARRAY,    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyBoolean1,1,    AwaResourceType_Boolean},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OPAQUEARRAY,     &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyOpaque1,1,     AwaResourceType_Opaque},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_TIMEARRAY,       &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyTime1,1,       AwaResourceType_Time},
 
-          detail::TestSetResource {AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_NotDefined,       AwaError_Success,          AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_TypeMismatch,     AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
-          detail::TestSetResource {AwaError_PathInvalid,      AwaError_Success,          AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink}
+          detail::TestSetResource {true, false, AwaError_Success,          AwaError_Success,          detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_NotDefined,       AwaError_OperationInvalid, AWA_MAX_ID - 1,               0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_TypeMismatch,     AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_STRINGARRAY,     &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  detail::TEST_RESOURCE_OBJECTLINKARRAY, &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, detail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink},
+          detail::TestSetResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,               AWA_INVALID_ID, AWA_INVALID_ID,                    &detail::dummyObjectLink1,1, AwaResourceType_ObjectLink}
 
         ));
 

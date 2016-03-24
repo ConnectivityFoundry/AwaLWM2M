@@ -39,7 +39,44 @@
 
 #define MAX_RESOURCE_INSTANCE_STR_LEN (12)
 
-AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type)
+static const char * SetArrayModeStrings[] =
+{
+    "Unspecified",
+    "Replace",
+    "Update",
+};
+
+static const char * SetArrayModeToString(SetArrayMode mode)
+{
+    const char * modeString = NULL;
+
+    if (mode > SetArrayMode_Unspecified && mode < SetArrayMode_LAST)
+    {
+        modeString = SetArrayModeStrings[mode];
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_Internal, "Unsupported SetArrayMode: %d", mode);
+    }
+
+    return modeString;
+}
+
+static SetArrayMode SetArrayModeFromString(char * setArrayModeString)
+{
+    SetArrayMode mode = SetArrayMode_Unspecified;
+    for (int i = 0; i < SetArrayMode_LAST; i++)
+    {
+        if (strcmp(setArrayModeString, SetArrayModeStrings[i]) == 0)
+        {
+            mode = i;
+            break;
+        }
+    }
+    return mode;
+}
+
+AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type, SetArrayMode setArrayMode)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -117,6 +154,26 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                                             }
                                             else
                                             {
+                                                if (setArrayMode != SetArrayMode_Unspecified)
+                                                {
+                                                    TreeNode setArrayModeNode = Xml_Find(resultNode, "SetArrayMode");
+
+                                                    if (!setArrayModeNode)
+                                                    {
+                                                        setArrayModeNode = Xml_CreateNodeWithValue("SetArrayMode", "%s", SetArrayModeToString(setArrayMode));
+                                                        TreeNode_AddChild(resultNode, setArrayModeNode);
+                                                    }
+                                                    else
+                                                    {
+                                                        SetArrayMode currentMode = SetArrayModeFromString((char *)TreeNode_GetValue(setArrayModeNode));
+                                                        if (currentMode == SetArrayMode_Update && setArrayMode == SetArrayMode_Replace)
+                                                        {
+                                                            char * newModeString = NULL;
+                                                            msprintf(&newModeString, "%s", SetArrayModeToString(setArrayMode));
+                                                        }
+                                                    }
+                                                }
+
                                                 if (SetWriteCommon_AddValueToResourceNode(resultNode, resourceInstanceID, encodedValue) == InternalError_Success)
                                                 {
                                                     result = AwaError_Success;

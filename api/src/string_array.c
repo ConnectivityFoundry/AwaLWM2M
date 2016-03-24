@@ -87,10 +87,10 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
 
     if (array != NULL)
     {
-        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
-        if (NulledStrings != NULL)
+        AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (nulledStrings != NULL)
         {
-            value = Array_GetValue((const AwaArray *)NulledStrings, index);
+            value = Array_GetValue((const AwaArray *)nulledStrings, index);
 
             if (value == NULL)
             {
@@ -102,9 +102,9 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
                 {
                     memcpy(nulledValue, nonNulledValue, nonNulledLength);
                     nulledValue[nonNulledLength] = '\0';
-                    Array_SetValue(NulledStrings, index, nulledValue, nonNulledLength + 1);
+                    Array_SetValue(nulledStrings, index, nulledValue, nonNulledLength + 1);
                     free(nulledValue);
-                    value = Array_GetValue((const AwaArray *)NulledStrings, index);
+                    value = Array_GetValue((const AwaArray *)nulledStrings, index);
                 }
                 else
                 {
