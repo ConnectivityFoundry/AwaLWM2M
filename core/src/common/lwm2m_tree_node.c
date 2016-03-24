@@ -59,6 +59,7 @@ static void Lwm2mTreeNode_Init(Lwm2mTreeNode * node)
     _node->Parent     = NULL;
     _node->Definition = NULL;
     _node->Create     = false;
+    _node->Replace    = false;
     ListInit(&_node->Children);
 }
 

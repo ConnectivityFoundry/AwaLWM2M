@@ -65,7 +65,8 @@ static const char * SetArrayModeToString(SetArrayMode mode)
 static SetArrayMode SetArrayModeFromString(char * setArrayModeString)
 {
     SetArrayMode mode = SetArrayMode_Unspecified;
-    for (int i = 0; i < SetArrayMode_LAST; i++)
+    int i = 0;
+    for (; i < SetArrayMode_LAST; i++)
     {
         if (strcmp(setArrayModeString, SetArrayModeStrings[i]) == 0)
         {
