@@ -1081,10 +1081,8 @@ static AwaFloat dummyFloat1 = 1.0;
 static AwaTime dummyTime1 = 0xA20AD72B;
 static AwaBoolean dummyBoolean1 = true;
 
-static char dummyOpaqueData[] = {'a',0,'x','\0', 123};
 //static int dummyObjLinkData[] = {-1,-1};
 
-AwaOpaque dummyOpaque1 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
 AwaObjectLink dummyObjectLink1 = { 3, 5 };
 AwaObjectLink dummyObjectLink2 = { 1, 7 };
 AwaObjectLink dummyObjectLink3 = { 0, 1 };
@@ -1098,8 +1096,14 @@ const AwaFloat dummyFloatArray2[] = {55.0, 0.0008, 11e10, 55.0, 0.0008, 11e10};
 const AwaBoolean dummyBooleanArray1[] = {true, false, true};
 const AwaBoolean dummyBooleanArray2[] = {true, false, true, true, false, true};
 
-AwaOpaque dummyOpaque2 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
-AwaOpaque dummyOpaque3 = {(void*) dummyOpaqueData, sizeof(dummyOpaqueData)};
+
+static char dummyOpaqueData1[] = {'a',0,'x','\0', 123};
+static char dummyOpaqueData2[] = {'a',0,'x','\0', 123, 'c', '2'};
+static char dummyOpaqueData3[] = {'a',0,'x','\0', 123, 1, 5, 0, 6};
+
+AwaOpaque dummyOpaque1 = {(void*) dummyOpaqueData1, sizeof(dummyOpaqueData1)};
+AwaOpaque dummyOpaque2 = {(void*) dummyOpaqueData2, sizeof(dummyOpaqueData2)};
+AwaOpaque dummyOpaque3 = {(void*) dummyOpaqueData3, sizeof(dummyOpaqueData3)};
 const AwaOpaque * dummyOpaqueArray1[] = {&dummyOpaque1, &dummyOpaque2, &dummyOpaque3};
 const AwaOpaque * dummyOpaqueArray2[] = {&dummyOpaque1, &dummyOpaque2, &dummyOpaque3, &dummyOpaque1, &dummyOpaque2, &dummyOpaque3};
 

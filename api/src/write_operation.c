@@ -379,6 +379,13 @@ static AwaError ServerWriteOperation_AddValues(AwaServerWriteOperation * operati
             void * value = ArrayIterator_GetValue(iterator);
             size_t length = ArrayIterator_GetValueLength(iterator);
 
+            if (type == AwaResourceType_OpaqueArray)
+            {
+                AwaOpaque * opaque = (AwaOpaque *)value;
+                length = opaque->Size;
+                value = opaque->Data;
+            }
+
             LogDebug("Adding value %p", value);
 
             if (value)
