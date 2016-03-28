@@ -1035,7 +1035,6 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
     AwaClientSession_Free(&clientSession);
 }
 
-
 ///***********************************************************************************************************
 // * WriteValue parameterised tests
 // */

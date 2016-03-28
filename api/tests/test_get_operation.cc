@@ -451,7 +451,6 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_handles_inval
     AwaClientGetOperation_Free(&operation);
 }
 
-
 /***********************************************************************************************************
  * GetValue parameterised tests
  */

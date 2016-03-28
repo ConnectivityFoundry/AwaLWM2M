@@ -169,20 +169,26 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                             {
                                 switch(type)
                                 {
+                                    case AwaResourceType_StringArray:
+                                    {
+                                        char * stringValue = Awa_MemAlloc(dataLength + 1);
+                                        memset(stringValue, 0, dataLength + 1);
+                                        memcpy(stringValue, dataValue, dataLength);
+                                        AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
+                                        Awa_MemSafeFree(stringValue);
+                                        break;
+                                    }
                                     case AwaResourceType_OpaqueArray:
                                     {
                                         AwaOpaque opaque;
-                                        opaque.Data = NULL;
+                                        opaque.Data = dataLength > 0 ? dataValue : NULL;
                                         opaque.Size = dataLength;
-                                        if (dataLength > 0)
-                                        {
-                                            opaque.Data = Awa_MemAlloc(dataLength);
-                                            memcpy(opaque.Data, dataValue, dataLength);
-                                        }
-                                        Array_SetValue(array, index, (void *)&opaque, sizeof(opaque));
+                                        AwaOpaqueArray_SetValue((AwaOpaqueArray *)array, index, opaque);
                                         break;
                                     }
                                     default:
+                                        // Array_SetValue should eventually be replaced with the explicit
+                                        // Awa*Array_SetValue functions.
                                         if (dataLength >= 0)
                                         {
                                             Array_SetValue(array, index, dataValue, dataLength);

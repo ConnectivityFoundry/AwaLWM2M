@@ -31,12 +31,12 @@ typedef struct _AwaArrayIterator _AwaCStringArrayIterator;
 AwaStringArray * AwaStringArray_New(void)
 {
     AwaStringArray * result = NULL;
-    AwaArray * NulledStrings = AwaArray_New();
+    AwaArray * nulledStrings = AwaArray_New();
 
-    if (NulledStrings != NULL)
+    if (nulledStrings != NULL)
     {
         result = (AwaStringArray *)AwaArray_New();
-        AwaArray_SetContext((AwaArray *)result, NulledStrings);
+        AwaArray_SetContext((AwaArray *)result, nulledStrings);
     }
 
     return result;
@@ -46,10 +46,10 @@ void AwaStringArray_Free(AwaStringArray ** array)
 {
     if ((array != NULL) && (*array != NULL))
     {
-        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)*array);
-        if (NulledStrings != NULL)
+        AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)*array);
+        if (nulledStrings != NULL)
         {
-            AwaArray_Free(&NulledStrings, AwaResourceType_StringArray);
+            AwaArray_Free(&nulledStrings, AwaResourceType_StringArray);
         }
         AwaArray_Free((AwaArray **)array, AwaResourceType_StringArray);
     }
@@ -59,10 +59,10 @@ void AwaStringArray_SetValueAsCString(AwaStringArray * array, AwaArrayIndex inde
 {
     if (array != NULL)
     {
-        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
-        if (NulledStrings != NULL)
+        AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (nulledStrings != NULL)
         {
-            Array_SetValue((AwaArray *)NulledStrings, index, (void *)value, strlen(value) + 1);
+            Array_SetValue((AwaArray *)nulledStrings, index, (void *)value, strlen(value) + 1);
         }
         Array_SetValue((AwaArray *)array, index, (void *)value, strlen(value));
     }
@@ -72,10 +72,10 @@ void AwaStringArray_DeleteValue(AwaStringArray * array, AwaArrayIndex index)
 {
     if (array != NULL)
     {
-        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
-        if (NulledStrings != NULL)
+        AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (nulledStrings != NULL)
         {
-            Array_DeleteItem((AwaArray *)NulledStrings, index, AwaResourceType_StringArray);
+            Array_DeleteItem((AwaArray *)nulledStrings, index, AwaResourceType_StringArray);
         }
         Array_DeleteItem((AwaArray *)array, index, AwaResourceType_StringArray);
     }
@@ -127,10 +127,10 @@ AwaCStringArrayIterator * AwaStringArray_NewCStringArrayIterator(const AwaString
     AwaCStringArrayIterator * iterator = NULL;
     if (array != NULL)
     {
-        AwaArray * NulledStrings = AwaArray_GetContext((AwaArray *)array);
-        if (NulledStrings != NULL)
+        AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
+        if (nulledStrings != NULL)
         {
-            iterator = (AwaCStringArrayIterator *)ArrayIterator_New((const AwaArray *)NulledStrings);
+            iterator = (AwaCStringArrayIterator *)ArrayIterator_New((const AwaArray *)nulledStrings);
         }
     }
     return iterator;
