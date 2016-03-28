@@ -1112,6 +1112,7 @@ const AwaInteger dummyTimeArray2[] = {16000, 8732222, 1111, 16000, 8732222, 1111
 
 
 const AwaObjectLink * dummyObjectLinkArray1[] = {&dummyObjectLink1, &dummyObjectLink2, &dummyObjectLink3};
+const AwaObjectLink * dummyObjectLinkArray2[] = {&dummyObjectLink1, &dummyObjectLink2, &dummyObjectLink3, &dummyObjectLink1, &dummyObjectLink2, &dummyObjectLink3};
 
 const AwaObjectID TEST_OBJECT_NON_ARRAY_TYPES = 10000;
 const AwaResourceID TEST_RESOURCE_STRING = 1;
@@ -1547,6 +1548,7 @@ INSTANTIATE_TEST_CASE_P(
           writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                         &writeDetail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
           writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, writeDetail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                         &writeDetail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
           writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                    AWA_INVALID_ID, AWA_INVALID_ID,                         &writeDetail::dummyTimeArray1,3,       AwaResourceType_TimeArray},
+          writeDetail::TestWriteResource {true, false, AwaError_AddInvalid,       AwaError_OperationInvalid,          writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_TIMEARRAY,       &writeDetail::dummyTimeArray2,6,       AwaResourceType_TimeArray},
 
           writeDetail::TestWriteResource {true, false, AwaError_Success,          AwaError_Success,          writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_OBJECTLINKARRAY, &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
           writeDetail::TestWriteResource {true, true, AwaError_Success,          AwaError_Success,          writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_OBJECTLINKARRAY, &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
@@ -1555,7 +1557,8 @@ INSTANTIATE_TEST_CASE_P(
           writeDetail::TestWriteResource {false, false, AwaError_OperationInvalid, AwaError_OperationInvalid, writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_OBJECTLINKARRAY, &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
           writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  AWA_INVALID_ID,                         &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
           writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, writeDetail::TEST_OBJECT_ARRAY_TYPES,  AWA_INVALID_ID, AWA_INVALID_ID,                         &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
-          writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                    AWA_INVALID_ID, AWA_INVALID_ID,                         &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray}
+          writeDetail::TestWriteResource {true, false, AwaError_PathInvalid,      AwaError_OperationInvalid, AWA_INVALID_ID,                    AWA_INVALID_ID, AWA_INVALID_ID,                         &writeDetail::dummyObjectLinkArray1,3, AwaResourceType_ObjectLinkArray},
+          writeDetail::TestWriteResource {true, false, AwaError_AddInvalid,          AwaError_OperationInvalid,          writeDetail::TEST_OBJECT_ARRAY_TYPES,  0,                  writeDetail::TEST_RESOURCE_OBJECTLINKARRAY, &writeDetail::dummyObjectLinkArray2,6, AwaResourceType_ObjectLinkArray}
         ));
 
 class TestWriteValueSingle : public TestWriteValue {};
