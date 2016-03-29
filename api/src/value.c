@@ -172,11 +172,19 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                     case AwaResourceType_StringArray:
                                     {
                                         char * stringValue = Awa_MemAlloc(dataLength + 1);
-                                        memset(stringValue, 0, dataLength + 1);
-                                        memcpy(stringValue, dataValue, dataLength);
-                                        AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
-                                        Awa_MemSafeFree(stringValue);
-                                        break;
+                                        if (stringValue != NULL)
+                                        {
+                                            memcpy(stringValue, dataValue, dataLength);
+                                            stringValue[dataLength] = 0;
+                                            AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
+                                            Awa_MemSafeFree(stringValue);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            LogErrorWithEnum(AwaError_OutOfMemory);
+                                            break;
+                                        }
                                     }
                                     case AwaResourceType_OpaqueArray:
                                     {
