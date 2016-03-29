@@ -551,7 +551,7 @@ AwaResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * cont
         node = Lwm2mTreeNode_GetNextChild(resourceNode, node);
     }
 
-    int numberOfExistingElements = Lwm2mCore_GetResourceInstanceCount(context, objectID, objectInstanceID, resourceID);
+    int numberOfExistingElements = Lwm2mTreeNode_IsReplaceFlagSet(resourceNode) ? 0 : Lwm2mCore_GetResourceInstanceCount(context, objectID, objectInstanceID, resourceID);
     if (numberOfNewElements + numberOfExistingElements > definition->MaximumInstances)
     {
         Lwm2m_Error("Too many resource instances for resource %d/%d/%d\n", objectID, objectInstanceID, resourceID);
@@ -668,6 +668,13 @@ static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * c
                 goto error;
             }
         }
+    }
+
+    if (Lwm2mTreeNode_IsReplaceFlagSet(resourceNode))
+    {
+        // set from client IPC
+        Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, true);
+        Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID);
     }
 
     // Perform the write

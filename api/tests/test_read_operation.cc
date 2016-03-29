@@ -606,7 +606,7 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
         {
             case AwaResourceType_String:
             {
-                ASSERT_STREQ((char*) data.expectedValue, (char*) data.expectedValue);
+                ASSERT_STREQ((char*) data.expectedValue, (char*) value);
                 break;
             }
             case AwaResourceType_Opaque:

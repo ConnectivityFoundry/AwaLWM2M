@@ -1025,4 +1025,433 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_objectlink_array_resource_ha
     AwaClientGetOperation_Free(&getOperation);
 }
 
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_string_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaStringArray * defaultArray = AwaStringArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        char value[8];
+        sprintf(value, "%d", i * 10);
+        AwaStringArray_SetValueAsCString(defaultArray, static_cast<size_t>(i), value);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsStringArray(customObjectDefinition, 1, "Test String Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaStringArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsStringArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_StringArray));
+
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaCStringArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaCStringArrayIterator_GetIndex(iterator));
+        EXPECT_STREQ(AwaStringArray_GetValueAsCString(defaultArray, i), AwaCStringArrayIterator_GetValueAsCString(iterator));
+    }
+    AwaCStringArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaStringArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_integer_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaIntegerArray * defaultArray = AwaIntegerArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        AwaIntegerArray_SetValue(defaultArray, static_cast<size_t>(i), i * 10);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray(customObjectDefinition, 1, "Test Integer Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaIntegerArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsIntegerArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_IntegerArray));
+
+    AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaIntegerArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaIntegerArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(AwaIntegerArray_GetValue(defaultArray, i), AwaIntegerArrayIterator_GetValue(iterator));
+    }
+    AwaIntegerArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaIntegerArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_float_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaFloatArray * defaultArray = AwaFloatArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        AwaFloatArray_SetValue(defaultArray, static_cast<size_t>(i), i * 10.1);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloatArray(customObjectDefinition, 1, "Test Float Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaFloatArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsFloatArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_FloatArray));
+
+    AwaFloatArrayIterator * iterator = AwaFloatArray_NewFloatArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaFloatArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaFloatArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(AwaFloatArray_GetValue(defaultArray, i), AwaFloatArrayIterator_GetValue(iterator));
+    }
+    AwaFloatArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaFloatArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_boolean_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaBooleanArray * defaultArray = AwaBooleanArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        AwaBooleanArray_SetValue(defaultArray, static_cast<size_t>(i), i % 2 == 0);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBooleanArray(customObjectDefinition, 1, "Test Boolean Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaBooleanArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsBooleanArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_BooleanArray));
+
+    AwaBooleanArrayIterator * iterator = AwaBooleanArray_NewBooleanArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaBooleanArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaBooleanArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(AwaBooleanArray_GetValue(defaultArray, i), AwaBooleanArrayIterator_GetValue(iterator));
+    }
+    AwaBooleanArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaBooleanArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_time_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaTimeArray * defaultArray = AwaTimeArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        AwaTimeArray_SetValue(defaultArray, static_cast<size_t>(i), i * 10);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTimeArray(customObjectDefinition, 1, "Test Time Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaTimeArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsTimeArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_TimeArray));
+
+    AwaTimeArrayIterator * iterator = AwaTimeArray_NewTimeArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaTimeArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaTimeArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(AwaTimeArray_GetValue(defaultArray, i), AwaTimeArrayIterator_GetValue(iterator));
+    }
+    AwaTimeArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaTimeArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_objectlink_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaObjectLinkArray * defaultArray = AwaObjectLinkArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        AwaObjectLink objectLink = {i, 10 - i};
+        AwaObjectLinkArray_SetValue(defaultArray, static_cast<size_t>(i), objectLink);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, 1, "Test ObjectLink Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaObjectLinkArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_ObjectLinkArray));
+
+    AwaObjectLinkArrayIterator * iterator = AwaObjectLinkArray_NewObjectLinkArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaObjectLinkArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaObjectLinkArrayIterator_GetIndex(iterator));
+        AwaObjectLink defaultObjectLink = AwaObjectLinkArray_GetValue(defaultArray, i);
+        AwaObjectLink receivedObjectLink = AwaObjectLinkArrayIterator_GetValue(iterator);
+
+        EXPECT_EQ(0, memcmp(&defaultObjectLink, &receivedObjectLink, sizeof(AwaObjectLink)));
+    }
+    AwaObjectLinkArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaObjectLinkArray_Free(&defaultArray);
+}
+
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_opaque_values)
+{
+    // Test that we can get the default values that an object was defined with
+    AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
+    EXPECT_TRUE(defineOperation != NULL);
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(10000, "Test Object", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    AwaOpaqueArray * defaultArray = AwaOpaqueArray_New();
+    for (int i = 0; i < 10; i++)
+    {
+        char dummyData[] = {'a', static_cast<char>(i), 0, 'c', '\0', 123};
+        AwaOpaque opaque = {dummyData, sizeof(dummyData)};
+        AwaOpaqueArray_SetValue(defaultArray, static_cast<size_t>(i), opaque);
+    }
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray(customObjectDefinition, 1, "Test Opaque Array Resource", 0, 10, AwaResourceOperations_ReadWrite, defaultArray));
+
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&defineOperation);
+
+    // Create a basic set operation to create the object instance / resource
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    // confirm we can iterate through the default value
+    AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(operation, "/10000/0/1"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
+    ASSERT_TRUE(NULL != response);
+
+
+    const AwaOpaqueArray * array = NULL;
+    AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(response, "/10000/0/1", &array);
+    ASSERT_TRUE(NULL != array);
+    EXPECT_EQ(0, Array_Compare((AwaArray *)defaultArray, (AwaArray *)array, AwaResourceType_OpaqueArray));
+
+    AwaOpaqueArrayIterator * iterator = AwaOpaqueArray_NewOpaqueArrayIterator(array);
+    for (int i = 0; i < 10; i++)
+    {
+        EXPECT_TRUE(AwaOpaqueArrayIterator_Next(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaOpaqueArrayIterator_GetIndex(iterator));
+
+        AwaOpaque defaultOpaque = AwaOpaqueArray_GetValue(defaultArray, i);
+        AwaOpaque receivedOpaque = AwaOpaqueArrayIterator_GetValue(iterator);
+
+        EXPECT_EQ(defaultOpaque.Size, receivedOpaque.Size);
+        EXPECT_EQ(0, memcmp(defaultOpaque.Data, receivedOpaque.Data, defaultOpaque.Size));
+    }
+    AwaOpaqueArrayIterator_Free(&iterator);
+
+    AwaClientGetOperation_Free(&operation);
+    AwaOpaqueArray_Free(&defaultArray);
+}
+
+
+
 } // namespace Awa

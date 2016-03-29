@@ -451,7 +451,6 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_handles_inval
     AwaClientGetOperation_Free(&operation);
 }
 
-
 /***********************************************************************************************************
  * GetValue parameterised tests
  */
@@ -645,7 +644,7 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
         {
             case AwaResourceType_String:
             {
-                ASSERT_STREQ((char*) data.expectedValue, (char*) data.expectedValue);
+                ASSERT_STREQ((char*) data.expectedValue, (char*) value);
                 break;
             }
             case AwaResourceType_Opaque:
@@ -1124,51 +1123,51 @@ TEST_P(TestGetValueArray, TestGetValueArrayInstantiation)
 
     switch(data.type)
     {
-    case AwaResourceType_StringArray:
-    {
-        expectedArray = (AwaArray *)this->expectedStringArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, data.path, (const AwaStringArray **)&array));
-        break;
-    }
-    case AwaResourceType_IntegerArray:
-    {
-        expectedArray = (AwaArray *)this->expectedIntegerArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, data.path, (const AwaIntegerArray **)&array));
-        break;
-    }
-    case AwaResourceType_FloatArray:
-    {
-        expectedArray = (AwaArray *)this->expectedFloatArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, data.path, (const AwaFloatArray **)&array));
-        break;
-    }
-    case AwaResourceType_BooleanArray:
-    {
-        expectedArray = (AwaArray *)this->expectedBooleanArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, data.path, (const AwaBooleanArray **)&array));
-        break;
-    }
-    case AwaResourceType_OpaqueArray:
-    {
-        expectedArray = (AwaArray *)this->expectedOpaqueArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, data.path, (const AwaOpaqueArray **)&array));
-        break;
-    }
-    case AwaResourceType_TimeArray:
-    {
-        expectedArray = (AwaArray *)this->expectedTimeArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, data.path, (const AwaTimeArray **)&array));
-        break;
-    }
-    case AwaResourceType_ObjectLinkArray:
-    {
-        expectedArray = (AwaArray *)this->expectedObjectLinkArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, data.path, (const AwaObjectLinkArray **)&array));
-        break;
-    }
-    default:
-        ASSERT_TRUE(false);
-        break;
+        case AwaResourceType_StringArray:
+        {
+            expectedArray = (AwaArray *)this->expectedStringArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, data.path, (const AwaStringArray **)&array));
+            break;
+        }
+        case AwaResourceType_IntegerArray:
+        {
+            expectedArray = (AwaArray *)this->expectedIntegerArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, data.path, (const AwaIntegerArray **)&array));
+            break;
+        }
+        case AwaResourceType_FloatArray:
+        {
+            expectedArray = (AwaArray *)this->expectedFloatArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, data.path, (const AwaFloatArray **)&array));
+            break;
+        }
+        case AwaResourceType_BooleanArray:
+        {
+            expectedArray = (AwaArray *)this->expectedBooleanArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, data.path, (const AwaBooleanArray **)&array));
+            break;
+        }
+        case AwaResourceType_OpaqueArray:
+        {
+            expectedArray = (AwaArray *)this->expectedOpaqueArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, data.path, (const AwaOpaqueArray **)&array));
+            break;
+        }
+        case AwaResourceType_TimeArray:
+        {
+            expectedArray = (AwaArray *)this->expectedTimeArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, data.path, (const AwaTimeArray **)&array));
+            break;
+        }
+        case AwaResourceType_ObjectLinkArray:
+        {
+            expectedArray = (AwaArray *)this->expectedObjectLinkArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, data.path, (const AwaObjectLinkArray **)&array));
+            break;
+        }
+        default:
+            ASSERT_TRUE(false);
+            break;
     }
     ASSERT_TRUE((data.expectedResult == AwaError_Success) == (array != NULL));
     if (array != NULL)

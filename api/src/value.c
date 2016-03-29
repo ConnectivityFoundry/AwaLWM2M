@@ -118,87 +118,131 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
         {
             uint32_t childIndex = 0;
             TreeNode resourceInstance = TreeNode_GetChild(rootNode, childIndex);
-            AwaArray * array = AwaArray_New();
-
-            while ((resourceInstance = TreeNode_GetChild(rootNode, childIndex)) != NULL)
+            AwaArray * array = NULL;
+            switch(type)
             {
-                if (strcmp(TreeNode_GetName(resourceInstance), "ResourceInstance") == 0)
+                case AwaResourceType_StringArray:
+                    array = (AwaArray *) AwaStringArray_New();
+                    break;
+                case AwaResourceType_IntegerArray:
+                    array = (AwaArray *) AwaIntegerArray_New();
+                    break;
+                case AwaResourceType_FloatArray:
+                    array = (AwaArray *) AwaFloatArray_New();
+                    break;
+                case AwaResourceType_BooleanArray:
+                    array = (AwaArray *) AwaBooleanArray_New();
+                    break;
+                case AwaResourceType_OpaqueArray:
+                    array = (AwaArray *) AwaOpaqueArray_New();
+                    break;
+                case AwaResourceType_TimeArray:
+                    array = (AwaArray *) AwaTimeArray_New();
+                    break;
+                case AwaResourceType_ObjectLinkArray:
+                    array = (AwaArray *) AwaObjectLinkArray_New();
+                    break;
+                default:
+                    LogErrorWithEnum(AwaError_Internal, "Could not create array of type %d", type);
+                    break;
+            }
+
+            if (array != NULL)
+            {
+                while ((resourceInstance = TreeNode_GetChild(rootNode, childIndex)) != NULL)
                 {
-                    TreeNode idNode = Xml_Find(resourceInstance, "ID");
-                    valueNode = Xml_Find(resourceInstance, "Value");
-
-                    if ((valueNode != NULL) && (idNode != NULL))
+                    if (strcmp(TreeNode_GetName(resourceInstance), "ResourceInstance") == 0)
                     {
-                        AwaArrayIndex index = xmlif_GetInteger(idNode, "ID");
+                        TreeNode idNode = Xml_Find(resourceInstance, "ID");
+                        valueNode = Xml_Find(resourceInstance, "Value");
 
-                        const char * data = (const char *)TreeNode_GetValue(valueNode);
-                        char * dataValue = NULL;
-                        AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
-                        int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
-
-                        if (dataValue)
+                        if ((valueNode != NULL) && (idNode != NULL))
                         {
-                            switch(type)
+                            AwaArrayIndex index = xmlif_GetInteger(idNode, "ID");
+
+                            const char * data = (const char *)TreeNode_GetValue(valueNode);
+                            char * dataValue = NULL;
+                            AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
+                            int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
+
+                            if (dataValue)
                             {
-                                case AwaResourceType_OpaqueArray:
+                                switch(type)
                                 {
-                                    AwaOpaque opaque;
-                                    opaque.Data = NULL;
-                                    opaque.Size = dataLength;
-                                    if (dataLength > 0)
+                                    case AwaResourceType_StringArray:
                                     {
-                                        opaque.Data = Awa_MemAlloc(dataLength);
-                                        memcpy(opaque.Data, dataValue, dataLength);
+                                        char * stringValue = Awa_MemAlloc(dataLength + 1);
+                                        if (stringValue != NULL)
+                                        {
+                                            memcpy(stringValue, dataValue, dataLength);
+                                            stringValue[dataLength] = 0;
+                                            AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
+                                            Awa_MemSafeFree(stringValue);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            LogErrorWithEnum(AwaError_OutOfMemory);
+                                            break;
+                                        }
                                     }
-                                    Array_SetValue(array, index, (void *)&opaque, sizeof(opaque));
-                                    break;
+                                    case AwaResourceType_OpaqueArray:
+                                    {
+                                        AwaOpaque opaque;
+                                        opaque.Data = dataLength > 0 ? dataValue : NULL;
+                                        opaque.Size = dataLength;
+                                        AwaOpaqueArray_SetValue((AwaOpaqueArray *)array, index, opaque);
+                                        break;
+                                    }
+                                    default:
+                                        // Array_SetValue should eventually be replaced with the explicit
+                                        // Awa*Array_SetValue functions.
+                                        if (dataLength >= 0)
+                                        {
+                                            Array_SetValue(array, index, dataValue, dataLength);
+                                        }
+                                        break;
                                 }
-                                default:
-                                    if (dataLength >= 0)
-                                    {
-                                        Array_SetValue(array, index, dataValue, dataLength);
-                                    }
-                                    break;
+                                free(dataValue);
                             }
-                            free(dataValue);
+                            else
+                            {
+                                LogErrorWithEnum(AwaError_Internal, "resource instance failed to decode");
+                                AwaArray_Free(&array, type);
+                                break;
+                            }
                         }
                         else
                         {
-                            LogErrorWithEnum(AwaError_Internal, "resource instance failed to decode");
+                            LogErrorWithEnum(AwaError_Internal, "invalid resource instance");
                             AwaArray_Free(&array, type);
                             break;
                         }
                     }
                     else
                     {
-                        LogErrorWithEnum(AwaError_Internal, "invalid resource instance");
-                        AwaArray_Free(&array, type);
-                        break;
+                        //skip ID etc
+                        LogDebug("value skip %s", TreeNode_GetName(resourceInstance));
                     }
-                }
-                else
-                {
-                    //skip ID etc
-                    LogDebug("value skip %s", TreeNode_GetName(resourceInstance));
+
+                    childIndex++;
                 }
 
-                childIndex++;
-            }
-
-            if (array != NULL)
-            {
-                value = Awa_MemAlloc(sizeof(*value));
-                if (value != NULL)
+                if (array != NULL)
                 {
-                    memset(value, 0, sizeof(*value));
-                    value->Type = type;
-                    value->Length = sizeof(array);
-                    value->Data = array;
-                    LogNew("Value", value);
-                }
-                else
-                {
-                    AwaArray_Free(&array, type);
+                    value = Awa_MemAlloc(sizeof(*value));
+                    if (value != NULL)
+                    {
+                        memset(value, 0, sizeof(*value));
+                        value->Type = type;
+                        value->Length = sizeof(array);
+                        value->Data = array;
+                        LogNew("Value", value);
+                    }
+                    else
+                    {
+                        AwaArray_Free(&array, type);
+                    }
                 }
             }
         }
@@ -217,7 +261,33 @@ void Value_Free(Value ** value)
         LogFree("Value", *value);
         if (((*value)->Type >= AwaResourceType_FirstArrayType) && ( (*value)->Type <= AwaResourceType_LastArrayType))
         {
-            AwaArray_Free((AwaArray **)&((*value)->Data), (*value)->Type);
+            switch((*value)->Type)
+            {
+                case AwaResourceType_StringArray:
+                    AwaStringArray_Free((AwaStringArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_IntegerArray:
+                    AwaIntegerArray_Free((AwaIntegerArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_FloatArray:
+                    AwaFloatArray_Free((AwaFloatArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_BooleanArray:
+                    AwaBooleanArray_Free((AwaBooleanArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_OpaqueArray:
+                    AwaOpaqueArray_Free((AwaOpaqueArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_TimeArray:
+                    AwaTimeArray_Free((AwaTimeArray **)&((*value)->Data));
+                    break;
+                case AwaResourceType_ObjectLinkArray:
+                    AwaObjectLinkArray_Free((AwaObjectLinkArray **)&((*value)->Data));
+                    break;
+                default:
+                    LogErrorWithEnum(AwaError_Internal, "Could not free array of type %d", (*value)->Type);
+                    break;
+            }
         }
         else
         {

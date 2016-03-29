@@ -60,6 +60,9 @@ int Lwm2mTreeNode_GetID(Lwm2mTreeNode * node, int * id);
 int Lwm2mTreeNode_SetCreateFlag(Lwm2mTreeNode * node, bool create);
 bool Lwm2mTreeNode_IsCreateFlagSet(Lwm2mTreeNode * node);
 
+int Lwm2mTreeNode_SetReplaceFlag(Lwm2mTreeNode * node, bool replace);
+bool Lwm2mTreeNode_IsReplaceFlagSet(Lwm2mTreeNode * node);
+
 int Lwm2mTreeNode_AddChild(Lwm2mTreeNode * node, Lwm2mTreeNode * child);
 bool Lwm2mTreeNode_HasChildren(Lwm2mTreeNode * node);
 int Lwm2mTreeNode_GetChildCount(Lwm2mTreeNode * node);

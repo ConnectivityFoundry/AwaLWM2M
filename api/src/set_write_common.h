@@ -41,6 +41,17 @@ extern "C" {
 #endif
 
 /**
+ * Supported set modes
+ */
+typedef enum
+{
+    SetArrayMode_Unspecified = 0, /**< Indicates that no set array mode has been set */
+    SetArrayMode_Replace,         /**< Indicates that performing a set operation on a multiple instance resource should replace the entire array */
+    SetArrayMode_Update,          /**< Indicates that performing a set operation on a multiple instance resource should only update resource instances that have changed */
+    SetArrayMode_LAST,            /**< Sentinel */
+} SetArrayMode;
+
+/**
  * @brief Add a value to an existing resource node returned from the process of building a tree from one or more paths
  * @param[in] propertyNode The resource node of an Objects tree to add the value to
  * @param[in] resourceInstanceID the ID of the value we are adding
@@ -59,7 +70,7 @@ InternalError SetWriteCommon_AddValueToResourceNode(TreeNode propertyNode, int r
  */
 InternalError SetWriteCommon_SetResourceNodeValue(TreeNode resourceNode, const char * value);
 
-AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type);
+AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type, SetArrayMode setArrayMode);
 
 // Encode a value into a string to be copied into a LWM2M Tree Node.
 // The encoded value that is returned must be explicitly freed by the caller.
