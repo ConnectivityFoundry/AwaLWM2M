@@ -342,7 +342,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsStringArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -387,7 +387,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -432,7 +432,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsFloatArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -477,7 +477,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsBooleanArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -525,7 +525,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaqueArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -570,7 +570,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsTimeArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -615,7 +615,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
     ASSERT_TRUE(NULL != customObjectDefinition);
 
-    // in order for DEFAULTS to be created, minimum instances must be > 1
+    // in order for DEFAULTS to be created, minimum instances must be >= 1
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
     ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
@@ -1026,7 +1026,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, optional_objectlink_array_resource_ha
 }
 
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_string_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_string_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1087,7 +1087,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaStringArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_integer_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_integer_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1146,7 +1146,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaIntegerArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_float_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_float_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1205,7 +1205,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaFloatArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_boolean_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_boolean_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1264,7 +1264,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaBooleanArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_time_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_time_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1323,7 +1323,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaTimeArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_objectlink_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_objectlink_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
@@ -1386,7 +1386,7 @@ TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_ite
     AwaObjectLinkArray_Free(&defaultArray);
 }
 
-TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_opaque_values)
+TEST_F(TestClientDefineDefaultsWithDaemon, AwaClientGetOperation_receive_and_iterate_default_opaque_array_values)
 {
     // Test that we can get the default values that an object was defined with
     AwaClientDefineOperation * defineOperation = AwaClientDefineOperation_New(session_);
