@@ -1835,26 +1835,56 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
         Lwm2mTreeNode * objectNode = Lwm2mTreeNode_GetFirstChild(root);
         while(objectNode != NULL)
         {
+            int objectID;
+            Lwm2mTreeNode_GetID(objectNode, &objectID);
+            TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(requestContext->ResponseObjectsTree, "Object", objectID);
+
             bool createObjectWithoutSpecifyingInstanceID = Lwm2mTreeNode_IsCreateFlagSet(objectNode);
             if (createObjectWithoutSpecifyingInstanceID)
             {
-                xmlif_AddDefaultsForMissingMandatoryValues(context, objectNode);
-                if (xmlif_SendCoapCreateRequest(request, client, objectNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                if (xmlif_AddDefaultsForMissingMandatoryValues(context, objectNode) == 0)
                 {
-                    numCoapRequests++;
+                    if (xmlif_SendCoapCreateRequest(request, client, objectNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                    {
+                        numCoapRequests++;
+                    }
+                    else
+                    {
+                        IPC_AddResultTag(responseObjectNode, AwaError_Internal);
+                        continue;
+                    }
+                }
+                else
+                {
+                    IPC_AddResultTag(responseObjectNode, AwaError_Internal);
+                    continue;
                 }
             }
             else
             {
                 Lwm2mTreeNode * objectInstanceNode = Lwm2mTreeNode_GetFirstChild(objectNode);
+                int objectInstanceID;
+                Lwm2mTreeNode_GetID(objectInstanceNode, &objectInstanceID);
+                TreeNode responseObjectInstanceNode = ObjectsTree_FindOrCreateChildNode(responseObjectNode, "ObjectInstance", objectInstanceID);
+
                 while(objectInstanceNode != NULL)
                 {
                     if (Lwm2mTreeNode_IsCreateFlagSet(objectInstanceNode))
                     {
-                        xmlif_AddDefaultsForMissingMandatoryValues(context, objectInstanceNode);
-                        if (xmlif_SendCoapCreateRequest(request, client, objectInstanceNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                        if (xmlif_AddDefaultsForMissingMandatoryValues(context, objectInstanceNode) == 0)
                         {
-                            numCoapRequests++;
+                            if (xmlif_SendCoapCreateRequest(request, client, objectInstanceNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                            {
+                                numCoapRequests++;
+                            }
+                            else
+                            {
+                                IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
+                            }
+                        }
+                        else
+                        {
+                            IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
                         }
                     }
                     else
@@ -1862,6 +1892,10 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                         if (xmlif_SendCoapWriteRequest(request, client, objectInstanceNode, xmlif_HandlerWriteResponse, requestContext, defaultWriteMode) != -1)
                         {
                             numCoapRequests++;
+                        }
+                        else
+                        {
+                            IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
                         }
                     }
 
