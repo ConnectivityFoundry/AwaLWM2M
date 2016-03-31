@@ -63,6 +63,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -109,6 +111,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -154,6 +158,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
@@ -207,6 +213,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
         AwaClientDefineOperation_Free(&clientDefineOperation);
         AwaServerDefineOperation_Free(&serverDefineOperation);
 
+        WaitForClientDefinition(customObjectID);
+
         // Create a write operation to create the custom object.
         // The write operation should add the defaults to the CoAP create packet.
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -255,6 +263,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -302,6 +312,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -347,6 +359,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
@@ -395,6 +409,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
@@ -452,6 +468,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/10000/0"));
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
@@ -496,6 +514,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
@@ -546,6 +566,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
@@ -600,6 +622,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -650,6 +674,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
+    WaitForClientDefinition(customObjectID);
+
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
@@ -699,6 +725,8 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
     AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
 
     // Create a write operation to create the custom object.
     // The write operation should add the defaults to the CoAP create packet.
