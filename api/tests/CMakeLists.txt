@@ -47,6 +47,7 @@ set (test_api_runner_SOURCES
   
   test_server_session.cc
   test_server_define_operation.cc
+  test_server_define_defaults.cc
   test_list_clients_operation.cc
   test_write_operation.cc
   test_set_write_common.cc

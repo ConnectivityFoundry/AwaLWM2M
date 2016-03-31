@@ -362,27 +362,31 @@ static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType
 
                     if (objectTree)
                     {
-                        const void * defaultData = NULL;
-                        int defaultLen = 0;
-                        if (definition->MaximumInstances == 1)  // multiple instance resources should be empty by default
+                        if (definition->MaximumInstances == 1 || definition->MinimumInstances > 0)  // optional multiple instance resources should be empty by default
                         {
-                            if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+                            ResourceInstanceIDType resourceInstanceID = 0;
+                            int minimumInstances = definition->MinimumInstances > 0 ? definition->MinimumInstances : 1;
+                            for (; resourceInstanceID < minimumInstances; resourceInstanceID++)
                             {
-                                ResourceInstanceIDType resourceInstanceID = 0;
-                                if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                                const void * defaultData = NULL;
+                                int defaultLen = 0;
+                                if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
                                 {
-                                    Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
-                                    result = 0;
+                                    if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                                    {
+                                        Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                                        result = 0;
+                                    }
+                                    else
+                                    {
+                                        result = -1;
+                                    }
                                 }
                                 else
                                 {
+                                    Lwm2m_Error("Failed to set sensible default for /%d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
                                     result = -1;
                                 }
-                            }
-                            else
-                            {
-                                Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-                                result = -1;;
                             }
                         }
                         else
