@@ -58,6 +58,7 @@ set (test_api_runner_SOURCES
   test_execute_operation.cc
   
   test_bootstrap.cc
+  test_daemon.cc
 )
 
 set (test_api_runner_INCLUDE_DIRS

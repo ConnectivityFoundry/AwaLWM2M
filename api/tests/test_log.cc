@@ -30,44 +30,46 @@ namespace Awa {
 
 class TestLog : public TestClientBase {};
 
-class TestLogCaptureFile : public TestLog, public CaptureFile
+template <typename T>
+class CaptureLog : public T
 {
 protected:
-    virtual void SetUp() {
-        CaptureFile::SetUp();
-        TestLog::SetUp();
-    }
-    virtual void TearDown() {
-        TestLog::TearDown();
-        CaptureFile::TearDown();
+    virtual const char * Read() const {
+        auto read = T::Read();
+
+        // a prefix of '[file:lineno] ' is prepended, advance beyond this
+        if ((read != nullptr) && (strlen(read) > 0))
+        {
+            if (strchr(read, '[') != nullptr)
+            {
+                auto msg = strchr(read, ']');
+                if (msg != NULL && ((msg + 2) < read + strlen(read)))
+                {
+                    read = msg + 2;
+                }
+            }
+        }
+        return read;
     }
 };
 
-class TestLogCaptureStdout : public TestLog, public CaptureStdout
+template <typename CaptureSource>
+class TestLogCapture : public TestLog, public CaptureLog<CaptureSource>
 {
 protected:
     virtual void SetUp() {
-        CaptureStdout::SetUp();
+        CaptureSource::SetUp();
         TestLog::SetUp();
     }
     virtual void TearDown() {
         TestLog::TearDown();
-        CaptureStdout::TearDown();
+        CaptureSource::TearDown();
     }
 };
 
-class TestLogCaptureStderr : public TestLog, public CaptureStderr
-{
-protected:
-    virtual void SetUp() {
-        CaptureStderr::SetUp();
-        TestLog::SetUp();
-    }
-    virtual void TearDown() {
-        TestLog::TearDown();
-        CaptureStderr::TearDown();
-    }
-};
+typedef TestLogCapture<CaptureFile> TestLogCaptureFile;
+typedef TestLogCapture<CaptureStdout> TestLogCaptureStdout;
+typedef TestLogCapture<CaptureStderr> TestLogCaptureStderr;
 
 TEST_F(TestLogCaptureFile, test_Log_level_None)
 {

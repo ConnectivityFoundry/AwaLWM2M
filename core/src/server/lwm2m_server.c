@@ -62,6 +62,7 @@ typedef struct
     char * InterfaceName;
     int AddressFamily;
     int ContentType;
+    bool Version;
 } Options;
 
 static FILE * logFile = NULL;
@@ -143,6 +144,12 @@ static int Lwm2mServer_Start(Options * options)
         {
             Lwm2m_Error("Failed to open log file %s: %s\n", options->LogFile, strerror(errno));
         }
+    }
+
+    if (options->Version)
+    {
+        Lwm2m_Printf(0, "%s\n", version);
+        goto error_close_log;
     }
 
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
@@ -262,24 +269,26 @@ error_close_log:
 
 static void PrintUsage(void)
 {
-    printf("Imagination Technologies LWM2M Server - %s\n\n", version);
+    printf("Awa LWM2M Server, version %s\n", version);
+    printf("Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies.\n\n");
 
     printf("Usage: awa_serverd [options]\n\n");
 
     printf("Options:\n");
-    printf("  --ip                : IP address for server\n");
-    printf("  --interface         : Network interface for server\n");
-    printf("  --addressFamily     : Address family for network interface. 4 for IPv4, 6 for IPv6\n");
-    printf("  --port, -p          : port number for CoAP communications\n");
-    printf("  --ipcPort, -i       : port number for IPC communications\n");
-    printf("  --contentType, -m   : Content Type ID (default 1542 - TLV)\n");
-    printf("  --logFile           : log filename\n");
-    printf("  --daemonise, -d     : run as daemon\n");
-    printf("  --verbose, -v       : enable verbose output\n");
-    printf("  --help              : show usage\n\n");
+    printf("  --ip, -a ADDR           : Accept client registration requests on IP address ADDR\n");
+    printf("  --interface, -e IF      : Accept client registration requests on network interface IF\n");
+    printf("  --addressFamily, -f AF  : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
+    printf("  --port, -p PORT         : Use port number PORT for CoAP communications\n");
+    printf("  --ipcPort, -i PORT      : Use port number PORT for IPC communications\n");
+    printf("  --contentType, -m ID    : Use Content Type ID (default 1542=TLV)\n");
+    printf("  --daemonise, -d         : Detach process from terminal and run in the background\n");
+    printf("  --verbose, -v           : Generate verbose output\n");
+    printf("  --logFile, -l FILE      : Log output to FILE\n");
+    printf("  --version, -V           : Print version and exit\n");
+    printf("  --help, -h              : Show usage\n\n");
 
     printf("Example:\n");
-    printf("    awa_serverd --interface eth0 --addressFamily 4 --port 5683\n");
+    printf("    awa_serverd --interface eth0 --addressFamily 4 --port 5683\n\n");
 
 }
 
@@ -314,11 +323,12 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"verbose",       no_argument,       0, 'v'},
             {"daemonise",     no_argument,       0, 'd'},
             {"logFile",       required_argument, 0, 'l'},
+            {"version",       no_argument,       0, 'V'},
             {"help",          no_argument,       0, 'h'},
             {0,               0,                 0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "a:e:f:p:i:m:vdl:h", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "p:a:i:e:f:m:vdl:Vh", longOptions, &optionIndex);
         if (c == -1)
         {
             break;
@@ -353,6 +363,9 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             case 'l':
                 options->LogFile = optarg;
                 break;
+            case 'V':
+                options->Version = true;
+                break;
             case 'h':
             default:
                 PrintUsage();
@@ -376,6 +389,7 @@ int main(int argc, char ** argv)
         .InterfaceName = NULL,
         .AddressFamily = AF_INET,
         .ContentType = ContentType_ApplicationOmaLwm2mTLV,
+        .Version = false,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)

@@ -472,7 +472,7 @@ static int fd_set_blocking(int fd, int blocking) {
     return 0;
 }
 
-const size_t BUF_SIZE = 256;
+const size_t BUF_SIZE = 4096;
 
 static void null_terminate_buffer(char * buffer, int rc, size_t bufSize)
 {
@@ -545,17 +545,7 @@ protected:
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
       detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
-
-      if (strlen(buffer_) > 0)
-      {
-          // a prefix of '[file:lineno] ' is prepended, advance beyond this
-          char * result = strchr(buffer_, ']') + 2;
-          return ((result != NULL) && (result <= (buffer_ + strlen(buffer_)))) ? result : buffer_;
-      }
-      else
-      {
-          return buffer_;
-      }
+      return buffer_;
   }
 
   FILE * outFile_;
@@ -624,17 +614,7 @@ protected:
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
       detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
-
-      if (strlen(buffer_) > 0)
-      {
-          // a prefix of '[file:lineno] ' is prepended, advance beyond this
-          char * result = strchr(buffer_, ']') + 2;
-          return ((result != NULL) && (result <= (buffer_ + strlen(buffer_)))) ? result : buffer_;
-      }
-      else
-      {
-          return buffer_;
-      }
+      return buffer_;
   }
 private:
   FILE * stream_;

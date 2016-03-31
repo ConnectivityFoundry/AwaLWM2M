@@ -38,7 +38,7 @@
 #include <errno.h>
 #include <signal.h>
 
-#include "lwm2m_core.h"  
+#include "lwm2m_core.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "lwm2m_bootstrap.h"
@@ -70,6 +70,7 @@ typedef struct
     char * LogFile;
     int AddressFamily;
     const char * FactoryBootstrapFile;
+    bool Version;
 } Options;
 
 
@@ -167,6 +168,12 @@ static int Lwm2mClient_Start(Options * options)
         {
             Lwm2m_Error("Failed to open log file %s: %s\n", options->LogFile, strerror(errno));
         }
+    }
+
+    if (options->Version)
+    {
+        Lwm2m_Printf(0, "%s\n", version);
+        goto error_close_log;
     }
 
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
@@ -298,22 +305,24 @@ error_close_log:
 
 static void PrintUsage(void)
 {
-    printf("Imagination Technologies LWM2M Client - %s\n\n", version);
+    printf("Awa LWM2M Client, version %s\n", version);
+    printf("Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies.\n\n");
 
     printf("Usage: awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]]\n\n");
 
     printf("Options:\n");
-    printf("  --port, -p          : Local port number for CoAP communications\n");
-    printf("  --addressFamily     : Address family for network interface. 4 for IPv4, 6 for IPv6\n");
-    printf("  --ipcPort, -i       : port number for IPC communications\n");
-    printf("  --endPointName, -e  : client end point name\n");
-    printf("  --bootstrap, -b     : bootstrap server URI\n");
-    printf("  --factoryBootstrap, -f\n"
-           "                      : factory bootstrap information file\n");
-    printf("  --logFile, -l       : log filename\n");
-    printf("  --daemonise, -d     : run as daemon\n");
-    printf("  --verbose, -v       : enable verbose output\n");
-    printf("  --help              : show usage\n\n");
+    printf("  --port, -p PORT          : Use local port number PORT for CoAP communications\n");
+    printf("  --addressFamily, -f AF   : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
+    printf("  --ipcPort, -i PORT       : Use port number PORT for IPC communications\n");
+    printf("  --endPointName, -e NAME  : Use NAME as client end point name\n");
+    printf("  --bootstrap, -b URI      : Use bootstrap server URI\n");
+    printf("  --factoryBootstrap, -f FILE\n"
+           "                           : Load factory bootstrap information from FILE\n");
+    printf("  --daemonise, -d          : Detach process from terminal and run in the background\n");
+    printf("  --verbose, -v            : Generate verbose output\n");
+    printf("  --logFile, -l FILE       : Log output to FILE\n");
+    printf("  --version, -V            : Print version and exit\n");
+    printf("  --help, -h               : Show usage\n\n");
 
     printf("Example:\n");
     printf("    awa_clientd --port 6000 --endPointName client1 --bootstrap coap://[::1]:2134\n\n");
@@ -339,22 +348,23 @@ static int ParseOptions(int argc, char ** argv, Options * options)
     {
         int optionIndex = 0;
 
-        static struct option longOptions[] = 
+        static struct option longOptions[] =
         {
             {"port",             required_argument, 0, 'p'},
             {"addressFamily",    required_argument, 0, 'a'},
             {"ipcPort",          required_argument, 0, 'i'},
             {"bootstrap",        required_argument, 0, 'b'},
+            {"factoryBootstrap", required_argument, 0, 'f'},
             {"endPointName",     required_argument, 0, 'e'},
             {"verbose",          no_argument,       0, 'v'},
             {"daemonise",        no_argument,       0, 'd'},
-            {"help",             no_argument,       0, 'h'},
             {"logFile",          required_argument, 0, 'l'},
-            {"factoryBootstrap", required_argument, 0, 'f'},
+            {"version",          no_argument,       0, 'V'},
+            {"help",             no_argument,       0, 'h'},
             {0,                  0,                 0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "p:a:i:b:e:vhl:df:", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "p:a:i:b:f:e:vdl:Vh", longOptions, &optionIndex);
         if (c == -1)
         {
             break;
@@ -374,11 +384,11 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             case 'b':
                 options->BootStrap = optarg;
                 break;
+            case 'f':
+                options->FactoryBootstrapFile = optarg;
+                break;
             case 'e':
                 options->EndPointName = optarg;
-                break;
-            case 'l':
-                options->LogFile = optarg;
                 break;
             case 'd':
                 options->Daemonise = true;
@@ -386,8 +396,11 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             case 'v':
                 options->Verbose = true;
                 break;
-            case 'f':
-                options->FactoryBootstrapFile = optarg;
+            case 'l':
+                options->LogFile = optarg;
+                break;
+            case 'V':
+                options->Version = true;
                 break;
             case 'h':
             default:
@@ -397,7 +410,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
     }
 
     // Check to see if at least one bootstrap option is specified
-    if ((options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
+    if (!options->Version && (options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
     {
         printf("Error: please specify a bootstrap option (--bootstrap or --factoryBootstrap)\n\n");
         PrintUsage();
@@ -420,6 +433,7 @@ int main(int argc, char ** argv)
         .LogFile = NULL,
         .AddressFamily = AF_INET,
         .FactoryBootstrapFile = NULL,
+        .Version = false,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)
