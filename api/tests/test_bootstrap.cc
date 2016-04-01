@@ -81,7 +81,9 @@ TEST_F(TestBootstrapServer, bootstrap_with_single_client)
     clientDaemon.SetEndpointName(clientEndpointName);
     clientDaemon.SetBootstrapURI(bootstrapURI);
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     std::string bootstrapConfigFilename = tmpnam(NULL);
+#pragma GCC diagnostic pop
     BootstrapConfigFile bootstrapConfigFile (bootstrapConfigFilename, serverAddress, serverCoapPort);
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
