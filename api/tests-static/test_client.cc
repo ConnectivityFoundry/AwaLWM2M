@@ -545,7 +545,9 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     serverDaemon.SetCoapPort(serverCoapPort);
     serverDaemon.SetIpcPort(serverIpcPort);
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     std::string bootstrapConfigFilename = tmpnam(NULL);
+#pragma GCC diagnostic pop
     BootstrapConfigFile bootstrapConfigFile (bootstrapConfigFilename, serverAddress, serverCoapPort);
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
