@@ -35,7 +35,7 @@
 
 namespace Awa {
 
-pid_t SpawnProcess(std::vector<const char *> &commandVector, bool wait_, bool silent)
+pid_t SpawnProcess(const std::vector<const char *> &commandVector, bool wait_, bool silent)
 {
     pid_t c_pid, pid;
 
