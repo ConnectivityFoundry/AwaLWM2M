@@ -32,34 +32,13 @@
 
 namespace Awa {
 
-namespace detail {
-
-const char * VERSION_FILE = "../VERSION";
-
-std::string LoadVersion()
-{
-    std::string line;
-    std::ifstream versionFile (VERSION_FILE);
-    if (versionFile.is_open())
-    {
-      getline(versionFile, line, '\0');
-        versionFile.close();
-        //std::cerr << "version " << line << std::endl;
-
-        // this will catch extra newlines added to the VERSION file
-    }
-    return line;
-}
-
-} // namespace detail
-
 class TestDaemon : public TestAwaBase {};
 
 class TestDaemonVersion : public TestDaemon, public CaptureStdout
 {
 protected:
     static void SetUpTestCase() {
-        expectedOutput = detail::LoadVersion();
+        expectedOutput = VERSION + std::string("\n");
     }
 
     virtual void SetUp() {

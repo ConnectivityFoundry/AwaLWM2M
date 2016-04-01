@@ -85,6 +85,7 @@ if (ENABLE_GCOV)
 endif ()
 
 add_definitions (-D__STDC_FORMAT_MACROS)
+add_definitions (-DVERSION="${VERSION}")
 
 # Disable format-extra-args for this source file:
 set_source_files_properties (test_utils.cc PROPERTIES COMPILE_FLAGS -Wno-format-extra-args)
