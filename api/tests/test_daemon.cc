@@ -38,7 +38,7 @@ class TestDaemonVersion : public TestDaemon, public CaptureStdout
 {
 protected:
     static void SetUpTestCase() {
-        expectedOutput = VERSION + std::string("\n");
+        expectedVersion = VERSION + std::string("\n");
     }
 
     virtual void SetUp() {
@@ -50,13 +50,7 @@ protected:
         CaptureStdout::TearDown();
     }
 
-    void CheckVersionOption(const char * daemonPath)
-    {
-        // suppress "deprecated conversion from string constant" warning
-#pragma GCC diagnostic ignored "-Wwrite-strings"
-        std::vector<const char *> commandVector { daemonPath, "--version" };
-#pragma GCC diagnostic pop
-
+    void CheckOutput(const std::vector<const char *> & commandVector, const std::string & expectedOutput) {
         pid_t pid = SpawnProcess(commandVector, false, false);
         ASSERT_GT(pid, 0);
 
@@ -65,15 +59,36 @@ protected:
         ASSERT_TRUE(WIFEXITED(status));
 
         auto output = Read();
-        std::cerr << output << std::endl;
-        std::cerr << expectedOutput << std::endl;
+        // because this test captures stdout, uncomment these lines to diagnose a failed test:
+        //std::cerr << output << std::endl;
+        //std::cerr << expectedOutput << std::endl;
         EXPECT_STREQ(expectedOutput.c_str(), output);
     }
 
-    static std::string expectedOutput;
+    void CheckVersionOption(const char * daemonPath)
+    {
+        // suppress "deprecated conversion from string constant" warning
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+        std::vector<const char *> commandVector { daemonPath, "--version" };
+#pragma GCC diagnostic pop
+
+        CheckOutput(commandVector, expectedVersion);
+    }
+
+    void CheckShortVersionOption(const char * daemonPath)
+    {
+        // suppress "deprecated conversion from string constant" warning
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+        std::vector<const char *> commandVector { daemonPath, "-V" };
+#pragma GCC diagnostic pop
+
+        CheckOutput(commandVector, expectedVersion);
+    }
+
+    static std::string expectedVersion;
 };
 
-std::string TestDaemonVersion::expectedOutput = std::string();
+std::string TestDaemonVersion::expectedVersion = std::string();
 
 TEST_F(TestDaemonVersion, bootstrap_prints_version)
 {
@@ -88,6 +103,21 @@ TEST_F(TestDaemonVersion, client_prints_version)
 TEST_F(TestDaemonVersion, server_prints_version)
 {
     CheckVersionOption(global::serverDaemonPath);
+}
+
+TEST_F(TestDaemonVersion, bootstrap_prints_version_short)
+{
+    CheckShortVersionOption(global::bootstrapServerDaemonPath);
+}
+
+TEST_F(TestDaemonVersion, client_prints_version_short)
+{
+    CheckShortVersionOption(global::clientDaemonPath);
+}
+
+TEST_F(TestDaemonVersion, server_prints_version_short)
+{
+    CheckShortVersionOption(global::serverDaemonPath);
 }
 
 // TODO: test that --logFile/-l option with --version/-V writes to log, not stdout.

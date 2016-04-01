@@ -6,7 +6,7 @@ set (test_api_runner_SOURCES
   support/support.cc
   support/process.cc
   support/daemon.cc
-  
+
   test_log.cc
   test_error.cc
   test_lwm2m_error.cc
@@ -34,7 +34,7 @@ set (test_api_runner_SOURCES
   test_session_common.cc
   test_define_operation.cc
   test_value.cc
-  
+
   test_client_session.cc
   test_client_define_operation.cc
   test_client_define_defaults.cc
@@ -42,9 +42,9 @@ set (test_api_runner_SOURCES
   test_get_operation.cc
   test_client_delete_operation.cc
   test_server_delete_operation.cc
-  test_subscribe_operation.cc  
-  test_observe_operation.cc  
-  
+  test_subscribe_operation.cc
+  test_observe_operation.cc
+
   test_server_session.cc
   test_server_define_operation.cc
   test_server_define_defaults.cc
@@ -56,7 +56,7 @@ set (test_api_runner_SOURCES
   test_changeset.cc
   test_subscribe_observe_common.cc
   test_execute_operation.cc
-  
+
   test_bootstrap.cc
   test_daemon.cc
 )
@@ -115,5 +115,3 @@ if (RUN_TESTS)
     DEPENDS test_api_runner_out.xml
   )
 endif ()
-
-

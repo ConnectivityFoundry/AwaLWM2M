@@ -33,7 +33,7 @@ namespace Awa {
 // Note that the type of the vector must be char *, not const char *.
 // If true, wait specifies that the parent should wait for the child to terminate.
 // If true, silent specifies that the child's stdout will be redirected to /dev/null.
-pid_t SpawnProcess(std::vector<const char *> &commandVector, bool wait, bool silent);
+pid_t SpawnProcess(const std::vector<const char *> &commandVector, bool wait, bool silent);
 
 // Kill an existing process, with SIGKILL.
 void KillProcess(pid_t pid);
