@@ -9,7 +9,7 @@
 
 ## Coding style guide.
 
-It's important to that coding style remains consistent throughout the project to ensure that all contributors and project administrators are able to easily decipher code blocks, comments, syntax etc. 
+It's important that coding style remains consistent throughout the project to ensure that all contributors and project administrators are able to easily decipher code blocks, comments, syntax etc. 
 Always consider that another contributor may one day continue to build on your submissions. Make it easy for them by adopting the style outlined below.
 
 ### General layout.

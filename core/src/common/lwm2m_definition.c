@@ -76,8 +76,8 @@ ResourceDefinition * Definition_LookupResourceDefinition(const DefinitionRegistr
     return Definition_LookupResourceDefinitionFromObjectDefinition(objFormat, resourceID);
 }
 
-ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
-                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers)
+ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers, LWM2MHandler handler)
 {
     ObjectDefinition * objFormat = NULL;
     objFormat = (ObjectDefinition *)malloc(sizeof(ObjectDefinition));
@@ -90,20 +90,37 @@ ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType o
          objFormat->ObjectID = objectID;
          objFormat->MinimumInstances = minimumInstances;
          objFormat->MaximumInstances = maximumInstances;
+         objFormat->Handler = handler;
 
          if (handlers != NULL)
          {
              memcpy(&objFormat->Handlers, handlers, sizeof(*handlers));
+         }
+         else
+         {
+             memset(&objFormat->Handlers, 0, sizeof(*handlers));
          }
 
          ListInit(&objFormat->Resource);
      }
      else
      {
-         Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+         AwaResult_SetResult(AwaResult_OutOfMemory);
      }
 
      return objFormat;
+}
+
+ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers)
+{
+     return NewObjectType(objName, objectID, maximumInstances, minimumInstances, handlers, NULL);
+}
+
+ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t minimumInstances,
+                                            uint16_t maximumInstances, LWM2MHandler handler)
+{
+    return NewObjectType(objName, objectID, maximumInstances, minimumInstances, NULL, handler);
 }
 
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat)
@@ -115,26 +132,26 @@ int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * o
     {
         if (objFormat->MaximumInstances != ExistingObjFormat->MaximumInstances)
         {
-            Lwm2mResult_SetResult(Lwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (strlen(ExistingObjFormat->ObjectName) != strlen(objFormat->ObjectName) ||
                  memcmp(ExistingObjFormat->ObjectName, objFormat->ObjectName, strlen(ExistingObjFormat->ObjectName)))
         {
-            Lwm2mResult_SetResult(Lwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else if (objFormat->MinimumInstances != ExistingObjFormat->MinimumInstances)
         {
-            Lwm2mResult_SetResult(Lwm2mResult_MismatchedRegistration);
+            AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
         else
         {
-            Lwm2mResult_SetResult(Lwm2mResult_AlreadyRegistered);
+            AwaResult_SetResult(AwaResult_AlreadyDefined);
         }
     }
     else
     {
         ListAdd(&objFormat->list, &registry->ObjectDefinition);
-        Lwm2mResult_SetResult(Lwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         result = 0;
     }
 
@@ -251,14 +268,14 @@ done:
     return nextObjectID;
 }
 
-ResourceTypeEnum Definition_GetResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
+AwaResourceType Definition_GetResourceType(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
 {
-    ResourceTypeEnum resourceType = ResourceTypeEnum_TypeInvalid;
-    Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+    AwaResourceType resourceType = AwaResourceType_Invalid;
+    AwaResult_SetResult(AwaResult_NotFound);
     ResourceDefinition * resFormat = Definition_LookupResourceDefinition(registry, objectID, resourceID);
     if (resFormat != NULL)
     {
-        Lwm2mResult_SetResult(Lwm2mResult_Success);
+        AwaResult_SetResult(AwaResult_Success);
         resourceType = resFormat->Type;
     }
     return resourceType;
@@ -279,14 +296,14 @@ int Definition_IsResourceTypeWritable(const DefinitionRegistry * registry, Objec
 int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectIDType objectID, ResourceIDType resourceID)
 {
     int isMultipleInstance = -1;
-    Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+    AwaResult_SetResult(AwaResult_NotFound);
 
     if (resourceID == -1)
     {
         ObjectDefinition * objFormat = Definition_LookupObjectDefinition(registry, objectID);
         if (objFormat != NULL)
         {
-            Lwm2mResult_SetResult(Lwm2mResult_Success);
+            AwaResult_SetResult(AwaResult_Success);
             isMultipleInstance = IS_MULTIPLE_INSTANCE(objFormat);
         }
     }
@@ -295,7 +312,7 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
         ResourceDefinition * resFormat = Definition_LookupResourceDefinition(registry, objectID, resourceID);
         if (resFormat != NULL)
         {
-            Lwm2mResult_SetResult(Lwm2mResult_Success);
+            AwaResult_SetResult(AwaResult_Success);
             isMultipleInstance = IS_MULTIPLE_INSTANCE(resFormat);
         }
     }
@@ -303,9 +320,9 @@ int Definition_IsTypeMultiInstance(const DefinitionRegistry * registry, ObjectID
     return isMultipleInstance;
 }
 
-ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
-                                                ResourceTypeType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
-                                                Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
+                                                AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
+                                                AwaResourceOperations operations, ResourceOperationHandlers * handlers, LWM2MHandler handler, Lwm2mTreeNode * defaultValueNode)
 {
     ResourceDefinition * resFormat = (ResourceDefinition *)malloc(sizeof(*resFormat));
     if (resFormat != NULL)
@@ -314,14 +331,19 @@ ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, co
         resFormat->ResourceName = strdup(resName);
         resFormat->ResourceID = resourceID;
         resFormat->Operation = operations;
-        resFormat->Type = (ResourceTypeEnum)resourceType;
+        resFormat->Type = (AwaResourceType)resourceType;
         resFormat->MaximumInstances = maximumInstances;
         resFormat->MinimumInstances = minimumInstances;
         resFormat->DefaultValueNode = (defaultValueNode != NULL) ? Lwm2mTreeNode_CopyRecursive(defaultValueNode) : NULL;
+        resFormat->Handler = handler;
 
         if (handlers != NULL)
         {
             memcpy(&resFormat->Handlers, handlers, sizeof(resFormat->Handlers));
+        }
+        else
+        {
+            memset(&resFormat->Handlers, 0, sizeof(resFormat->Handlers));
         }
 
         ListAdd(&resFormat->list, &objFormat->Resource);
@@ -329,8 +351,21 @@ ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, co
     return resFormat;
 }
 
-int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
-                                    uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+ResourceDefinition * Definition_NewResourceType(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID,
+                                                AwaResourceType resourceType, uint16_t maximumInstances, uint16_t minimumInstances,
+                                                AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+{
+    return NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL, defaultValueNode);
+}
+
+ResourceDefinition * Definition_NewResourceTypeWithHandler(ObjectDefinition * objFormat, const char * resName, ResourceIDType resourceID, AwaResourceType resourceType,
+                                                           uint16_t MinimumInstances, uint16_t MaximumInstances, AwaResourceOperations operations, LWM2MHandler Handler)
+{
+    return NewResourceType(objFormat, resName, resourceID, resourceType, MaximumInstances, MinimumInstances, operations, NULL, Handler, NULL);
+}
+
+int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
+                                    uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     int result = -1;
 
@@ -342,25 +377,25 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
     if ((resourceID < 0) || (resourceID > LWM2M_LIMITS_MAX_RESOURCE_ID))
     {
         Lwm2m_Error("resource ID out of range\n");
-        Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
-    if (Operations_IsResourceTypeExecutable(operations) && resourceType != ResourceTypeEnum_TypeNone)
+    if (Operations_IsResourceTypeExecutable(operations) && resourceType != AwaResourceType_None)
     {
-        Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Operations_IsResourceTypeExecutable(operations) && maximumInstances > 1)
     {
-        Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+        AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Definition_LookupResourceDefinition(registry, objectID, resourceID))
     {
-        Lwm2mResult_SetResult(Lwm2mResult_AlreadyRegistered);
+        AwaResult_SetResult(AwaResult_AlreadyDefined);
         goto error;
     }
 
@@ -368,19 +403,19 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
     if (!(objFormat = Definition_LookupObjectDefinition(registry, objectID)))
     {
         Lwm2m_Error("Failed to look up object format\n");
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+        AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
 
     if (Definition_NewResourceType(objFormat, resName, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode) == NULL)
     {
         Lwm2m_Error("Unable to allocate memory\n");
-        Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         goto error;
     }
 
     result = 0;
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
 
 error:
     return result;
@@ -520,7 +555,7 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
     static const int64_t defaultInt = 0;
     static const float defaultFloat = 0.0f;
     static const bool defaultBool = false;
-    static const ObjectLink defaultObjectLink = {0, 0};
+    static const AwaObjectLink defaultObjectLink = {0, 0};
 
     int result = 0;
     if (resourceDefinition != NULL)
@@ -533,34 +568,34 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
                 *dataLen = 0;
                 switch (resourceDefinition->Type)
                 {
-                    case ResourceTypeEnum_TypeOpaque:     // no break
-                    case ResourceTypeEnum_TypeNone:
+                    case AwaResourceType_Opaque:     // no break
+                    case AwaResourceType_None:
                         break;
-                    case ResourceTypeEnum_TypeInteger:
+                    case AwaResourceType_Integer:
                         *dataLen = sizeof(defaultInt);
                         *data = &defaultInt;
                         break;
-                    case ResourceTypeEnum_TypeFloat:
+                    case AwaResourceType_Float:
                         *dataLen = sizeof(defaultFloat);
                         *data = &defaultFloat;
                         break;
-                    case ResourceTypeEnum_TypeBoolean:
+                    case AwaResourceType_Boolean:
                         *dataLen = sizeof(defaultBool);
                         *data = &defaultBool;
                         break;
-                    case ResourceTypeEnum_TypeString:
+                    case AwaResourceType_String:
                         *data = defaultString;
                         *dataLen = strlen(*data) + 1;
                         break;
-                    case ResourceTypeEnum_TypeTime:
+                    case AwaResourceType_Time:
                         *dataLen = sizeof(defaultInt);
                         *data = &defaultInt;
                         break;
-                    case ResourceTypeEnum_TypeObjectLink:
+                    case AwaResourceType_ObjectLink:
                         *dataLen = sizeof(defaultObjectLink);
                         *data = &defaultObjectLink;
                         break;
-                    case ResourceTypeEnum_TypeInvalid:  // no break
+                    case AwaResourceType_Invalid:  // no break
                     default:
                         Lwm2m_Error("Invalid resource type %d\n", resourceDefinition->Type);
                         break;
@@ -570,3 +605,4 @@ int Definition_AllocSensibleDefault(const ResourceDefinition * resourceDefinitio
     }
     return result;
 }
+

@@ -1,3 +1,25 @@
+/************************************************************************************************************************
+ Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+        following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+        following disclaimer in the documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+        products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+************************************************************************************************************************/
+
 
 #include <gtest/gtest.h>
 
@@ -14,7 +36,6 @@
 #include "client_session.h"
 #include "changeset.h"
 #include "utils.h"
-#include "support/mock_malloc.h"
 
 namespace Awa {
 
@@ -50,28 +71,6 @@ TEST_F(TestClientChangeSet, Client_AwaChangeSet_New_free_invalid_inputs)
 
     ASSERT_EQ(AwaError_OperationInvalid, ChangeSet_Free(&changeSet));
     ASSERT_EQ(AwaError_OperationInvalid, ChangeSet_Free(NULL));
-    Tree_Delete(objectsTree);
-}
-
-TEST_F(TestClientChangeSet, ChangeSet_NewWithClientID_handles_out_of_memory)
-{
-    TreeNode objectsTree = ObjectsTree_New();
-    mockMallocFailCounter = 1;
-    ASSERT_EQ(NULL, ChangeSet_NewWithClientID(NULL, SessionType_Client, objectsTree, "IMG1"));
-
-    mockMallocFailCounter = 2;
-    ASSERT_EQ(NULL, ChangeSet_NewWithClientID(NULL, SessionType_Client, objectsTree, "IMG1"));
-    Tree_Delete(objectsTree);
-}
-
-TEST_F(TestClientChangeSet, ChangeSet_New_handles_out_of_memory)
-{
-    TreeNode objectsTree = ObjectsTree_New();
-    mockMallocFailCounter = 1;
-    ASSERT_EQ(NULL, ChangeSet_New(NULL, SessionType_Client, objectsTree));
-
-    mockMallocFailCounter = 2;
-    ASSERT_EQ(NULL, ChangeSet_New(NULL, SessionType_Client, objectsTree));
     Tree_Delete(objectsTree);
 }
 
@@ -183,10 +182,11 @@ TEST_F(TestServerChangeSet, Server_AwaChangeSet_GetExecuteArguments_valid_inputs
     TreeNode objectsTree = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
     AwaChangeSet * changeSet = ChangeSet_New(session_, SessionType_Server, objectsTree);
     ASSERT_TRUE(NULL != changeSet);
-    AwaExecuteArguments arguments;
+    AwaExecuteArguments arguments = { 0 };
     EXPECT_EQ(AwaError_Success, ChangeSet_GetExecuteArguments(changeSet, "/3/0/4", &arguments));
 
     EXPECT_EQ(arguments.Size, 5u);
+    ASSERT_TRUE(NULL != arguments.Data);
     EXPECT_EQ(0, memcmp("Hello", (const char *)arguments.Data, 5));
 
     ASSERT_EQ(AwaError_Success, ChangeSet_Free(&changeSet));

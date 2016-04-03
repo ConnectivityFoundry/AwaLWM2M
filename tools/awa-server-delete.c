@@ -32,13 +32,12 @@
 //    -p, --ipcPort=PORT         Connect to IPC port  (default=`12345')
 //    -a, --ipcAddress              IP address of client (default='127.0.0.1')
 //
-//  Specify one or more object, object instance and resource paths
-//  to delete in the format "/O/I/R/i", separated by spaces.
+//  Specify one or more object instance paths
+//  to delete in the format "/O/I", separated by spaces.
 //  For example:
 //
-//      /3/0/0
-//      /3/0/7/1
-//      /4/0/3 /4/0/6
+//      /3/0
+//      /4/0
 //
 
 

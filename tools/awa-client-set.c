@@ -391,7 +391,6 @@ static int CreateTargets(const AwaClientSession * session, AwaClientSetOperation
             // Skip it
             Debug("Skipping %s (%d)\n", targets[i], i);
         }
-
         FreeTarget(&target);
     }
 
@@ -413,6 +412,7 @@ static int CreateTargets(const AwaClientSession * session, AwaClientSetOperation
             // Skip it
             Debug("Skipping %s (%d)\n", targets[i], i);
         }
+        FreeTarget(&target);
     }
     return count;
 }

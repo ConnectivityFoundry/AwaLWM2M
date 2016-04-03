@@ -50,23 +50,23 @@
 extern "C" {
 #endif
 
-// Convert a data type string to a ResourceTypeEnum used by LWM2M
-ResourceTypeEnum xmlif_StringToDataType(const char * value);
+// Convert a data type string to a AwaResourceType used by LWM2M
+AwaResourceType xmlif_StringToDataType(const char * value);
 
-// Convert from a ResourceTypeEnum to a string representation
-const char * xmlif_DataTypeToString(ResourceTypeEnum type);
+// Convert from a AwaResourceType to a string representation
+const char * xmlif_DataTypeToString(AwaResourceType type);
 
 // Convert a string to a Operations enum used by LWM2M
-Operations xmlif_StringToOperation(const char * value);
+AwaResourceOperations xmlif_StringToOperation(const char * value);
 
 // Convert from an Operations enum to a string representation
-const char * xmlif_OperationToString(Operations operation);
+const char * xmlif_OperationToString(AwaResourceOperations operation);
 
 int xmlif_GetInteger(TreeNode content, const char * name);
 
 const char * xmlif_GetOpaque(TreeNode content, const char * name);
 
-int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char * buffer, int bufferLength);
+int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * buffer, int bufferLength);
 
 #ifdef __cplusplus
 }

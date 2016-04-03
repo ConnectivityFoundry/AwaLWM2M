@@ -34,12 +34,18 @@ The client-tutorial application makes use of the Awa API to define objects and r
 
 ## Awa LightweightM2M installation.
 
-Firstly, Awa LWM2M must be compiled and installed, using the commands below to build and install Awa LWM2M to the  *./build/install* directory:
+Use the commands below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
 ```
 ~/AwaLWM2M$ make
 ~/AwaLWM2M$ cd build
-~/AwaLWM2M/build$ cmake DESTDIR=./install install
+~/AwaLWM2M/build$ make install DESTDIR=./install
+```
+
+Alternatively, you can use the following command to install into the default directory given above:
+
+```
+~/AwaLWM2M$ make install
 ```
 
 ----
@@ -58,10 +64,8 @@ $ cd ~/tutorial
 To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to retain the ````<TAB>```` character preceding *$(CC) client-tutorial.c* :
 
 ```make
-INSTALL_PATH:=~/AwaLWM2M/build/install
-
 all:
-	$(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
+	$(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
 
 Now is a good time to define our objects and resources:
@@ -320,11 +324,9 @@ int main(void)
 Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
-INSTALL_PATH:=~/AwaLWM2M/build/install
-
 all:
-        $(CC) client-tutorial.c -o client-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I $(INSTALL_PATH)/usr/include -L $(INSTALL_PATH)/usr/lib -lawa
+        $(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
+        $(CC) server-tutorial.c -o server-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
 
 Build the new application...
@@ -391,6 +393,295 @@ Heater[/1000/0]:
 Heater[/1000/0]:
     Manufacturer[/1000/0/101]: HotAir Systems Inc
     Temperature[/1000/0/104]: 10
+```
+
+## Example: Create a standalone LWM2M client on a gateway device using the Awa Static API.
+
+This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
+
+Create a new directory *static-client-tutorial*
+
+Copy the following code into static-client-tutorial/*Makefile*:
+
+```make
+all:
+	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa_static
+```
+
+Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
+
+```c
+#include <string.h>
+#include <stdio.h>
+#include "awa/static.h"
+
+int main(void)
+{
+    AwaStaticClient * awaClient = AwaStaticClient_New();
+
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+
+    AwaStaticClient_Init(awaClient);
+
+    while (1)
+    {
+        AwaStaticClient_Process(awaClient);
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    return 0;
+}
+```
+
+Run "make" and specify the install path to Awa LWM2M:
+
+```
+$ cd static-client-tutorial
+static-client-tutorial $ make INSTALL_PATH=~/AwaLWM2M/build/install
+```
+
+Start the bootstrap and server daemons:
+
+```
+$ ./build/install/bin/awa_bootstrapd -d --config core/bootstrap-localhost.config
+$ ./build/install/bin/awa_serverd -d
+```
+
+Run your new application:
+
+```
+$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./static-client-tutorial
+```
+
+Query the server for connected clients:
+
+```
+$ ./build/install/bin/awa-server-list-clients -o
+Client: AwaStaticClient1
+  /2/0     LWM2MAccessControl
+  /2/1     LWM2MAccessControl
+  /2/2     LWM2MAccessControl
+  /2/3     LWM2MAccessControl
+  /1/0     LWM2MServer
+```
+
+### Add a custom object using the Awa static API.
+
+The following code expands on the previous example, by demonstrating how to add a custom object
+
+```c
+#include <string.h>
+#include <stdio.h>
+#include "awa/static.h"
+
++#define HEATER_INSTANCES 1
+
++typedef struct
++{
++    char Manufacturer[64];
++    AwaFloat Temperature;
++
++} HeaterObject;
+
++static HeaterObject heater[HEATER_INSTANCES];
+
++static void DefineHeaterObject(AwaStaticClient * awaClient)
++{
++    AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
++                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
++    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
++                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
++}
+
++static void SetInitialValues(AwaStaticClient * awaClient)
++{
++    int instance = 0;
++
++    AwaStaticClient_CreateObjectInstance(awaClient, 1000, instance);
++
++    AwaStaticClient_CreateResource(awaClient, 1000, instance, 101);
++    strcpy(heater[instance].Manufacturer, "HotAir Systems Inc");
++
++    AwaStaticClient_CreateResource(awaClient, 1000, instance, 104);
++    heater[instance].Temperature = 0.0;
++}
+
+int main(void)
+{
+    AwaStaticClient * awaClient = AwaStaticClient_New();
+
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+
+    AwaStaticClient_Init(awaClient);
+
++   DefineHeaterObject(awaClient);
++   SetInitialValues(awaClient);
+
+    while (1)
+    {
+        AwaStaticClient_Process(awaClient);
+
++       //heater[0].Temperature = value from hardware
++       AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    return 0;
+}
+
+```
+
+## Example: Create a standalone LWM2M client within a contiki environment.
+
+Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree 
+for a contiki environment. 
+
+The following instructions act as an example of how to build a LWM2M client for contiki.
+
+*Note: In this case we will use the contiki simulated environment, hardware specific configuration
+ is outside of the scope of this tutorial*
+
+Create a new directory *contiki-example*:
+
+```
+$ mkdir contiki-example
+```
+
+Clone AwaLWM2M and contiki into this directory:
+
+```
+$ cd contiki-example
+contiki-example$ git clone https://github.com/FlowM2M/AwaLWM2M.git 
+contiki-example$ git clone https://github.com/contiki-os/contiki.git 
+
+contiki-example$ ls
+AwaLWM2M
+contiki
+```
+
+Copy the following code into contiki-example/*Makefile*:
+
+```make
+CONTIKI_PROJECT=static-client-tutorial
+CONTIKI=contiki
+LWM2M_DIR=AwaLWM2M
+
+CFLAGS += -Wall -Wno-pointer-sign
+CFLAGS += -I$(LWM2M_DIR)/api/include -DLWM2M_CLIENT
+
+CFLAGS += -DUIP_CONF_BUFFER_SIZE=4096
+CFLAGS += -DREST_MAX_CHUNK_SIZE=512
+
+APPS += er-coap
+APPS += rest-engine
+
+APPDIRS += $(LWM2M_DIR)/core/src
+APPS += client
+APPS += common
+
+CONTIKI_WITH_IPV6 = 1
+CONTIKI_WITH_RPL = 0
+
+all: static-client-tutorial
+
+include $(CONTIKI)/Makefile.include
+```
+
+Copy the following code to contiki-example/*static-client-tutorial.c*:
+
+```c
+#include <stdio.h>
+#include "contiki.h"
+#include "awa/static.h"
+
+#define HEATER_INSTANCES 1
+
+typedef struct
+{
+    char Manufacturer[64];
+    AwaFloat Temperature;
+
+} HeaterObject;
+
+static HeaterObject heater[HEATER_INSTANCES];
+
+static void DefineHeaterObject(AwaStaticClient * awaClient)
+{
+    AwaStaticClient_RegisterObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
+                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
+    AwaStaticClient_RegisterResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
+                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
+}
+
+static void SetInitialValues(AwaStaticClient * awaClient)
+{
+    int instance = 0;
+
+    AwaStaticClient_CreateObjectInstance(awaClient, 1000, instance);
+
+    AwaStaticClient_CreateResource(awaClient, 1000, instance, 101);
+    strcpy(heater[instance].Manufacturer, "HotAir Systems Inc");
+
+    AwaStaticClient_CreateResource(awaClient, 1000, instance, 104);
+    heater[instance].Temperature = 0.0;
+}
+
+PROCESS(lwm2m_client, "Awa LWM2M Example Client");
+AUTOSTART_PROCESSES(&lwm2m_client);
+
+PROCESS_THREAD(lwm2m_client, ev, data)
+{
+    PROCESS_BEGIN();
+
+    static AwaStaticClient * awaClient;
+
+    awaClient = AwaStaticClient_New();
+
+	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");
+
+    AwaStaticClient_Init(awaClient);
+
+    DefineHeaterObject(awaClient);
+    SetInitialValues(awaClient);
+
+    while (1)
+    {
+        static struct etimer et;
+        static int waitTime;
+
+        waitTime = AwaStaticClient_Process(awaClient);
+
+        //heater[0].Temperature = value from hardware
+        AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
+
+        etimer_set(&et, (waitTime * CLOCK_SECOND) / 1000);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        waitTime = 0;
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    PROCESS_END();
+}
+```
+
+Build your contiki application:
+
+```
+contiki-example$ make TARGET=minimal-net
 ```
 
 ----

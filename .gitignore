@@ -38,6 +38,7 @@ server_low.log
 server_high.log
 awa_clientd.log
 awa_serverd.log
+awa_bootstrapd.log
 
 lib/libcoap/Makefile
 lib/libcoap/autom4te.cache/

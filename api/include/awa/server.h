@@ -20,11 +20,31 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file server.h
+ * @brief This interface enables an application to interact with the LWM2M interface provided by LWM2M Server Core.
+ *
+ * The Core may be running as a separate process (daemon), or it may be linked with the application directly.
+ *
+ * The Core provides LWM2M operations targeted at registered LWM2M clients. LWM2M operations provide access to
+ * client resources within a data model based on Objects, Object Instances and Resources.
+ * Please consult the LWM2M specification for details of this model.
+ *
+ * A Management Application may interact with clients via the Awa Server API, accessing the client's resources. Therefore
+ * it is essential that both the Client Application and Management Application are aware of the same data
+ * model.
+ *
+ * It is recommended that registered IDs are used for objects that conform to registered LWM2M objects such
+ * as IPSO objects.
+ */
 
 #ifndef AWA_SERVER_H
 #define AWA_SERVER_H
 
+// @cond
 #include <stdbool.h>
+// @endcond
+
 #include "common.h"
 
 #ifdef __cplusplus
@@ -101,6 +121,7 @@ typedef struct _AwaServerObservation AwaServerObservation;
 typedef struct _AwaServerObserveResponse AwaServerObserveResponse;
 /// @endcond
 
+
 /**************************************************************************************************
  * Callbacks
  *************************************************************************************************/
@@ -114,6 +135,7 @@ typedef struct _AwaServerObserveResponse AwaServerObserveResponse;
  * @param[in] context A pointer to user-specified data passed to AwaServerObservation_New
  */
 typedef void (*AwaServerObservationCallback)(const AwaChangeSet * changeSet, void * context);
+
 
 /**************************************************************************************************
  * Server Session Management

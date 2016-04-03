@@ -20,29 +20,48 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <signal.h>
-#include <errno.h>
-#include <poll.h>
+#if !defined (CONTIKI)
+  #include <signal.h>
+  #include <errno.h>
+  #include <poll.h>
+#else
+  #include "contiki.h"
+  #include "contiki-net.h"
+#endif
 
-#include "lwm2m_static.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "awa/static.h"
 #include "lwm2m_security_object.h"
 #include "lwm2m_server_object.h"
 #include "lwm2m_acl_object.h"
+#include "lwm2m_debug.h"
 
-#define MAX_ADDRESS_LENGTH      50
+#define MAX_ADDRESS_LENGTH           (50)
+#define DEFAULT_CLIENT_HOLD_OFF_TIME (30)
 
 struct _AwaStaticClient
 {
     Lwm2mContextType * Context;
-    CoapInfo * COAP;
+    CoapInfo * CoAPInfo;
     bool BootstrapConfigured;
     bool EndpointNameConfigured;
-    bool COAPConfigured;
+    bool CoAPConfigured;
     bool Running;
+    bool Initialised;
     const char * BootstrapServerURI;
-    char COAPListenAddress[MAX_ADDRESS_LENGTH];
-    int COAPListenPort;
+    char CoAPListenAddress[MAX_ADDRESS_LENGTH];
+    int CoAPListenPort;
+    void * ApplicationContext;
 };
+
+// must line up with AWA_OPAQUE macro
+typedef struct
+{
+    size_t Size;
+    uint8_t Data[];
+} AwaStaticOpaque;
 
 AwaStaticClient * AwaStaticClient_New()
 {
@@ -57,8 +76,9 @@ AwaStaticClient * AwaStaticClient_New()
         {
             client->BootstrapConfigured = false;
             client->EndpointNameConfigured = false;
-            client->COAPConfigured = false;
+            client->CoAPConfigured = false;
             client->Running = false;
+            client->Initialised = false;
         }
         else
         {
@@ -76,7 +96,7 @@ void AwaStaticClient_Free(AwaStaticClient ** client)
     {
         Lwm2mCore_Destroy((*client)->Context);
 
-        if((*client)->COAP != NULL)
+        if ((*client)->CoAPInfo != NULL)
         {
             coap_Destroy();
         }
@@ -92,17 +112,19 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
 
     if (client != NULL)
     {
-        if (client->COAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
+        if (client->CoAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
-            client->COAP = coap_Init(client->COAPListenAddress, client->COAPListenPort, DebugLevel_Debug);
+            client->CoAPInfo = coap_Init(client->CoAPListenAddress, client->CoAPListenPort, Lwm2m_GetLogLevel());
 
-            if (client->COAP != NULL)
+            if (client->CoAPInfo != NULL)
             {
-                Lwm2mCore_SetCoapInfo(client->Context, client->COAP);
+                Lwm2mCore_SetCoapInfo(client->Context, client->CoAPInfo);
                 Lwm2m_RegisterACLObject(client->Context);
                 Lwm2m_RegisterServerObject(client->Context);
                 Lwm2m_RegisterSecurityObject(client->Context);
                 Lwm2m_PopulateSecurityObject(client->Context, client->BootstrapServerURI);
+                Lwm2mCore_SetApplicationContext(client->Context, client);
+                client->Initialised = true;
                 result = AwaError_Success;
             }
             else
@@ -123,17 +145,99 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     return result;
 }
 
+AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
+{
+    AwaError result = AwaError_Unspecified;
+    if ((level >= AwaLogLevel_None) && (level <= AwaLogLevel_Debug))
+    {
+        Lwm2m_SetAwaLogLevel(level);
+        coap_SetLogLevel(Lwm2m_GetLogLevel());
+
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = AwaError_LogLevelInvalid;
+    }
+
+    return result;
+}
+
 AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const char * bootstrapServerURI)
 {
     AwaError result = AwaError_Unspecified;
 
     if ((client != NULL) && (bootstrapServerURI != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             client->BootstrapServerURI = bootstrapServerURI;
             client->BootstrapConfigured = true;
             result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_OperationInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const AwaFactoryBootstrapInfo * factoryBootstrapInformation)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if ((client != NULL) && (factoryBootstrapInformation != NULL))
+    {
+        if (!client->Running && client->Initialised)
+        {
+
+            if(client->CoAPConfigured)
+            {
+
+                // Mandatory resources only
+#if (__GNUC__ >= 5)
+                BootstrapInfo info = { 0 };
+#else
+                // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119
+                BootstrapInfo info;
+                memset(&info, 0, sizeof(info));
+#endif
+
+                // Assign an arbitrary server ID
+                static int serverID = 1000;
+                ++serverID;
+
+                info.SecurityInfo.ServerID = serverID;
+                strncpy(info.SecurityInfo.ServerURI, factoryBootstrapInformation->SecurityInfo.ServerURI, BOOTSTRAP_CONFIG_SERVER_URI_SIZE);
+                info.SecurityInfo.ServerURI[BOOTSTRAP_CONFIG_SERVER_URI_SIZE - 1] = '\0'; // Defensive
+                info.SecurityInfo.Bootstrap = false;
+                info.SecurityInfo.SecurityMode = factoryBootstrapInformation->SecurityInfo.SecurityMode;
+                memcpy(info.SecurityInfo.PublicKey, factoryBootstrapInformation->SecurityInfo.PublicKeyOrIdentity, BOOTSTRAP_CONFIG_PUBLIC_KEY_SIZE);
+                memcpy(info.SecurityInfo.SecretKey, factoryBootstrapInformation->SecurityInfo.SecretKey, BOOTSTRAP_CONFIG_SECRET_KEY_SIZE);
+                info.SecurityInfo.HoldOffTime = DEFAULT_CLIENT_HOLD_OFF_TIME;
+
+                info.ServerInfo.ShortServerID = serverID;
+                info.ServerInfo.LifeTime = factoryBootstrapInformation->ServerInfo.Lifetime;
+                info.ServerInfo.MinPeriod = factoryBootstrapInformation->ServerInfo.DefaultMinPeriod;
+                info.ServerInfo.MaxPeriod = factoryBootstrapInformation->ServerInfo.DefaultMaxPeriod;
+                info.ServerInfo.DisableTimeout = factoryBootstrapInformation->ServerInfo.DisableTimeout;
+                info.ServerInfo.Notification = factoryBootstrapInformation->ServerInfo.Notification;
+                strncpy(info.ServerInfo.Binding, factoryBootstrapInformation->ServerInfo.Binding, BOOTSTRAP_CONFIG_BINDING_SIZE);
+                info.ServerInfo.Binding[BOOTSTRAP_CONFIG_BINDING_SIZE - 1] = '\0'; // Defensive
+
+                Lwm2mCore_SetFactoryBootstrap(client->Context, &info);
+                result = AwaError_Success;
+            }
+            else
+            {
+                result = AwaError_StaticClientInvalid;
+            }
         }
         else
         {
@@ -154,10 +258,11 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
 
     if ((client != NULL) && (EndPointName != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             if (Lwm2mCore_SetEndPointClientName(client->Context, EndPointName) > 0)
             {
+                Lwm2m_Debug("Client endpoint name: %s\n", EndPointName);
                 client->EndpointNameConfigured = true;
                 result = AwaError_Success;
             }
@@ -179,19 +284,19 @@ AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * 
     return result;
 }
 
-AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, const char * address, int port)
+AwaError AwaStaticClient_SetCoAPListenAddressPort(AwaStaticClient * client, const char * address, int port)
 {
     AwaError result = AwaError_Unspecified;
 
     if ((client != NULL) && (address != NULL))
     {
-        if (!client->Running)
+        if (!client->Running && !client->Initialised)
         {
             if (strlen(address) < MAX_ADDRESS_LENGTH)
             {
-                strcpy(client->COAPListenAddress, address);
-                client->COAPListenPort = port;
-                client->COAPConfigured = true;
+                strcpy(client->CoAPListenAddress, address);
+                client->CoAPListenPort = port;
+                client->CoAPConfigured = true;
                 result = AwaError_Success;
             }
             else
@@ -212,52 +317,471 @@ AwaError AwaStaticClient_SetCOAPListenAddressPort(AwaStaticClient * client, cons
     return result;
 }
 
-int AwaStaticClient_Process(AwaStaticClient * client)
+AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * context)
 {
-    int result;
-    struct pollfd fds[1];
-    int nfds = 1;
-    int timeout;
+    AwaError result = AwaError_Unspecified;
 
-    fds[0].fd = client->COAP->fd;
-    fds[0].events = POLLIN;
-
-    timeout = Lwm2mCore_Process(client->Context);
-
-    result = poll(fds, nfds, timeout);
-    if (result < 0)
+    if (client != NULL)
     {
-        if (errno == EINTR)
-        {
-            result = timeout;
-        }
-        else
-        {
-            perror("poll:");
-        }
+        client->ApplicationContext = context;
+        result = AwaError_Success;
     }
-    else if (result > 0)
+    else
     {
-        if (fds[0].revents == POLLIN)
-        {
-            coap_HandleMessage();
-        }
-
-        result = timeout;
+        result = AwaError_StaticClientInvalid;
     }
-
-    if (result == timeout)
-        coap_Process();
 
     return result;
 }
 
+void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
+{
+    void *  result = NULL;
 
-//AwaError AwaStaticClient_RegisterObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-//                                          uint16_t minimumInstances, uint16_t maximumInstances)
-//{
-//    ObjectOperationHandlers * handlers = NULL;
-//    ObjectDefinition * defintion = Definition_NewObjectType(objectName, objectID, maximumInstances, minimumInstances, handlers);
-//}
+    if (client != NULL)
+    {
+        result = client->ApplicationContext;
+    }
 
+    return result;
+}
 
+int AwaStaticClient_Process(AwaStaticClient * client)
+{
+    int result = -1;
+
+    if (client != NULL)
+    {
+        if (!client->Running)
+        {
+            client->Running = true;
+        }
+#if !defined (CONTIKI)
+        struct pollfd fds[1];
+        int nfds = 1;
+        int timeout;
+
+        fds[0].fd = client->CoAPInfo->fd;
+        fds[0].events = POLLIN;
+
+        timeout = Lwm2mCore_Process(client->Context);
+
+        result = poll(fds, nfds, timeout);
+        if (result < 0)
+        {
+            if (errno == EINTR)
+            {
+                result = timeout;
+            }
+            else
+            {
+                perror("poll:");
+            }
+        }
+        else if (result > 0)
+        {
+            if (fds[0].revents == POLLIN)
+            {
+                coap_HandleMessage();
+            }
+
+            result = timeout;
+        }
+
+        if (result == timeout)
+        {
+            coap_Process();
+        }
+#else
+        result = Lwm2mCore_Process(client->Context);
+#endif
+
+    }
+
+    return result;
+}
+
+static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation,
+                                AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
+                                void ** dataPointer, size_t * dataSize, bool * changed)
+{
+    AwaResult result;
+
+    ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+    if (objectDefinition != NULL)
+    {
+        uint8_t * offset;
+        ResourceDefinition * resourceDefinition;
+
+        // Check instance range
+        if ((objectInstanceID >= 0) && (objectInstanceID < objectDefinition->MaximumInstances))
+        {
+            switch (operation)
+            {
+            case AwaOperation_CreateObjectInstance:
+                result = AwaResult_SuccessCreated;
+                break;
+
+            case AwaOperation_DeleteObjectInstance:
+                result = AwaResult_SuccessDeleted;
+                break;
+
+            case AwaOperation_CreateResource:
+                result = AwaResult_SuccessCreated;
+                break;
+
+            case AwaOperation_DeleteResource:
+                result = AwaResult_SuccessDeleted;
+                break;
+
+            case AwaOperation_Write:
+
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
+                    if (resourceDefinition->IsPointerArray)
+                    {
+                        offset = resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                    }
+                    else
+                    {
+                        offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                    }
+
+                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    {
+                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
+
+                        // dataSize equals the size of the opaque data and the bytes used to store
+                        // the length, so subtract that during the comparision.
+                        if (*dataSize <= (resourceDefinition->DataElementSize - sizeof(temp->Size)))
+                        {
+                            memcpy(temp->Data, *dataPointer, *dataSize);
+                            temp->Size = *dataSize;
+                            result = AwaResult_SuccessChanged;
+                        }
+                        else
+                        {
+                            result = AwaResult_BadRequest;
+                        }
+                    }
+                    else
+                    {
+                        if (*dataSize <= resourceDefinition->DataElementSize)
+                        {
+                            memcpy(offset, *dataPointer, *dataSize);
+                            result = AwaResult_SuccessChanged;
+                        }
+                        else
+                        {
+                            result = AwaResult_BadRequest;
+                        }
+                    }
+                }
+                else
+                {
+                    result = AwaResult_BadRequest;
+                }
+                break;
+
+            case AwaOperation_Read:
+
+                resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID);
+                if (resourceDefinition != NULL)
+                {
+                    if (resourceDefinition->IsPointerArray)
+                    {
+                        offset = resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                    }
+                    else
+                    {
+                        offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                    }
+
+                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    {
+                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
+                        *dataPointer = temp->Data;
+                        *dataSize = temp->Size;
+                    }
+                    else
+                    {
+                        *dataPointer = offset;
+                        *dataSize = resourceDefinition->DataElementSize;
+                    }
+                    result = AwaResult_SuccessContent;
+                }
+                else
+                {
+                    result = AwaResult_BadRequest;
+                }
+                break;
+
+            case AwaOperation_Execute:
+            default:
+                result = AwaResult_BadRequest;
+                break;
+            }
+        }
+        else
+        {
+            result = AwaResult_BadRequest;
+        }
+    }
+    else
+    {
+        result = AwaResult_BadRequest;
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                      uint16_t minimumInstances, uint16_t maximumInstances)
+{
+    return AwaStaticClient_DefineObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, DefaultHandler);
+}
+
+AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                                 uint16_t minimumInstances, uint16_t maximumInstances,
+                                                 AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        {
+            ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+
+            if (defintion != NULL)
+            {
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+                {
+                    Lwm2mCore_ObjectCreated(client->Context, objectID);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_Internal;
+                }
+            }
+            else
+            {
+                result = AwaError_OutOfMemory;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if (Lwm2mCore_CreateOptionalResource(client->Context, objectID, objectInstanceID, resourceID) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_CannotCreate;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
+{
+    AwaError result;
+
+    if (client != NULL)
+    {
+        if (Lwm2mCore_CreateObjectInstance(client->Context, objectID, objectInstanceID) != -1)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_CannotCreate;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+static AwaError DefineResource(AwaStaticClient * client, const char * resourceName,
+                               AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                               uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                               AwaStaticClientHandler handler,  void * dataPointers, bool isPointerArray,
+                               size_t dataElementSize, size_t dataStepSize)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if ((resourceName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        {
+            ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+            if (objFormat != NULL)
+            {
+                ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
+                if (resourceDefinition != NULL)
+                {
+                    resourceDefinition->DataPointers = dataPointers;
+                    resourceDefinition->IsPointerArray = isPointerArray;
+                    resourceDefinition->DataElementSize = dataElementSize;
+                    resourceDefinition->DataStepSize = dataStepSize;
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_DefinitionInvalid;
+                }
+            }
+            else
+            {
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, const char * resourceName,
+                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                                                     void * dataPointer, size_t dataElementSize, size_t dataStepSize)
+{
+    AwaError result;
+
+    if ((dataPointer == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        result = DefineResource(client, resourceName,
+                                objectID, resourceID, resourceType,
+                                minimumInstances, maximumInstances, operations, DefaultHandler,
+                                dataPointer, false, dataElementSize, dataStepSize);
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
+                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                                                        void * dataPointers[], size_t dataElementSize)
+{
+    AwaError result;
+
+    if ((dataPointers == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        // check there are enough pointers in the array. There needs to be one pointer for each instance of the resource.
+        int count = 0;
+        while (dataPointers[count] != NULL)
+        {
+            count++;
+        }
+
+        if (count == maximumInstances)
+        {
+            result = DefineResource(client, resourceName,
+                                    objectID, resourceID, resourceType,
+                                    minimumInstances, maximumInstances, operations, DefaultHandler,
+                                    dataPointers, true, dataElementSize, 0);
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_DefineResourceWithHandler(AwaStaticClient * client, const char * resourceName,
+                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                                                   AwaStaticClientHandler handler)
+{
+    return DefineResource(client, resourceName,
+                          objectID, resourceID, resourceType,
+                          minimumInstances, maximumInstances, operations, handler,
+                          NULL, false, 0 , 0);
+}
+
+AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID, resourceID);
+        if (definition != NULL)
+        {
+            if (definition->Handler != NULL)
+            {
+                void * valueBuffer = NULL;
+                size_t valueBufferSize = 0;
+                int resourceInstanceID = 0;  // Note: This will only work for single-instance resources.
+                AwaResult lwm2mResult = AwaResult_Unspecified;
+                if ((lwm2mResult = definition->Handler(client, AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&valueBuffer, &valueBufferSize, NULL)) == AwaResult_SuccessContent)
+                {
+                    Lwm2m_MarkObserversChanged(client->Context, objectID, objectInstanceID, resourceID, valueBuffer, valueBufferSize);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    Lwm2m_Debug("Read handler for /%d/%d/%d returned %d\n", objectID, objectInstanceID, resourceID, lwm2mResult);
+                    result = AwaError_Internal;
+                }
+            }
+            else
+            {
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    return result;
+}

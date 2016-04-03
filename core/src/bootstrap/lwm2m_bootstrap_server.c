@@ -59,6 +59,7 @@ typedef struct
     char * IPAddress;
     char * InterfaceName;
     int AddressFamily;
+    bool Version;
 } Options;
 
 static FILE * logFile;
@@ -69,7 +70,6 @@ static void PrintOptions(const Options * options);
 
 static void CtrlCSignalHandler(int dummy)
 {
-    Lwm2m_Debug("Exit triggered\n");
     quit = 1;
 }
 
@@ -142,6 +142,12 @@ static int Bootstrap_Start(Options * options)
         }
     }
 
+    if (options->Version)
+    {
+        Lwm2m_Printf(0, "%s\n", version);
+        goto error_close_log;
+    }
+
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     Lwm2m_PrintBanner();
     if (options->Verbose)
@@ -173,7 +179,8 @@ static int Bootstrap_Start(Options * options)
     }
     else
     {
-        strcpy(ipAddress, options->IPAddress);
+        strncpy(ipAddress, options->IPAddress, NI_MAXHOST);
+        ipAddress[NI_MAXHOST - 1] = '\0';  // Defensive
     }
 
     CoapInfo * coap = coap_Init(ipAddress, options->Port, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
@@ -229,6 +236,7 @@ static int Bootstrap_Start(Options * options)
         }
         coap_Process();
     }
+    Lwm2m_Debug("Exit triggered\n");
 
 error_destroy:
     Lwm2mBootstrap_Destroy();
@@ -247,23 +255,25 @@ error_close_log:
 
 static void PrintUsage(void)
 {
-    printf("Imagination Technologies LWM2M Bootstrap Server - %s\n\n", version);
+    printf("Awa LWM2M Bootstrap Server, version %s\n", version);
+    printf("Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies.\n\n");
 
     printf("Usage: awa_bootstrapd [options]\n\n");
 
     printf("Options:\n");
-    printf("  --ip                : IP address for bootstrap server\n");
-    printf("  --interface         : Network interface for bootstrap server\n");
-    printf("  --addressFamily     : Address family for network interface. 4 for IPv4, 6 for IPv6\n");
-    printf("  --port, -p          : port number for CoAP communications\n");
-    printf("  --config, -c        : config file (server list)\n");
-    printf("  --daemonize, -d     : daemonize\n");
-    printf("  --verbose, -v       : verbose debug output\n");
-    printf("  --logFile           : log filename\n");
-    printf("  --help              : show usage\n\n");
+    printf("  --ip, -a ADDR           : Accept client bootstrap requests on IP address ADDR\n");
+    printf("  --interface, -e IF      : Accept client bootstrap requests on network interface IF\n");
+    printf("  --addressFamily, -f AF  : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
+    printf("  --port, -p PORT         : Use port number PORT for CoAP communications\n");
+    printf("  --config, -c FILE       : Load server list configuration from FILE\n");
+    printf("  --daemonize, -d         : Detach process from terminal and run in the background\n");
+    printf("  --verbose, -v           : Generate verbose output\n");
+    printf("  --logFile, -l FILE      : Log output to FILE\n");
+    printf("  --version, -V           : Print version and exit\n");
+    printf("  --help, -h              : Show usage\n\n");
 
     printf("Example:\n");
-    printf("    awa_bootstrapd --port 15685 --config bootstrap.conf\n");
+    printf("    awa_bootstrapd --port 15685 --config bootstrap.config\n\n");
 
 }
 
@@ -300,11 +310,12 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"verbose",       no_argument,            0, 'v'},
             {"daemonise",     no_argument,            0, 'd'},
             {"logFile",       required_argument,      0, 'l'},
+            {"version",       no_argument,            0, 'V'},
             {"help",          no_argument,            0, 'h'},
             {0,               0,                      0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "a:p:c:vdl:h", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "a:p:c:vdl:Vh", longOptions, &optionIndex);
         if (c == -1)
             break;
 
@@ -334,6 +345,9 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             case 'l':
                 options->LogFile = optarg;
                 break;
+            case 'V':
+                options->Version = true;
+                break;
             case 'h':
             default:
                 PrintUsage();
@@ -355,7 +369,8 @@ int main(int argc, char ** argv)
         .ConfigCount = 0,
         .IPAddress = DEFAULT_IP_ADDRESS,
         .InterfaceName = NULL,
-        .AddressFamily = AF_INET
+        .AddressFamily = AF_INET,
+        .Version = false,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)

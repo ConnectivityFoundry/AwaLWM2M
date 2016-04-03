@@ -49,19 +49,25 @@ typedef struct
     ObjectIDType ObjectID;
     ObjectInstanceIDType ObjectInstanceID;
     Lwm2mContextType * Context;
-    const char * EndPointName;
+    char * EndPointName;
 } Lwm2mBootstrapClient;
 
 static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS];
 
-static const char * GetEndPointNameFromQuery(const char * query)
+static char * GetEndPointNameFromQuery(const char * query)
 {
-    const char * endPointName = NULL;
+    char * endPointName = NULL;
     char * str = strdup(query);
     const char delim[] = "&?";
     char * token = strtok(str, delim);
     while (token != NULL)
     {
+        if (endPointName != NULL)
+        {
+            free(endPointName);
+            endPointName = NULL;
+        }
+
         // Find end point name
         if (strncmp(token, QUERY_EP_NAME, strlen(QUERY_EP_NAME)) == 0)
         {
@@ -109,10 +115,10 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
     return result;
 }
 
-static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, 
-                                          const char * token, int tokenLength, ContentType contentType, const char * requestContent,
-                                          int requestContentLen, ContentType * responseContentType, char * responseContent,
-                                          int * responseContentLen, int * responseCode)
+static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query,
+                           const char * token, int tokenLength, ContentType contentType, const char * requestContent,
+                           size_t requestContentLen, ContentType * responseContentType, char * responseContent,
+                           size_t * responseContentLen, int * responseCode)
 {
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
@@ -134,26 +140,26 @@ static int Lwm2mBootstrap_EndpointHandler(int type, void * ctxt, AddressType * a
 
             Lwm2mBootstrap_AddClientToQueue(&client);
     
-            *responseCode = Lwm2mResult_SuccessChanged;
+            *responseCode = AwaResult_SuccessChanged;
             break;
         }
 
         default:
-            *responseCode = Lwm2mResult_MethodNotAllowed;
+            *responseCode = AwaResult_MethodNotAllowed;
             break;
     }
     return 0;
 }
 
-static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void BootstrapTransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
-    if (responseCode >= Lwm2mResult_Success && responseCode <= Lwm2mResult_SuccessContent)
+    if ((responseCode >= AwaResult_Success) && (responseCode <= AwaResult_SuccessContent))
     {
         Lwm2mBootstrapClient * client = (Lwm2mBootstrapClient *)context;
         char uri[MAX_URI_LENGTH];
         char server[MAX_URI_LENGTH];
 
-        Lwm2mCore_AddressTypeToPath(server, addr);
+        Lwm2mCore_AddressTypeToPath(server, MAX_URI_LENGTH, addr);
 
         // Get the next security/server object to send
         if ((client->ObjectID == LWM2M_SECURITY_OBJECT) || (client->ObjectID == 1))
@@ -194,7 +200,7 @@ static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * add
             Lwm2mTreeNode_DeleteRecursive(object);
 
             Lwm2m_Debug("Put to %s\n", uri);
-            coap_PutRequest(context, uri, ContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, Lwm2mBootstrap_TransactionCallback);
+            coap_PutRequest(context, uri, ContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, BootstrapTransactionCallback);
         }
         else
         {
@@ -205,7 +211,7 @@ static void Lwm2mBootstrap_TransactionCallback(void * context, AddressType * add
             coap_PostRequest(context, uri, ContentType_None, NULL, 0, NULL);
 
             // Delete the client record
-            free((void *)client->EndPointName);
+            free(client->EndPointName);
             memset(client, 0, sizeof(*client));
         }
     }
@@ -220,7 +226,7 @@ void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
         // Kick start sending bootstrap with callback
         if (bootStrapQueue[i].Used && (bootStrapQueue[i].ObjectID == 0) && (bootStrapQueue[i].ObjectInstanceID == -1))
         {
-            Lwm2mBootstrap_TransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, Lwm2mResult_Success, 0, NULL, 0);
+            BootstrapTransactionCallback(&bootStrapQueue[i], &bootStrapQueue[i].Addr, NULL, AwaResult_Success, 0, NULL, 0);
         }
     }
 }
@@ -231,7 +237,7 @@ bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** conf
     bool success = true;
     int i = 0;
 
-    Lwm2mCore_AddResourceEndPoint(context, "/bs", Lwm2mBootstrap_EndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/bs", EndpointHandler);
 
     for (i = 0; i < configCount; i++)
     {
@@ -251,7 +257,7 @@ void Lwm2mBootstrap_Destroy(void)
     {
         if (bootStrapQueue[i].Used)
         {
-            free(&bootStrapQueue[i].EndPointName);
+            free(bootStrapQueue[i].EndPointName);
             memset(&bootStrapQueue[i], 0, sizeof(bootStrapQueue[i]));
         }
     }

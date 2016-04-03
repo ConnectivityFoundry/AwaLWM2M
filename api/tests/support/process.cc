@@ -35,7 +35,7 @@
 
 namespace Awa {
 
-pid_t SpawnProcess(std::vector<const char *> &commandVector, bool wait_, bool silent)
+pid_t SpawnProcess(const std::vector<const char *> &commandVector, bool wait_, bool silent)
 {
     pid_t c_pid, pid;
 
@@ -211,6 +211,7 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
         if (rc == -1)
         {
             perror("sendto failed");
+            close(sockfd);
             //printf("sockfd %d, request %p, requestLen %zu, fromAddr %p, fromAddrLen %d\n", sockfd, request, requestLen, &fromAddr, fromAddrLen);
             close(sockfd);
             return -1;

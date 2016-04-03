@@ -471,6 +471,11 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     return &coapInfo;
 }
 
+void coap_SetLogLevel(int logLevel)
+{
+
+}
+
 int coap_Destroy(void)
 {
     return 0;

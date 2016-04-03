@@ -43,8 +43,8 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int timeout = 2500;         // milliseconds
-    const int timeoutTolerance = 100;  // milliseconds
+    const int timeout = 2500;          // milliseconds
+    const int timeoutTolerance = 250;  // milliseconds
 
 } // namespace defaults
 
@@ -472,10 +472,30 @@ static int fd_set_blocking(int fd, int blocking) {
     return 0;
 }
 
-const size_t BUF_SIZE = 256;
+const size_t BUF_SIZE = 4096;
+
+static void null_terminate_buffer(char * buffer, int rc, size_t bufSize)
+{
+    // if rc is valid, null-terminate buffer after rc bytes read
+    if (rc > 0)
+    {
+        if (rc < static_cast<int>(bufSize))
+        {
+            buffer[rc] = 0;
+        }
+        else
+        {
+            // unless bytes fill buffer entirely, then truncate
+            buffer[bufSize - 1] = 0;
+        }
+    }
+    else
+    {
+        buffer[0] = 0;
+    }
+}
 
 } // namespace detail
-
 
 // A test utility class for capturing output from a file
 class CaptureFile
@@ -524,20 +544,8 @@ protected:
   const char * Read() const {
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
-      if (rc == 0 || rc == -1) {
-          buffer_[0] = 0;
-      }
-
-      if (strlen(buffer_) > 0)
-      {
-          // a prefix of '[file:lineno] ' is prepended, advance beyond this
-          char * result = strchr(buffer_, ']') + 2;
-          return ((result != NULL) && (result <= (buffer_ + strlen(buffer_)))) ? result : buffer_;
-      }
-      else
-      {
-          return buffer_;
-      }
+      detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
+      return buffer_;
   }
 
   FILE * outFile_;
@@ -605,20 +613,8 @@ protected:
   virtual const char * Read() const {
       // non-blocking
       int rc = read(pipe_fd_[0], buffer_, detail::BUF_SIZE);
-      if (rc == 0 || rc == -1) {
-          buffer_[0] = 0;
-      }
-
-      if (strlen(buffer_) > 0)
-      {
-          // a prefix of '[file:lineno] ' is prepended, advance beyond this
-          char * result = strchr(buffer_, ']') + 2;
-          return ((result != NULL) && (result <= (buffer_ + strlen(buffer_)))) ? result : buffer_;
-      }
-      else
-      {
-          return buffer_;
-      }
+      detail::null_terminate_buffer(buffer_, rc, detail::BUF_SIZE);
+      return buffer_;
   }
 private:
   FILE * stream_;
@@ -729,6 +725,36 @@ protected:
     useconds_t timeoutDuration_;
 };
 
+class PollCondition
+{
+public:
+    explicit PollCondition(int maxCount = 10) : pollCount(0), pollMaxCount(maxCount) {}
+
+    virtual ~PollCondition() {}
+
+    virtual void Reset()
+    {
+        pollCount = 0;
+    }
+
+    virtual bool Wait()
+    {
+        while(++pollCount < pollMaxCount)
+        {
+            if (Check())
+            {
+                break;
+            }
+        }
+
+        return pollCount < pollMaxCount;
+    }
+
+    virtual bool Check() = 0;
+protected:
+    int pollCount;
+    int pollMaxCount;
+};
 
 } // namespace Awa
 

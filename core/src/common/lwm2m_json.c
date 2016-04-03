@@ -167,19 +167,30 @@ static int JsonEncodeOpaque(char * buffer, int bufferLen, char * id, char * valu
 }
 
 // Write a JSON encoded string to the buffer provided
-static int JsonEncodeString(char * buffer, int bufferLen, char * id, char * value, bool last)
+static int JsonEncodeString(char * buffer, int bufferLen, char * id, char * value, size_t size, bool last)
 {
-    sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%s\"}", id, value);
-    if (!last)
+    int result = 0;
+
+    char * temp = (char *)malloc(size + 1);
+    if (temp != NULL)
     {
-        strcat(buffer,",\n");
-    }
-    else
-    {
-        strcat(buffer,"]\n");
+        memcpy(temp, value, size);
+        temp[size] = '\0';
+
+        sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%s\"}", id, temp);
+        if (!last)
+        {
+            strcat(buffer,",\n");
+        }
+        else
+        {
+            strcat(buffer,"]\n");
+        }
+        free(temp);
+        result = strlen(buffer);
     }
 
-    return strlen(buffer);
+    return result;
 }
 
 // Write a JSON encoded integer to the buffer provided
@@ -229,7 +240,7 @@ static int JsonEncodeBoolean(char * buffer, int bufferLen, char * id, bool value
 }
 
 // Write a JSON encoded object-link to the buffer provided
-static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, uint16_t objectID, uint16_t objectInstanceID, bool last)
+static int JsonEncodeObjectLink(char * buffer, int bufferLen, char * id, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, bool last)
 {
     sprintf(buffer, "{\"n\":\"%s\",\"sv\":\"%d:%d\"}", id, objectID, objectInstanceID);
     if (!last)
@@ -259,14 +270,14 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
     value = (uint8_t * )Lwm2mTreeNode_GetValue(node, &size);
     switch (definition->Type)
     {
-        case ResourceTypeEnum_TypeString:
-            valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, last);
+        case AwaResourceType_String:
+            valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, size, last);
             break;
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaResourceType_Boolean:
             valueLength = JsonEncodeBoolean((char *)buffer, len, id, *(bool*)value, last);
             break;
-        case ResourceTypeEnum_TypeTime:  // no break
-        case ResourceTypeEnum_TypeInteger:
+        case AwaResourceType_Time:  // no break
+        case AwaResourceType_Integer:
             switch (size)
             {
                case sizeof(int8_t):
@@ -285,7 +296,7 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
                    break;
             }
             break;
-        case ResourceTypeEnum_TypeFloat:
+        case AwaResourceType_Float:
             switch (size)
             {
                 case sizeof(float):
@@ -299,12 +310,12 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
                     break;
             }
             break;
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaResourceType_Opaque:
             valueLength = JsonEncodeOpaque((char *)buffer, len, id, (char *)value, size, last);
             break;
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaResourceType_ObjectLink:
            {
-               ObjectLink * objectLink = (ObjectLink *) value;
+               AwaObjectLink * objectLink = (AwaObjectLink *) value;
                valueLength = JsonEncodeObjectLink((char *)buffer, len, id, objectLink->ObjectID, objectLink->ObjectInstanceID, last);
                break;
            }
@@ -490,11 +501,6 @@ static Lwm2mTreeNode * AddObjectNode(Lwm2mTreeNode * root, const DefinitionRegis
     Lwm2mTreeNode * objectNode = (root != NULL) ? Lwm2mTreeNode_FindNode(root, objectID) : NULL;
     if (objectNode == NULL)
     {
-        objectNode = Lwm2mTreeNode_Create();
-
-        Lwm2mTreeNode_SetID(objectNode, objectID);
-        Lwm2mTreeNode_SetType(objectNode, Lwm2mTreeNodeType_Object);
-
         ObjectDefinition * definition = Definition_LookupObjectDefinition(registry, objectID);
 
         if (definition == NULL)
@@ -503,9 +509,14 @@ static Lwm2mTreeNode * AddObjectNode(Lwm2mTreeNode * root, const DefinitionRegis
             return NULL;
         }
 
+        objectNode = Lwm2mTreeNode_Create();
+        Lwm2mTreeNode_SetID(objectNode, objectID);
+        Lwm2mTreeNode_SetType(objectNode, Lwm2mTreeNodeType_Object);
+
         if (Lwm2mTreeNode_SetDefinition(objectNode, definition) != 0)
         {
             Lwm2m_Error("ERROR: Failed to set definition Object %d\n", objectID);
+            Lwm2mTreeNode_DeleteRecursive(objectNode);
             return NULL;
         }
 
@@ -542,10 +553,6 @@ static Lwm2mTreeNode * AddResourceNode(Lwm2mTreeNode * instanceNode, const Defin
     Lwm2mTreeNode * resourceNode = (instanceNode != NULL) ? Lwm2mTreeNode_FindNode(instanceNode, resourceID) : NULL;
     if (resourceNode == NULL)
     {
-        resourceNode = Lwm2mTreeNode_Create();
-        Lwm2mTreeNode_SetID(resourceNode, resourceID);
-        Lwm2mTreeNode_SetType(resourceNode, Lwm2mTreeNodeType_Resource);
-
         ResourceDefinition * definition = Definition_LookupResourceDefinition(registry, objectID, resourceID);
 
         if (definition == NULL)
@@ -554,9 +561,14 @@ static Lwm2mTreeNode * AddResourceNode(Lwm2mTreeNode * instanceNode, const Defin
             return NULL;
         }
 
+        resourceNode = Lwm2mTreeNode_Create();
+        Lwm2mTreeNode_SetID(resourceNode, resourceID);
+        Lwm2mTreeNode_SetType(resourceNode, Lwm2mTreeNodeType_Resource);
+
         if (Lwm2mTreeNode_SetDefinition(resourceNode, definition) != 0)
         {
             Lwm2m_Error("ERROR: Failed to set definition Object %d Resource %d\n", objectID, resourceID);
+            Lwm2mTreeNode_DeleteRecursive(resourceNode);
             return NULL;
         }
 
@@ -576,7 +588,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
     int index;
     jsmn_parser p;
     jsmntok_t tokens[MAX_JSON_TOKENS];
-    char basename[128];
+    enum { BASENAME_SIZE = 128 };
+    char basename[BASENAME_SIZE];
     uint64_t basetime = 0;
     const char * buffer = (const char *)buf;
 
@@ -605,7 +618,8 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
         {
             return -1;
         }
-        strcpy(basename, JsonTokenToString(buffer, t));
+        strncpy(basename, JsonTokenToString(buffer, t), BASENAME_SIZE);
+        basename[BASENAME_SIZE - 1] = '\0'; // Defensive
 
         *dest = Lwm2mTreeNode_Create();
         Lwm2mTreeNode_SetType(*dest, Lwm2mTreeNodeType_Root);
@@ -722,10 +736,6 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                 resourceNode = *dest;
             }
 
-            resourceValueNode = Lwm2mTreeNode_Create();
-            Lwm2mTreeNode_SetID(resourceValueNode, resourceInstanceID);
-            Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
-
             // Data type, "sv", "v", "bv" etc
             JsonDataType jsonDataType;
             t = &tokens[t->next_sibling];
@@ -763,10 +773,14 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
             }
             char * value = JsonTokenToString(buffer, t);
 
+            resourceValueNode = Lwm2mTreeNode_Create();
+            Lwm2mTreeNode_SetID(resourceValueNode, resourceInstanceID);
+            Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
+
             int resourceType = Definition_GetResourceType(registry, objectID, resourceID);
             switch (resourceType)
             {
-                case ResourceTypeEnum_TypeTime:
+                case AwaResourceType_Time:
                     if (jsonDataType == JSON_TYPE_FLOAT)
                     {
                         int64_t temp = 0;
@@ -780,19 +794,21 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     else
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
                     break;
 
-                case ResourceTypeEnum_TypeFloat:  // no break
-                case ResourceTypeEnum_TypeInteger:
+                case AwaResourceType_Float:  // no break
+                case AwaResourceType_Integer:
 
                     if (jsonDataType != JSON_TYPE_FLOAT)
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
 
-                    if (resourceType == ResourceTypeEnum_TypeFloat)
+                    if (resourceType == AwaResourceType_Float)
                     {
                         double temp = 0;
                         result = sscanf((char *)value, "%24lf", &temp);
@@ -812,7 +828,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeBoolean:
+                case AwaResourceType_Boolean:
                     if (jsonDataType == JSON_TYPE_BOOLEAN)
                     {
                         int64_t temp = (strcmp(value, "true")) ? 1: 0;
@@ -820,14 +836,16 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     else
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
                     break;
 
-                case ResourceTypeEnum_TypeOpaque:
+                case AwaResourceType_Opaque:
                     {
                         if (jsonDataType != JSON_TYPE_STRING)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
 
@@ -835,6 +853,7 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         char * decodedValue = (char *)malloc(outLength);
                         if (decodedValue == NULL)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
                         int decodedLength = b64Decode(decodedValue, outLength, value, strlen(value));
@@ -850,24 +869,26 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     }
                     break;
 
-                case ResourceTypeEnum_TypeString:
+                case AwaResourceType_String:
                     if (jsonDataType != JSON_TYPE_STRING)
                     {
+                        Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                         return -1;
                     }
 
                     result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&value[0], strlen(value) + 1);
                     break;
 
-                case ResourceTypeEnum_TypeObjectLink:
+                case AwaResourceType_ObjectLink:
                     {
                         if (jsonDataType != JSON_TYPE_OBJECT_LINK)
                         {
+                            Lwm2mTreeNode_DeleteRecursive(resourceValueNode);
                             return -1;
                         }
 
-                        ObjectLink objectLink;
-                        result = sscanf(value, "%24" SCNu16":%24" SCNu16, &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                        AwaObjectLink objectLink;
+                        result = sscanf(value, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                         if (result > 0)
                         {
                             result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&objectLink, sizeof(objectLink));

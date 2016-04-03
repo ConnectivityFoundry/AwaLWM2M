@@ -158,6 +158,7 @@ int main(int argc, char ** argv)
     {
         Error("Failed to establish Awa Session\n");
         result = 1;
+        goto cleanup;
     }
 
     result = ProcessDeleteOperation(operation);

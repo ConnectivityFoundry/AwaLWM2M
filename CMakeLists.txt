@@ -15,6 +15,7 @@ enable_testing ()
 # build tests, but disable running by default
 option (BUILD_TESTS "Build tests" ON)
 option (RUN_TESTS "Enable tests" OFF)
+option (WITH_JSON "Enable JSON support" ON)
 # cmdline: cmake -DBUILD_TESTS=ON -DRUN_TESTS=OFF ..
 
 option (ENABLE_GCOV "Enable code coverage check" OFF)

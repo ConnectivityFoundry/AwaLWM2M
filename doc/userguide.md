@@ -22,6 +22,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
     * [The Awa client daemon.](userguide.md#the-awa-client-daemon)  
     * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
     * [The Awa API.](userguide.md#the-awa-api)
+    * [Awa client API tools.](userguide.md#awa-client-api-tools)
         * [API options.](userguide.md#common-options)
         * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
         * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
@@ -88,6 +89,8 @@ In the case where a single instance of an object and resource exists the address
 
 Semantic addressing allows resources to be written to directly: ````1000/0/1/2='this value"````
 
+[Back to the table of contents](userguide.md#contents)
+
 ----
 
 
@@ -134,6 +137,7 @@ Example:
 
 ```` awa_clientd --port 6000 --endPointName client1 --bootstrap coap://0.0.0.0:2134 ````
 
+[Back to the table of contents](userguide.md#contents)
 
 ----
 
@@ -170,6 +174,7 @@ Example: ````awa_serverd --interface eth0 --addressFamily 4 --port 5683 ````
 
 For examples of how to use the LWM2M server with the LWM2M client see the *LWM2M client usage* section below.
 
+[Back to the table of contents](userguide.md#contents)
 
 ----
 
@@ -239,8 +244,9 @@ NotificationStoringWhenDisabledOrOffline=true
  * *DisableTimeout* is not supported.  
  * *NotificationStoringWhenDisabledOrOffline* is not supported.  
 
-----
+[Back to the table of contents](userguide.md#contents)
 
+----
 
 
 ## Using the LWM2M client.
@@ -253,7 +259,7 @@ $ build/core/src/server/awa_serverd --verbose
 $ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
 ````
 
-### The Awa_API.
+### The Awa API.
 
 The Awa API provides a way for applications to communicate with the LWM2M client and server daemons via the IPC interface.  
 The client API header file can be found in "include/Awa/client.h".  
@@ -263,6 +269,8 @@ Both server and client APIs are implemented in the *libawa* library.   Applicati
 Useful examples can be found in the *api/example* folder. 
 
 The tools directory contains a number of useful tools. These are built with the daemons, by default. A complete toolset reference can be found [here](Awa_tools_reference.md).
+
+[Back to the table of contents](userguide.md#contents)
 
 ## Awa client API tools.
 
@@ -297,6 +305,9 @@ Most tools take one or more PATH parameters, specified in the format:
 | /O/I/R/i | specifies the object ID, object instance ID, resource ID and resource instance ID for operations on specific resource instances. |
 
 For tools that write data, values can be specified with the format: ````PATH=VALUE````
+
+[Back to the table of contents](userguide.md#contents)
+
 
 ### Creating a new object definition.
 
@@ -335,11 +346,15 @@ Example. Define TestObject2 as ObjectID 1000, with a single mandatory instance, 
  --resourceID=2 --resourceName=Resource2 --resourceType=none    --resourceInstances=single --resourceRequired=optiona   --resourceOperations=e
 ````
 
+[Back to the table of contents](userguide.md#contents)
+
 ### Discovering a device's object and resource definitions.
 
 The *awa-client-explore* tool is used to discover the objects and resources that have been defined on the LWM2M server. The tool will also list the objects and object-resources that are currently defined within the client daemon.
 
 Example: ````./awa-client-explore ````
+
+[Back to the table of contents](userguide.md#contents)
 
 ### Setting resource values.
 
@@ -369,6 +384,8 @@ Multiple set operations can be combined on the command line:
  
  ````./awa-client-set --create /1000/0 /1000/0/0=Happy /1000/0/1/7=Seventh ````
 
+[Back to the table of contents](userguide.md#contents)
+
 ### Retrieving a resource value.
 
 The *awa-client-get* tool is used to retrieve the value of a client object resource and display it on the console.
@@ -384,6 +401,8 @@ All object instances for an object ID can also be retrieved: ````./awa-client-ge
 If the resource specified is a multiple-instance resource, all instances will be retrieved. Individual instances can be displayed by specifying the resource instance index:  ````./awa-client-get /1000/0/5/1 /1000/0/5/2 ````
 
 The *--quiet/-q* option can be used to suppress the display of any extra information.
+
+[Back to the table of contents](userguide.md#contents)
 
 ### Subscribing to a change of resource value.
 
@@ -411,6 +430,8 @@ For example, to wait for no longer than 60 seconds for a single notification: ``
 
 Multiple paths can be combined on the command line: ````./awa-client-subscribe /3/0/4 /3/0/5 /4 ````
 
+[Back to the table of contents](userguide.md#contents)
+
 ### Deleting a resource.
 
 To delete an object or resource instance from the client, use the *awa-client-delete* tool.  
@@ -422,6 +443,9 @@ To delete the resource with ID 5 from instance 0 of object ID 1000: ````./awa-cl
 
 Unlike the *awa-server-delete* tool, this tool can modify the client's data structures directly, so is not limited by LWM2M Delete rules.
 
+[Back to the table of contents](userguide.md#contents)
+
+
 ## Awa Server API tools.
 
 Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
@@ -432,6 +456,8 @@ Server tools often require a target client ID to be specified:
 |-----|-----|
 | -c, --clientID=ID | ClientID is the client endpoint name used by the client when registering with the LWM2M server. |
 
+
+[Back to the table of contents](userguide.md#contents)
 
 ### Listing registered clients.
 
@@ -459,9 +485,14 @@ Returns
 1 imagination1 <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
 ````
 
+[Back to the table of contents](userguide.md#contents)
+
+
 ### Creating a server object definition.
 
 The *awa-server-define* tool is used to define custom objects on the server. To use a custom object, the object definition must be registered with the server daemon. The *awa-server-define* tool has identical functionality to *awa-client-define*, described earlier.
+
+[Back to the table of contents](userguide.md#contents)
 
 ### Writing a value to a resource on a registered client.
 
@@ -492,6 +523,9 @@ The ID of the newly created object instance is displayed.
 
  **Note: Create functionality is not yet supported.**
 
+
+[Back to the table of contents](userguide.md#contents)
+
 ### Reading a resource value from a registered client.
 
 The *awa-server-read* tool is used to retrieve the value of a resource and display it on the console. For example, to display the value of resource 0, within instance 0 of object 1000:
@@ -502,6 +536,9 @@ Multiple resources and object instances can be read using:
 
 ````./awa-server-read -c imagination1 /1000/0/2 /1000/0/3 /1000/1 /1001 ````
 
+
+[Back to the table of contents](userguide.md#contents)
+
 ### Deleting an object instance from a registered client.
 
 The *awa-server-delete* tool is used to delete an instance of an object from a connected client. For example, to delete object 1000, instance 0 from the client "imagination1":
@@ -509,6 +546,9 @@ The *awa-server-delete* tool is used to delete an instance of an object from a c
 ````./awa-server-delete --clientID=imagination1 /1000/0 ````
 
 **Note.** Due to LWM2M protocol restrictions it is not possible to delete individual resources, resource instances, or entire objects.
+
+
+[Back to the table of contents](userguide.md#contents)
 
 ### Observing a resource on a registered client.
 
@@ -537,6 +577,9 @@ For example, to wait for no longer than 60 seconds for a single notification:
 
 Observe attributes that affect the way notifications are generated can be changed with the *awa-server-write-attributes* tool.
 
+
+[Back to the table of contents](userguide.md#contents)
+
 ### Executing a resource on a registered client.
 
 The *awa-server-execute* tool is used to initiate an *execute* operation on a resource that supports it.
@@ -557,6 +600,10 @@ Opaque data can be supplied as an argument to the execute operation by piping in
 
 Execute operations on an object, an object instance or a resource instance are not possible.
 
+
+[Back to the table of contents](userguide.md#contents)
+
+
 ### Write attribute values of a resource or object instance on a registered client.
 
 The *awa-server-write-attributes* tool is used to change the value of attributes associated with a client's resource or object instance.
@@ -571,6 +618,9 @@ Multiple attribute values can be set with the same call. For example, to set the
 
 Note that the *?* and *&* characters will need to be escaped for most shells.
 
+[Back to the table of contents](userguide.md#contents)
+
+
 ## Further information.
 
 ### Application example.
@@ -584,7 +634,10 @@ Full Awa API reference material is available [here](http://flowm2m.github.io/Awa
 
 ### Connecting to third party servers.
 
-A *how to* guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
+A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
+
+[Back to the table of contents](userguide.md#contents)
+
 
 ----
 ----

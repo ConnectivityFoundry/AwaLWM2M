@@ -30,10 +30,9 @@
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_debug.h"
 
-#include "../../api/include/awa/error.h"
-#include "../../api/include/awa/common.h"
+#include <awa/static.h>
 
-TreeNode IPC_NewResponseNode(const char * type, Lwm2mResult code)
+TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
 {
     TreeNode responseNode = Xml_CreateNode("Response");
     TreeNode typeNode = Xml_CreateNodeWithValue("Type", "%s", type);

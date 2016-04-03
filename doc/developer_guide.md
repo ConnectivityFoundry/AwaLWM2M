@@ -29,7 +29,7 @@ Awa LightWeightM2M is an implementation of OMA LWM2M written in C. It incorporat
 Awa LightWeightM2M source code is made available by Imagination Technologies Limited under the standard 3-clause BSD license described [here.](https://www.tldrlegal.com/l/bsd3)
 
 ### Contributing to Awa LightWeightM2M.
-Contributions to the Awa project are welcome and there are many ways to help, by submitting bug reports for example, or making feature requests, code changes or documentation edits.  
+Contributions to the Awa LightweigthM2M project are welcome and there are many ways to help, by submitting bug reports for example, or making feature requests, code changes or documentation edits.  
 To ensure that the codebase remains easy to understand, maintain and improve, all contributions should adhere to the [coding style guide](coding_style.md).  
 A comprehensive collection of unit tests is being developed and maintained to ensure that new contributions do not break existing functionality. All code submissions should be accompanied by one or more relevant unit tests, implemented within the existing unit test framework as described in the [*Testing*](developer_guide.md#testing) section below.
 
@@ -48,7 +48,7 @@ The codebase is divided into the following parts:
  
 The Client, Server and Bootstrap server are implemented as Linux processes. Typically these run as *daemons*, detached from a parent console, which may be configured to automatically run when the host starts up. For example, a Linux gateway may automatically start the server so that constrained devices are able to register as soon as the gateway becomes available.  
  
-The API is provided as a linkable library, to be incorporated into a user program. The API has three parts:
+The API is provided as a linkable library, to be incorporated into a user program. It has three parts:
  
  * Client API
  * Static client API
@@ -158,7 +158,7 @@ TODO
 
 ## Testing.
 
-Awa LWM2M was developed alongside a comprehensive test suite, implemented within the Google Test framework. Tests are written in C++ and compile as part of one of several "test runner" applications:
+Awa LightweightM2M was developed alongside a comprehensive test suite, implemented within the Google Test framework. Tests are written in C++ and compile as part of one of several "test runner" applications:
  
  * test_core_runner executes tests related to Client and Server daemon components.
  * test_api_runner executes tests related to Client and Server API components, including top-level tests involving multiple daemons.

@@ -26,10 +26,10 @@
 #include "lwm2m_objects.h"
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen);
 
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
 static int Lwm2mServer_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
@@ -142,7 +142,7 @@ static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID
 }
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+                                           ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     Lwm2mServerType * server = GetServerObjectByObjectInstanceID(context, objectInstanceID);
     if (server != NULL)
@@ -188,6 +188,10 @@ static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID
                 *bufferLen = -1;
         }
     }
+    else
+    {
+        *bufferLen = -1;
+    }
     return *bufferLen;
 }
 
@@ -201,7 +205,7 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 }
 
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+                                            ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
     int result = -1;
 
@@ -288,7 +292,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
     return result;
 }
 
-static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, int inValueBufferLen)
+static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Registration Update triggered for server %d\n", objectInstanceID);
     Lwm2mCore_SetServerUpdateRegistration(context, objectInstanceID);
@@ -297,19 +301,19 @@ static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectI
 
 void Lwm2m_RegisterServerObject(Lwm2mContextType * context)
 {
-    ResourceOperationHandlers registrationUpdateTriggerOperationHandler = {.Execute = executeRegistrationUpdateTrigger, .CreateOptionalResource = Lwm2mServer_CreateOptionalResourceHandler};
+    ResourceOperationHandlers registrationUpdateTriggerOperationHandler = { .Execute = executeRegistrationUpdateTrigger, .CreateOptionalResource = Lwm2mServer_CreateOptionalResourceHandler };
 
     Lwm2mCore_RegisterObjectType(context, "LWM2MServer" , LWM2M_SERVER_OBJECT, MultipleInstancesEnum_Multiple, MandatoryEnum_Mandatory, &serverObjectOperationHandlers);
 
-    Lwm2mCore_RegisterResourceType(context, "ShortServerID",                            LWM2M_SERVER_OBJECT, 0, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R,  &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Lifetime",                                 LWM2M_SERVER_OBJECT, 1, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DefaultMinimumPeriod",                     LWM2M_SERVER_OBJECT, 2, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DefaultMaximumPeriod",                     LWM2M_SERVER_OBJECT, 3, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Disable",                                  LWM2M_SERVER_OBJECT, 4, ResourceTypeEnum_TypeNone,    MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_E,  &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "DisableTimeout",                           LWM2M_SERVER_OBJECT, 5, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "NotificationStoringWhenDisabledorOffline", LWM2M_SERVER_OBJECT, 6, ResourceTypeEnum_TypeBoolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Binding",                                  LWM2M_SERVER_OBJECT, 7, ResourceTypeEnum_TypeString,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_RW, &serverResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "RegistrationUpdateTrigger",                LWM2M_SERVER_OBJECT, 8, ResourceTypeEnum_TypeNone,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_E,  &registrationUpdateTriggerOperationHandler);
+    Lwm2mCore_RegisterResourceType(context, "ShortServerID",                            LWM2M_SERVER_OBJECT, 0, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly,  &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Lifetime",                                 LWM2M_SERVER_OBJECT, 1, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DefaultMinimumPeriod",                     LWM2M_SERVER_OBJECT, 2, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DefaultMaximumPeriod",                     LWM2M_SERVER_OBJECT, 3, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Disable",                                  LWM2M_SERVER_OBJECT, 4, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_Execute,  &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "DisableTimeout",                           LWM2M_SERVER_OBJECT, 5, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "NotificationStoringWhenDisabledorOffline", LWM2M_SERVER_OBJECT, 6, AwaResourceType_Boolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Binding",                                  LWM2M_SERVER_OBJECT, 7, AwaResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadWrite, &serverResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "RegistrationUpdateTrigger",                LWM2M_SERVER_OBJECT, 8, AwaResourceType_None,    MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_Execute,  &registrationUpdateTriggerOperationHandler);
 }
 
 // Add a server entry to our list of servers or updates an existing one triggers a Registration request.
@@ -334,7 +338,7 @@ void Lwm2mCore_SetServerUpdateRegistration(Lwm2mContextType * context, int serve
 
 int Lwm2mServerObject_GetDefaultMinimumPeriod(Lwm2mContextType * context, int shortServerID)
 {
-    int64_t defaultMinimumPeriod = -1;
+    int64_t defaultMinimumPeriod = 0;
     Lwm2mServerType * server = GetServerObjectByShortServerID(context, shortServerID);
     if (server != NULL)
     {

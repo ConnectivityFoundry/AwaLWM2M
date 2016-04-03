@@ -178,7 +178,7 @@ int main(int argc, char ** argv)
             goto cleanup;
         }
 
-        targets = malloc(ai.inputs_num * sizeof(Target));
+        targets = malloc(ai.inputs_num * sizeof(Target *));
         // Add target paths from command line
         int i = 0;
         for (i = 0; i < ai.inputs_num; ++i)

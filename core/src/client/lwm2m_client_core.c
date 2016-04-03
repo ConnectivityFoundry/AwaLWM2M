@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -62,44 +62,45 @@ struct _Lwm2mContextType
     char EndPointName[MAX_ENDPOINT_NAME_LENGTH];  // Client EndPoint name
     bool UseFactoryBootstrap;                 // Factory bootstrap information has been loaded from file.
     struct ListHead ObserverList;
+    void * ApplicationContext;
 };
 
 static Lwm2mContextType Lwm2mContext;
 
-static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                            ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
-                                            const void ** buffer, int * bufferLen);
+static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
+                                  ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
+                                  const void ** buffer, size_t * bufferLen);
 
-static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                             ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
-                                             uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
+                                   ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
+                                   uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
-static int Lwm2mCore_ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
-static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
-static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
+static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-static int Lwm2mCore_DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
-                                                    const char * path, const char * query, const char * token, int tokenLength,
-                                                    ContentType contentType, const char * requestContent, int requestContentLen,
-                                                    ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
+                                          const char * path, const char * query, const char * token, int tokenLength,
+                                          ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                          ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 ObjectOperationHandlers defaultObjectOperationHandlers =
 {
-    .CreateInstance = Lwm2mCore_ObjectStoreCreateInstanceHandler,
-    .Delete = Lwm2mCore_ObjectStoreDeleteHandler,
+    .CreateInstance = ObjectStoreCreateInstanceHandler,
+    .Delete = ObjectStoreDeleteHandler,
 };
 
 ResourceOperationHandlers defaultResourceOperationHandlers =
 {
-    .Read = Lwm2mCore_ObjectStoreReadHandler,    //default handler, read from object store
-    .Write = Lwm2mCore_ObjectStoreWriteHandler,  //default handler, write to object store.
+    .Read = ObjectStoreReadHandler,    //default handler, read from object store
+    .Write = ObjectStoreWriteHandler,  //default handler, write to object store.
     .Execute = NULL,
-    .CreateOptionalResource = Lwm2mCore_ObjectStoreCreateOptionalResourceHandler,
+    .CreateOptionalResource = ObjectStoreCreateOptionalResourceHandler,
 };
 
 
 // Serialise the Object referenced by OIR into the provided buffer. Return number of bytes serialised, negative on failure
-static int Lwm2mCore_SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int oir[], int oirLength, ContentType * responseContentType, char * buffer, int size)
+static int SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int oir[], int oirLength, ContentType * responseContentType, char * buffer, size_t size)
 {
     int len = -1;
 
@@ -134,11 +135,11 @@ static int Lwm2mCore_SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptConten
 }
 
 // Deserialise the encoded buffer provided into the Object references by OIR. Return number of bytes deserialised, negative on failure
-static int Lwm2mCore_DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, int len)
+static int DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, size_t len)
 {
-    /* If the content type is not specified in the payload of a response message, 
-     * the default content type (text/plain) is assumed; otherwise the content type 
-     * MUST be specified in using one of the supported Media Types. 
+    /* If the content type is not specified in the payload of a response message,
+     * the default content type (text/plain) is assumed; otherwise the content type
+     * MUST be specified in using one of the supported Media Types.
      */
     if (contentType ==  ContentType_None)
     {
@@ -164,12 +165,12 @@ static int Lwm2mCore_DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentTy
     return len;
 }
 
-static void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
+void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
 {
-    char path[32];
+    char path[LWM2M_MAX_OIR_PATH_LEN];
     sprintf(path, "/%d", objectID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObject(&context->ObjectTree, objectID);
     Lwm2m_MarkObserversChanged(context, objectID, -1, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -181,7 +182,7 @@ static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectID
     char path[32];
     sprintf(path, "/%d/%d", objectID, objectInstanceID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList,path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList,path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddObjectInstance(&context->ObjectTree, objectID, objectInstanceID);
     Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, -1, NULL, 0);
     Lwm2m_SetUpdateRegistration(context);
@@ -213,21 +214,25 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
 {
     char path[32];
     const void * newValue = NULL;
-    int newValueLength = 0;
+    size_t newValueLength = 0;
 
     sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
 
-    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, Lwm2mCore_DeviceManagmentEndpointHandler);
+    Lwm2mEndPoint_AddResourceEndPoint(&context->EndPointList, path, DeviceManagmentEndpointHandler);
     Lwm2mObjectTree_AddResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
-    Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
-    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+
+    if (Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID) != AwaResourceType_None)
+    {
+        Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &newValue, &newValueLength);
+        Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, newValue, newValueLength);
+    }
 }
 
 // This function is called when a read is performed for a resource that uses the "default" read handler. It is responsible
 // for looking up the resource specified and copying it's contents into the buffer specified by "destBuffer".
 // Return -1 on error, or the size of the data written to destBuffer.
-static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
+                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
 }
@@ -235,30 +240,23 @@ static int Lwm2mCore_ObjectStoreReadHandler(void * context, ObjectIDType objectI
 // This function is called when a write is performed for a resource that uses the "default" write handler. It is responsible
 // for looking up the resource specified and populating it from the contents in srcBuffer.
 // Return -1 on error, or the size of the data written to destBuffer.
-static int Lwm2mCore_ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
+                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
-    int nullTerminator = 0;
-
-    // If the type is a string, add a NULL terminator.
-    if (Definition_GetResourceType(((Lwm2mContextType *)(context))->Definitions, objectID, resourceID) == ResourceTypeEnum_TypeString)
-    {
-        nullTerminator = 1;
-    }
     return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID,
-                                                resourceInstanceID, srcBufferLen + nullTerminator, srcBuffer, 0, srcBufferLen, changed);
+                                                resourceInstanceID, srcBufferLen, srcBuffer, 0, srcBufferLen, changed);
 }
 
 // This function is called when a delete is performed for an object/object instance that uses the "default" handler.
 // Return -1 on error, or 0 on success.
-static int Lwm2mCore_ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     return ObjectStore_Delete(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID);
 }
 
 // This function is called when a create instance is performed for an object that uses the "default" handler.
 // Return -1 on error, or the ID of the created object instance on success.
-static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
+static int ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
     DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
     ObjectStore * store = ((Lwm2mContextType *)context)->Store;
@@ -270,7 +268,7 @@ static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDTy
     else
     {
         Lwm2m_Error("No definition for object ID %d\n", objectID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+        AwaResult_SetResult(AwaResult_NotFound);
         objectInstanceID = -1;
     }
     return objectInstanceID;
@@ -280,92 +278,154 @@ static int Lwm2mCore_ObjectStoreCreateInstanceHandler(void * context, ObjectIDTy
 // Return -1 on error, or the ID of the created object instance on success.
 int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
-    if ((objectInstanceID != -1) && (Lwm2mCore_Exists(context, objectID, objectInstanceID, -1)))
-    {
-        Lwm2m_Error("Object instance already exists: /%d/%d\n", objectID, objectInstanceID);
-        goto error;
-    }
+    ObjectInstanceIDType result = -1;
 
-    ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
-    if ((definition == NULL) || (definition->Handlers.CreateInstance == NULL))
+    if ((objectInstanceID == -1) || (!Lwm2mCore_Exists(context, objectID, objectInstanceID, -1)))
     {
-        Lwm2m_Error("No create handler for object ID %d\n", objectID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
-        goto error;
-    }
-
-    if ((objectInstanceID = definition->Handlers.CreateInstance(context, objectID, objectInstanceID)) >= 0) 
-    {
-        Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
-    }
-    else
-    {
-        Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
-    }
-
-    return objectInstanceID;
-error:
-    return -1;
-}
-
-// This function is called when a create optional resource is performed for a resource that uses the "default" handler.
-// Return 0 if resource created successfully, otherwise -1 on error.
-static int Lwm2mCore_ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
-{
-    DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
-    ObjectStore * store = ((Lwm2mContextType *)context)->Store;
-
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
-    if (definition == NULL)
-    {
-        Lwm2m_Error("No definition for object ID %d Resource ID %d\n", objectID, resourceID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
-        goto error;
-    }
-
-    if ((resourceID = ObjectStore_CreateResource(store, objectID, objectInstanceID, resourceID)) == -1)
-    {
-        goto error;
-    }
-
-    if (definition->DefaultValueNode == NULL)
-    {
-        // load new resource with a sensible default
-        Lwm2mObjectTree * objectTree = &((Lwm2mContextType *)context)->ObjectTree;
-        const void * defaultData = NULL;
-        int defaultLen = 0;
-        if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+        ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
+        if (definition != NULL)
         {
-            ResourceInstanceIDType resourceInstanceID = 0;
-            if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+            if (definition->Handlers.CreateInstance == NULL)
             {
-                Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                if (definition->Handler != NULL)
+                {
+                    //void * context, LWM2MOperation operation, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, void ** dataPointer, uint16_t * dataSize, bool * changed)
+                    AwaResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context) , AwaOperation_CreateObjectInstance, objectID, objectInstanceID, 0, 0, NULL, NULL, NULL);
+                    AwaResult_SetResult(lwm2mResult);
+
+                    if (lwm2mResult == AwaResult_SuccessCreated)
+                    {
+                        Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+                        result = objectInstanceID;
+                    }
+                    else
+                    {
+                        Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
+                        result = -1;
+                    }
+                }
+                else
+                {
+                    Lwm2m_Error("No hander defined for Object ID %d\n", objectID);
+                    AwaResult_SetResult(AwaResult_NotFound);
+                    result = -1;
+                }
+            }
+            else
+            {
+                if ((result = definition->Handlers.CreateInstance(context, objectID, objectInstanceID)) >= 0)
+                {
+                    Lwm2mCore_ObjectInstanceCreated(context, objectID, result);
+                }
+                else
+                {
+                    Lwm2m_Error("Could not create Object /%d/%d\n", objectID, objectInstanceID);
+                    result = -1;
+                }
             }
         }
         else
         {
-            Lwm2m_Error("Failed to set sensible default for /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-            goto error;
+            Lwm2m_Error("No definition for object ID %d\n", objectID);
+            AwaResult_SetResult(AwaResult_NotFound);
+            result = -1;
         }
     }
     else
     {
-        Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(definition->DefaultValueNode);
-        while (resourceInstanceNode)
-        {
-            int resourceInstanceID = 0;
-            const uint8_t * resourceInstanceValue;
-            uint16_t resourceInstanceValueLength;
-            Lwm2mTreeNode_GetID(resourceInstanceNode, &resourceInstanceID);
-            resourceInstanceValue = Lwm2mTreeNode_GetValue(resourceInstanceNode, &resourceInstanceValueLength);
-            Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, resourceInstanceValue, resourceInstanceValueLength);
-            resourceInstanceNode = Lwm2mTreeNode_GetNextChild(definition->DefaultValueNode, resourceInstanceNode);
-        }
+        Lwm2m_Error("Object instance already exists: /%d/%d\n", objectID, objectInstanceID);
+        result = -1;
     }
 
-    return 0;
-error:
-    return -1;
+    return result;
+}
+
+// This function is called when a create optional resource is performed for a resource that uses the "default" handler.
+// Return 0 if resource created successfully, otherwise -1 on error.
+static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+{
+    int result = -1;
+    if (context != NULL)
+    {
+        DefinitionRegistry * definitions = ((Lwm2mContextType *)context)->Definitions;
+        ObjectStore * store = ((Lwm2mContextType *)context)->Store;
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(definitions, objectID, resourceID);
+
+        if (definition != NULL)
+        {
+            if ((resourceID = ObjectStore_CreateResource(store, objectID, objectInstanceID, resourceID)) != -1)
+            {
+                if (definition->DefaultValueNode == NULL)
+                {
+                    // load new resource with a sensible default
+                    Lwm2mObjectTree * objectTree = &((Lwm2mContextType *)context)->ObjectTree;
+
+                    if (objectTree)
+                    {
+                        if (definition->MaximumInstances == 1 || definition->MinimumInstances > 0)  // optional multiple instance resources should be empty by default
+                        {
+                            ResourceInstanceIDType resourceInstanceID = 0;
+                            int minimumInstances = definition->MinimumInstances > 0 ? definition->MinimumInstances : 1;
+                            for (; resourceInstanceID < minimumInstances; resourceInstanceID++)
+                            {
+                                const void * defaultData = NULL;
+                                int defaultLen = 0;
+                                if (Definition_AllocSensibleDefault(definition, &defaultData, &defaultLen) == 0)
+                                {
+                                    if (Lwm2mObjectTree_AddResourceInstance(objectTree, objectID, objectInstanceID, resourceID, resourceInstanceID) == 0)
+                                    {
+                                        Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, defaultData, defaultLen);
+                                        result = 0;
+                                    }
+                                    else
+                                    {
+                                        result = -1;
+                                    }
+                                }
+                                else
+                                {
+                                    Lwm2m_Error("Failed to set sensible default for /%d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
+                                    result = -1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(definition->DefaultValueNode);
+                    while (resourceInstanceNode != NULL)
+                    {
+                        int resourceInstanceID = 0;
+                        const uint8_t * resourceInstanceValue;
+                        uint16_t resourceInstanceValueLength;
+                        Lwm2mTreeNode_GetID(resourceInstanceNode, &resourceInstanceID);
+                        resourceInstanceValue = Lwm2mTreeNode_GetValue(resourceInstanceNode, &resourceInstanceValueLength);
+                        Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, resourceInstanceID, resourceInstanceValue, resourceInstanceValueLength);
+                        resourceInstanceNode = Lwm2mTreeNode_GetNextChild(definition->DefaultValueNode, resourceInstanceNode);
+                    }
+
+                    result = 0;
+                }
+            }
+            else
+            {
+                result = -1;
+            }
+
+        }
+        else
+        {
+            Lwm2m_Error("No definition for object ID %d Resource ID %d\n", objectID, resourceID);
+            AwaResult_SetResult(AwaResult_NotFound);
+            result = -1;
+        }
+    }
+    return result;
 }
 
 // Create an optional resource for a specified object instance.
@@ -373,17 +433,48 @@ error:
 int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.CreateOptionalResource == NULL))
+    if (definition == NULL)
     {
-        Lwm2m_Error("No create resource handler for object ID %d resource ID %d\n", objectID, resourceID);
-        Lwm2mResult_SetResult(Lwm2mResult_NotFound);
+        Lwm2m_Error("No resource definition for object ID %d resource ID %d\n", objectID, resourceID);
+        AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
 
-    if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0) 
+    if (Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
     {
-        Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        Lwm2m_Error("Resource already exists %d/%d/%d\n", objectID, objectInstanceID, resourceID);
+        goto error;
     }
+
+    if (definition->Handlers.CreateOptionalResource == NULL)
+    {
+        if (definition->Handler == NULL)
+        {
+            Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        }
+        else
+        {
+            AwaResult result = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
+            AwaResult_SetResult(result);
+
+            if (result == AwaResult_SuccessCreated)
+            {
+                Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+            }
+            else
+            {
+                goto error;
+            }
+        }
+    }
+    else
+    {
+        if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0)
+        {
+            Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+        }
+    }
+
     return 0;
 error:
     return -1;
@@ -392,11 +483,11 @@ error:
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the resource level) and check it's permissions.
-// Return various errors on failure, Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
+// Return various errors on failure, AwaResult_Success on success.
+AwaResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * resourceNode,
                                                            ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, bool createObjectInstance)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     Lwm2mTreeNode * node;
     int resourceID;
     ResourceDefinition * definition;
@@ -409,7 +500,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
         {
             case LWM2M_SECURITY_OBJECT:
                 Lwm2m_Error("Permissions do not allow writing to %d/%d/%d\n", objectID, objectInstanceID, resourceID);
-                result = Lwm2mResult_Unauthorized;
+                result = AwaResult_Unauthorized;
                 goto error;
             default:
                 break;
@@ -419,8 +510,8 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
     definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
     if (definition == NULL)
     {
-        Lwm2m_Error("Resource definition not found\n");
-        result = Lwm2mResult_NotFound;
+        Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", objectID, resourceID);
+        result = AwaResult_NotFound;
         goto error;
     }
 
@@ -428,7 +519,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
     if (Lwm2mTreeNode_IsCreateFlagSet(resourceNode) && Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
     {
         Lwm2m_Error("Cannot create resource /%d/%d/%d: resource already exists\n", objectID, objectInstanceID, resourceID);
-        result = Lwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
         goto error;
     }
 
@@ -436,7 +527,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
     if (origin == Lwm2mRequestOrigin_Server && !Operations_IsResourceTypeWritable(definition->Operation) && !createObjectInstance)
     {
         Lwm2m_Error("Permissions do not allow writing to %d/%d/%d\n", objectID, objectInstanceID, resourceID);
-        result = Lwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -452,7 +543,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
         if (!IS_MULTIPLE_INSTANCE(definition) && resourceInstanceID != 0)
         {
             Lwm2m_Error("Permissions do not allow for creation of multiple instances of %d/%d/%d/%d\n", objectID, objectInstanceID, resourceID, resourceInstanceID);
-            result = Lwm2mResult_MethodNotAllowed;
+            result = AwaResult_MethodNotAllowed;
             goto error;
         }
 
@@ -464,11 +555,11 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForResourceNode(Lwm2mContextType * co
         node = Lwm2mTreeNode_GetNextChild(resourceNode, node);
     }
 
-    int numberOfExistingElements = Lwm2mCore_GetResourceInstanceCount(context, objectID, objectInstanceID, resourceID);
+    int numberOfExistingElements = Lwm2mTreeNode_IsReplaceFlagSet(resourceNode) ? 0 : Lwm2mCore_GetResourceInstanceCount(context, objectID, objectInstanceID, resourceID);
     if (numberOfNewElements + numberOfExistingElements > definition->MaximumInstances)
     {
         Lwm2m_Error("Too many resource instances for resource %d/%d/%d\n", objectID, objectInstanceID, resourceID);
-        result = Lwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 error:
@@ -477,13 +568,13 @@ error:
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the object instance level) and check it's permissions.
-// Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectInstanceNode, int objectID, bool createObjectInstance)
+// Return various errors on failure, return AwaResult_Success on success.
+AwaResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectInstanceNode, int objectID, bool createObjectInstance)
 {
     Lwm2mTreeNode * node;
     int objectInstanceID;
     ObjectDefinition * definition;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
 
     bool create = Lwm2mTreeNode_IsCreateFlagSet(objectInstanceNode) || createObjectInstance;
     bool idExists = Lwm2mTreeNode_GetID(objectInstanceNode, &objectInstanceID);
@@ -492,14 +583,14 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextTyp
     if (definition == NULL)
     {
         Lwm2m_Error("definition not found\n");
-        result = Lwm2mResult_NotFound;
+        result = AwaResult_NotFound;
         goto error;
     }
 
     if (create && (objectInstanceID != -1) && Lwm2mCore_Exists(context, objectID, objectInstanceID, -1))
     {
         Lwm2m_Error("Cannot create object instance /%d/%d: Already exists\n", objectID, objectInstanceID);
-        result = Lwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
         goto error;
     }
 
@@ -508,13 +599,13 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextTyp
     if (!IS_MULTIPLE_INSTANCE(definition) && (objectInstanceID != 0) && (!create || idExists))
     {
         Lwm2m_Error("Permissions do not allow for creation of multiple instances of %d\n", objectID);
-        result = Lwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
     if (create && (Lwm2mCore_GetObjectNumInstances(context, objectID) + 1 > definition->MaximumInstances))
     {
         Lwm2m_Error("Cannot create object instance: object %d already contains a maximum number of instances\n", objectID);
-        result = Lwm2mResult_MethodNotAllowed;
+        result = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -522,7 +613,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(Lwm2mContextTyp
     while (node)
     {
         result = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, node, objectID, objectInstanceID, createObjectInstance);
-        if (result != Lwm2mResult_Success)
+        if (result != AwaResult_Success)
         {
             goto error;
         }
@@ -535,12 +626,12 @@ error:
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode
 // (at the object level) and check it's permissions.
-// Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance)
+// Return various errors on failure, return AwaResult_Success on success.
+AwaResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * context, Lwm2mRequestOrigin origin, Lwm2mTreeNode * objectNode, bool createObjectInstance)
 {
     Lwm2mTreeNode * node;
     int objectID;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
 
     Lwm2mTreeNode_GetID(objectNode, &objectID);
     bool create = Lwm2mTreeNode_IsCreateFlagSet(objectNode) || createObjectInstance;
@@ -549,7 +640,7 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * cont
     while (node)
     {
         result = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, node, objectID, create);
-        if (result != Lwm2mResult_Success)
+        if (result != AwaResult_Success)
         {
             return result;
         }
@@ -560,34 +651,41 @@ Lwm2mResult Lwm2mCore_CheckWritePermissionsForObjectNode(Lwm2mContextType * cont
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the resource level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
-// Return various errors on failure, return Lwm2mResult_Success on success.
-static Lwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * resourceNode, ObjectIDType objectID,
+// Return various errors on failure, return AwaResult_Success on success.
+static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * resourceNode, ObjectIDType objectID,
                                                               ObjectInstanceIDType objectInstanceID, bool createOptionalResource)
 {
     int resourceID;
-    Lwm2mResult result = Lwm2mResult_SuccessChanged;
+    AwaResult result = AwaResult_SuccessChanged;
 
     Lwm2mTreeNode_GetID(resourceNode, &resourceID);
 
     if (createOptionalResource || Lwm2mTreeNode_IsCreateFlagSet(resourceNode))
     {
         ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-        if (!IS_MANDATORY(definition) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+        if ((definition != NULL) && !Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
         {
             if (Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == -1)
             {
                 Lwm2m_Error("Failed to create optional resource: /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-                result = Lwm2mResult_InternalError;
+                result = AwaResult_InternalError;
                 goto error;
             }
         }
+    }
+
+    if (Lwm2mTreeNode_IsReplaceFlagSet(resourceNode))
+    {
+        // set from client IPC
+        Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, true);
+        Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID);
     }
 
     // Perform the write
     Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(resourceNode);
     while (resourceInstanceNode)
     {
-        uint16_t length;
+        uint16_t length = 0;
         const uint8_t * value;
         int id;
 
@@ -598,7 +696,7 @@ static Lwm2mResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType *
         {
             if (Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, id, value, length) != 0)
             {
-                result = Lwm2mResult_InternalError;
+                result = AwaResult_InternalError;
                 break;
             }
         }
@@ -610,11 +708,11 @@ error:
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the object instance level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
-// Return various errors on failure, return Lwm2mResult_Success on success.
-static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * instanceNode, ObjectIDType objectID,
+// Return various errors on failure, return AwaResult_Success on success.
+static AwaResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * instanceNode, ObjectIDType objectID,
                                                                     bool createObjectInstance, bool createOptionalResources, bool replace, int * newObjectInstanceID)
 {
-    Lwm2mResult result = Lwm2mResult_SuccessChanged;
+    AwaResult result = AwaResult_SuccessChanged;
 
     Lwm2mTreeNode_GetID(instanceNode, newObjectInstanceID);
 
@@ -623,15 +721,15 @@ static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContext
         // Special handling for a bootstrap write
         if ((*newObjectInstanceID != -1) && Lwm2mCore_Exists(context, objectID, *newObjectInstanceID, -1))
         {
-            result = Lwm2mResult_SuccessChanged;
+            result = AwaResult_SuccessChanged;
         }
         else if ((*newObjectInstanceID = Lwm2mCore_CreateObjectInstance(context, objectID, *newObjectInstanceID)) != -1)
         {
-             result = Lwm2mResult_SuccessChanged;
+             result = AwaResult_SuccessChanged;
         }
         else
         {
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
     }
@@ -640,12 +738,12 @@ static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContext
         if ((*newObjectInstanceID = Lwm2mCore_CreateObjectInstance(context, objectID, *newObjectInstanceID)) == -1)
         {
             Lwm2m_Error("Failed to create object instance\n");
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
         else
         {
-            result = Lwm2mResult_SuccessCreated;
+            result = AwaResult_SuccessCreated;
         }
     }
 
@@ -658,8 +756,8 @@ static Lwm2mResult Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(Lwm2mContext
     Lwm2mTreeNode * resourceNode = Lwm2mTreeNode_GetFirstChild(instanceNode);
     while (resourceNode != NULL)
     {
-        Lwm2mResult writeResourceResult = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, resourceNode, objectID, *newObjectInstanceID, createOptionalResources);
-        if (!Lwm2mResult_IsSuccess(writeResourceResult))
+        AwaResult writeResourceResult = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, resourceNode, objectID, *newObjectInstanceID, createOptionalResources);
+        if (!AwaResult_IsSuccess(writeResourceResult))
         {
             result = writeResourceResult;
             break;
@@ -672,13 +770,13 @@ error:
 
 // This function is called when an LWM2M write operation is performed, it is used to walk a Lwm2mTreeNode (at the object level)
 // and write any values by making calls to Lwm2mCore_SetResourceInstanceValue(). Write permissions must already be checked.
-// Return various errors on failure, return Lwm2mResult_Success on success.
-Lwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance, 
+// Return various errors on failure, return AwaResult_Success on success.
+AwaResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context, Lwm2mTreeNode * objectNode, bool createObjectInstance,
                                                      bool createOptionalResources, bool replace, int * newObjectInstanceID)
 {
     Lwm2mTreeNode * node;
     int objectID;
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
 
     Lwm2mTreeNode_GetID(objectNode, &objectID);
     node = Lwm2mTreeNode_GetFirstChild(objectNode);
@@ -686,7 +784,7 @@ Lwm2mResult Lwm2mCore_ParseObjectNodeAndWriteToStore(Lwm2mContextType * context,
     while (node != NULL)
     {
         result = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, node, objectID, createObjectInstance, createOptionalResources, replace, newObjectInstanceID);
-        if (!Lwm2mResult_IsSuccess(result))
+        if (!AwaResult_IsSuccess(result))
         {
             break;
         }
@@ -738,14 +836,14 @@ error:
  * @param[in] handlers pointer to ResourceOperationsHandlers, use &defaultResourceOperationHandlers if custom behaviour is not required
  * @return -1 on error 0 on success
  */
-int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
-                                   uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers)
+int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
 }
 
-int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, ResourceTypeType resourceType,
-                                   uint16_t maximumInstances, uint16_t minimumInstances, Operations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
+int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, const char * resName, ObjectIDType objectID, ResourceIDType resourceID, AwaResourceType resourceType,
+                                   uint16_t maximumInstances, uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType, maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
 }
@@ -755,23 +853,23 @@ int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, c
  * @param[in] context
  * @param[in] objectID
  * @param[in] objectInstanceID
- * @return Lwm2mResult_SuccessDeleted on success
+ * @return AwaResult_SuccessDeleted on success
  * @return various errors on failure
  */
-Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace)
 {
     // According to the standard a DELETE must be O/I, not O/I/R,
     // only the client or bootstrap server has the authorisation to delete individual resources.
-    if ((resourceID != -1) && (requestOrigin == Lwm2mRequestOrigin_Server))
+    if ((resourceID != -1) && (requestOrigin == Lwm2mRequestOrigin_Server) && (!replace))
     {
-        return Lwm2mResult_MethodNotAllowed;
+        return AwaResult_MethodNotAllowed;
     }
 
     if (objectID == -1)
     {
         if (requestOrigin != Lwm2mRequestOrigin_BootstrapServer)
         {
-            return Lwm2mResult_Unauthorized;
+            return AwaResult_Unauthorized;
         }
         else
         {
@@ -780,9 +878,9 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
             while ((objectID = Lwm2mCore_GetNextObjectID(context, objectID)) != -1)
             {
                 // Best effort attempt
-                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1);
+                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1, replace);
             }
-            return Lwm2mResult_SuccessDeleted;
+            return AwaResult_SuccessDeleted;
         }
     }
     else if (objectInstanceID == -1)
@@ -790,21 +888,21 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         if (requestOrigin == Lwm2mRequestOrigin_Server)
         {
             // ObjectInstance is required for CoAP delete requests.
-            return Lwm2mResult_MethodNotAllowed;
+            return AwaResult_MethodNotAllowed;
         }
     }
 
     ObjectDefinition * definition = Definition_LookupObjectDefinition(context->Definitions, objectID);
-    if ((definition == NULL) || (definition->Handlers.Delete == NULL))
+    if ((definition == NULL))
     {
-        Lwm2m_Error("No delete handler for object ID %d\n", objectID);
-        return Lwm2mResult_NotFound;
+        Lwm2m_Error("No definitions for object ID %d\n", objectID);
+        return AwaResult_NotFound;
     }
 
-    if ((requestOrigin == Lwm2mRequestOrigin_Server) && !IS_MULTIPLE_INSTANCE(definition) && IS_MANDATORY(definition) && (objectInstanceID == 0))
+    if ((!replace) && (requestOrigin == Lwm2mRequestOrigin_Server) && !IS_MULTIPLE_INSTANCE(definition) && IS_MANDATORY(definition) && (Lwm2mCore_GetObjectNumInstances(context, objectID) == definition->MinimumInstances))
     {
         // If the object is marked mandatory and single-instance, we must have at least one instance.
-        return Lwm2mResult_Unauthorized;
+        return AwaResult_Unauthorized;
     }
 
     if (requestOrigin == Lwm2mRequestOrigin_Server)
@@ -814,13 +912,35 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         {
             case LWM2M_SECURITY_OBJECT: // no break
             case LWM2M_SERVER_OBJECT:
-                return Lwm2mResult_Unauthorized;
+                return AwaResult_Unauthorized;
             default:
                 break;
         }
     }
 
-    int ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+
+    int ret = -1;
+    if (definition->Handlers.Delete == NULL)
+    {
+        if (definition->Handler != NULL)
+        {
+            AwaResult result = AwaResult_InternalError;
+            AwaOperation operation = AwaOperation_DeleteObjectInstance;
+            if (resourceID != -1)
+            {
+                operation = AwaOperation_DeleteResource;
+            }
+
+            result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, -1, NULL, NULL, NULL);
+
+            ret = (result == AwaResult_SuccessDeleted) ? 0 : -1;
+        }
+    }
+    else
+    {
+        ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+    }
+
     if (ret != -1)
     {
         char path[32];
@@ -862,13 +982,20 @@ Lwm2mResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requ
         // that an observed resource has been removed.
     }
 
-    return (ret == 0) ? Lwm2mResult_SuccessDeleted : Lwm2mResult_NotFound;
+    return (ret == 0) ? AwaResult_SuccessDeleted : AwaResult_NotFound;
 }
 
 // Check to see if an Object, ObjectInstance or Resource exists. Return 1 if exists, or 0 if the specified entity does not exist.
-int Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
-    return Lwm2mObjectTree_Exists(&context->ObjectTree, objectID, objectInstanceID, resourceID, -1);
+    bool result = false;
+
+    if (context != NULL)
+    {
+        result = Lwm2mObjectTree_Exists(&context->ObjectTree, objectID, objectInstanceID, resourceID, -1);
+    }
+
+    return result;
 }
 
 // Register an Observer of a specific resource. Return -1 on error, 0 on success.
@@ -887,37 +1014,91 @@ int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, Obje
 
 // Set the value of a resource instance. Return -1 on error, 0 or greater on success.
 int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                       ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
+                                       ResourceInstanceIDType resourceInstanceID, const void * value, size_t valueSize)
 {
+    int result = -1;
     bool changed = false;
 
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Write == NULL))
+    if (definition != NULL)
     {
-        return -1;
+        if (definition->Handlers.Write == NULL)
+        {
+            if (definition->Handler != NULL)
+            {
+                if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Write, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, &changed) == AwaResult_SuccessChanged)
+                {
+                    Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                    if (changed)
+                    {
+                        Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+                    }
+                    result = 0;
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            else
+            {
+                result = -1;
+            }
+        }
+        else
+        {
+            if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
+            {
+                Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                if (changed)
+                {
+                    Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
+                }
+                result = 0;
+            }
+        }
+    }
+    else
+    {
+        result = -1;
     }
 
-    if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*)value, valueSize, &changed) >= 0)
-    {
-        Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
-        if (changed)
-        {
-            Lwm2m_MarkObserversChanged(context, objectID, objectInstanceID, resourceID, value, valueSize);
-        }
-        return 0;
-    }
-    return -1;
+    return result;
 }
 
 // Execute a resource and pass in the provided value. Return -1 on error, 0 or greater on success.
-int Lwm2mCore_ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, int valueSize)
+static int ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void * value, size_t valueSize)
 {
-    ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Execute == NULL))
+    int result = -1;
+
+    if(context)
     {
-        return -1;
+        ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
+        if ((definition != NULL))
+        {
+
+            if (definition->Handlers.Execute == NULL)
+            {
+                if (definition->Handler != NULL)
+                {
+                    AwaResult res = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Execute, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)&value, &valueSize, NULL);
+
+                    if (res == AwaResult_Success)
+                        result = 1;
+                }
+            }
+            else
+            {
+                result = definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+            }
+        }
+        else
+        {
+            result = -1;
+        }
     }
-    return definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*)value, valueSize);
+
+    return result;
 }
 
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
@@ -965,14 +1146,38 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
     return Lwm2mObjectTree_GetNextResourceInstanceID(&context->ObjectTree, &iterator);
 }
 
-int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** Value, int * ValueBufferSize)
+int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, const void ** value, size_t * valueBufferSize)
 {
     ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, objectID, resourceID);
-    if ((definition == NULL) || (definition->Handlers.Read == NULL))
+    if (definition == NULL)
     {
         return -1;
     }
-    return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, Value, ValueBufferSize);
+
+    if (definition->Handlers.Read == NULL)
+    {
+        if (definition->Handler != NULL)
+        {
+            if (definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Read, objectID, objectInstanceID, resourceID, resourceInstanceID, (void **)value, valueBufferSize, NULL) == AwaResult_SuccessContent)
+            {
+                return *valueBufferSize;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return definition->Handlers.Read(context, objectID, objectInstanceID, resourceID, resourceInstanceID, value, valueBufferSize);
+    }
+
+    return -1;
 }
 
 /**
@@ -1048,43 +1253,43 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 }
 
 // Handler LwM2M Notifications and send them as CoAP messages. Return 0 on success, non-zero on error.
-static int Lwm2m_HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength,
-                                    ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * ContextData)
+static int HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength,
+                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * ContextData)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     int oir[3];
     ObjectInstanceResourceKey key = { objectID, objectInstanceID, resourceID };
-    char path[128] = {0};
+    enum { PATH_LEN = 128 };
+    char path[PATH_LEN] = {0};
     int matches;
     ContentType payloadContentType;
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    Lwm2mCore_AddressTypeToPath(path, addr);
-    strcat(path, "/");
-    strcat(path, OirToUri(key));
+    Lwm2mCore_AddressTypeToPath(path, PATH_LEN, addr);
+    strncat(path, "/", PATH_LEN - strlen(path));
+    strncat(path, OirToUri(key), PATH_LEN - strlen(path));
 
     matches = sscanf(OirToUri(key), "%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
     Lwm2mTreeNode * dest;
-    if (TreeBuilder_CreateTreeFromOIR(&dest, context, origin, oir, matches) == Lwm2mResult_Success)
+    if (TreeBuilder_CreateTreeFromOIR(&dest, context, origin, oir, matches) == AwaResult_Success)
     {
         char payload[1024];
-        int payloadLen = Lwm2mCore_SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
-        Lwm2mTreeNode_DeleteRecursive(dest);
-
+        int payloadLen = SerialiseOIR(dest, contentType, oir, matches, &payloadContentType, payload, sizeof(payload));
         if (payloadLen >= 0)
         {
             Lwm2m_Debug("Send Notify to %s\n", path);
             coap_SendNotify(addr, path, token, tokenLength, payloadContentType, payload, payloadLen, sequence);
         }
     }
+    Lwm2mTreeNode_DeleteRecursive(dest);
     return 0;
 }
 
 // Handle CoAP GET Requests with Observe, Maps to LWM2M Observe. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, char * token, int tokenLength,
-                                          ContentType contentType, const char * requestContent, int requestContentLen, ContentType * responseContentType,
-                                          char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, char * token, int tokenLength,
+                                ContentType contentType, const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+                                char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1093,7 +1298,7 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
     *responseContentType = ContentType_None;
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
 
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
@@ -1101,43 +1306,43 @@ static int Lwm2mCore_HandleObserveRequest(void * ctxt, AddressType * addr, const
     {
         // Do not support an Observe and Discover in the same request.
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_MethodNotAllowed;
+        *responseCode = AwaResult_MethodNotAllowed;
     }
     else if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]))
     {
         int len = 0;
-        if (Lwm2mCore_Observe(context, addr, token, tokenLength, oir[0], oir[1], oir[2], contentType, Lwm2m_HandleNotification, NULL) != -1)
+        if (Lwm2mCore_Observe(context, addr, token, tokenLength, oir[0], oir[1], oir[2], contentType, HandleNotification, NULL) != -1)
         {
             Lwm2mTreeNode * root;
-            if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
+            if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
             {
-                len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+                len = SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
             }
             Lwm2mTreeNode_DeleteRecursive(root);
         }
 
         *responseContentLen = (len >= 0) ? len : 0;
-        *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : result;
+        *responseCode = (len >= 0) ? AwaResult_SuccessContent : result;
     }
     else
     {
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
     return 0;
 }
 
 // Handle CoAP GET Requests with Cancel Observe, Maps to LWM2M CancelObserve. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                                const char * requestContent, int requestContentLen, ContentType * responseContentType,
-                                                char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                      const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+                                      char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
     int oir[3] = { -1, -1, -1 };
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     if (matches > 0)
@@ -1147,16 +1352,16 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
 
         // Perform "GET", to return clientID in content.
         Lwm2mTreeNode * root;
-        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
+        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
         {
-            len = Lwm2mCore_SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+            len = SerialiseOIR(root, contentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
         Lwm2mTreeNode_DeleteRecursive(root);
 
         if (len >= 0)
         {
             *responseContentLen = len;
-            *responseCode = Lwm2mResult_SuccessContent;
+            *responseCode = AwaResult_SuccessContent;
         }
         else
         {
@@ -1167,15 +1372,15 @@ static int Lwm2mCore_HandleCancelObserveRequest(void * ctxt, AddressType * addr,
     else
     {
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
     return 0;
 }
 
 // Handler CoAP GET Requests, maps onto LWM2M READ and DISCOVER operations. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const char * path, const char * query,
-                                      ContentType acceptContentType, const char * requestContent, int requestContentLen,
-                                      ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, const char * query,
+                            ContentType acceptContentType, const char * requestContent, size_t requestContentLen,
+                            ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int len = 0;
@@ -1185,7 +1390,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
 
     *responseContentType = ContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
-    Lwm2mResult result = Lwm2mResult_Unspecified;
+    AwaResult result = AwaResult_Unspecified;
 
     if (acceptContentType == ContentType_ApplicationLinkFormat)
     {
@@ -1195,9 +1400,9 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
     {
         Lwm2m_Debug("Read\n");
         Lwm2mTreeNode * root;
-        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == Lwm2mResult_Success)
+        if ((result = TreeBuilder_CreateTreeFromOIR(&root, context, origin, oir, matches)) == AwaResult_Success)
         {
-            len = Lwm2mCore_SerialiseOIR(root, acceptContentType, oir, matches, responseContentType, responseContent, *responseContentLen);
+            len = SerialiseOIR(root, acceptContentType, oir, matches, responseContentType, responseContent, *responseContentLen);
         }
         else
         {
@@ -1208,7 +1413,7 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
     }
 
     *responseContentLen = (len < 0) ? 0 : len;
-    *responseCode = (len >= 0) ? Lwm2mResult_SuccessContent : result;
+    *responseCode = (len >= 0) ? AwaResult_SuccessContent : result;
     return 0;
 }
 
@@ -1216,8 +1421,8 @@ static int Lwm2mCore_HandleGetRequest(void * ctxt, AddressType * addr, const cha
 // Partial Update: adds or updates Resources or Resource Instances provided in the new value
 // and leaves other existing Resources or Resource Instances unchanged.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                       const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                             const char * requestContent, int requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int len = -1;
@@ -1244,25 +1449,25 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
     {
         // Handle EXECUTE
         Lwm2m_Debug("EXECUTE: %s\n", path);
-        len = Lwm2mCore_ResourceExecute(context, oir[0], oir[1], oir[2], 0, requestContent, requestContentLen);
+        len = ResourceExecute(context, oir[0], oir[1], oir[2], 0, requestContent, requestContentLen);
 
         *responseContentLen = 0;
         if (len >= 0)
         {
-            *responseCode = Lwm2mResult_SuccessChanged;
+            *responseCode = AwaResult_SuccessChanged;
         }
         else
         {
             // execute not allowed
-            *responseCode = Lwm2mResult_MethodNotAllowed;
+            *responseCode = AwaResult_MethodNotAllowed;
         }
     }
     else
     {
         // Handle WRITE and CREATE
         Lwm2mTreeNode * root = NULL;
-        len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
-        
+        len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+
         if (len >= 0)
         {
             bool createObjectInstance = false;
@@ -1296,23 +1501,23 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
             {
                 Lwm2m_Debug("WRITE (partial update): %s\n", path);
             }
-            
+
             switch (Lwm2mTreeNode_GetType(root))
             {
                 case Lwm2mTreeNodeType_Object:
-                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectNode(context, origin, root, createObjectInstance)) == Lwm2mResult_Success)
+                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectNode(context, origin, root, createObjectInstance)) == AwaResult_Success)
                     {
                         *responseCode = Lwm2mCore_ParseObjectNodeAndWriteToStore(context, root, true, true, false, &oir[1]);
                     }
                     break;
                 case Lwm2mTreeNodeType_ObjectInstance:
-                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], createObjectInstance)) == Lwm2mResult_Success)
+                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], createObjectInstance)) == AwaResult_Success)
                     {
                         *responseCode = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, root, oir[0], false, true, false, &oir[1]);
                     }
                     break;
                 case Lwm2mTreeNodeType_Resource:
-                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], createObjectInstance)) == Lwm2mResult_Success)
+                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], createObjectInstance)) == AwaResult_Success)
                     {
                         *responseCode = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, root, oir[0], oir[1], true);
                     }
@@ -1320,11 +1525,11 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
                 case Lwm2mTreeNodeType_ResourceInstance: // no break
                 default:
                     // Should never happen..
-                    *responseCode = Lwm2mResult_BadRequest;
+                    *responseCode = AwaResult_BadRequest;
                     break;
             }
 
-            if (createObjectInstance && Lwm2mResult_IsSuccess(*responseCode))
+            if (createObjectInstance && AwaResult_IsSuccess(*responseCode))
             {
                 // Copy location into response to convey it to the CoAP abstraction layer.
                 *responseContentLen = sprintf(responseContent, "/%d/%d", oir[0], oir[1]);
@@ -1333,7 +1538,7 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
         else
         {
             Lwm2m_Error("Failed to deserialise content type %d, len %d\n", contentType, len);
-            *responseCode = Lwm2mResult_BadRequest;
+            *responseCode = AwaResult_BadRequest;
         }
         Lwm2mTreeNode_DeleteRecursive(root);
     }
@@ -1346,8 +1551,8 @@ static int Lwm2mCore_HandlePostRequest(void * ctxt, AddressType * addr, const ch
 //   4.04 Not Found URI of “Write Attributes” operation is not found
 //   4.01 Unauthorized Access Right Permission Denied
 //   4.05 Method Not Allowed Target is not allowed for Write Attributes operation
-static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                                  const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                        const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int oir[3] = { -1, -1, -1 };
@@ -1359,7 +1564,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
     if ((matches == 3) && (Definition_IsResourceTypeExecutable(context->Definitions, oir[0], oir[2]) == 1))
     {
         Lwm2m_Error("Write attributes cannot be set on an executable resource: %s\n", path);
-        *responseCode = Lwm2mResult_MethodNotAllowed;
+        *responseCode = AwaResult_MethodNotAllowed;
         goto error;
     }
 
@@ -1376,7 +1581,7 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
         if (pairs != NULL)
         {
             int i = 0;
-            for (i = 0; i < numPairs; i++)
+            for  (i = 0; i < numPairs; i++)
             {
                 QueryPair * pair = &pairs[i];
                 Lwm2m_Debug("Pair %d: %s = %s\n", i, pair->Key, pair->Value);
@@ -1391,31 +1596,37 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
 
                     switch (characteristics->ValueType)
                     {
-                        case ResourceTypeEnum_TypeInteger:
+                        case AwaResourceType_Integer:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24d", &integerValue) == 0))
                             {
                                 Lwm2m_Error("Failed to parse integer value %s for write attribute: %s\n", pair->Value, pair->Key);
-                                *responseCode = Lwm2mResult_BadRequest;
+                                *responseCode = AwaResult_BadRequest;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                             }
                             break;
                         }
-                        case ResourceTypeEnum_TypeFloat:
+                        case AwaResourceType_Float:
                         {
                             if ((pair->Value != NULL) && (sscanf(pair->Value, "%24f", &floatValue) == 0))
                             {
                                 Lwm2m_Error("Failed to parse float value %s for write attribute: %s\n", pair->Value, pair->Key);
-                                *responseCode = Lwm2mResult_BadRequest;
+                                *responseCode = AwaResult_BadRequest;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                             }
                             break;
                         }
-                        case ResourceTypeEnum_TypeNone:
+                        case AwaResourceType_None:
                             break;
                         default:
                             Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);
-                            *responseCode = Lwm2mResult_InternalError;
+                            *responseCode = AwaResult_InternalError;
+                            Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                            pairs = NULL;
                             goto error;
                             break;
                     }
@@ -1449,7 +1660,9 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                                 break;
                             default:
                                 Lwm2m_Error("Unsupported resource type for write attribute: %d\n", characteristics->ValueType);
-                                *responseCode = Lwm2mResult_InternalError;
+                                *responseCode = AwaResult_InternalError;
+                                Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                                pairs = NULL;
                                 goto error;
                                 break;
                         }
@@ -1460,7 +1673,9 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
                 else
                 {
                     Lwm2m_Error("No write attribute matches query key: %s\n", pair->Key);
-                    *responseCode = Lwm2mResult_BadRequest;
+                    *responseCode = AwaResult_BadRequest;
+                    Lwm2mCore_FreeQueryPairs(pairs, numPairs);
+                    pairs = NULL;
                     goto error;
                 }
             }
@@ -1472,31 +1687,31 @@ static int Lwm2mCore_HandleWriteAttributesRequest(void * ctxt, AddressType * add
             if ((maximumPeriod != -1) && (minimumPeriod > maximumPeriod))
             {
                 Lwm2m_Error("Attempt to set maximum period to less than minimum period\n");
-                *responseCode = Lwm2mResult_BadRequest;
+                *responseCode = AwaResult_BadRequest;
             }
             else if (temp.Valid[AttributeTypeEnum_GreaterThan] && temp.Valid[AttributeTypeEnum_LessThan] && temp.Valid[AttributeTypeEnum_Step])
             {
                 // The following rules MUST be respected (“lt” value + 2*”stp” values < “gt” value)
                 Lwm2m_Error("The difference between minimum and maximum threshold is less than twice the step attribute value\n");
-                *responseCode = Lwm2mResult_BadRequest;
+                *responseCode = AwaResult_BadRequest;
             }
             else
             {
                 // Query was fully checked - copy attributes
                 memcpy(attributes, &temp, sizeof(NotificationAttributes));
-                *responseCode = Lwm2mResult_SuccessChanged;
+                *responseCode = AwaResult_SuccessChanged;
             }
             Lwm2mCore_FreeQueryPairs(pairs, numPairs);
             pairs = NULL;
         }
         else
         {
-            *responseCode = Lwm2mResult_BadRequest;
+            *responseCode = AwaResult_BadRequest;
         }
     }
     else
     {
-        *responseCode = Lwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
 
 error:
@@ -1506,8 +1721,8 @@ error:
 // Handle CoAP PUT Requests, maps onto LWM2M Replace WRITE and WRITE ATTRIBUTES operations.
 // LWM2M Spec 5.4.3: Replace: replaces the Object Instance or the Resource(s) with the new value provided in the “Write” operation.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                      const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                            const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1527,7 +1742,7 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
         int len;
 
         // Create new resource instance with the values provided.
-        len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+        len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
 
         if (len >= 0)
         {
@@ -1535,52 +1750,50 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
             {
                 case Lwm2mTreeNodeType_Object:
                     Lwm2m_Error("Cannot replace a whole object using PUT\n");
-                    *responseCode = Lwm2mResult_MethodNotAllowed;
+                    *responseCode = AwaResult_MethodNotAllowed;
                     break;
                 case Lwm2mTreeNodeType_ObjectInstance:
-                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == Lwm2mResult_Success)
+                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == AwaResult_Success)
                     {
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2]) == Lwm2mResult_SuccessDeleted)
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == AwaResult_SuccessDeleted)
                         {
                             *responseCode = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, root, oir[0], true, true, false, &oir[1]);
                         }
                         else
                         {
-                            *responseCode = Lwm2mResult_NotFound;
+                            *responseCode = AwaResult_NotFound;
                         }
                     }
                     break;
                 case Lwm2mTreeNodeType_Resource:
-                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == Lwm2mResult_Success)
+                    if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == AwaResult_Success)
                     {
-                        // Unlike object instance, resource does not have to exist for PUT to succeed.
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]))
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == AwaResult_SuccessDeleted)
                         {
-                            // Multiple-instance resources will be updated rather than replaced.
                             *responseCode = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, root, oir[0], oir[1], true);
                         }
                         else
                         {
-                            *responseCode = Lwm2mResult_NotFound;
+                            *responseCode = AwaResult_NotFound;
                         }
                     }
                     break;
                 case Lwm2mTreeNodeType_ResourceInstance: // no break
                 default:
                     // Should never happen.
-                    *responseCode = Lwm2mResult_InternalError;
+                    *responseCode = AwaResult_InternalError;
                     break;
             }
         }
         else
         {
-            *responseCode = Lwm2mResult_BadRequest;
+            *responseCode = AwaResult_BadRequest;
         }
         Lwm2mTreeNode_DeleteRecursive(root);
     }
     else
     {
-        *responseCode = Lwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
     }
     return -1;
 }
@@ -1593,8 +1806,8 @@ static int Lwm2mCore_HandlePutRequest(void * ctxt, AddressType * addr, const cha
 // in using a TLV or JSON formatted payload, to populate a LWM2M Client in a single message containing serveral instances of the
 // same object.
 // Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                               const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                                     const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int matches;
@@ -1605,31 +1818,31 @@ static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, 
     Lwm2m_Debug("BOOTSTRAP WRITE: %s\n", path);
 
     *responseContentLen = 0;
-    *responseCode = Lwm2mResult_BadRequest;
+    *responseCode = AwaResult_BadRequest;
 
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     Lwm2mTreeNode * root;
 
     // Create new resource instance with the values provided.
-    int len = Lwm2mCore_DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
+    int len = DeserialiseOIR(&root, contentType, context, oir, matches, requestContent, requestContentLen);
     if (len >= 0)
     {
         switch (Lwm2mTreeNode_GetType(root))
         {
             case Lwm2mTreeNodeType_Object:
-                if ((result = Lwm2mCore_CheckWritePermissionsForObjectNode(context, origin, root, false)) == Lwm2mResult_Success)
+                if ((result = Lwm2mCore_CheckWritePermissionsForObjectNode(context, origin, root, false)) == AwaResult_Success)
                 {
                     *responseCode = Lwm2mCore_ParseObjectNodeAndWriteToStore(context, root, false, true, true, &oir[1]);
                 }
                 break;
             case Lwm2mTreeNodeType_ObjectInstance:
-                if ((result = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == Lwm2mResult_Success)
+                if ((result = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == AwaResult_Success)
                 {
                     *responseCode = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, root, oir[0], false, true, true, &oir[1]);
                 }
                 break;
             case Lwm2mTreeNodeType_Resource:
-                if ((result = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == Lwm2mResult_Success)
+                if ((result = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == AwaResult_Success)
                 {
                     *responseCode = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, root, oir[0], oir[1], true);
                 }
@@ -1646,8 +1859,8 @@ static int Lwm2mCore_HandleBootstrapPutRequest(void * ctxt, AddressType * addr, 
 }
 
 // Handle CoAP DELETE Requests, maps onto LWM2M DELETE operation. Return 0 on success, non-zero on error.
-static int Lwm2mCore_HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                         const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                               const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int oir[3] = { -1, -1, -1 };
@@ -1655,51 +1868,51 @@ static int Lwm2mCore_HandleDeleteRequest(void * ctxt, AddressType * addr, const 
 
     *responseContentLen = 0;
     sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
-    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2]);
+    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], false);
     return 0;
 }
 
 // Handler for all "lwm2m" endpoints
-static int Lwm2mCore_DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
+static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
                                                     const char * path, const char * query, const char * token, int tokenLength,
-                                                    ContentType contentType, const char * requestContent, int requestContentLen,
-                                                    ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+                                                    ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                                    ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
         case COAP_GET_REQUEST:
-            return Lwm2mCore_HandleGetRequest(ctxt, addr, path, query, contentType,requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleGetRequest(ctxt, addr, path, query, contentType,requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
 
         case COAP_POST_REQUEST:
-            return Lwm2mCore_HandlePostRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+            return HandlePostRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
         case COAP_PUT_REQUEST:
             if (requestContentLen == 0 && strchr(query, '?') != NULL)
             {
-                return Lwm2mCore_HandleWriteAttributesRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandleWriteAttributesRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
             else if (Lwm2mCore_ServerIsBootstrap(ctxt, addr))
             {
-                return Lwm2mCore_HandleBootstrapPutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandleBootstrapPutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
             else
             {
-                return Lwm2mCore_HandlePutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+                return HandlePutRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
             }
 
         case COAP_DELETE_REQUEST:
-            return Lwm2mCore_HandleDeleteRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+            return HandleDeleteRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
         case COAP_OBSERVE_REQUEST:
-            return Lwm2mCore_HandleObserveRequest(ctxt, addr, path, query, (char*)token, tokenLength, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleObserveRequest(ctxt, addr, path, query, (char*)token, tokenLength, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
 
         case COAP_CANCEL_OBSERVE_REQUEST:
-            return Lwm2mCore_HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
+            return HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
     }
 
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
-    *responseCode = Lwm2mResult_MethodNotAllowed;
+    *responseCode = AwaResult_MethodNotAllowed;
     return 0;
 }
 
@@ -1727,7 +1940,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     {
         response->responseContentType = ContentType_None;
         response->responseContentLen = 0;
-        response->responseCode = Lwm2mResult_NotFound;
+        response->responseCode = AwaResult_NotFound;
         return 0;
     }
 
@@ -1791,7 +2004,7 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
     }
 
     Lwm2m_UpdateObservers(context);
-    return nextTick; 
+    return nextTick;
 }
 
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation)
@@ -1893,11 +2106,38 @@ void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap)
 
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context)
 {
-    return context->Coap;
+    CoapInfo * result = NULL;
+
+    if (context != NULL)
+    {
+        result = context->Coap;
+    }
+
+    return result;
+}
+
+void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context)
+{
+    void * result = NULL;
+
+    if (context != NULL)
+    {
+        result = context->ApplicationContext;
+    }
+
+    return result;
+}
+
+void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicationContext)
+{
+    if (context != NULL)
+    {
+        context->ApplicationContext = applicationContext;
+    }
 }
 
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName)
 {
     Lwm2mContextType * context = &Lwm2mContext;
 
@@ -1915,7 +2155,8 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap,  char * endPointName)
 
     if (endPointName != NULL)
     {
-        strcpy(context->EndPointName, endPointName);
+        strncpy(context->EndPointName, endPointName, MAX_ENDPOINT_NAME_LENGTH);
+        context->EndPointName[MAX_ENDPOINT_NAME_LENGTH - 1] = '\0'; // Defensive
     }
 
     context->UseFactoryBootstrap = false;

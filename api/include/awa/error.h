@@ -20,6 +20,10 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file error.h
+ * @brief Provides definitions for Awa LWM2M Client and Server API error codes and error function declarations.
+ */
 
 #ifndef AWA_ERROR_H
 #define AWA_ERROR_H
@@ -82,6 +86,8 @@ typedef enum
     // 31
     AwaError_StaticClientInvalid,        /**< Indicates an operation was attempted in the context of an invalid Static Client */
     AwaError_StaticClientNotConfigured,  /**< Indicates a Static Client was initialised without being configured */
+    AwaError_LogLevelInvalid,            /**< Indicates an attempt to set an unknown log level  */
+
 
     AwaError_LAST                        /**< Reserved value */
 } AwaError;

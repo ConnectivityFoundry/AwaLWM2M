@@ -39,7 +39,7 @@
 #define BOOTSTRAP_FINISHED_TIMEOUT (15000)
 
 
-static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen);
+static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
 
 
 /*
@@ -55,7 +55,7 @@ static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, con
  * to the LWM2M Client. Different from „Write“ operation in Device Management and Service Enablement interface, the LWM2M Client MUST write
  * the value included in the payload regardless of an existence of the targeting Object Instance or Resource.
  */
-static void Lwm2m_SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
+static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
 {
     char * uriPath = "/bs";
     char uriQuery[128];
@@ -71,14 +71,14 @@ static void Lwm2m_SendBootStrapRequest(Lwm2mContextType * context, int shortServ
     sprintf(uri, "%s%s%s", serverPath, uriPath, uriQuery);
     Lwm2m_Info("Bootstrap with %s\n", uri);
 
-    coap_PostRequest(context, uri, ContentType_None, NULL, 0, Lwm2m_HandleBootstrapResponse);
+    coap_PostRequest(context, uri, ContentType_None, NULL, 0, HandleBootstrapResponse);
 }
 
-static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen)
+static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     Lwm2mContextType * context = ctxt;
 
-    if (responseCode == 204)
+    if (responseCode == AwaResult_SuccessChanged)
     {
         Lwm2m_Info("Waiting for bootstrap to finish\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapFinishPending);
@@ -90,7 +90,7 @@ static void Lwm2m_HandleBootstrapResponse(void * ctxt, AddressType* address, con
     }
 }
 
-static bool Lwm2m_BootStrapFromSmartCard(Lwm2mContextType * context)
+static bool BootStrapFromSmartCard(Lwm2mContextType * context)
 {
     // not implemented
 
@@ -98,7 +98,7 @@ static bool Lwm2m_BootStrapFromSmartCard(Lwm2mContextType * context)
     return false;
 }
 
-static bool Lwm2m_BootStrapFromFactory(Lwm2mContextType * context)
+static bool BootStrapFromFactory(Lwm2mContextType * context)
 {
     Lwm2m_Debug("Lwm2m_BootstrapFromFactory: %s\n", Lwm2mCore_GetUseFactoryBootstrap(context) ? "True" : "False");
 
@@ -106,8 +106,8 @@ static bool Lwm2m_BootStrapFromFactory(Lwm2mContextType * context)
 }
 
 // Handler called when the server posts a "finished" message to /bs
-static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                               const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     Lwm2mBootStrapState state = Lwm2mCore_GetBootstrapState(context);
@@ -121,7 +121,7 @@ static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * pat
         Lwm2m_Info("Bootstrap finished\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
-        *responseCode = 204;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else if ((state == Lwm2mBootStrapState_BootStrapPending) ||
              (state == Lwm2mBootStrapState_ClientHoldOff))
@@ -129,30 +129,30 @@ static int Lwm2m_BootStrapPost(void * ctxt, AddressType * addr, const char * pat
         Lwm2m_Info("Server initiated bootstrap\n");
         Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
         Lwm2mCore_UpdateAllServers(context, Lwm2mRegistrationState_Register);
-        *responseCode = 204;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else
     {
-        *responseCode = 400;
+        *responseCode = AwaResult_BadRequest;
     }
     return 0;
 }
 
 // Handler for /bs
-static int Lwm2mCore_BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
+static int BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
                                               const char * path, const char * query, const char * token, int tokenLength,
-                                              ContentType contentType, const char * requestContent, int requestContentLen,
-                                              ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+                                              ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                              ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
         case COAP_PUT_REQUEST:  // no break
         case COAP_POST_REQUEST:
-            return Lwm2m_BootStrapPost(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+            return BootStrapPost(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
         default:
             *responseContentType = ContentType_None;
             *responseContentLen = 0;
-            *responseCode = Lwm2mResult_MethodNotAllowed;
+            *responseCode = AwaResult_MethodNotAllowed;
             break;
     }
     return -1;
@@ -161,7 +161,7 @@ static int Lwm2mCore_BootstrapEndpointHandler(int type, void * ctxt, AddressType
 // Initialise the boot strap mechanism, create the /bs endpoint
 void Lwm2m_BootStrapInit(Lwm2mContextType * context)
 {
-    Lwm2mCore_AddResourceEndPoint(context, "/bs", Lwm2mCore_BootstrapEndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/bs", BootstrapEndpointHandler);
 }
 
 /* The LWM2M Client MUST follow the procedure specified as below when attempting to bootstrap a LWM2M Device:
@@ -186,12 +186,12 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
         case Lwm2mBootStrapState_NotBootStrapped:
 
             // First attempt smart card bootstrap.
-            if (Lwm2m_BootStrapFromSmartCard(context))
+            if (BootStrapFromSmartCard(context))
             {
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
             }
             // If that fails try and use the factory information.
-            else if (Lwm2m_BootStrapFromFactory(context))
+            else if (BootStrapFromFactory(context))
             {
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapped);
             }
@@ -221,7 +221,7 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
             {
                 Lwm2m_Info("Hold Off expired - attempt client-initiated bootstrap\n");
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_BootStrapPending);
-                Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
+                SendBootStrapRequest(context, SERVER_BOOTSTRAP);
                 Lwm2mCore_SetLastBootStrapUpdate(context, now);
             }
             break;
@@ -259,7 +259,7 @@ void Lwm2m_UpdateBootStrapState(Lwm2mContextType * context)
             {
                 Lwm2m_Warning("HoldOff Expired - Re-attempt bootstrap\n");
                 Lwm2mCore_SetBootstrapState(context, Lwm2mBootStrapState_NotBootStrapped);
-                Lwm2m_SendBootStrapRequest(context, SERVER_BOOTSTRAP);
+                SendBootStrapRequest(context, SERVER_BOOTSTRAP);
             }
             break;
 

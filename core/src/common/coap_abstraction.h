@@ -48,7 +48,7 @@ typedef struct
     int tokenLength;
     ContentType contentType;
     const char * requestContent;
-    int requestContentLen;
+    size_t requestContentLen;
 
 } CoapRequest;
 
@@ -56,15 +56,15 @@ typedef struct
 {
     ContentType responseContentType;
     char * responseContent;
-    int responseContentLen;
+    size_t responseContentLen;
     char * responseLocation;
-    int responseLocationLen;
+    size_t responseLocationLen;
     int responseCode;
 
 } CoapResponse;
 
 typedef int (*RequestHandler)(CoapRequest * request, CoapResponse * response);
-typedef void (*TransactionCallback)(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, int payloadLen);
+typedef void (*TransactionCallback)(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
 typedef void (*NotificationFreeCallback)(void * context);
 
 typedef struct
@@ -73,9 +73,12 @@ typedef struct
 } CoapInfo;
 
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel);
+
 int coap_Destroy(void);
 void coap_Process(void);
 void coap_HandleMessage(void);
+
+void coap_SetLogLevel(int logLevel);
 
 void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback);
 void coap_PostRequest(void * context, const char * uri, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);

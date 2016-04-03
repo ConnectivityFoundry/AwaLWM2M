@@ -8,7 +8,6 @@ set (awa_bootstrapd_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_tlv.c
   ${CORE_SRC_DIR}/common/lwm2m_plaintext.c
   ${CORE_SRC_DIR}/common/lwm2m_prettyprint.c
-  ${CORE_SRC_DIR}/common/lwm2m_json.c
   ${CORE_SRC_DIR}/common/lwm2m_opaque.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
 )
@@ -17,22 +16,30 @@ set (awa_bootstrapd_INCLUDE_DIRS
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
   ${CORE_SRC_DIR}/bootstrap
-  ${LIBB64_INCLUDE_DIR}
-  ${LIBJSMN_INCLUDE_DIR}
 )
+
+if (WITH_JSON)
+  list (APPEND awa_bootstrapd_SOURCES
+    ${CORE_SRC_DIR}/common/lwm2m_json.c
+  )
+  # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
+  list (APPEND awa_bootstrapd_INCLUDE_DIRS
+    ${LIBJSMN_INCLUDE_DIR}
+  )
+endif ()
 
 add_definitions (-DLWM2M_BOOTSTRAP)
 
-if (ENABLE_GCOV_TEST)
+if (ENABLE_GCOV)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
 
 add_executable (awa_bootstrapd ${awa_bootstrapd_SOURCES})
 target_include_directories (awa_bootstrapd PRIVATE ${awa_bootstrapd_INCLUDE_DIRS})
-target_link_libraries (awa_bootstrapd lwm2m_common_static)
+target_link_libraries (awa_bootstrapd awa_common_static)
 
-if (ENABLE_GCOV_TEST)
+if (ENABLE_GCOV)
   target_link_libraries (awa_bootstrapd gcov)
 endif ()
 

@@ -265,7 +265,7 @@ static void HandleGetRequest(void * context, coap_address_t * addr, const char *
     }
 
     response->hdr->code = COAP_RESPONSE_CODE(coapResponse.responseCode);
-    Lwm2m_Debug("COAP_REQUEST_GET: responseCode %d, responseContentLen %d\n", coapResponse.responseCode, coapResponse.responseContentLen);
+    Lwm2m_Debug("COAP_REQUEST_GET: responseCode %d, responseContentLen %zu\n", coapResponse.responseCode, coapResponse.responseContentLen);
 }
 
 static void HandleObserveRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
@@ -312,7 +312,7 @@ static void HandleObserveRequest(void * context, coap_address_t * addr, const ch
     }
 
     response->hdr->code = COAP_RESPONSE_CODE(coapResponse.responseCode);
-    Lwm2m_Debug("COAP_REQUEST_OBSERVE: responseCode %d, responseContentLen %d\n", coapResponse.responseCode, coapResponse.responseContentLen);
+    Lwm2m_Debug("COAP_REQUEST_OBSERVE: responseCode %d, responseContentLen %zu\n", coapResponse.responseCode, coapResponse.responseContentLen);
 }
 
 static void HandleCancelObserveRequest(void * context, coap_address_t * addr, const char * path, const char * query,
@@ -357,7 +357,7 @@ static void HandleCancelObserveRequest(void * context, coap_address_t * addr, co
     }
 
     response->hdr->code = COAP_RESPONSE_CODE(coapResponse.responseCode);
-    Lwm2m_Debug("COAP_REQUEST_CANCEL_OBSERVE: responseCode %d, responseContentLen %d\n", coapResponse.responseCode, coapResponse.responseContentLen);
+    Lwm2m_Debug("COAP_REQUEST_CANCEL_OBSERVE: responseCode %d, responseContentLen %zu\n", coapResponse.responseCode, coapResponse.responseContentLen);
 }
 
 /* 8.2.4: A CoAP PUT is used for the Replace
@@ -392,10 +392,10 @@ static void HandlePutRequest(void * context, coap_address_t * addr, const char *
     if (coap_get_data(request, &requestLength, &requestData))
     {
         coapRequest.requestContent = (const char *)requestData;
-        coapRequest.requestContentLen = (int)requestLength;
+        coapRequest.requestContentLen = requestLength;
     }
 
-    Lwm2m_Debug("COAP_REQUEST_PUT: path %s, query %s contentType %d, request->length %d\n", path, query, contentType, (int)requestLength);
+    Lwm2m_Debug("COAP_REQUEST_PUT: path %s, query %s contentType %d, request->length %zu\n", path, query, contentType, requestLength);
 
     if (requestHandler(&coapRequest, &coapResponse) == 0)
     {
@@ -442,10 +442,10 @@ static void HandlePostRequest(void * context, coap_address_t * addr, const char 
     if (coap_get_data(request, &requestLength, &requestData))
     {
         coapRequest.requestContent = (const char *)requestData;
-        coapRequest.requestContentLen = (int)requestLength;
+        coapRequest.requestContentLen = requestLength;
     }
 
-    Lwm2m_Debug("COAP_REQUEST_POST: path %s, query %s, contentType %d, request->length %d\n", path, query, contentType, (int)requestLength);
+    Lwm2m_Debug("COAP_REQUEST_POST: path %s, query %s, contentType %d, request->length %zu\n", path, query, contentType, requestLength);
 
     if (requestHandler(&coapRequest, &coapResponse) == 0)
     {
@@ -501,7 +501,7 @@ static void HandleDeleteRequest(void * context, coap_address_t * addr, const cha
     requestHandler(&coapRequest, &coapResponse);
 
     response->hdr->code = COAP_RESPONSE_CODE(coapResponse.responseCode);
-    Lwm2m_Debug("COAP_REQUEST_DELETE: responseCode %d, responseContentLen %d\n", coapResponse.responseCode, coapResponse.responseContentLen);
+    Lwm2m_Debug("COAP_REQUEST_DELETE: responseCode %d, responseContentLen %zu\n", coapResponse.responseCode, coapResponse.responseContentLen);
 }
 
 static void coap_HandleRequest(coap_context_t * ctx,
@@ -1112,7 +1112,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
     char port_str[32];
 
-    coap_set_log_level(logLevel);
+    coap_SetLogLevel(logLevel);
 
     sprintf(port_str, "%d", port);
 
@@ -1131,6 +1131,11 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     ListInit(&notifyCallbackList);
 
     return &coapInfo;
+}
+
+void coap_SetLogLevel(int logLevel)
+{
+    coap_set_log_level(logLevel);
 }
 
 static void DestroyLists(void)

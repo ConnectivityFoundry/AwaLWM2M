@@ -87,7 +87,7 @@ static NotificationAttributes * GetHighestValidAttributesForType(AttributeTypeEn
 }
 
 void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                                ResourceIDType resourceID, const void * newValue, int newValueLength)
+                                ResourceIDType resourceID, const void * newValue, size_t newValueLength)
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     struct ListHead * observerItem;
@@ -115,7 +115,9 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
             {
                 switch (definition->Type)
                 {
-                    case ResourceTypeEnum_TypeInteger: case ResourceTypeEnum_TypeFloat: case ResourceTypeEnum_TypeTime:
+                    case AwaResourceType_Integer: // no-break
+                    case AwaResourceType_Float:   // no-break
+                    case AwaResourceType_Time:
                     {
                         NotificationAttributes * greaterThanAttributes = GetHighestValidAttributesForType(AttributeTypeEnum_GreaterThan, resourceAttributes,
                                                                                                           objectInstanceAttributes, objectAttributes);
@@ -127,7 +129,8 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                         switch (definition->Type)
                         {
                             // FIXME: Remove duplication if possible
-                            case ResourceTypeEnum_TypeInteger: case ResourceTypeEnum_TypeTime:
+                            case AwaResourceType_Integer: // no-break
+                            case AwaResourceType_Time:
                             {
                                 int64_t oldValueAsInteger = *((int64_t *)observer->OldValue);
                                 int64_t newValueAsInteger = *((int64_t *)newValue);
@@ -152,7 +155,7 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                                 }
                                 break;
                             }
-                            case ResourceTypeEnum_TypeFloat:
+                            case AwaResourceType_Float:
                             {
                                 double oldValueAsFloat = *((double *)observer->OldValue);
                                 double newValueAsFloat = *((double *)newValue);
@@ -316,11 +319,11 @@ int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int token
         if ((resourceDefinition != NULL) && (!IS_MULTIPLE_INSTANCE(resourceDefinition)))
         {
             const void * oldValue = NULL;
-            int oldValueLength = 0;
+            size_t oldValueLength = 0;
 
             Lwm2mCore_GetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, 0, &oldValue, &oldValueLength);
 
-            if (oldValueLength > 0 && oldValue != NULL)
+            if ((oldValueLength > 0) && (oldValue != NULL))
             {
                 observer->OldValueLength = oldValueLength;
                 observer->OldValue = malloc(observer->OldValueLength);

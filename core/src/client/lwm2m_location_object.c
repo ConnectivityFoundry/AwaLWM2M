@@ -35,12 +35,12 @@
 void Lwm2m_RegisterLocationObject(Lwm2mContextType * context)
 {
     Lwm2mCore_RegisterObjectType(context, "Location" , LWM2M_LOCATION_OBJECT, MultipleInstancesEnum_Single, MandatoryEnum_Optional, &defaultObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Latitude",    LWM2M_LOCATION_OBJECT, 0, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Longitude",   LWM2M_LOCATION_OBJECT, 1, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Altitude",    LWM2M_LOCATION_OBJECT, 2, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Uncertainty", LWM2M_LOCATION_OBJECT, 3, ResourceTypeEnum_TypeString, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Velocity",    LWM2M_LOCATION_OBJECT, 4, ResourceTypeEnum_TypeOpaque, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_R, &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Timestamp",   LWM2M_LOCATION_OBJECT, 5, ResourceTypeEnum_TypeTime,   MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_R, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Latitude",    LWM2M_LOCATION_OBJECT, 0, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Longitude",   LWM2M_LOCATION_OBJECT, 1, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Altitude",    LWM2M_LOCATION_OBJECT, 2, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Uncertainty", LWM2M_LOCATION_OBJECT, 3, AwaResourceType_String, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Velocity",    LWM2M_LOCATION_OBJECT, 4, AwaResourceType_Opaque, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Timestamp",   LWM2M_LOCATION_OBJECT, 5, AwaResourceType_Time,   MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly, &defaultResourceOperationHandlers);
 
     Lwm2mCore_CreateObjectInstance(context, LWM2M_LOCATION_OBJECT, 0);
 }
