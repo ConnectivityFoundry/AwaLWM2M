@@ -213,6 +213,7 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
             perror("sendto failed");
             close(sockfd);
             //printf("sockfd %d, request %p, requestLen %zu, fromAddr %p, fromAddrLen %d\n", sockfd, request, requestLen, &fromAddr, fromAddrLen);
+            close(sockfd);
             return -1;
         }
 
@@ -224,7 +225,6 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     }
 
     close(sockfd);
-
     return response ? 0 : -1;
 }
 

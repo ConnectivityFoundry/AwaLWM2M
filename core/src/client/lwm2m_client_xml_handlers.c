@@ -430,7 +430,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 value = TreeNode_GetValue(resNode);
 
                 const uint8_t * defaultValue = NULL;
-                uint16_t defaultValueLength = 0;
+                int defaultValueLength = 0;
 
                 if (value  != NULL)
                 {

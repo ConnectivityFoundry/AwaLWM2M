@@ -143,55 +143,58 @@ static void Lwm2m_ParseObjectList(Lwm2mClientType * client, const char * objectL
             int object, instance = -1;
 
             char * objectStr = strtok_r(token, ";", &savePointer2);
-            char * attribute = strtok_r(NULL, ";", &savePointer2);
-            while (attribute != NULL)
+            if (objectStr != NULL)
             {
-                int contentType;
-                char resourceType[128];
-
-                if (sscanf(attribute, "ct=%10d", &contentType))
+                char * attribute = strtok_r(NULL, ";", &savePointer2);
+                while (attribute != NULL)
                 {
-                    // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
-                    // by including the content type in the root path link using the ct= link attribute.
-                    if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (objectStr != NULL) && (!strcmp(objectStr, "</>")))
+                    int contentType;
+                    char resourceType[128];
+
+                    if (sscanf(attribute, "ct=%10d", &contentType))
                     {
-                        client->SupportsJson = true;
-                        Lwm2m_Info("Supports JSON\n");
+                        // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
+                        // by including the content type in the root path link using the ct= link attribute.
+                        if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                        {
+                            client->SupportsJson = true;
+                            Lwm2m_Info("Supports JSON\n");
+                        }
                     }
+                    else if (sscanf(attribute, "rt=%127s", resourceType))
+                    {
+                        if (!strcmp(resourceType, "oma.lwm2m"))
+                        {
+                            sscanf(objectStr, "<%127s>", altPath);
+                        }
+                        else
+                        {
+                            Lwm2m_Info("unknown resource type %s, skipping %s\n", resourceType, objectStr);
+                            goto skip;
+                        }
+                    }
+                    attribute = strtok_r(NULL, ";", &savePointer2);
                 }
-                else if (sscanf(attribute, "rt=%127s", resourceType))
+
+                int pos = sscanf(objectStr, "</%5d/%5d>", &object, &instance);
+                if (pos <= 0)
                 {
-                    if (!strcmp(resourceType, "oma.lwm2m"))
-                    {
-                        sscanf(objectStr, "<%127s>", altPath);
-                    }
-                    else
-                    {
-                        Lwm2m_Info("unknown resource type %s, skipping %s\n", resourceType, objectStr);
-                        goto skip;
-                    }
+                    token = strtok_r(NULL, delim, &savePointer);
+                    continue;
                 }
-                attribute = strtok_r(NULL, ";", &savePointer2);
+
+                // Create new entry, perhaps check for duplicates?
+                ObjectListEntry * entry = malloc(sizeof(ObjectListEntry));
+                if (entry == NULL)
+                {
+                    break;
+                }
+
+                entry->ObjectID = object;
+                entry->InstanceID = instance;
+
+                ListAdd(&entry->list, &client->ObjectList);
             }
-
-            int pos = sscanf(objectStr, "</%5d/%5d>", &object, &instance);
-            if (pos <= 0)
-            {
-                token = strtok_r(NULL, delim, &savePointer);
-                continue;
-            }
-
-            // create new entry, perhaps check for duplicates?
-            ObjectListEntry * entry = malloc(sizeof(ObjectListEntry));
-            if (entry == NULL)
-            {
-                break;
-            }
-
-            entry->ObjectID = object;
-            entry->InstanceID = instance;
-
-            ListAdd(&entry->list, &client->ObjectList);
 
         skip:
             token = strtok_r(NULL, delim, &savePointer);
