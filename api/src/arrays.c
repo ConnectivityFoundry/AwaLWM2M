@@ -38,6 +38,7 @@ struct _ArrayItem
 struct _AwaArray
 {
     struct ListHead ValueList;
+    void * Context;
 };
 
 struct _AwaArrayIterator
@@ -65,10 +66,31 @@ AwaArray * AwaArray_New(void)
     return array;
 }
 
+void AwaArray_SetContext(AwaArray * array, void * context)
+{
+    if (array != NULL)
+    {
+        array->Context = context;
+    }
+}
+
+void * AwaArray_GetContext(AwaArray * array)
+{
+    void * result = NULL;
+
+    if (array != NULL)
+    {
+        result = array->Context;
+    }
+
+    return result;
+}
+
+
 void Array_FreeItemValue(ArrayItem * valueItem)
 {
-    Awa_MemSafeFree(valueItem->Value);
     LogFree("AwaArray.Item.Value",  valueItem->Value);
+    Awa_MemSafeFree(valueItem->Value);
     valueItem->Value = NULL;
 }
 
@@ -77,12 +99,12 @@ void Array_FreeItem(ArrayItem * valueItem, AwaResourceType resourceType)
     if (resourceType == AwaResourceType_OpaqueArray)
     {
         AwaOpaque * opaque = (AwaOpaque *)valueItem->Value;
-        Awa_MemSafeFree(opaque->Data);
         LogFree("AwaArray.OpaqueData", opaque->Data);
+        Awa_MemSafeFree(opaque->Data);
     }
     Array_FreeItemValue(valueItem);
-    Awa_MemSafeFree(valueItem);
     LogFree("AwaArray.Item", valueItem);
+    Awa_MemSafeFree(valueItem);
 }
 
 void Array_Free(struct ListHead * ValueList, AwaResourceType resourceType)

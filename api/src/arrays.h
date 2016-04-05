@@ -37,6 +37,8 @@ typedef struct _ArrayItem ArrayItem;
 
 AwaArray * AwaArray_New(void);
 void AwaArray_Free(AwaArray ** array, AwaResourceType resourceType);
+void AwaArray_SetContext(AwaArray * array, void * context);
+void * AwaArray_GetContext(AwaArray * array);
 ArrayItem * Array_SetValue(AwaArray * array, AwaArrayIndex index, void * value, size_t valueLength);
 void * Array_GetValue(const AwaArray * array, AwaArrayIndex index);
 ArrayItem * Array_GetArrayItem(const AwaArray * array, AwaArrayIndex index);

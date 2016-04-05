@@ -253,12 +253,12 @@ AwaError AwaClientSetOperation_CreateOptionalResource(AwaClientSetOperation * op
     return result;
 }
 
-static AwaError ClientSetOperation_AddValue(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type)
+static AwaError ClientSetOperation_AddValue(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type, SetArrayMode setArrayMode)
 {
     AwaError result = AwaError_Unspecified;
     if (operation != NULL)
     {
-        result = SetWriteCommon_AddValue(operation->Common, SessionType_Client, path, resourceInstanceID, value, size, type);
+        result = SetWriteCommon_AddValue(operation->Common, SessionType_Client, path, resourceInstanceID, value, size, type, setArrayMode);
     }
     else
     {
@@ -292,7 +292,7 @@ static AwaError ClientSetOperation_AddValues(AwaClientSetOperation * operation, 
 
             if (value)
             {
-                result = ClientSetOperation_AddValue(operation, path, index, value, length, type);
+                result = ClientSetOperation_AddValue(operation, path, index, value, length, type, SetArrayMode_Replace);
                 if (result != AwaError_Success)
                 {
                     LogError("Unable to add array resource Instance");
@@ -321,7 +321,7 @@ AwaError AwaClientSetOperation_AddValueAsCString(AwaClientSetOperation * operati
     AwaError result = AwaError_Unspecified;
     if (value != NULL)
     {
-        result = ClientSetOperation_AddValue(operation, path, 0, (void *)value, strlen(value), AwaResourceType_String);
+        result = ClientSetOperation_AddValue(operation, path, 0, (void *)value, strlen(value), AwaResourceType_String, SetArrayMode_Unspecified);
     }
     else
     {
@@ -332,32 +332,32 @@ AwaError AwaClientSetOperation_AddValueAsCString(AwaClientSetOperation * operati
 
 AwaError AwaClientSetOperation_AddValueAsInteger(AwaClientSetOperation * operation, const char * path, AwaInteger value)
 {
-    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaInteger), AwaResourceType_Integer);
+    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaInteger), AwaResourceType_Integer, SetArrayMode_Unspecified);
 }
 
 AwaError AwaClientSetOperation_AddValueAsFloat(AwaClientSetOperation * operation, const char * path, AwaFloat value)
 {
-    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaFloat), AwaResourceType_Float);
+    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaFloat), AwaResourceType_Float, SetArrayMode_Unspecified);
 }
 
 AwaError AwaClientSetOperation_AddValueAsBoolean(AwaClientSetOperation * operation, const char * path, AwaBoolean value)
 {
-    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaBoolean), AwaResourceType_Boolean);
+    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaBoolean), AwaResourceType_Boolean, SetArrayMode_Unspecified);
 }
 
 AwaError AwaClientSetOperation_AddValueAsTime(AwaClientSetOperation * operation, const char * path, AwaTime value)
 {   
-    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaTime), AwaResourceType_Time);
+    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaTime), AwaResourceType_Time, SetArrayMode_Unspecified);
 } 
 
 AwaError AwaClientSetOperation_AddValueAsOpaque(AwaClientSetOperation * operation, const char * path, AwaOpaque value)
 {   
-    return ClientSetOperation_AddValue(operation, path, 0, value.Data, value.Size, AwaResourceType_Opaque); 
+    return ClientSetOperation_AddValue(operation, path, 0, value.Data, value.Size, AwaResourceType_Opaque, SetArrayMode_Unspecified);
 } 
 
 AwaError AwaClientSetOperation_AddValueAsObjectLink(AwaClientSetOperation * operation, const char * path, AwaObjectLink value)
 {   
-    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLink);
+    return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLink, SetArrayMode_Unspecified);
 }
 
 AwaError AwaClientSetOperation_AddValueAsIntegerArray(AwaClientSetOperation * operation, const char * path, const AwaIntegerArray * array)
@@ -397,37 +397,37 @@ AwaError AwaClientSetOperation_AddValueAsObjectLinkArray(AwaClientSetOperation *
 
 AwaError AwaClientSetOperation_AddArrayValueAsCString(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, const char * value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)value, strlen(value), AwaResourceType_StringArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)value, strlen(value), AwaResourceType_StringArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsInteger(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaInteger value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaInteger), AwaResourceType_IntegerArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaInteger), AwaResourceType_IntegerArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsFloat(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaFloat value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaFloat), AwaResourceType_FloatArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaFloat), AwaResourceType_FloatArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsBoolean(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaBoolean value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaBoolean), AwaResourceType_BooleanArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaBoolean), AwaResourceType_BooleanArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsTime(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaTime value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaTime), AwaResourceType_TimeArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaTime), AwaResourceType_TimeArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsOpaque(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaOpaque value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, value.Data, value.Size, AwaResourceType_OpaqueArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, value.Data, value.Size, AwaResourceType_OpaqueArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_AddArrayValueAsObjectLink(AwaClientSetOperation * operation, const char * path, int resourceInstanceID, AwaObjectLink value)
 {
-    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLinkArray);
+    return ClientSetOperation_AddValue(operation, path, resourceInstanceID, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLinkArray, SetArrayMode_Update);
 }
 
 AwaError AwaClientSetOperation_Perform(AwaClientSetOperation * operation, AwaTimeout timeout)

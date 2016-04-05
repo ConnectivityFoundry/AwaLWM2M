@@ -13,41 +13,38 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#define _GNU_SOURCE
-#include <dlfcn.h>
+#include <stdlib.h>
 #include <stdio.h>
 
-int mockMallocFailCounter = 0;
+#include <awa/common.h>
+#include <awa/server.h>
 
-void* malloc(size_t sz)
+#define OPERATION_PERFORM_TIMEOUT 1000
+
+int main(void)
 {
-    void *(*libc_malloc)(size_t) = dlsym(RTLD_NEXT, "malloc");
+    AwaServerSession * session = AwaServerSession_New();
 
-    // fail the malloc when the counter reaches zero
-    if (mockMallocFailCounter > 0)
-    {
-        if (--mockMallocFailCounter == 0)
-        {
-            printf("malloc fail\n");
-            return NULL;
-        }
-        else
-        {
-            printf("malloc fail pending %d\n", mockMallocFailCounter);
-        }
-    }
-    return libc_malloc(sz);
-}
+    AwaServerSession_Connect(session);
 
-void free(void *p)
-{
-    void (*libc_free)(void*) = dlsym(RTLD_NEXT, "free");
-    libc_free(p);
+    AwaObjectDefinition * objectDefinition = AwaObjectDefinition_New(1000, "Heater", 0, 1);
+
+    AwaObjectDefinition_AddResourceDefinitionAsString(objectDefinition, 101, "Manufacturer", false, AwaResourceOperations_ReadWrite, NULL);
+    AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition,  104, "Temperature",  false, AwaResourceOperations_ReadWrite, 0.0);
+
+    AwaServerDefineOperation * operation = AwaServerDefineOperation_New(session);
+    AwaServerDefineOperation_Add(operation, objectDefinition);
+    AwaServerDefineOperation_Perform(operation, OPERATION_PERFORM_TIMEOUT);
+    AwaServerDefineOperation_Free(&operation);
+
+    AwaServerSession_Disconnect(session);
+    AwaServerSession_Free(&session);
+    return 0;
 }

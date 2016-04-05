@@ -1,3 +1,25 @@
+/************************************************************************************************************************
+ Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+        following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+        following disclaimer in the documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+        products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+************************************************************************************************************************/
+
 // TODO: Test observe to multiple objects in a single request, then cancel one of the observations without the others being broken
 
 #include <gtest/gtest.h>
@@ -175,6 +197,62 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
             const char * value;
             AwaChangeSet_GetValueAsCStringPointer(changeSet, "/3/0/15", &value);
             EXPECT_STREQ(count == 1? "Pacific/Wellington" : "123414123", value);
+        }
+        void TestBody() {}
+    };
+    CallbackHandler1 cbHandler;
+
+    AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
+
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+
+    // set via server api to trigger notification.
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    sleep(1); // otherwise we can miss the second notify
+
+    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_EQ(2, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
+    ASSERT_TRUE(NULL == observation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+}
+
+TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_wrong_session_type)
+{
+    // start a client
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    sleep(1);
+
+    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    {
+        int count;
+
+        CallbackHandler1() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            const AwaClientSession * clientSession = AwaChangeSet_GetClientSession(changeSet);
+            EXPECT_TRUE(NULL == clientSession);
+            const AwaServerSession * serverSession = AwaChangeSet_GetServerSession(changeSet);
+            EXPECT_TRUE(NULL != serverSession);
         }
         void TestBody() {}
     };

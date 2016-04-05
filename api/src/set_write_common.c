@@ -39,34 +39,45 @@
 
 #define MAX_RESOURCE_INSTANCE_STR_LEN (12)
 
-char * SetWriteCommon_EncodeValue(const void * value, size_t size, ResourceTypeType internalResourceType)
+static const char * SetArrayModeStrings[] =
 {
-    char * encodedValue = NULL;
-    switch (internalResourceType)
+    "Unspecified",
+    "Replace",
+    "Update",
+};
+
+static const char * SetArrayModeToString(SetArrayMode mode)
+{
+    const char * modeString = NULL;
+
+    if (mode > SetArrayMode_Unspecified && mode < SetArrayMode_LAST)
     {
-        case ResourceTypeEnum_TypeObjectLink:
-        {
-            //special case: we have to pack the object link as two unsigned short integers
-            char packedValue[sizeof(int16_t) * 2];
-
-            AwaObjectLink *objectLink = (AwaObjectLink*)value;
-            uint16_t objectID = objectLink->ObjectID;
-            uint16_t objectInstanceID = objectLink->ObjectInstanceID;
-
-            memcpy(packedValue, &objectID, sizeof(uint16_t));
-            memcpy(packedValue + sizeof(uint16_t), &objectInstanceID, sizeof(uint16_t));
-
-            encodedValue = xmlif_EncodeValue(internalResourceType, packedValue, sizeof(packedValue));
-            break;
-        }
-        default:
-            encodedValue = xmlif_EncodeValue(internalResourceType, value, size);
-            break;
+        modeString = SetArrayModeStrings[mode];
     }
-    return encodedValue;
+    else
+    {
+        LogErrorWithEnum(AwaError_Internal, "Unsupported SetArrayMode: %d", mode);
+    }
+
+    return modeString;
 }
 
-AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type)
+static SetArrayMode SetArrayModeFromString(char * setArrayModeString)
+{
+    SetArrayMode mode = SetArrayMode_Unspecified;
+    int i = 0;
+    for (; i < SetArrayMode_LAST; i++)
+    {
+        if (strcmp(setArrayModeString, SetArrayModeStrings[i]) == 0)
+        {
+            mode = i;
+            break;
+        }
+    }
+    return mode;
+}
+
+AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessionType, const char * path, int resourceInstanceID, void * value, size_t size, AwaResourceType type, SetArrayMode setArrayMode)
 {
     AwaError result = AwaError_Unspecified;
 
@@ -120,7 +131,7 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
 
                                     if (ObjectsTree_GetNumChildrenWithName(resultNode, "ResourceInstance") < resourceDefinition->MaximumInstances)
                                     {
-                                        char * encodedValue = SetWriteCommon_EncodeValue(value, size, Utils_GetResourceType(type));
+                                        char * encodedValue = xmlif_EncodeValue(Utils_GetPrimativeResourceType(type), value, size);
 
                                         if (ObjectsTree_AddPath(objectsTree, path, &resultNode) == InternalError_Success && resultNode != NULL)
                                         {
@@ -144,6 +155,26 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                                             }
                                             else
                                             {
+                                                if (setArrayMode != SetArrayMode_Unspecified)
+                                                {
+                                                    TreeNode setArrayModeNode = Xml_Find(resultNode, "SetArrayMode");
+
+                                                    if (!setArrayModeNode)
+                                                    {
+                                                        setArrayModeNode = Xml_CreateNodeWithValue("SetArrayMode", "%s", SetArrayModeToString(setArrayMode));
+                                                        TreeNode_AddChild(resultNode, setArrayModeNode);
+                                                    }
+                                                    else
+                                                    {
+                                                        SetArrayMode currentMode = SetArrayModeFromString((char *)TreeNode_GetValue(setArrayModeNode));
+                                                        if (currentMode == SetArrayMode_Update && setArrayMode == SetArrayMode_Replace)
+                                                        {
+                                                            char * newModeString = NULL;
+                                                            msprintf(&newModeString, "%s", SetArrayModeToString(setArrayMode));
+                                                        }
+                                                    }
+                                                }
+
                                                 if (SetWriteCommon_AddValueToResourceNode(resultNode, resourceInstanceID, encodedValue) == InternalError_Success)
                                                 {
                                                     result = AwaError_Success;

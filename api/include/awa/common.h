@@ -20,127 +20,30 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+/**
+ * @file common.h
+ * @brief Provides declarations and definitions that are common to the Awa LWM2M API and Static API.
+ */
 
 #ifndef AWA_COMMON_H
 #define AWA_COMMON_H
 
+// @cond
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+// @endcond
 
+#include "types.h"
 #include "error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef int AwaObjectID;
-typedef int AwaObjectInstanceID;
-typedef int AwaResourceID;
-typedef int AwaResourceInstanceID;
-
-/**
- * Used to mark an invalid object, object instance or resource ID.
- */
-#define AWA_INVALID_ID (-1)
-
-/**
- * Defines the maximum permissible object, object instance or resource ID.
- */
-#define AWA_MAX_ID (65535)
-
-// LWM2M Data Types
-
-/**
- * Corresponds to the LWM2M 64-bit Integer type.
- */
-typedef int64_t AwaInteger;
-
-/**
- * Corresponds to the LWM2M Float type.
- */
-typedef double AwaFloat;
-
-/**
- * Corresponds to the LWM2M Boolean type.
- */
-typedef bool AwaBoolean;
-
-/**
- * Corresponds to the LWM2M Time type.
- */
-typedef int64_t AwaTime;
-
-/**
- * A utility struct used to convey data pointer and size of an opaque data block.
- */
-typedef struct _AwaOpaque
-{
-    void * Data;        /**< pointer to opaque data */
-    size_t Size;        /**< size of opaque data block */
-} AwaOpaque;
-
-/**
- * A utility struct used to convey object link data.
- */
-typedef struct _AwaObjectLink
-{
-    AwaObjectID ObjectID;                  /**< Object ID */
-    AwaObjectInstanceID ObjectInstanceID;  /**< Object Instance ID */
-} AwaObjectLink;
-
-// AwaString reserved for future use (UTF-8)
-
-typedef struct _AwaChangeSet AwaChangeSet;
-
-/**
- * Supported resource types
- */
-typedef enum
-{
-    AwaResourceType_Invalid = 0,     /**< indicates an invalid resource type */
-
-    AwaResourceType_None,            /**< indicates a resource with no type */
-    AwaResourceType_String,          /**< indicates a resource capable of holding an ASCII string (UTF-8 is not supported) */
-    AwaResourceType_Integer,         /**< indicates a resource capable of holding a LWM2M Integer value */
-    AwaResourceType_Float,           /**< indicates a resource capable of holding a LWM2M Float value */
-    AwaResourceType_Boolean,         /**< indicates a resource capable of holding a LWM2M Boolean value */
-    AwaResourceType_Opaque,          /**< indicates a resource capable of holding a LWM2M Opaque value */
-    AwaResourceType_Time,            /**< indicates a resource capable of holding a LWM2M Time value */
-    AwaResourceType_ObjectLink,      /**< indicates a resource capable of holding a LWM2M ObjectLink value */
-
-    // arrays (for multiple resource instances) are their own type
-    AwaResourceType_StringArray,     /**< indicates a multiple-instance resource capable of holding a number of ASCII string values */
-    AwaResourceType_IntegerArray,    /**< indicates a multiple-instance resource capable of holding a number of LWM2M Integer values */
-    AwaResourceType_FloatArray,      /**< indicates a multiple-instance resource capable of holding a number of LWM2M Float values */
-    AwaResourceType_BooleanArray,    /**< indicates a multiple-instance resource capable of holding a number of LWM2M Boolean values */
-    AwaResourceType_OpaqueArray,     /**< indicates a multiple-instance resource capable of holding a number of LWM2M Opaque values */
-    AwaResourceType_TimeArray,       /**< indicates a multiple-instance resource capable of holding a number of LWM2M Time values */
-    AwaResourceType_ObjectLinkArray, /**< indicates a multiple-instance resource capable of holding a number of LWM2M ObjectLink values */
-
-    // sentinel, do not remove
-    AwaResourceType_LAST,            /**< Reserved value */
-
-    AwaResourceType_FirstArrayType = AwaResourceType_StringArray,
-    AwaResourceType_LastArrayType = AwaResourceType_ObjectLinkArray,
-} AwaResourceType;
-
-/**
- * Supported resource operations for management servers
- */
-typedef enum
-{
-    AwaResourceOperations_Invalid = 0,  /**< indicates an invalid resource operation */
-
-    AwaResourceOperations_None,         /**< indicates no operations are permitted to a management server */
-    AwaResourceOperations_ReadOnly,     /**< indicates the resource is read-only to a management server */
-    AwaResourceOperations_WriteOnly,    /**< indicates the resource is write-only to a management server */
-    AwaResourceOperations_ReadWrite,    /**< indicates the resource can be read and written by a management server */
-    AwaResourceOperations_Execute,      /**< indicates the resource can be executed by a management server */
-
-    // sentinel, do not remove
-    AwaResourceOperations_LAST          /**< Reserved value */
-} AwaResourceOperations;
+/**************************************************************************************************
+ * Public Types and Enumerations
+ *************************************************************************************************/
 
 /**
  * Supported change types for a change subscription
@@ -160,17 +63,6 @@ typedef enum
     AwaChangeType_Current,                 /**< TODO: indicates the current value of an object instance or resource on the specified path on subscription creation */
 
 } AwaChangeType;
-
-/**
- * Supported log levels for a log command
- */
-typedef enum
-{
-    AwaLogLevel_Error = 0,  /**< Only errors are reported. */
-    AwaLogLevel_Warning,    /**< Warnings are reported, in addition to Error. */
-    AwaLogLevel_Verbose,    /**< High-level information is reported, in addition to Warning. */
-    AwaLogLevel_Debug,      /**< Low-level information is reported, in addition to Verbose. */
-} AwaLogLevel;
 
 /**
  * Represents a timeout value, in milliseconds
@@ -211,7 +103,7 @@ typedef struct _AwaTimeArray AwaTimeArray;
 typedef struct _AwaObjectLinkArray AwaObjectLinkArray;
 
 // Public Array Iterator types
-typedef struct _AwaStringArrayIterator AwaStringArrayIterator;
+typedef struct _AwaCStringArrayIterator AwaCStringArrayIterator;
 typedef struct _AwaIntegerArrayIterator AwaIntegerArrayIterator;
 typedef struct _AwaFloatArrayIterator AwaFloatArrayIterator;
 typedef struct _AwaBooleanArrayIterator AwaBooleanArrayIterator;
@@ -342,7 +234,7 @@ size_t AwaObjectLinkArray_GetValueCount(const AwaObjectLinkArray * array);
  * @return NULL on failure.
  * @{
  */
-AwaStringArrayIterator *     AwaStringArray_NewStringArrayIterator        (const AwaStringArray * array);
+AwaCStringArrayIterator *    AwaStringArray_NewCStringArrayIterator       (const AwaStringArray * array);
 AwaIntegerArrayIterator *    AwaIntegerArray_NewIntegerArrayIterator      (const AwaIntegerArray * array);
 AwaFloatArrayIterator *      AwaFloatArray_NewFloatArrayIterator          (const AwaFloatArray * array);
 AwaBooleanArrayIterator *    AwaBooleanArray_NewBooleanArrayIterator      (const AwaBooleanArray * array);
@@ -383,7 +275,7 @@ bool AwaObjectLinkArray_IsValid(const AwaObjectLinkArray * array, AwaArrayIndex 
  * @return false if the input Array Iterator is invalid, or has reached the end of its array.
  * @{
  */
-bool AwaStringArrayIterator_Next    (AwaStringArrayIterator *     iterator);
+bool AwaCStringArrayIterator_Next   (AwaCStringArrayIterator *    iterator);
 bool AwaIntegerArrayIterator_Next   (AwaIntegerArrayIterator *    iterator);
 bool AwaFloatArrayIterator_Next     (AwaFloatArrayIterator *      iterator);
 bool AwaBooleanArrayIterator_Next   (AwaBooleanArrayIterator *    iterator);
@@ -401,7 +293,7 @@ bool AwaObjectLinkArrayIterator_Next(AwaObjectLinkArrayIterator * iterator);
  * @return 0 if the input Array Iterator is invalid.
  * @{
  */
-AwaArrayIndex AwaStringArrayIterator_GetIndex    (const AwaStringArrayIterator *     iterator);
+AwaArrayIndex AwaCStringArrayIterator_GetIndex   (const AwaCStringArrayIterator *     iterator);
 AwaArrayIndex AwaIntegerArrayIterator_GetIndex   (const AwaIntegerArrayIterator *    iterator);
 AwaArrayIndex AwaFloatArrayIterator_GetIndex     (const AwaFloatArrayIterator *      iterator);
 AwaArrayIndex AwaBooleanArrayIterator_GetIndex   (const AwaBooleanArrayIterator *    iterator);
@@ -420,14 +312,14 @@ AwaArrayIndex AwaObjectLinkArrayIterator_GetIndex(const AwaObjectLinkArrayIterat
  * @{
  */
 // RESERVED for UTF8 support:
-//AwaString   AwaStringArrayIterator_GetValue         (const AwaStringArrayIterator * iterator);
-const char *      AwaStringArrayIterator_GetValueAsCString(const AwaStringArrayIterator * iterator);
-AwaInteger    AwaIntegerArrayIterator_GetValue        (const AwaIntegerArrayIterator * iterator);
-AwaFloat      AwaFloatArrayIterator_GetValue          (const AwaFloatArrayIterator * iterator);
-AwaBoolean    AwaBooleanArrayIterator_GetValue        (const AwaBooleanArrayIterator * iterator);
-AwaOpaque     AwaOpaqueArrayIterator_GetValue         (const AwaOpaqueArrayIterator * iterator);
-AwaTime       AwaTimeArrayIterator_GetValue           (const AwaTimeArrayIterator * iterator);
-AwaObjectLink AwaObjectLinkArrayIterator_GetValue     (const AwaObjectLinkArrayIterator * iterator);
+//AwaString   AwaStringArrayIterator_GetValue          (const AwaStringArrayIterator * iterator);
+const char *  AwaCStringArrayIterator_GetValueAsCString(const AwaCStringArrayIterator * iterator);
+AwaInteger    AwaIntegerArrayIterator_GetValue         (const AwaIntegerArrayIterator * iterator);
+AwaFloat      AwaFloatArrayIterator_GetValue           (const AwaFloatArrayIterator * iterator);
+AwaBoolean    AwaBooleanArrayIterator_GetValue         (const AwaBooleanArrayIterator * iterator);
+AwaOpaque     AwaOpaqueArrayIterator_GetValue          (const AwaOpaqueArrayIterator * iterator);
+AwaTime       AwaTimeArrayIterator_GetValue            (const AwaTimeArrayIterator * iterator);
+AwaObjectLink AwaObjectLinkArrayIterator_GetValue      (const AwaObjectLinkArrayIterator * iterator);
 /** @} */
 
 /**
@@ -438,7 +330,7 @@ AwaObjectLink AwaObjectLinkArrayIterator_GetValue     (const AwaObjectLinkArrayI
  * @param[in,out] Array Iterator A pointer to a Array Iterator pointer of the specified type that will be set to NULL.
  * @{
  */
-void AwaStringArrayIterator_Free    (AwaStringArrayIterator ** iterator);
+void AwaCStringArrayIterator_Free   (AwaCStringArrayIterator ** iterator);
 void AwaIntegerArrayIterator_Free   (AwaIntegerArrayIterator ** iterator);
 void AwaFloatArrayIterator_Free     (AwaFloatArrayIterator ** iterator);
 void AwaBooleanArrayIterator_Free   (AwaBooleanArrayIterator ** iterator);
@@ -838,6 +730,8 @@ AwaLWM2MError AwaPathResult_GetLWM2MError(const AwaPathResult * result);
 /**************************************************************************************************
  * ChangeSet Functions for Change Subscriptions and Observations
  *************************************************************************************************/
+
+typedef struct _AwaChangeSet AwaChangeSet;
 
 /**
  * @brief Create a new Path Iterator for a ChangeSet, used to iterate through the list of resource paths

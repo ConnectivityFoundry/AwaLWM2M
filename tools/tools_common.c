@@ -925,18 +925,18 @@ static AwaError AddPathToCString(char ** cstring, const char * path, void * resp
                 }
                 if (result == AwaError_Success)
                 {
-                    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(array);
-                        while (AwaStringArrayIterator_Next(iterator))
+                    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
+                        while (AwaCStringArrayIterator_Next(iterator))
                     {
-                        AwaArrayIndex index = AwaStringArrayIterator_GetIndex(iterator);
+                        AwaArrayIndex index = AwaCStringArrayIterator_GetIndex(iterator);
                         if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
                         {
-                            const char * value = AwaStringArrayIterator_GetValueAsCString(iterator);
+                            const char * value = AwaCStringArrayIterator_GetValueAsCString(iterator);
                             resourceValue = strdup(value);
                             AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
                         }
                     }
-                    AwaStringArrayIterator_Free(&iterator);
+                    AwaCStringArrayIterator_Free(&iterator);
                 }
             }
             break;
@@ -1622,6 +1622,7 @@ void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool qu
                 PrintResourceDefinition(resourceDefinition, quiet, AwaObjectDefinition_GetID(objectDefinition));
             }
         }
+        AwaResourceDefinitionIterator_Free(&resourceIterator);
     }
 }
 

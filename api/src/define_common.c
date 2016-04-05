@@ -77,10 +77,9 @@ AwaError ObjectDefinition_AddResourceDefinition(AwaObjectDefinition * objectDefi
         {
             if (Definition_LookupResourceDefinitionFromObjectDefinition(objectDefinition, resourceID) == NULL)
             {
-                Operations coreOperations = Utils_GetResourceTypeOperations(operations);
-                ResourceTypeType coreResourceType = Utils_GetResourceType(resourceType);
+                AwaResourceType coreResourceType = Utils_GetPrimativeResourceType(resourceType);
 
-                if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, coreOperations, RESOURCE_HANDLER, defaultValueNode))
+                if (Definition_NewResourceType(objectDefinition, resourceName, resourceID, coreResourceType, maximumInstances, minimumInstances, operations, RESOURCE_HANDLER, defaultValueNode))
                 {
                     result = AwaError_Success;
                 }
@@ -308,64 +307,31 @@ AwaResourceType AwaResourceDefinition_GetType(const AwaResourceDefinition * reso
     {
         if (!IS_MULTIPLE_INSTANCE(resourceDefinition))
         {
-
-            switch (resourceDefinition->Type)
-            {
-                case ResourceTypeEnum_TypeInvalid:
-                    resourceType = AwaResourceType_Invalid;
-                    break;
-                case ResourceTypeEnum_TypeOpaque:
-                    resourceType = AwaResourceType_Opaque;
-                    break;
-                case ResourceTypeEnum_TypeInteger:
-                    resourceType = AwaResourceType_Integer;
-                    break;
-                case ResourceTypeEnum_TypeFloat:
-                    resourceType = AwaResourceType_Float;
-                    break;
-                case ResourceTypeEnum_TypeBoolean:
-                    resourceType = AwaResourceType_Boolean;
-                    break;
-                case ResourceTypeEnum_TypeString:
-                    resourceType = AwaResourceType_String;
-                    break;
-                case ResourceTypeEnum_TypeTime:
-                    resourceType = AwaResourceType_Time;
-                    break;
-                case ResourceTypeEnum_TypeNone:
-                    resourceType = AwaResourceType_None;
-                    break;
-                case ResourceTypeEnum_TypeObjectLink:
-                    resourceType = AwaResourceType_ObjectLink;
-                    break;
-                default:
-                    LogError("Invalid resource type %d", resourceDefinition->Type);
-                    resourceType = AwaResourceType_Invalid;
-            }
+            resourceType = resourceDefinition->Type;
         }
         else
         {
             switch (resourceDefinition->Type)
             {
-                case ResourceTypeEnum_TypeOpaque:
+                case AwaResourceType_Opaque:
                     resourceType = AwaResourceType_OpaqueArray;
                     break;
-                case ResourceTypeEnum_TypeInteger:
+                case AwaResourceType_Integer:
                     resourceType = AwaResourceType_IntegerArray;
                     break;
-                case ResourceTypeEnum_TypeFloat:
+                case AwaResourceType_Float:
                     resourceType = AwaResourceType_FloatArray;
                     break;
-                case ResourceTypeEnum_TypeBoolean:
+                case AwaResourceType_Boolean:
                     resourceType = AwaResourceType_BooleanArray;
                     break;
-               case ResourceTypeEnum_TypeString:
+               case AwaResourceType_String:
                     resourceType = AwaResourceType_StringArray;
                     break;
-               case ResourceTypeEnum_TypeTime:
+               case AwaResourceType_Time:
                     resourceType = AwaResourceType_TimeArray;
                     break;
-               case ResourceTypeEnum_TypeObjectLink:
+               case AwaResourceType_ObjectLink:
                     resourceType = AwaResourceType_ObjectLinkArray;
                     break;
                default:
@@ -420,27 +386,7 @@ AwaResourceOperations AwaResourceDefinition_GetSupportedOperations(const AwaReso
 
     if (resourceDefinition != NULL)
     {
-        switch (resourceDefinition->Operation)
-        {
-            case Operations_None:
-                operations = AwaResourceOperations_None;
-                break;
-            case Operations_R:
-                operations = AwaResourceOperations_ReadOnly;
-                break;
-            case Operations_W:
-                operations = AwaResourceOperations_WriteOnly;
-                break;
-            case Operations_RW:
-                operations = AwaResourceOperations_ReadWrite;
-                break;
-            case Operations_E:
-                operations = AwaResourceOperations_Execute;
-                break;
-            default:
-                LogError("Invalid operation %d", resourceDefinition->Operation);
-                operations = AwaResourceOperations_None;
-        }
+        operations = resourceDefinition->Operation;
     }
 
     return operations;

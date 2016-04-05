@@ -24,6 +24,7 @@
 #ifndef LWM2M_TYPES_H
 #define LWM2M_TYPES_H
 
+#include <awa/static.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -42,29 +43,6 @@ extern "C" {
 
 typedef enum
 {
-    // These values must align with the table in lwm2m_types.c:ResourceTypeStrings
-    ResourceTypeEnum_TypeInvalid = -1,
-    ResourceTypeEnum_TypeOpaque,
-    ResourceTypeEnum_TypeInteger,
-    ResourceTypeEnum_TypeFloat,
-    ResourceTypeEnum_TypeBoolean,
-    ResourceTypeEnum_TypeString,
-    ResourceTypeEnum_TypeTime,
-    ResourceTypeEnum_TypeNone,
-    ResourceTypeEnum_TypeObjectLink,
-} ResourceTypeEnum;
-
-typedef enum
-{
-    Operations_None = 0,
-    Operations_R = 1,
-    Operations_W = 2,
-    Operations_RW = 3,
-    Operations_E = 4,
-} Operations;
-
-typedef enum
-{
     MandatoryEnum_Optional = 0,
     MandatoryEnum_Mandatory = 1,
 } MandatoryEnum;
@@ -75,17 +53,10 @@ typedef enum
     MultipleInstancesEnum_Multiple = LWM2M_MAX_ID,
 } MultipleInstancesEnum;
 
-typedef struct
-{
-    uint16_t ObjectID;
-    uint16_t ObjectInstanceID;
-} ObjectLink;
-
 typedef int ObjectIDType;
 typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;
 typedef int ResourceInstanceIDType;
-typedef int ResourceTypeType;
 
 #ifndef CONTIKI
 typedef struct
@@ -123,14 +94,14 @@ typedef enum
     ContentType_CustomPrettyPrint = 999,
 } ContentType;
 
-bool Operations_IsResourceTypeExecutable(Operations operation);
-bool Operations_IsResourceTypeWritable(Operations operation);
-bool Operations_IsResourceTypeReadable(Operations operation);
-bool Operations_Contains(Operations parent, Operations child);
+bool Operations_IsResourceTypeExecutable(AwaResourceOperations operation);
+bool Operations_IsResourceTypeWritable(AwaResourceOperations operation);
+bool Operations_IsResourceTypeReadable(AwaResourceOperations operation);
+bool Operations_Contains(AwaResourceOperations parent, AwaResourceOperations child);
 
 size_t Lwm2mCore_GetNumberOfResourceTypeStrings(void);
-const char * Lwm2mCore_ResourceTypeToString(ResourceTypeType resourceType);
-ResourceTypeType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
+const char * Lwm2mCore_ResourceTypeToString(AwaResourceType resourceType);
+AwaResourceType Lwm2mCore_ResourceTypeFromString(const char * resourceTypeString);
 
 #ifdef __cplusplus
 }

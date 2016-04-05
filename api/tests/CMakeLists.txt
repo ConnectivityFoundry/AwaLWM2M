@@ -6,8 +6,7 @@ set (test_api_runner_SOURCES
   support/support.cc
   support/process.cc
   support/daemon.cc
-  support/mock_malloc.c
-  
+
   test_log.cc
   test_error.cc
   test_lwm2m_error.cc
@@ -35,7 +34,7 @@ set (test_api_runner_SOURCES
   test_session_common.cc
   test_define_operation.cc
   test_value.cc
-  
+
   test_client_session.cc
   test_client_define_operation.cc
   test_client_define_defaults.cc
@@ -43,11 +42,12 @@ set (test_api_runner_SOURCES
   test_get_operation.cc
   test_client_delete_operation.cc
   test_server_delete_operation.cc
-  test_subscribe_operation.cc  
-  test_observe_operation.cc  
-  
+  test_subscribe_operation.cc
+  test_observe_operation.cc
+
   test_server_session.cc
   test_server_define_operation.cc
+  test_server_define_defaults.cc
   test_list_clients_operation.cc
   test_write_operation.cc
   test_set_write_common.cc
@@ -56,8 +56,9 @@ set (test_api_runner_SOURCES
   test_changeset.cc
   test_subscribe_observe_common.cc
   test_execute_operation.cc
-  
+
   test_bootstrap.cc
+  test_daemon.cc
 )
 
 set (test_api_runner_INCLUDE_DIRS
@@ -71,7 +72,6 @@ set (test_api_runner_INCLUDE_DIRS
 )
 
 set (test_api_runner_LIBRARIES
-  dl
   gtest
   pthread
   Awa_static
@@ -85,6 +85,7 @@ if (ENABLE_GCOV)
 endif ()
 
 add_definitions (-D__STDC_FORMAT_MACROS)
+add_definitions (-DVERSION="${VERSION}")
 
 # Disable format-extra-args for this source file:
 set_source_files_properties (test_utils.cc PROPERTIES COMPILE_FLAGS -Wno-format-extra-args)
@@ -114,5 +115,3 @@ if (RUN_TESTS)
     DEPENDS test_api_runner_out.xml
   )
 endif ()
-
-

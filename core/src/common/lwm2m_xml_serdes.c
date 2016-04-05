@@ -28,12 +28,12 @@
 #include "lwm2m_xml_serdes.h"
 #include "xml.h"
 
-static const char * TypeStrings[] = { "Opaque", "Integer", "Float", "Boolean", "String", "DateTime", "None", "ObjectLink" };
+static const char * TypeStrings[] = { "Invalid", "None", "String", "Integer", "Float", "Boolean", "Opaque", "DateTime", "ObjectLink" };
 static const char * OperationStrings[] = { "None", "Read", "Write", "ReadWrite", "Execute", "ReadExecute", "WriteExecute", "ReadWriteExecute" };
 
 #define NUM_TYPES (sizeof(TypeStrings) / sizeof(const char *))
 
-ResourceTypeEnum xmlif_StringToDataType(const char * value)
+AwaResourceType xmlif_StringToDataType(const char * value)
 {
     int i;
 
@@ -47,7 +47,7 @@ ResourceTypeEnum xmlif_StringToDataType(const char * value)
     return -1;
 }
 
-const char * xmlif_DataTypeToString(ResourceTypeEnum type)
+const char * xmlif_DataTypeToString(AwaResourceType type)
 {
     if ((type < 0) || (type >= NUM_TYPES))
     {
@@ -56,7 +56,7 @@ const char * xmlif_DataTypeToString(ResourceTypeEnum type)
     return TypeStrings[type];
 }
 
-Operations xmlif_StringToOperation(const char * value)
+AwaResourceOperations xmlif_StringToOperation(const char * value)
 {
     int i;
 
@@ -67,12 +67,12 @@ Operations xmlif_StringToOperation(const char * value)
             return i;
         }
     }
-    return Operations_None;
+    return AwaResourceOperations_None;
 }
 
-const char * xmlif_OperationToString(Operations operation)
+const char * xmlif_OperationToString(AwaResourceOperations operation)
 {
-    if ((operation < Operations_None) || (operation > Operations_E))
+    if ((operation < AwaResourceOperations_None) || (operation > AwaResourceOperations_Execute))
     {
         return "None";
     }
@@ -103,7 +103,7 @@ const char * xmlif_GetOpaque(TreeNode content, const char * name)
     return NULL;
 }
 
-char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int bufferLength)
+char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int bufferLength)
 {
     int outLength = 0;
     char * dataValue = NULL;
@@ -115,7 +115,7 @@ char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int buf
 
     switch(dataType)
     {
-        case ResourceTypeEnum_TypeString:
+        case AwaResourceType_String:
         {
             // adjust string length because object store expects Pascal strings
             if (bufferLength > 0 && buffer[bufferLength - 1] == 0)
@@ -126,19 +126,19 @@ char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int buf
         }
         // no break - intentional fall-through
 
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaResourceType_Opaque:
             outLength = (((bufferLength + 2) * 4) / 3);
             dataValue = malloc(outLength + 1);
             if (dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             dataValue[outLength] = '\0';
             outLength = b64Encode(dataValue, outLength, (char*)buffer, bufferLength);
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaResourceType_Float:
 
             if (bufferLength == sizeof(double))
             {
@@ -157,13 +157,13 @@ char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int buf
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_InternalError);
+                AwaResult_SetResult(AwaResult_InternalError);
                 goto error;
             }
             break;
 
-        case ResourceTypeEnum_TypeInteger:  // no break
-        case ResourceTypeEnum_TypeTime:
+        case AwaResourceType_Integer:  // no break
+        case AwaResourceType_Time:
 
             switch (bufferLength)
             {
@@ -186,100 +186,76 @@ char * xmlif_EncodeValue(ResourceTypeEnum dataType, const char * buffer, int buf
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
 
             break;
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaResourceType_Boolean:
             outLength = asprintf(&dataValue, "%s", (*(bool*)&buffer[0]) ? "True" : "False");
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             break;
 
-        case ResourceTypeEnum_TypeObjectLink:;
-            ObjectLink * objectLink = (ObjectLink *) buffer;
-            outLength = asprintf(&dataValue, "%"PRIu16":%"PRIu16, objectLink->ObjectID, objectLink->ObjectInstanceID);
+        case AwaResourceType_ObjectLink:;
+            AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
+            outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             break;
 
-        case ResourceTypeEnum_TypeNone:
+        case AwaResourceType_None:
         default:
-            Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+            AwaResult_SetResult(AwaResult_BadRequest);
             goto error;
     }
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
 error:
     return dataValue;
 }
 
-int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char * buffer, int bufferLength)
+int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * buffer, int bufferLength)
 {
     int dataLength = -1;
     int outLength;
 
     switch(dataType)
     {
-        case ResourceTypeEnum_TypeString:
-            //
-            outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes,
-            *dataValue = malloc(outLength);
-            if (*dataValue == NULL)
-            {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
-                goto error;
-            }
-            dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
-
-            if (dataLength == -1)
-            {
-                Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
-                goto error;
-            }
-            else
-            {
-                dataLength++;  // add space for null terminator
-                char * nullTerminated = malloc(dataLength);
-                memcpy(nullTerminated, *dataValue, dataLength - 1);
-                free(*dataValue);
-                nullTerminated[dataLength-1] = '\0';
-                *dataValue = nullTerminated;
-            }
-            break;
-        case ResourceTypeEnum_TypeOpaque: case ResourceTypeEnum_TypeNone: // TypeNone for Executable payload which is an Opaque
+        case AwaResourceType_String:
+        case AwaResourceType_Opaque: 
+        case AwaResourceType_None: // TypeNone for Executable payload which is an Opaque
             outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes
             *dataValue = malloc(outLength);
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
             if (dataLength == -1)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+                AwaResult_SetResult(AwaResult_BadRequest);
                 goto error;
             }
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaResourceType_Float:
         {
             double d;
             *dataValue = malloc(sizeof(double));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             sscanf(buffer, "%20lf", &d);
@@ -288,14 +264,14 @@ int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char *
             break;
         }
 
-        case ResourceTypeEnum_TypeInteger:  // no break
-        case ResourceTypeEnum_TypeTime:
+        case AwaResourceType_Integer:  // no break
+        case AwaResourceType_Time:
         {
             uint64_t u;
             *dataValue = malloc(sizeof(uint64_t));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             sscanf(buffer, "%"SCNd64, &u);
@@ -304,40 +280,39 @@ int xmlif_DecodeValue(char ** dataValue, ResourceTypeEnum dataType, const char *
             break;
         }
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaResourceType_Boolean:
             *dataValue = malloc(sizeof(bool));
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
             (*dataValue)[0] = (strcmp(buffer, "True") == 0);
             dataLength = sizeof(bool);
             break;
 
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaResourceType_ObjectLink:
         {
-            dataLength = sizeof(ObjectLink);
+            dataLength = sizeof(AwaObjectLink);
             *dataValue = malloc(dataLength);
 
             if (*dataValue == NULL)
             {
-                Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+                AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
-            ObjectLink * objectLink = (ObjectLink *)*dataValue;
-            sscanf(buffer, "%"SCNu16":%"SCNu16,&objectLink->ObjectID, &objectLink->ObjectInstanceID);
-
+            AwaObjectLink * objectLink = (AwaObjectLink *)*dataValue;
+            sscanf(buffer, "%10d:%10d", &objectLink->ObjectID, &objectLink->ObjectInstanceID);
             break;
         }
 
-        //case ResourceTypeEnum_TypeNone:
+        //case AwaResourceType_None:
         default:
-            Lwm2mResult_SetResult(Lwm2mResult_BadRequest);
+            AwaResult_SetResult(AwaResult_BadRequest);
             goto error;
     }
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
 error:
     return dataLength;
 }

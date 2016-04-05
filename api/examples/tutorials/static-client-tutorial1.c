@@ -13,24 +13,34 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#ifndef MOCK_MALLOC
-#define MOCK_MALLOC
+#include <string.h>
+#include <stdio.h>
+#include "awa/static.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int main(void)
+{
+    AwaStaticClient * awaClient = AwaStaticClient_New();
 
-extern int mockMallocFailCounter;
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
 
-#ifdef __cplusplus
+    AwaStaticClient_Init(awaClient);
+
+    while (1)
+    {
+        AwaStaticClient_Process(awaClient);
+    }
+
+    AwaStaticClient_Free(&awaClient);
+
+    return 0;
 }
-#endif
-
-#endif // MOCK_MALLOC

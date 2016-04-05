@@ -179,13 +179,24 @@ AwaServerObservation * AwaServerObservation_New(const char * clientID, const cha
             observation->Path = strdup(path);
             if (observation->Path != NULL)
             {
-                observation->Operations = List_New();
-                if (observation->Operations != NULL)
+                observation->ClientID = strdup(clientID);
+                if (observation->ClientID != NULL)
                 {
-                    observation->Callback = (void*)callback;
-                    observation->Context = context;
-                    observation->Session = NULL;
-                    observation->ClientID = clientID;
+                    observation->Operations = List_New();
+                    if (observation->Operations != NULL)
+                    {
+                        observation->Callback = (void*)callback;
+                        observation->Context = context;
+                        observation->Session = NULL;
+                    }
+                    else
+                    {
+                        free((void *)observation->Path);
+                        free((void *)observation->ClientID);
+                        Awa_MemSafeFree(observation);
+                        LogErrorWithEnum(AwaError_OutOfMemory);
+                        observation = NULL;
+                    }
                 }
                 else
                 {
@@ -243,6 +254,7 @@ AwaError AwaServerObservation_Free(AwaServerObservation ** observation)
         }
 
         free((void *)(*observation)->Path);
+        free((void *)(*observation)->ClientID);
         Awa_MemSafeFree(*observation);
         *observation = NULL;
 

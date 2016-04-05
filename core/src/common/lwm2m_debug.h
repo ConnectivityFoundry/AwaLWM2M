@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <awa/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,6 +114,8 @@ void Lwm2m_PrintBanner(void);
 void Lwm2m_SetOutput(FILE * output);
 
 void Lwm2m_SetLogLevel(DebugLevel level);
+DebugLevel Lwm2m_GetLogLevel();
+void Lwm2m_SetAwaLogLevel(AwaLogLevel level);
 
 #ifdef __cplusplus
 }

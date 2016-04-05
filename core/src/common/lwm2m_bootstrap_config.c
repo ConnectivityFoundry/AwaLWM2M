@@ -23,41 +23,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 #include "lwm2m_bootstrap_config.h"
 #include "lwm2m_core.h"
 #include "lwm2m_debug.h"
 #include "lwm2m_objects.h"
-
-typedef struct
-{
-    char ServerURI[255];
-    bool Bootstrap;
-    int SecurityMode ;
-    char PublicKey[255];
-    char SecretKey[255];
-    int ServerID;
-    int HoldOffTime;
-} Lwm2mSecurityInfo;
-
-typedef struct
-{
-    int ShortServerID;
-    int LifeTime;
-    int MinPeriod;
-    int MaxPeriod;
-    //char * Disable;
-    int DisableTimeout;
-    bool Notification;
-    char Binding[10];
-    //char * UpdateTrigger;
-} Lwm2mServerInfo;
-
-struct _BootstrapInfo
-{
-    Lwm2mSecurityInfo SecurityInfo;
-    Lwm2mServerInfo ServerInfo;
-};
 
 static bool ParseLine(BootstrapInfo * bootstrapInfo, char * line, size_t len)
 {
@@ -232,18 +203,44 @@ void BootstrapInformation_DeleteBootstrapInfo(const BootstrapInfo * bootstrapInf
     free((void *)bootstrapInfo);
 }
 
+AwaObjectInstanceID FindNextFreeObjectInstanceID(Lwm2mContextType * context, AwaObjectID ObjectID, AwaObjectInstanceID StartObjectInstanceID)
+{
+    AwaObjectInstanceID result = AWA_INVALID_ID;
+
+    if (StartObjectInstanceID != AWA_INVALID_ID)
+    {
+        result = StartObjectInstanceID;
+    }
+
+    while(Lwm2mCore_Exists(context, ObjectID, result, AWA_INVALID_ID))
+    {
+        result++;
+    }
+
+    if (result > AWA_MAX_ID)
+    {
+        result = AWA_INVALID_ID;
+    }
+
+    return result;
+}
+
 int BootstrapInformation_Apply(Lwm2mContextType * context, const BootstrapInfo * bootstrapInfo)
 {
-    static int instanceID = 1; // Always start at 1 as we reserve instance 0 for the BOOTSTRAP server
+    AwaObjectInstanceID instanceID = FindNextFreeObjectInstanceID(context, LWM2M_SECURITY_OBJECT, 1);
     Lwm2mCore_CreateObjectInstance(context, LWM2M_SECURITY_OBJECT, instanceID);
 
+#ifdef LWM2M_BOOTSTRAP
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SERVER_URI);
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_BOOTSTRAP_SERVER);
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECURITY_MODE);
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_PUBLIC_KEY);
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SECRET_KEY);
+#endif
+
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SHORT_SERVER_ID);
     Lwm2mCore_CreateOptionalResource(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_CLIENT_HOLD_OFF);
+
 
     Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SECURITY_OBJECT, instanceID, LWM2M_SECURITY_OBJECT_SERVER_URI, 0,
                                        bootstrapInfo->SecurityInfo.ServerURI,     strlen(bootstrapInfo->SecurityInfo.ServerURI));
@@ -265,17 +262,20 @@ int BootstrapInformation_Apply(Lwm2mContextType * context, const BootstrapInfo *
     {
         // This LWM2M Object provides the data related to a LWM2M Server.
         // A Bootstrap Server has no such an Object Instance associated to it.
-        static int securityInstanceID = 0;
+        AwaObjectInstanceID securityInstanceID = FindNextFreeObjectInstanceID(context, LWM2M_SERVER_OBJECT, 0);
 
         Lwm2mCore_CreateObjectInstance(context, LWM2M_SERVER_OBJECT, securityInstanceID);
 
+#ifdef LWM2M_BOOTSTRAP
         Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_SHORT_SERVER_ID);
         Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_LIFETIME);
+        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_NOTIFICATION_STORING);
+        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_BINDING);
+#endif
+
         Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MINIMUM_PERIOD);
         Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_MAXIMUM_PERIOD);
         Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_DISABLE_TIMEOUT);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_NOTIFICATION_STORING);
-        Lwm2mCore_CreateOptionalResource(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_BINDING);
 
         Lwm2mCore_SetResourceInstanceValue(context, LWM2M_SERVER_OBJECT, securityInstanceID, LWM2M_SERVER_OBJECT_SHORT_SERVER_ID,0,
                                            &bootstrapInfo->ServerInfo.ShortServerID,   sizeof(bootstrapInfo->SecurityInfo.ServerID));

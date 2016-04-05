@@ -626,11 +626,7 @@ TreeNode ObjectsTree_GetNextLeafNode(TreeNode currentNode)
         TreeNode parentNode = TreeNode_GetParent(currentNode);
         if (parentNode == NULL)
         {
-            if (ObjectsTree_IsObjectsNode(currentNode))
-            {
-                nextNode = TreeNode_GetChild(currentNode, 0);
-            }
-            else
+            if (!ObjectsTree_IsObjectsNode(currentNode))
             {
                 LogError("No Objects node in XML tree");
                 goto done;

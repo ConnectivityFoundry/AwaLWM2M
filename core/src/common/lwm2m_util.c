@@ -127,7 +127,7 @@ int64_t ptrToInt64(void * ptr)
     return temp;
 }
 
-void Lwm2mCore_AddressTypeToPath(char * path, AddressType * addr)
+void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * addr)
 {
 #ifndef CONTIKI
     char buffer[255];
@@ -137,21 +137,21 @@ void Lwm2mCore_AddressTypeToPath(char * path, AddressType * addr)
     switch (addr->Addr.Sa.sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET,&addr->Addr.Sin.sin_addr,buffer,sizeof(buffer));
+            ip = inet_ntop(AF_INET, &addr->Addr.Sin.sin_addr, buffer, sizeof(buffer));
             port = ntohs(addr->Addr.Sin.sin_port);
-            sprintf(path, "coap://%s:%d", ip, port);
+            snprintf(path, pathSize, "coap://%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6,&addr->Addr.Sin6.sin6_addr,buffer,sizeof(buffer));
+            ip = inet_ntop(AF_INET6, &addr->Addr.Sin6.sin6_addr, buffer, sizeof(buffer));
             port =  ntohs(addr->Addr.Sin6.sin6_port);
-            sprintf(path, "coap://[%s]:%d", ip, port);
+            snprintf(path, pathSize, "coap://[%s]:%d", ip, port);
             break;
         default:
             Lwm2m_Error("Unsupported address family: %d\n", addr->Addr.Sa.sa_family);
             break;
     }
 #else
-    sprintf(path, "coap://[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]:%d", uip_htons(addr->Addr.u16[0]), uip_htons(addr->Addr.u16[1]), uip_htons(addr->Addr.u16[2]), uip_htons(addr->Addr.u16[3]), uip_htons(addr->Addr.u16[4]), uip_htons(addr->Addr.u16[5]), uip_htons(addr->Addr.u16[6]), uip_htons(addr->Addr.u16[7]), addr->Port);
+    snprintf(path, pathSize, "coap://[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]:%d", uip_htons(addr->Addr.u16[0]), uip_htons(addr->Addr.u16[1]), uip_htons(addr->Addr.u16[2]), uip_htons(addr->Addr.u16[3]), uip_htons(addr->Addr.u16[4]), uip_htons(addr->Addr.u16[5]), uip_htons(addr->Addr.u16[6]), uip_htons(addr->Addr.u16[7]), addr->Port);
 #endif
 }
 
@@ -309,8 +309,8 @@ int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamil
         goto error;
     }
 
-    char linkLocalIpv6Address[NI_MAXHOST];
-    char globalIpv6Address[NI_MAXHOST];
+    char linkLocalIpv6Address[NI_MAXHOST] = { 0 };
+    char globalIpv6Address[NI_MAXHOST] = { 0 };
     bool found = false;
     int index = 0;
     for (interfaceAddress = interfaceAddresses; interfaceAddress != NULL; interfaceAddress = interfaceAddress->ifa_next)
@@ -320,7 +320,7 @@ int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamil
             continue;
         }
 
-        if((strcmp(interfaceAddress->ifa_name, interface)==0)&&(interfaceAddress->ifa_addr->sa_family==addressFamily))
+        if ((strcmp(interfaceAddress->ifa_name, interface)==0)&&(interfaceAddress->ifa_addr->sa_family==addressFamily))
         {
             int socketAddressLength = 0;
             switch(addressFamily)
@@ -338,14 +338,14 @@ int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamil
             if (returnCode != 0)
             {
                 Lwm2m_Error("getnameinfo() failed: %s\n", gai_strerror(returnCode));
-                goto error;
+                goto error_free;
             }
 
             size_t addressLength = strlen(host);
             if (destAddressLength < addressLength)
             {
                 Lwm2m_Error("Error: Address is longer than %zu characters\n", destAddressLength);
-                goto error;
+                goto error_free;
             }
 
             switch(addressFamily)
@@ -373,13 +373,13 @@ int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamil
 
     if (addressFamily == AF_INET6)
     {
-        if (globalIpv6Address != NULL)
+        if (strlen(globalIpv6Address) > 0)
         {
             Lwm2m_Debug("Global IPv6 address found for interface %s: %s\n", interface, globalIpv6Address);
             strcpy(destAddress, globalIpv6Address);
             found = true;
         }
-        else if (linkLocalIpv6Address != NULL)
+        else if (strlen(linkLocalIpv6Address) > 0)
         {
             Lwm2m_Warning("No global IPv6 address found for interface %s: using local: %s\n", interface, linkLocalIpv6Address);
             strcpy(destAddress, linkLocalIpv6Address);
@@ -393,8 +393,9 @@ int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamil
         returnCode = 1;
     }
 
-error:
+error_free:
     freeifaddrs(interfaceAddresses);
+error:
 #endif
     return returnCode;
 }

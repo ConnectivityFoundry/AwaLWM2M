@@ -1,9 +1,30 @@
+/************************************************************************************************************************
+ Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+        following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+        following disclaimer in the documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+        products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+************************************************************************************************************************/
+
 #include <gtest/gtest.h>
 
 #include "awa/client.h"
 #include "arrays.h"
 #include "support/support.h"
-#include "support/mock_malloc.h"
 
 namespace Awa {
 
@@ -19,12 +40,6 @@ TEST_F(TestArray, AwaIntegerArray_New_and_Free_valid_inputs)
     ASSERT_TRUE(NULL != array);
     AwaIntegerArray_Free(&array);
     ASSERT_TRUE(NULL == array);
-}
-
-TEST_F(TestArray, AwaIntegerArray_New_handles_out_of_memory)
-{
-    mockMallocFailCounter = 1;
-    ASSERT_EQ(NULL, AwaIntegerArray_New());
 }
 
 TEST_F(TestArray, AwaIntegerArray_SetValue_GetValue_valid_inputs)
@@ -175,7 +190,7 @@ TEST_F(TestArray, AwaIntegerArrayIterator_Set_Get_values)
     AwaIntegerArray * array = AwaIntegerArray_New();
     EXPECT_TRUE(NULL != array);
 
-    for(int i = 0; i < 1000; i+=5)
+    for (int i = 0; i < 1000; i+=5)
     {
         AwaIntegerArray_SetValue(array, i, i*2);
     }
@@ -183,11 +198,11 @@ TEST_F(TestArray, AwaIntegerArrayIterator_Set_Get_values)
     AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
-    for(int i = 0; i < 1000; i+=5)
+    for (int i = 0; i < 1000; i+=5)
     {
         ASSERT_TRUE(AwaIntegerArrayIterator_Next(iterator));
-        ASSERT_EQ(static_cast<size_t>(i), AwaIntegerArrayIterator_GetIndex(iterator));
-        ASSERT_EQ(i*2, AwaIntegerArrayIterator_GetValue(iterator));
+        EXPECT_EQ(static_cast<size_t>(i), AwaIntegerArrayIterator_GetIndex(iterator));
+        EXPECT_EQ(i*2, AwaIntegerArrayIterator_GetValue(iterator));
 //        ASSERT_EQ(sizeof(AwaInteger), ArrayIterator_GetValueLength(iterator));
     }
 
@@ -361,7 +376,7 @@ TEST_F(TestArray, AwaFloatArrayIterator_Set_Get_values)
     AwaFloatArray * array = AwaFloatArray_New();
     EXPECT_TRUE(NULL != array);
 
-    for(int i = 0; i < 1000; i+=5)
+    for(int i = 1; i < 1000; i+=5)
     {
         AwaFloatArray_SetValue(array, i, 100000.0 / i*2);
     }
@@ -369,7 +384,7 @@ TEST_F(TestArray, AwaFloatArrayIterator_Set_Get_values)
     AwaFloatArrayIterator * iterator = AwaFloatArray_NewFloatArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
-    for(int i = 0; i < 1000; i+=5)
+    for(int i = 1; i < 1000; i+=5)
     {
         ASSERT_TRUE(AwaFloatArrayIterator_Next(iterator));
         ASSERT_EQ(static_cast<size_t>(i), AwaFloatArrayIterator_GetIndex(iterator));
@@ -896,10 +911,10 @@ TEST_F(TestArray, AwaStringArrayIterator_New_and_Free_valid_inputs)
     AwaStringArray * array = AwaStringArray_New();
     EXPECT_TRUE(NULL != array);
 
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(array);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
     ASSERT_TRUE(NULL != iterator);
 
-    AwaStringArrayIterator_Free(&iterator);
+    AwaCStringArrayIterator_Free(&iterator);
     ASSERT_TRUE(NULL == iterator);
 
     AwaStringArray_Free(&array);
@@ -908,7 +923,7 @@ TEST_F(TestArray, AwaStringArrayIterator_New_and_Free_valid_inputs)
 
 TEST_F(TestArray, AwaStringArrayIterator_New_invalid_inputs)
 {
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(NULL);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(NULL);
     ASSERT_TRUE(NULL == iterator);
 }
 
@@ -925,23 +940,23 @@ TEST_F(TestArray, AwaStringArrayIterator_Set_Get_values)
         AwaStringArray_SetValueAsCString(array, i, temp);
     }
 
-    AwaStringArrayIterator * iterator = AwaStringArray_NewStringArrayIterator(array);
+    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
     EXPECT_TRUE(NULL != iterator);
 
     for(int i = 0; i < 1000; i+=5)
     {
         char temp [64];
 
-        ASSERT_TRUE(AwaStringArrayIterator_Next(iterator));
-        ASSERT_EQ(static_cast<size_t>(i), AwaStringArrayIterator_GetIndex(iterator));
+        ASSERT_TRUE(AwaCStringArrayIterator_Next(iterator));
+        ASSERT_EQ(static_cast<size_t>(i), AwaCStringArrayIterator_GetIndex(iterator));
         sprintf(temp, "%d",  i*2);
-        ASSERT_EQ(0, strcmp(temp, AwaStringArrayIterator_GetValueAsCString(iterator)));
+        ASSERT_EQ(0, strcmp(temp, AwaCStringArrayIterator_GetValueAsCString(iterator)));
 //        ASSERT_EQ(strlen(temp) + 1, ArrayIterator_GetValueLength(iterator));
     }
 
-    ASSERT_FALSE(AwaStringArrayIterator_Next(iterator));
+    ASSERT_FALSE(AwaCStringArrayIterator_Next(iterator));
 
-    AwaStringArrayIterator_Free(&iterator);
+    AwaCStringArrayIterator_Free(&iterator);
     EXPECT_TRUE(NULL == iterator);
 
     AwaStringArray_Free(&array);

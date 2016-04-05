@@ -1,3 +1,25 @@
+/************************************************************************************************************************
+ Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+        following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+        following disclaimer in the documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+        products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+************************************************************************************************************************/
+
 #include <gtest/gtest.h>
 
 #include <lwm2m_tree_node.h>
@@ -429,7 +451,6 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_handles_inval
     AwaClientGetOperation_Free(&operation);
 }
 
-
 /***********************************************************************************************************
  * GetValue parameterised tests
  */
@@ -623,7 +644,7 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
         {
             case AwaResourceType_String:
             {
-                ASSERT_STREQ((char*) data.expectedValue, (char*) data.expectedValue);
+                ASSERT_STREQ((char*) data.expectedValue, (char*) value);
                 break;
             }
             case AwaResourceType_Opaque:
@@ -1102,51 +1123,51 @@ TEST_P(TestGetValueArray, TestGetValueArrayInstantiation)
 
     switch(data.type)
     {
-    case AwaResourceType_StringArray:
-    {
-        expectedArray = (AwaArray *)this->expectedStringArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, data.path, (const AwaStringArray **)&array));
-        break;
-    }
-    case AwaResourceType_IntegerArray:
-    {
-        expectedArray = (AwaArray *)this->expectedIntegerArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, data.path, (const AwaIntegerArray **)&array));
-        break;
-    }
-    case AwaResourceType_FloatArray:
-    {
-        expectedArray = (AwaArray *)this->expectedFloatArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, data.path, (const AwaFloatArray **)&array));
-        break;
-    }
-    case AwaResourceType_BooleanArray:
-    {
-        expectedArray = (AwaArray *)this->expectedBooleanArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, data.path, (const AwaBooleanArray **)&array));
-        break;
-    }
-    case AwaResourceType_OpaqueArray:
-    {
-        expectedArray = (AwaArray *)this->expectedOpaqueArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, data.path, (const AwaOpaqueArray **)&array));
-        break;
-    }
-    case AwaResourceType_TimeArray:
-    {
-        expectedArray = (AwaArray *)this->expectedTimeArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, data.path, (const AwaTimeArray **)&array));
-        break;
-    }
-    case AwaResourceType_ObjectLinkArray:
-    {
-        expectedArray = (AwaArray *)this->expectedObjectLinkArray_;
-        ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, data.path, (const AwaObjectLinkArray **)&array));
-        break;
-    }
-    default:
-        ASSERT_TRUE(false);
-        break;
+        case AwaResourceType_StringArray:
+        {
+            expectedArray = (AwaArray *)this->expectedStringArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, data.path, (const AwaStringArray **)&array));
+            break;
+        }
+        case AwaResourceType_IntegerArray:
+        {
+            expectedArray = (AwaArray *)this->expectedIntegerArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, data.path, (const AwaIntegerArray **)&array));
+            break;
+        }
+        case AwaResourceType_FloatArray:
+        {
+            expectedArray = (AwaArray *)this->expectedFloatArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, data.path, (const AwaFloatArray **)&array));
+            break;
+        }
+        case AwaResourceType_BooleanArray:
+        {
+            expectedArray = (AwaArray *)this->expectedBooleanArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, data.path, (const AwaBooleanArray **)&array));
+            break;
+        }
+        case AwaResourceType_OpaqueArray:
+        {
+            expectedArray = (AwaArray *)this->expectedOpaqueArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, data.path, (const AwaOpaqueArray **)&array));
+            break;
+        }
+        case AwaResourceType_TimeArray:
+        {
+            expectedArray = (AwaArray *)this->expectedTimeArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, data.path, (const AwaTimeArray **)&array));
+            break;
+        }
+        case AwaResourceType_ObjectLinkArray:
+        {
+            expectedArray = (AwaArray *)this->expectedObjectLinkArray_;
+            ASSERT_EQ(data.expectedResult, AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, data.path, (const AwaObjectLinkArray **)&array));
+            break;
+        }
+        default:
+            ASSERT_TRUE(false);
+            break;
     }
     ASSERT_TRUE((data.expectedResult == AwaError_Success) == (array != NULL));
     if (array != NULL)

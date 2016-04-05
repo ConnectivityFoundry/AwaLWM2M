@@ -1,3 +1,25 @@
+/************************************************************************************************************************
+ Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+        following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+        following disclaimer in the documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+        products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+************************************************************************************************************************/
+
 // TODO: Test subscribe to multiple objects in a single request, then cancel one of the subscriptions without the others being broken
 
 #include <gtest/gtest.h>
@@ -225,6 +247,56 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
 
             // TODO: need to add support for the other cases
             EXPECT_EQ(AwaChangeType_ResourceModified, AwaChangeSet_GetChangeType(changeSet, "/3/0/16"));
+        }
+        void TestBody() {}
+    };
+    ChangeCallbackHandler1 cbHandler;
+
+    AwaClientSubscribeOperation * operation = AwaClientSubscribeOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/16", ChangeCallbackRunner, &cbHandler);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+
+    // set via client api to trigger notification.
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaClientSession_DispatchCallbacks(session_);
+    EXPECT_EQ(1, cbHandler.count);
+
+    EXPECT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
+    EXPECT_TRUE(NULL == changeSubscription);
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Free(&operation));
+    EXPECT_TRUE(NULL == operation);
+}
+
+TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_ChangeSet_handles_wrong_session_type)
+{
+    struct ChangeCallbackHandler1 : public TestSubscribeToChangeWithConnectedSession
+    {
+        int count;
+
+        ChangeCallbackHandler1() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            const AwaClientSession * clientSession = AwaChangeSet_GetClientSession(changeSet);
+            EXPECT_TRUE(NULL != clientSession);
+            const AwaServerSession * serverSession = AwaChangeSet_GetServerSession(changeSet);
+            EXPECT_TRUE(NULL == serverSession);
         }
         void TestBody() {}
     };
@@ -855,6 +927,69 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSession_AwaChangeSet_
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
     ASSERT_EQ(1, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
+    ASSERT_TRUE(NULL == changeSubscription);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+}
+
+TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Subscribe_to_multiple_instance_resource_changes)
+{
+    struct ChangeCallbackHandler2 : public TestSubscribeToChangeWithConnectedSession
+    {
+        int count;
+
+        ChangeCallbackHandler2() : count(0) {}
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            ASSERT_TRUE(NULL != changeSet);
+            AwaPathIterator * iterator = AwaChangeSet_NewPathIterator(changeSet);
+            ASSERT_TRUE(NULL != iterator);
+            EXPECT_TRUE(AwaPathIterator_Next(iterator));
+            EXPECT_STREQ("/3/0/6", AwaPathIterator_Get(iterator));
+            EXPECT_FALSE(AwaPathIterator_Next(iterator));
+
+            const AwaIntegerArray * valueArray = NULL;
+            AwaChangeSet_GetValuesAsIntegerArrayPointer(changeSet, "/3/0/6", &valueArray);
+            ASSERT_TRUE(NULL != valueArray);
+            EXPECT_EQ(12345, AwaIntegerArray_GetValue(valueArray, 0));
+            EXPECT_EQ(54321, AwaIntegerArray_GetValue(valueArray, 1));
+
+            AwaPathIterator_Free(&iterator);
+
+        }
+        void TestBody() {}
+    };
+    ChangeCallbackHandler2 cbHandler;
+
+    AwaClientSubscribeOperation * operation = AwaClientSubscribeOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/6", ChangeCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
+
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+
+    // set via client api to trigger notification.
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
+    ASSERT_TRUE(NULL != setOperation);
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 0, 12345));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 1, 54321));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+
+    cbHandler.count = 0;
+    AwaClientSession_DispatchCallbacks(session_);
+    ASSERT_EQ(1, cbHandler.count);
+
 
     ASSERT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
     ASSERT_TRUE(NULL == changeSubscription);

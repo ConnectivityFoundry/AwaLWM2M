@@ -207,7 +207,7 @@ void xmlif_DestroyExecuteHandlers(void)
 }
 
 int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                 uint8_t * inValueBuffer, int inValueBufferLen)
+                                 uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     ExecuteHandlerType * executeHandler = NULL;
     executeHandler = xmlif_GetExecuteHandler(objectID, objectInstanceID, resourceID);
@@ -219,7 +219,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
         Lwm2m_Info("xmlif_ResourceOperation: %s\n", (char *)inValueBuffer);
         if (inValueBuffer != NULL)
         {
-            base64content = xmlif_EncodeValue(ResourceTypeEnum_TypeOpaque, inValueBuffer, inValueBufferLen);
+            base64content = xmlif_EncodeValue(AwaResourceType_Opaque, inValueBuffer, inValueBufferLen);
         }
 
         do
@@ -271,7 +271,7 @@ int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, O
 
 static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta)
 {
-    int result = Lwm2mResult_Success;
+    int result = AwaResult_Success;
     int res;
     ObjectIDType objectID = -1;
     const char * objectName = NULL;
@@ -340,7 +340,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
     res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, &defaultObjectOperationHandlers);
     if (res < 0)
     {
-        result = Lwm2mResult_Forbidden;
+        result = AwaResult_Forbidden;
         goto error;
     }
 
@@ -359,7 +359,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
             uint16_t resourceMinimumInstances = 0;
             Lwm2mTreeNode * defaultValueNode = NULL;
 
-            Operations operation = Operations_None;
+            AwaResourceOperations operation = AwaResourceOperations_None;
 
             resNode = TreeNode_Navigate(property, "Property/PropertyID");
             if (resNode != NULL)
@@ -430,7 +430,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 value = TreeNode_GetValue(resNode);
 
                 const uint8_t * defaultValue = NULL;
-                uint16_t defaultValueLength = 0;
+                int defaultValueLength = 0;
 
                 if (value  != NULL)
                 {
@@ -464,22 +464,27 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                         value = xmlif_GetOpaque(resourceInstance, "ResourceInstance/Value");
 
                         const uint8_t * defaultValue = NULL;
-                        uint16_t defaultValueLength = 0;
+                        int defaultValueLength = 0;
 
                         defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
-
-                        Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                        Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
-                        Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-                        Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, defaultValueLength);
-                        Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
-
+                        if (defaultValueLength != -1)
+                        {
+                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                            Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
+                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
+                        }
+                        else
+                        {
+                            Lwm2m_Error("xmlif_DecodeValue failed\n");
+                        }
                         free((void*)defaultValue);
                     }
                 }
             }
 
-            if (operation & Operations_E)
+            if (operation & AwaResourceOperations_Execute)
             {
                 // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
                 res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, &xmlifResourceOperationHandlers, defaultValueNode);
@@ -493,7 +498,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
 
             if (res < 0)
             {
-                result = Lwm2mResult_Forbidden;
+                result = AwaResult_Forbidden;
                 goto error;
             }
 
@@ -519,7 +524,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     {
         response = Xml_CreateNode("Response");
         TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT));
-        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_BadRequest));
+        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_BadRequest));
     }
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
@@ -540,7 +545,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
 
     response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_Success));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
     xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
@@ -563,7 +568,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
     int successCount = 0;
     while (objectDefinition != NULL)
     {
-        if (xmlif_RegisterObjectFromXML(context, objectDefinition) == Lwm2mResult_Success)
+        if (xmlif_RegisterObjectFromXML(context, objectDefinition) == AwaResult_Success)
         {
             ++successCount;
         }
@@ -572,7 +577,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
 
     TreeNode response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DEFINE));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_Success));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
 
     Xml_TreeToString(response, buffer, sizeof(buffer));
     xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
@@ -591,7 +596,7 @@ static void xmlif_GenerateResponse(void * ctxt, AddressType* address, const char
     RequestInfoType * request = ctxt;
 
     TreeNode response = IPC_NewResponseNode(responseType, responseCode);
-    if (Lwm2mResult_IsSuccess(responseCode))
+    if (AwaResult_IsSuccess(responseCode))
     {
         TreeNode content = Xml_CreateNode("Content");
         TreeNode_AddChild(content, responseObjectsTree);
@@ -619,10 +624,10 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     char * dataValue = NULL;
     const char * buffer = NULL;
 
-    ResourceTypeType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
-    if (dataType != ResourceTypeEnum_TypeNone)
+    AwaResourceType dataType = Definition_GetResourceType(Lwm2mCore_GetDefinitions(context), objectID, resourceID);
+    if (dataType != AwaResourceType_None)
     {
-        int dataLength = 0;
+        size_t dataLength = 0;
 
         outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID, (const void **)&buffer, &dataLength);
         //Lwm2m_Debug("GET /%d/%d/%d[%d]: outLength %d, dataLength %d\n", objectID, instanceID, resourceID, resourceInstanceID, outLength, dataLength);
@@ -724,7 +729,7 @@ static AwaError AddObjectInstancesToGetResponse(Lwm2mContextType * context, int 
 // Called to handle a request with the type "Get".
 static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlRequestContent)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContent, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -738,7 +743,7 @@ static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlReques
         if (key.ObjectID == AWA_INVALID_ID)
         {
             Lwm2m_Error("No object specified: /%d/%d/%d\n", key.ObjectID, key.InstanceID, key.ResourceID);
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
 
@@ -843,7 +848,7 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                 TreeNode xmlResourceNode = NULL;
                 while ((xmlResourceNode = Xml_FindFrom(xmlObjectInstanceNode, "Resource", &propertyIndex)) != NULL)
                 {
-                    uint16_t resourceID;
+                    int resourceID;
                     bool createOptionalResource = Xml_Find(xmlResourceNode, "Create") != NULL;
 
                     if ((resourceID = xmlif_GetInteger(xmlResourceNode, "Resource/ID")) == -1)
@@ -917,17 +922,25 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                         }
                         else
                         {
+                            bool replace = false;
+                            const char * setWriteModeString = xmlif_GetOpaque(xmlResourceNode, "Resource/SetArrayMode");
+                            if (setWriteModeString != NULL)
+                            {
+                                replace = (strcmp(setWriteModeString, "Replace") == 0);
+                            }
+                            Lwm2mTreeNode_SetReplaceFlag(resourceNode, replace);
+
                             uint32_t valueIndex = 0;
                             TreeNode xmlResourceInstanceNode = NULL;
                             while ((xmlResourceInstanceNode = Xml_FindFrom(xmlResourceNode, "ResourceInstance", &valueIndex)) != NULL)
                             {
-                                uint16_t valueID = xmlif_GetInteger(xmlResourceInstanceNode, "ResourceInstance/ID");
-                                Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                                Lwm2mTreeNode_SetID(resourceInstanceNode, valueID);
-                                Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-
                                 if (readValues)
                                 {
+                                    int valueID = xmlif_GetInteger(xmlResourceInstanceNode, "ResourceInstance/ID");
+                                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                                    Lwm2mTreeNode_SetID(resourceInstanceNode, valueID);
+                                    Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+
                                     const char * data;
                                     int dataLength;
                                     char * dataValue = NULL;
@@ -987,7 +1000,7 @@ error:
 // Called to handle a request with the type "Set".
 static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1004,12 +1017,12 @@ static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
             int objectID;
             int createdObjectInstanceID = -1;
             Lwm2mTreeNode_GetID(object, &objectID);
-            Lwm2mResult setResult = Lwm2mCore_CheckWritePermissionsForObjectNode(context, Lwm2mRequestOrigin_Client, object, false);
-            if (Lwm2mResult_IsSuccess(setResult))
+            AwaResult setResult = Lwm2mCore_CheckWritePermissionsForObjectNode(context, Lwm2mRequestOrigin_Client, object, false);
+            if (AwaResult_IsSuccess(setResult))
             {
                 setResult = Lwm2mCore_ParseObjectNodeAndWriteToStore(context, object, false, false, false, &createdObjectInstanceID);
             }
-            AwaError error = Lwm2mResult_ToAwaError(setResult, AwaError_PathInvalid);
+            AwaError error = AwaResult_ToAwaError(setResult, AwaError_PathInvalid);
             TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(responseObjectsTree, "Object", xmlif_GetInteger(requestObjectNode, "Object/ID"));
             Lwm2mTreeNode * objectInstance = Lwm2mTreeNode_GetFirstChild(object);
             if (objectInstance != NULL)
@@ -1068,7 +1081,7 @@ static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
         else
         {
             Lwm2m_Error("Failed to parse XML object");
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
     }
@@ -1089,14 +1102,14 @@ int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int s
 
     memcpy(request, contextData, sizeof(RequestInfoType));
 
-    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), Lwm2mResult_Success, MSGTYPE_CHANGE_NOTIFICATION);
+    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, MSGTYPE_CHANGE_NOTIFICATION);
 
     return 0;
 }
 
-static Lwm2mResult xmlif_HandleObserve(void * context, RequestInfoType * request, ObjectIDType objectID, ObjectInstanceIDType instanceID, ResourceIDType resourceID)
+static AwaResult xmlif_HandleObserve(void * context, RequestInfoType * request, ObjectIDType objectID, ObjectInstanceIDType instanceID, ResourceIDType resourceID)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     AddressType addr;
     memset(&addr, 0, sizeof(addr));
     addr.Size = sizeof(request->FromAddr);
@@ -1108,7 +1121,7 @@ static Lwm2mResult xmlif_HandleObserve(void * context, RequestInfoType * request
 
     if (Lwm2mCore_Observe(context, &addr, NULL, 0, objectID, instanceID, resourceID, ContentType_ApplicationOmaLwm2mTLV, xmlif_Lwm2mNotificationCallback, (void*)temp) < 0)
     {
-        result = Lwm2mResult_BadRequest;
+        result = AwaResult_BadRequest;
         free(temp);
         goto error;
     }
@@ -1120,7 +1133,7 @@ error:;
 // Called to handle a request with the type "Subscribe".
 static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xmlRequestContentNode)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContentNode, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1134,7 +1147,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
         if (key.ObjectID == AWA_INVALID_ID)
         {
             Lwm2m_Error("No object specified: /%d/%d/%d\n", key.ObjectID, key.InstanceID, key.ResourceID);
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
 
@@ -1184,14 +1197,14 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                         }
                         else
                         {
-                            IPC_AddResultTag(responseLeafNode, Lwm2mResult_InternalError);
+                            IPC_AddResultTag(responseLeafNode, AwaResult_InternalError);
                             goto error;
                         }
                     }
                     else
                     {
-                        Lwm2mResult observeResult = Lwm2mResult_Unspecified;
-                        if ((observeResult = xmlif_HandleObserve(context, request, key.ObjectID, key.InstanceID, key.ResourceID)) == Lwm2mResult_Success)
+                        AwaResult observeResult = AwaResult_Unspecified;
+                        if ((observeResult = xmlif_HandleObserve(context, request, key.ObjectID, key.InstanceID, key.ResourceID)) == AwaResult_Success)
                         {
                             IPC_AddResultTag(responseLeafNode, AwaError_Success);
                         }
@@ -1219,7 +1232,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
                             if (resFormat != NULL)
                             {
                                  // Cancel SubscribeToExecute or SubscribeToChange
-                                 if (resFormat->Operation == Operations_E)
+                                 if (resFormat->Operation == AwaResourceOperations_Execute)
                                  {
                                      if (xmlif_RemoveExecuteHandler(&key, request) >= 0)
                                      {
@@ -1289,7 +1302,7 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
     TreeNode content = NULL;
 
     // CoAP 2.XX responses indicate success, 2.05 and 2.04 may both have content in the old spec.
-    if ((responseCode & Lwm2mResult_Success) != 0)
+    if ((responseCode & AwaResult_Success) != 0)
     {
         content = IPC_NewContentNode();
         TreeNode objects = ObjectsTree_New();
@@ -1326,27 +1339,33 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
                 TreeNode_AddChild(resource, resourceIDnode);
 
                 ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinition(Lwm2mCore_GetDefinitions(context), key.ObjectID, resourceID);
-
-                if (IS_MULTIPLE_INSTANCE(resourceDefinition))
+                if (resourceDefinition != NULL)
                 {
-                    int resourceInstanceID = -1;
-                    while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, key.ObjectID, instanceID, resourceID, resourceInstanceID)) != -1)
+                    if (IS_MULTIPLE_INSTANCE(resourceDefinition))
                     {
-                        TreeNode resourceInstance = Xml_CreateNode("ResourceInstance");
-                        TreeNode resourceInstanceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceInstanceID);
-                        TreeNode_AddChild(resourceInstance, resourceInstanceIDnode);
-                        TreeNode_AddChild(resource, resourceInstance);
+                        int resourceInstanceID = -1;
+                        while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, key.ObjectID, instanceID, resourceID, resourceInstanceID)) != -1)
+                        {
+                            TreeNode resourceInstance = Xml_CreateNode("ResourceInstance");
+                            TreeNode resourceInstanceIDnode = Xml_CreateNodeWithValue("ID", "%d", resourceInstanceID);
+                            TreeNode_AddChild(resourceInstance, resourceInstanceIDnode);
+                            TreeNode_AddChild(resource, resourceInstance);
 
-                        AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, resourceInstanceID, resourceInstance);
+                            AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, resourceInstanceID, resourceInstance);
+                        }
                     }
+                    else
+                    {
+                        AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, 0, resource);
+                    }
+
+                    // If we have requested a specific resource, then return -1 here and break.
+                    resourceID = (key.ResourceID == -1) ? Lwm2mCore_GetNextResourceID(context, key.ObjectID, instanceID, resourceID) : -1;
                 }
                 else
                 {
-                    AddResourceInstanceToGetResponse(context, key.ObjectID, instanceID, resourceID, 0, resource);
+                    Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", key.ObjectID, resourceID);
                 }
-
-                // If we have requested a specific resource, then return -1 here and break.
-                resourceID = (key.ResourceID == -1) ? Lwm2mCore_GetNextResourceID(context, key.ObjectID, instanceID, resourceID) : -1;
             }
             instanceID = (key.InstanceID == -1) ? Lwm2mCore_GetNextObjectInstanceID(context, key.ObjectID, instanceID) : -1;
         }
@@ -1376,7 +1395,7 @@ done:
 // Called to handle a request with the type "Delete".
 static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mResult result = Lwm2mResult_Success;
+    AwaResult result = AwaResult_Success;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
@@ -1390,7 +1409,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
         if (key.ObjectID == AWA_INVALID_ID)
         {
             Lwm2m_Error("No object specified: /%d/%d/%d\n", key.ObjectID, key.InstanceID, key.ResourceID);
-            result = Lwm2mResult_BadRequest;
+            result = AwaResult_BadRequest;
             goto error;
         }
 
@@ -1399,9 +1418,9 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
         TreeNode responseResourceNode = key.ResourceID != AWA_INVALID_ID? ObjectsTree_FindOrCreateChildNode(responseObjectInstanceNode, "Resource", key.ResourceID) : NULL;
         TreeNode responseLeafNode = responseResourceNode? responseResourceNode : responseObjectInstanceNode? responseObjectInstanceNode : responseObjectNode;
 
-        Lwm2mResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID);
+        AwaResult deleteResult = Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, key.ObjectID, key.InstanceID, key.ResourceID, false);
 
-        IPC_AddResultTag(responseLeafNode, Lwm2mResult_ToAwaError(deleteResult, AwaError_CannotDelete));
+        IPC_AddResultTag(responseLeafNode, AwaResult_ToAwaError(deleteResult, AwaError_CannotDelete));
     }
 
 error:

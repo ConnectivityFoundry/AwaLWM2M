@@ -45,13 +45,13 @@ typedef struct
 
 static void DestroyObjectList(struct ListHead * objectList);
 
-static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                                 int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                                 ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
-static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                           int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                           ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode);
+static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static void Lwm2m_SplitUpQuery(const char * query, RegistrationQueryString * result)
 {
@@ -143,55 +143,58 @@ static void Lwm2m_ParseObjectList(Lwm2mClientType * client, const char * objectL
             int object, instance = -1;
 
             char * objectStr = strtok_r(token, ";", &savePointer2);
-            char * attribute = strtok_r(NULL, ";", &savePointer2);
-            while (attribute != NULL)
+            if (objectStr != NULL)
             {
-                int contentType;
-                char resourceType[128];
-
-                if (sscanf(attribute, "ct=%10d", &contentType))
+                char * attribute = strtok_r(NULL, ";", &savePointer2);
+                while (attribute != NULL)
                 {
-                    // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
-                    // by including the content type in the root path link using the ct= link attribute.
-                    if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                    int contentType;
+                    char resourceType[128];
+
+                    if (sscanf(attribute, "ct=%10d", &contentType))
                     {
-                        client->SupportsJson = true;
-                        Lwm2m_Info("Supports JSON\n");
+                        // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
+                        // by including the content type in the root path link using the ct= link attribute.
+                        if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                        {
+                            client->SupportsJson = true;
+                            Lwm2m_Info("Supports JSON\n");
+                        }
                     }
+                    else if (sscanf(attribute, "rt=%127s", resourceType))
+                    {
+                        if (!strcmp(resourceType, "oma.lwm2m"))
+                        {
+                            sscanf(objectStr, "<%127s>", altPath);
+                        }
+                        else
+                        {
+                            Lwm2m_Info("unknown resource type %s, skipping %s\n", resourceType, objectStr);
+                            goto skip;
+                        }
+                    }
+                    attribute = strtok_r(NULL, ";", &savePointer2);
                 }
-                else if (sscanf(attribute, "rt=%127s", resourceType))
+
+                int pos = sscanf(objectStr, "</%5d/%5d>", &object, &instance);
+                if (pos <= 0)
                 {
-                    if (!strcmp(resourceType, "oma.lwm2m"))
-                    {
-                        sscanf(objectStr, "<%127s>", altPath);
-                    }
-                    else
-                    {
-                        Lwm2m_Info("unknown resource type %s, skipping %s\n", resourceType, objectStr);
-                        goto skip;
-                    }
+                    token = strtok_r(NULL, delim, &savePointer);
+                    continue;
                 }
-                attribute = strtok_r(NULL, ";", &savePointer2);
+
+                // Create new entry, perhaps check for duplicates?
+                ObjectListEntry * entry = malloc(sizeof(ObjectListEntry));
+                if (entry == NULL)
+                {
+                    break;
+                }
+
+                entry->ObjectID = object;
+                entry->InstanceID = instance;
+
+                ListAdd(&entry->list, &client->ObjectList);
             }
-
-            int pos = sscanf(objectStr, "</%5d/%5d>", &object, &instance);
-            if (pos <= 0)
-            {
-                token = strtok_r(NULL, delim, &savePointer);
-                continue;
-            }
-
-            // create new entry, perhaps check for duplicates?
-            ObjectListEntry * entry = malloc(sizeof(ObjectListEntry));
-            if (entry == NULL)
-            {
-                break;
-            }
-
-            entry->ObjectID = object;
-            entry->InstanceID = instance;
-
-            ListAdd(&entry->list, &client->ObjectList);
 
         skip:
             token = strtok_r(NULL, delim, &savePointer);
@@ -334,7 +337,7 @@ static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPoin
             ListAdd(&client->list, Lwm2mCore_GetClientList(context));
 
             sprintf(RegisterLocation, "/rd/%d", client->Location);
-            Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, Lwm2mCore_UpdateEndpointHandler);
+            Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, UpdateEndpointHandler);
 
             result = Lwm2m_UpdateClient(context, client->Location, lifeTime, bindingMode, addr, contentType, objectList, objectListLength);
         }
@@ -369,8 +372,8 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
                               const char * query, ContentType contentType, 
-                              const char * requestContent, int requestContentLen,
-                              char * responseContent, int * responseContentLen,
+                              const char * requestContent, size_t requestContentLen,
+                              char * responseContent, size_t * responseContentLen,
                               int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
@@ -384,7 +387,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     if (q.EndPointName == NULL)
     {
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -392,7 +395,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     if (contentType != ContentType_ApplicationLinkFormat)
     {
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -417,12 +420,12 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         sprintf(responseContent, "rd/%d", client->Location);
     
         *responseContentLen = strlen(responseContent);  // no content
-        *responseCode = Lwm2mResult_SuccessCreated;
+        *responseCode = AwaResult_SuccessCreated;
     }
     else
     {
         *responseContentLen = 0;
-        *responseCode = Lwm2mResult_Forbidden;  // Duplicate
+        *responseCode = AwaResult_Forbidden;  // Duplicate
     }
 
     Lwm2m_ReleaseQueryString(&q);
@@ -432,11 +435,11 @@ done:
 }
 
 // handler called when a client puts to /rd/<location>
-static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
-        const char * query, ContentType contentType,
-        const char * requestContent, int requestContentLen,
-        char * responseContent, int * responseContentLen,
-        int * responseCode)
+static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
+                       const char * query, ContentType contentType,
+                       const char * requestContent, size_t requestContentLen,
+                       char * responseContent, size_t * responseContentLen,
+                       int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     RegistrationQueryString q;
@@ -449,7 +452,7 @@ static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
 
     if (sscanf(path, "/rd/%10d\n", &location) != 1)
     {
-        *responseCode = Lwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
@@ -457,11 +460,11 @@ static int Lwm2m_RegisterPut(void * ctxt, AddressType * addr, const char * path,
 
     if (Lwm2m_UpdateClient(context, location, q.LifeTime, q.BindingModeValue, addr, contentType, requestContent, requestContentLen) == 0)
     {
-        *responseCode = Lwm2mResult_SuccessChanged;
+        *responseCode = AwaResult_SuccessChanged;
     }
     else
     {
-        *responseCode = Lwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
 
     Lwm2m_ReleaseQueryString(&q);
@@ -470,8 +473,8 @@ done:
 }
 
 // handler called when a client sends a deregister by sending a DELETE to /rd/X
-static int Lwm2m_RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                const char * requestContent, int requestContentLen, char * responseContent, int * responseContentLen, int * responseCode)
+static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+                          const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
 
@@ -483,19 +486,19 @@ static int Lwm2m_RegisterDelete(void * ctxt, AddressType * addr, const char * pa
 
     if (sscanf(path, "/rd/%10d\n", &location) != 1)
     {
-        *responseCode = Lwm2mResult_BadRequest;
+        *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
     Lwm2mClientType * client = Lwm2m_LookupClientByLocation(context, location);
     if (client == NULL)
     {
-        *responseCode = Lwm2mResult_NotFound;
+        *responseCode = AwaResult_NotFound;
     }
     else
     {
         Lwm2m_DeregisterClient(context, client);
-        *responseCode = Lwm2mResult_SuccessDeleted;
+        *responseCode = AwaResult_SuccessDeleted;
     }
 done:
     return 0;
@@ -506,21 +509,21 @@ done:
  * i.e when a Registration message is handled, a new endpoint is created for the client /rd/<location>. these
  * end points are handled here.
  */
-static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                           int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                           ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
    switch(type)
    {
        // The old standard used to use PUT for update requests, so we must continue to support this
        case COAP_PUT_REQUEST:
-           return Lwm2m_RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        case COAP_POST_REQUEST:
-           return Lwm2m_RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterPut(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        case COAP_DELETE_REQUEST:
-           return Lwm2m_RegisterDelete(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
+           return RegisterDelete(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
 
        default:
            break;
@@ -528,14 +531,14 @@ static int Lwm2mCore_UpdateEndpointHandler(int type, void * ctxt, AddressType * 
 
    *responseContentType = ContentType_None;
    *responseContentLen = 0;
-   *responseCode = Lwm2mResult_MethodNotAllowed;
+   *responseCode = AwaResult_MethodNotAllowed;
     return 0;
 }
 
 // This function is called when a CoAP request is made to /rd
-static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                                 int tokenLength, ContentType contentType, const char * requestContent, int requestContentLen,
-                                                 ContentType * responseContentType, char * responseContent, int * responseContentLen, int * responseCode)
+static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
+                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -547,7 +550,7 @@ static int Lwm2mCore_RegistrationEndpointHandler(int type, void * ctxt, AddressT
 
     *responseContentType = ContentType_None;
     *responseContentLen = 0;
-    *responseCode = Lwm2mResult_MethodNotAllowed;
+    *responseCode = AwaResult_MethodNotAllowed;
     return 0;
 }
 
@@ -576,7 +579,7 @@ int Lwm2m_RegistrationInit(Lwm2mContextType * context)
     ListInit(Lwm2mCore_GetClientList(context));
     Lwm2mCore_SetLastLocation(context, 0);
 
-    Lwm2mCore_AddResourceEndPoint(context, "/rd", Lwm2mCore_RegistrationEndpointHandler);
+    Lwm2mCore_AddResourceEndPoint(context, "/rd", RegistrationEndpointHandler);
 
     return 0;
 }

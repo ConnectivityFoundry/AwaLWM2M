@@ -72,10 +72,10 @@ typedef struct
 
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen);
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen);
 
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed);
+                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
@@ -244,7 +244,7 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 }
 
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, int * bufferLen)
+                                             ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
     LWM2MSecurityInfo * security = GetSecurityInfo(context, objectInstanceID);
 
@@ -336,7 +336,7 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 }
 
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, int srcBufferLen, bool * changed)
+                                              ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
     int result = -1;
     LWM2MSecurityInfo * security =  GetSecurityInfo(context, objectInstanceID);
@@ -574,16 +574,16 @@ void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, const char * bootS
 void Lwm2m_RegisterSecurityObject(Lwm2mContextType * context)
 {
     Lwm2mCore_RegisterObjectType(context, "LWM2MSecurity" , LWM2M_SECURITY_OBJECT, MultipleInstancesEnum_Multiple, MandatoryEnum_Mandatory, &securityObjectOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "LWM2MServerURI",            LWM2M_SECURITY_OBJECT, 0,  ResourceTypeEnum_TypeString,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "BootstrapServer",           LWM2M_SECURITY_OBJECT, 1,  ResourceTypeEnum_TypeBoolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "SecurityMode",              LWM2M_SECURITY_OBJECT, 2,  ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "PublicKeyorIDentity",       LWM2M_SECURITY_OBJECT, 3,  ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ServerPublicKeyorIDentity", LWM2M_SECURITY_OBJECT, 4,  ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "SecretKey",                 LWM2M_SECURITY_OBJECT, 5,  ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "SMSSecurityMode",           LWM2M_SECURITY_OBJECT, 6,  ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "SMSBindingKeyParameters",   LWM2M_SECURITY_OBJECT, 7,  ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "SMSBindingSecretKeys",      LWM2M_SECURITY_OBJECT, 8,  ResourceTypeEnum_TypeOpaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "LWM2MServerSMSNumber",      LWM2M_SECURITY_OBJECT, 9,  ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ShortServerID",             LWM2M_SECURITY_OBJECT, 10, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  Operations_None, &securityResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ClientHoldOffTime",         LWM2M_SECURITY_OBJECT, 11, ResourceTypeEnum_TypeInteger, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, Operations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "LWM2MServerURI",            LWM2M_SECURITY_OBJECT, 0,  AwaResourceType_String,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "BootstrapServer",           LWM2M_SECURITY_OBJECT, 1,  AwaResourceType_Boolean, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "SecurityMode",              LWM2M_SECURITY_OBJECT, 2,  AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "PublicKeyorIDentity",       LWM2M_SECURITY_OBJECT, 3,  AwaResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ServerPublicKeyorIDentity", LWM2M_SECURITY_OBJECT, 4,  AwaResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "SecretKey",                 LWM2M_SECURITY_OBJECT, 5,  AwaResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "SMSSecurityMode",           LWM2M_SECURITY_OBJECT, 6,  AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "SMSBindingKeyParameters",   LWM2M_SECURITY_OBJECT, 7,  AwaResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "SMSBindingSecretKeys",      LWM2M_SECURITY_OBJECT, 8,  AwaResourceType_Opaque,  MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "LWM2MServerSMSNumber",      LWM2M_SECURITY_OBJECT, 9,  AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ShortServerID",             LWM2M_SECURITY_OBJECT, 10, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional,  AwaResourceOperations_None, &securityResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ClientHoldOffTime",         LWM2M_SECURITY_OBJECT, 11, AwaResourceType_Integer, MultipleInstancesEnum_Single, MandatoryEnum_Optional, AwaResourceOperations_None, &securityResourceOperationHandlers);
 }

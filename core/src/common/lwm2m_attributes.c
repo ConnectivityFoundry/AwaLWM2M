@@ -35,12 +35,12 @@
 
 const static AttributeCharacteristics AttributeCharacteristicsTable[] =
 {
-    {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = ResourceTypeEnum_TypeInteger},
-    {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = ResourceTypeEnum_TypeInteger},
-    {.Type = AttributeTypeEnum_GreaterThan,     .Name = "Greater Than",    .CoRELinkParam = "gt",      .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_LessThan,        .Name = "Less Than",       .CoRELinkParam = "lt",      .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_Step,            .Name = "Step",            .CoRELinkParam = "stp",     .ValueType = ResourceTypeEnum_TypeFloat},
-    {.Type = AttributeTypeEnum_Cancel,          .Name = "Cancel",          .CoRELinkParam = "cancel",  .ValueType = ResourceTypeEnum_TypeNone},
+    {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = AwaResourceType_Integer},
+    {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = AwaResourceType_Integer},
+    {.Type = AttributeTypeEnum_GreaterThan,     .Name = "Greater Than",    .CoRELinkParam = "gt",      .ValueType = AwaResourceType_Float},
+    {.Type = AttributeTypeEnum_LessThan,        .Name = "Less Than",       .CoRELinkParam = "lt",      .ValueType = AwaResourceType_Float},
+    {.Type = AttributeTypeEnum_Step,            .Name = "Step",            .CoRELinkParam = "stp",     .ValueType = AwaResourceType_Float},
+    {.Type = AttributeTypeEnum_Cancel,          .Name = "Cancel",          .CoRELinkParam = "cancel",  .ValueType = AwaResourceType_None},
 };
 
 const AttributeCharacteristics * Lwm2mAttributes_GetAttributeCharacteristics(char * coreLinkParam)
@@ -115,7 +115,7 @@ AttributeStore * AttributeStore_Create(void)
     AttributeStore * store = (AttributeStore *)malloc(sizeof(AttributeStore));
     if (store == NULL)
     {
-        Lwm2mResult_SetResult(Lwm2mResult_OutOfMemory);
+        AwaResult_SetResult(AwaResult_OutOfMemory);
         return NULL;
     }
 
@@ -123,7 +123,7 @@ AttributeStore * AttributeStore_Create(void)
 
     ListInit(&store->ServerNotificationAttributes);
 
-    Lwm2mResult_SetResult(Lwm2mResult_Success);
+    AwaResult_SetResult(AwaResult_Success);
     return store;
 }
 

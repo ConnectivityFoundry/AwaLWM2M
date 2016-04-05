@@ -99,138 +99,57 @@ size_t Utils_GetNumberOfResourceTypeStrings(void)
     return numEntries;
 }
 
-ResourceTypeType Utils_GetResourceType(AwaResourceType resourceType)
-{
-    ResourceTypeType result = ResourceTypeEnum_TypeInvalid;
-
-    switch (resourceType)
-    {
-        case AwaResourceType_Invalid:
-            result = ResourceTypeEnum_TypeInvalid;
-            break;
-
-        case AwaResourceType_None:
-            result = ResourceTypeEnum_TypeNone;
-            break;
-
-        case AwaResourceType_StringArray:
-        case AwaResourceType_String:
-            result = ResourceTypeEnum_TypeString;
-            break;
-
-        case AwaResourceType_IntegerArray:
-        case AwaResourceType_Integer:
-            result = ResourceTypeEnum_TypeInteger;
-            break;
-
-        case AwaResourceType_FloatArray:
-        case AwaResourceType_Float:
-            result = ResourceTypeEnum_TypeFloat;
-            break;
-
-        case AwaResourceType_BooleanArray:
-        case AwaResourceType_Boolean:
-            result = ResourceTypeEnum_TypeBoolean;
-            break;
-
-        case AwaResourceType_OpaqueArray:
-        case AwaResourceType_Opaque:
-            result = ResourceTypeEnum_TypeOpaque;
-            break;
-
-        case AwaResourceType_TimeArray:
-        case AwaResourceType_Time:
-            result = ResourceTypeEnum_TypeTime;
-            break;
-
-        case AwaResourceType_ObjectLinkArray:
-        case AwaResourceType_ObjectLink:
-            result = ResourceTypeEnum_TypeObjectLink;
-            break;
-
-        default:
-            LogError("Invalid resource type %d", resourceType);
-            break;
-    }
-
-    return result;
-}
-
-// NB: Does not support arrays!
-AwaResourceType Utils_GetAwaResourceType(ResourceTypeType resourceType)
+AwaResourceType Utils_GetPrimativeResourceType(AwaResourceType resourceType)
 {
     AwaResourceType result = AwaResourceType_Invalid;
 
     switch (resourceType)
     {
-        case ResourceTypeEnum_TypeInvalid:
+        case AwaResourceType_Invalid:
             result = AwaResourceType_Invalid;
             break;
 
-        case ResourceTypeEnum_TypeNone:
+        case AwaResourceType_None:
             result = AwaResourceType_None;
             break;
 
-        case ResourceTypeEnum_TypeString:
+        case AwaResourceType_StringArray:
+        case AwaResourceType_String:
             result = AwaResourceType_String;
             break;
 
-        case ResourceTypeEnum_TypeInteger:
+        case AwaResourceType_IntegerArray:
+        case AwaResourceType_Integer:
             result = AwaResourceType_Integer;
             break;
 
-        case ResourceTypeEnum_TypeFloat:
+        case AwaResourceType_FloatArray:
+        case AwaResourceType_Float:
             result = AwaResourceType_Float;
             break;
 
-        case ResourceTypeEnum_TypeBoolean:
+        case AwaResourceType_BooleanArray:
+        case AwaResourceType_Boolean:
             result = AwaResourceType_Boolean;
             break;
 
-        case ResourceTypeEnum_TypeOpaque:
+        case AwaResourceType_OpaqueArray:
+        case AwaResourceType_Opaque:
             result = AwaResourceType_Opaque;
             break;
 
-        case ResourceTypeEnum_TypeTime:
+        case AwaResourceType_TimeArray:
+        case AwaResourceType_Time:
             result = AwaResourceType_Time;
             break;
 
-        case ResourceTypeEnum_TypeObjectLink:
+        case AwaResourceType_ObjectLinkArray:
+        case AwaResourceType_ObjectLink:
             result = AwaResourceType_ObjectLink;
             break;
 
         default:
             LogError("Invalid resource type %d", resourceType);
-            break;
-    }
-
-    return result;
-}
-
-Operations Utils_GetResourceTypeOperations(AwaResourceOperations operation)
-{
-    Operations result = Operations_None;
-
-    switch (operation)
-    {
-        case AwaResourceOperations_None:
-            result = Operations_None;
-            break;
-        case AwaResourceOperations_ReadOnly:
-            result = Operations_R;
-            break;
-        case AwaResourceOperations_WriteOnly:
-            result = Operations_W;
-            break;
-        case AwaResourceOperations_ReadWrite:
-            result = Operations_RW;
-            break;
-        case AwaResourceOperations_Execute:
-            result = Operations_E;
-            break;
-        default:
-            LogError("Invalid operation %d", operation);
-            result = Operations_None;
             break;
     }
 

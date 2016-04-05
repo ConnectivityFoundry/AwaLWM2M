@@ -65,11 +65,16 @@ int xmlif_AddRequestHandler(const char * msgType, XmlRequestHandler handler)
     return 0;
 }
 
-int xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
-        const struct sockaddr *dest_addr, socklen_t addrlen)
+ssize_t xmlif_SendTo(int sockfd, const void *buf, size_t len, int flags,
+                     const struct sockaddr *dest_addr, socklen_t addrlen)
 {
     Lwm2m_Debug("Send %zu bytes on IPC\n%s\n", len , (const char *)buf);
-    return sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    ssize_t result = sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    if (result == -1)
+    {
+        perror("sendto");
+    }
+    return result;
 }
 
 int xmlif_init(void * context, int port)
@@ -136,7 +141,7 @@ int xmlif_init(void * context, int port)
 static void HandleInvalidRequest(const RequestInfoType * request)
 {
     TreeNode responseNode = Xml_CreateNode("Response");
-    TreeNode code = Xml_CreateNodeWithValue("Code", "%d", Lwm2mResult_BadRequest);
+    TreeNode code = Xml_CreateNodeWithValue("Code", "%d", AwaResult_BadRequest);
     TreeNode_AddChild(responseNode, code);
 
     char buffer[MAXBUFLEN];
@@ -262,7 +267,10 @@ error:
 
 void xmlif_destroy(int sockfd)
 {
-    close(sockfd);
+    if (sockfd >= 0)
+    {
+        close(sockfd);
+    }
 
     struct ListHead * i, * n;
     ListForEachSafe(i, n, &handlerList)
@@ -279,7 +287,7 @@ void xmlif_destroy(int sockfd)
 TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
 {
     ObjectDefinition * objFormat = 0;
-    int result = Lwm2mResult_Success;
+    int result = AwaResult_Success;
 
     TreeNode response = Xml_CreateNode("Response");
 
@@ -300,7 +308,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         objFormat = Definition_LookupObjectDefinition(definitionRegistry, objectID);
         if (objFormat == NULL)
         {
-            result = Lwm2mResult_NotFound;
+            result = AwaResult_NotFound;
             goto error;
         }
 
@@ -312,7 +320,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         else
         {
             Tree_Delete(content);
-            result = Lwm2mResult_NotFound;
+            result = AwaResult_NotFound;
         }
     }
 

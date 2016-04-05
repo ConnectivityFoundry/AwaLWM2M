@@ -39,8 +39,12 @@ endif
 BUILD_DIR_ABS:=$(shell pwd)/$(BUILD_DIR)
 
 all: $(BUILD_DIR)/Makefile
-	make -C $(BUILD_DIR) --no-print-directory
+	$(MAKE) -C $(BUILD_DIR) --no-print-directory
 	@echo "Build complete in directory $(BUILD_DIR)"
+
+install: all
+	cd $(BUILD_DIR); $(MAKE) install DESTDIR=./install
+	@echo "AwaLWM2M installed to $(BUILD_DIR)/install"
 
 $(BUILD_DIR)/Makefile:
 	mkdir -p $(BUILD_DIR)
@@ -91,36 +95,39 @@ TEST_PATHS=--clientDaemonPath=$(LWM2M_CLIENTD_BIN) \
   --bootstrapConfig=api/tests/bootstrap-gtest.config
 
 .PHONY: gtest_tests
-gtest_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
+gtest_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
 	$(TEST_SRC_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_SRC_XML)"        $(TEST_PATHS)
 	$(TEST_STATIC_API_BIN) $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_STATIC_API_XML)" $(TEST_PATHS)
 	$(TEST_API_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_API_XML)"        $(TEST_PATHS)
 	$(TEST_TOOLS_BIN)      $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_TOOLS_XML)"      $(TEST_PATHS)
 
 .PHONY: gdb_tests
-gdb_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
-	gdb -quiet -ex=r --args $(TEST_SRC_BIN)   --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
-	gdb -quiet -ex=r --args $(TEST_API_BIN)   --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
-	gdb -quiet -ex=r --args $(TEST_TOOLS_BIN) --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
+gdb_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
+	gdb -quiet -ex=r --args $(TEST_SRC_BIN)        --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
+	gdb -quiet -ex=r --args $(TEST_API_BIN)        --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
+	gdb -quiet -ex=r --args $(TEST_STATIC_API_BIN) --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
+	gdb -quiet -ex=r --args $(TEST_TOOLS_BIN)      --gtest_break_on_failure $(GTEST_OPTIONS) $(TEST_PATHS)
 
 VALGRIND_SUPPRESSIONS:=$(realpath ci/valgrind.suppress)
 VALGRIND_OPTIONS:=--error-exitcode=1 --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=$(VALGRIND_SUPPRESSIONS)
 
 .PHONY: valgrind_tests
-valgrind_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
-	valgrind $(VALGRIND_OPTIONS) $(TEST_SRC_BIN)   $(GTEST_OPTIONS) $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) $(TEST_API_BIN)   $(GTEST_OPTIONS) $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) $(TEST_TOOLS_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
+valgrind_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
+	valgrind $(VALGRIND_OPTIONS) $(TEST_SRC_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) $(TEST_STATIC_API_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) $(TEST_TOOLS_BIN)      $(GTEST_OPTIONS) $(TEST_PATHS)
 
 VALGRIND_LOG_DIR:=./valgrind
 VALGRIND_LOG_OPTIONS:=--xml=yes --xml-file=$(VALGRIND_LOG_DIR)/valgrind.%p.xml --log-file=$(VALGRIND_LOG_DIR)/valgrind.%p.log
 
 .PHONY: valgrind_comprehensive
-valgrind_comprehensive: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN)
+valgrind_comprehensive: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
 	mkdir -p $(VALGRIND_LOG_DIR)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_SRC_BIN)   $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)   $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_TOOLS_BIN) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_SRC_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_STATIC_API_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_TOOLS_BIN)      $(GTEST_OPTIONS) $(TEST_PATHS)
 
 .PHONY: cppcheck
 cppcheck:
