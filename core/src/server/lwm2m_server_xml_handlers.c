@@ -1448,6 +1448,10 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
             {
                 continue;  // don't add default values for optional multiple instance resources
             }
+            if (resourceDefinition->MinimumInstances == 0)
+            {
+                continue;  // don't add default values for optional resources
+            }
 
             Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
             while(child != NULL)
