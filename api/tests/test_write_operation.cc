@@ -349,6 +349,40 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_with_optional_resource_should_not_create_optional_resource)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "MandatoryResource", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(1, "OptionalResource", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    AwaInteger value = 123456789;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+
+    AwaClientGetOperation * getOperation = AwaClientGetOperation_New(client_session_);
+    EXPECT_TRUE(getOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+
+    const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+    EXPECT_TRUE(getResponse != NULL);
+
+    ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/1000/0/0"));
+    ASSERT_FALSE(AwaClientGetResponse_ContainsPath(getResponse, "/1000/0/1"));
+
+    AwaClientGetOperation_Free(&getOperation);
+}
+
 TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_post_existing_object_instance_should_succeed)
 {
     ObjectDescription object = { 1000, "Object1000", 0, 1,
