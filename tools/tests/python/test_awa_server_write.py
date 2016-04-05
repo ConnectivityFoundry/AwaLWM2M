@@ -182,7 +182,7 @@ class TestWrite(tools_common.AwaTest):
         
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
-                    tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
+                    tools_common.CustomResource("Resource100", 100, "string",  "single", "mandatory", "rw"),
             )),
         )
         params = tools_common.create_define_command(customObjects)
@@ -202,7 +202,7 @@ class TestWrite(tools_common.AwaTest):
         
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
-                    tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
+                    tools_common.CustomResource("Resource100", 100, "string",  "single", "mandatory", "rw"),
             )),
         )
         params = tools_common.create_define_command(customObjects)
@@ -237,7 +237,7 @@ class TestWrite(tools_common.AwaTest):
         
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
-                    tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
+                    tools_common.CustomResource("Resource100", 100, "string",  "single", "mandatory", "rw"),
             )),
         )
         params = tools_common.create_define_command(customObjects)
@@ -261,7 +261,7 @@ class TestWrite(tools_common.AwaTest):
         
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
-                    tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
+                    tools_common.CustomResource("Resource100", 100, "string",  "single", "mandatory", "rw"),
             )),
         )
         params = tools_common.create_define_command(customObjects)
