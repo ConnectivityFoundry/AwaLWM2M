@@ -35,8 +35,8 @@ Run make in the root directory of the Awa LWM2M repository
 This will produce the following executable files:
 
 * build/core/src/client/awa_clientd
-* build/core/src/client/awa_serverd
-* build/core/src/client/awa_bootstrapd
+* build/core/src/server/awa_serverd
+* build/core/src/bootstrap/awa_bootstrapd
 
  
 For usage information see the [User guide](userguide.md)

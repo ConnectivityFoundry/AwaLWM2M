@@ -386,7 +386,7 @@ class TestServer(tools_common.AwaTest):
         # test that we can't read from a write only resource
         customObjects = (
             CustomObject("Object1001", 1001, False, "single", (
-                    CustomResource("Resource100", 100, "string",  "single", "optional", "w"),
+                    CustomResource("Resource100", 100, "string",  "single", "mandatory", "w"),
             )),
         )
 

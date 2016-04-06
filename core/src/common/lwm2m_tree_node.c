@@ -44,6 +44,7 @@ typedef struct
     uint8_t * Value;                    // NULL if not a resource instance?
     uint16_t Length;                    // 0 if not a resource instance.
     bool Create;                        // create flag
+    bool Replace;                       // replace flag
 
 } _Lwm2mTreeNode;
 
@@ -58,6 +59,7 @@ static void Lwm2mTreeNode_Init(Lwm2mTreeNode * node)
     _node->Parent     = NULL;
     _node->Definition = NULL;
     _node->Create     = false;
+    _node->Replace    = false;
     ListInit(&_node->Children);
 }
 
@@ -211,6 +213,28 @@ bool Lwm2mTreeNode_IsCreateFlagSet(Lwm2mTreeNode * node)
     }
 
     return _node->Create;
+}
+
+int Lwm2mTreeNode_SetReplaceFlag(Lwm2mTreeNode * node, bool replace)
+{
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
+    if (node == NULL)
+    {
+        return -1;
+    }
+
+    _node->Replace = replace;
+    return 0;
+}
+bool Lwm2mTreeNode_IsReplaceFlagSet(Lwm2mTreeNode * node)
+{
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
+    if (node == NULL)
+    {
+        return false;
+    }
+
+    return _node->Replace;
 }
 
 int Lwm2mTreeNode_AddChild(Lwm2mTreeNode * node, Lwm2mTreeNode * child)

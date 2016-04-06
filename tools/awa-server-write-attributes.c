@@ -265,11 +265,23 @@ static WriteAttributesTarget * CreateWriteAttributesTarget(const char * arg)
     int numPairs;
 
     const char * query = strchr(arg, '?');
-    QueryPair * queryPairs = SplitQuery(query, &numPairs);
-
-    if ((query == NULL) || (queryPairs == NULL) || (arg[0] != '/') || (CountSlashes(arg) > 3))
+    if (query == NULL)
     {
         Error("Target %s is not valid\n", arg);
+        return NULL;
+    }
+
+    QueryPair * queryPairs = SplitQuery(query, &numPairs);
+    if (queryPairs == NULL)
+    {
+        Error("Target %s is not valid\n", arg);
+        return NULL;
+    }
+
+    if ((arg[0] != '/') || (CountSlashes(arg) > 3))
+    {
+        Error("Target %s is not valid\n", arg);
+        free(queryPairs);
         return NULL;
     }
 

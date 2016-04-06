@@ -356,7 +356,7 @@ static AwaError ServerWriteOperation_AddValue(AwaServerWriteOperation * operatio
     AwaError result = AwaError_Unspecified;
     if (operation != NULL)
     {
-        result = SetWriteCommon_AddValue(ServerOperation_GetDefaultClientOperation(operation->ServerOperation), SessionType_Server, path, resourceInstanceID, value, size, type);
+        result = SetWriteCommon_AddValue(ServerOperation_GetDefaultClientOperation(operation->ServerOperation), SessionType_Server, path, resourceInstanceID, value, size, type, SetArrayMode_Unspecified);
     }
     else
     {
@@ -379,6 +379,13 @@ static AwaError ServerWriteOperation_AddValues(AwaServerWriteOperation * operati
             void * value = ArrayIterator_GetValue(iterator);
             size_t length = ArrayIterator_GetValueLength(iterator);
 
+            if (type == AwaResourceType_OpaqueArray)
+            {
+                AwaOpaque * opaque = (AwaOpaque *)value;
+                length = opaque->Size;
+                value = opaque->Data;
+            }
+
             LogDebug("Adding value %p", value);
 
             if (value)
@@ -386,7 +393,7 @@ static AwaError ServerWriteOperation_AddValues(AwaServerWriteOperation * operati
                 result = ServerWriteOperation_AddValue(operation, path, index, value, length, type);
                 if (result != AwaError_Success)
                 {
-                    LogError("Unabled to add array resource Instance");
+                    LogError("Unable to add array resource Instance %zu", index);
                     break;
                 }
             }

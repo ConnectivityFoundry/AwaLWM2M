@@ -1441,7 +1441,17 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
         if (resourceDefinition != NULL)
         {
             if (resourceDefinition->Type == AwaResourceType_None)
+            {
                 continue;
+            }
+            if (resourceDefinition->DefaultValueNode == NULL && resourceDefinition->MaximumInstances > 1 && resourceDefinition->MinimumInstances == 0)
+            {
+                continue;  // don't add default values for optional multiple instance resources
+            }
+            if (resourceDefinition->MinimumInstances == 0)
+            {
+                continue;  // don't add default values for optional resources
+            }
 
             Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
             while(child != NULL)
@@ -1454,41 +1464,64 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
                 }
                 child = Lwm2mTreeNode_GetNextChild(node, child);
             }
-
             if (child == NULL)
             {
-                const void * defaultData = NULL;
-                uint16_t defaultLen = 0;
-
                 if (resourceDefinition->DefaultValueNode != NULL)
                 {
-                    defaultData = Lwm2mTreeNode_GetValue(resourceDefinition->DefaultValueNode, &defaultLen);
+                    child = Lwm2mTreeNode_CopyRecursive(resourceDefinition->DefaultValueNode);
+
+                    if (child != NULL)
+                    {
+                        Lwm2mTreeNode_SetID(child, resourceID);
+                        Lwm2mTreeNode_SetType(child, Lwm2mTreeNodeType_Resource);
+                        Lwm2mTreeNode_SetDefinition(child, resourceDefinition);
+                        Lwm2mTreeNode_AddChild(node, child);
+                    }
+                    else
+                    {
+                        Lwm2m_Error("Failed to copy default value node\n");
+                        Lwm2mTreeNode_DeleteRecursive(child);
+                        goto error;
+                    }
                 }
                 else
                 {
-                    int temp;
-                    Definition_AllocSensibleDefault(resourceDefinition, &defaultData, &temp);
-                    defaultLen = temp;
+                    child = Lwm2mTreeNode_Create();
+                    if (child != NULL)
+                    {
+                        Lwm2mTreeNode_SetID(child, resourceID);
+                        Lwm2mTreeNode_SetType(child, Lwm2mTreeNodeType_Resource);
+                        Lwm2mTreeNode_SetDefinition(child, resourceDefinition);
+                        Lwm2mTreeNode_AddChild(node, child);
+
+                        ResourceInstanceIDType resourceInstanceID = 0;
+                        int minimumInstances = resourceDefinition->MinimumInstances > 0 ? resourceDefinition->MinimumInstances : 1;
+                        for (; resourceInstanceID < minimumInstances; resourceInstanceID++)
+                        {
+                            const void * defaultData = NULL;
+                            int defaultLen = 0;
+                            if (Definition_AllocSensibleDefault(resourceDefinition, &defaultData, &defaultLen) == 0)
+                            {
+                                TreeNode resourceInstance = Lwm2mTreeNode_Create();
+                                Lwm2mTreeNode_SetID(resourceInstance, resourceInstanceID);
+                                Lwm2mTreeNode_SetType(resourceInstance, Lwm2mTreeNodeType_ResourceInstance);
+                                Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
+                                Lwm2mTreeNode_AddChild(child, resourceInstance);
+                            }
+                            else
+                            {
+                                Lwm2m_Error("Failed to allocate sensible default for object %d resource %d (resource instance %d)\n", objectID, resourceID, resourceInstanceID);
+                                Lwm2mTreeNode_DeleteRecursive(child);
+                                goto error;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Lwm2m_Error("Failed to create child node\n");
+                        goto error;
+                    }
                 }
-
-                if (defaultData == NULL)
-                {
-                    Lwm2m_Error("Failed to allocate sensible default for missing mandatory resource /%d/%d\n", objectID, resourceID);
-                    result = 1;
-                    goto error;
-                }
-                child = Lwm2mTreeNode_Create();
-                Lwm2mTreeNode_SetID(child, resourceID);
-                Lwm2mTreeNode_SetType(child, Lwm2mTreeNodeType_Resource);
-                Lwm2mTreeNode_SetDefinition(child, resourceDefinition);
-                Lwm2mTreeNode_AddChild(node, child);
-
-                Lwm2mTreeNode * resourceInstance = Lwm2mTreeNode_Create();
-                Lwm2mTreeNode_SetID(resourceInstance, 0);
-                Lwm2mTreeNode_SetType(resourceInstance, Lwm2mTreeNodeType_ResourceInstance);
-                Lwm2mTreeNode_SetValue(resourceInstance, defaultData, defaultLen);
-                Lwm2mTreeNode_AddChild(child, resourceInstance);
-
                 Lwm2m_Debug("Added default value to create request for resource: %d\n", resourceID);
             }
         }
@@ -1835,26 +1868,56 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
         Lwm2mTreeNode * objectNode = Lwm2mTreeNode_GetFirstChild(root);
         while(objectNode != NULL)
         {
+            int objectID;
+            Lwm2mTreeNode_GetID(objectNode, &objectID);
+            TreeNode responseObjectNode = ObjectsTree_FindOrCreateChildNode(requestContext->ResponseObjectsTree, "Object", objectID);
+
             bool createObjectWithoutSpecifyingInstanceID = Lwm2mTreeNode_IsCreateFlagSet(objectNode);
             if (createObjectWithoutSpecifyingInstanceID)
             {
-                xmlif_AddDefaultsForMissingMandatoryValues(context, objectNode);
-                if (xmlif_SendCoapCreateRequest(request, client, objectNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                if (xmlif_AddDefaultsForMissingMandatoryValues(context, objectNode) == 0)
                 {
-                    numCoapRequests++;
+                    if (xmlif_SendCoapCreateRequest(request, client, objectNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                    {
+                        numCoapRequests++;
+                    }
+                    else
+                    {
+                        IPC_AddResultTag(responseObjectNode, AwaError_Internal);
+                        continue;
+                    }
+                }
+                else
+                {
+                    IPC_AddResultTag(responseObjectNode, AwaError_Internal);
+                    continue;
                 }
             }
             else
             {
                 Lwm2mTreeNode * objectInstanceNode = Lwm2mTreeNode_GetFirstChild(objectNode);
+                int objectInstanceID;
+                Lwm2mTreeNode_GetID(objectInstanceNode, &objectInstanceID);
+                TreeNode responseObjectInstanceNode = ObjectsTree_FindOrCreateChildNode(responseObjectNode, "ObjectInstance", objectInstanceID);
+
                 while(objectInstanceNode != NULL)
                 {
                     if (Lwm2mTreeNode_IsCreateFlagSet(objectInstanceNode))
                     {
-                        xmlif_AddDefaultsForMissingMandatoryValues(context, objectInstanceNode);
-                        if (xmlif_SendCoapCreateRequest(request, client, objectInstanceNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                        if (xmlif_AddDefaultsForMissingMandatoryValues(context, objectInstanceNode) == 0)
                         {
-                            numCoapRequests++;
+                            if (xmlif_SendCoapCreateRequest(request, client, objectInstanceNode, xmlif_HandlerCreateResponse, requestContext, defaultWriteMode) != -1)
+                            {
+                                numCoapRequests++;
+                            }
+                            else
+                            {
+                                IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
+                            }
+                        }
+                        else
+                        {
+                            IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
                         }
                     }
                     else
@@ -1862,6 +1925,10 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
                         if (xmlif_SendCoapWriteRequest(request, client, objectInstanceNode, xmlif_HandlerWriteResponse, requestContext, defaultWriteMode) != -1)
                         {
                             numCoapRequests++;
+                        }
+                        else
+                        {
+                            IPC_AddResultTag(responseObjectInstanceNode, AwaError_Internal);
                         }
                     }
 

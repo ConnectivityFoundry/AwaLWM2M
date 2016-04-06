@@ -430,7 +430,7 @@ static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta
                 value = TreeNode_GetValue(resNode);
 
                 const uint8_t * defaultValue = NULL;
-                uint16_t defaultValueLength = 0;
+                int defaultValueLength = 0;
 
                 if (value  != NULL)
                 {
@@ -922,6 +922,14 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                         }
                         else
                         {
+                            bool replace = false;
+                            const char * setWriteModeString = xmlif_GetOpaque(xmlResourceNode, "Resource/SetArrayMode");
+                            if (setWriteModeString != NULL)
+                            {
+                                replace = (strcmp(setWriteModeString, "Replace") == 0);
+                            }
+                            Lwm2mTreeNode_SetReplaceFlag(resourceNode, replace);
+
                             uint32_t valueIndex = 0;
                             TreeNode xmlResourceInstanceNode = NULL;
                             while ((xmlResourceInstanceNode = Xml_FindFrom(xmlResourceNode, "ResourceInstance", &valueIndex)) != NULL)

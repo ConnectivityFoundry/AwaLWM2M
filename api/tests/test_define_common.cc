@@ -398,16 +398,16 @@ INSTANTIATE_TEST_CASE_P(
           detail::DefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_Time,       true, AwaResourceOperations_ReadWrite, NULL},
           detail::DefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_Time,       true, AwaResourceOperations_ReadWrite, NULL},
           detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_Time,       true, AwaResourceOperations_ReadWrite, NULL},
-          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_Time,       true, AwaResourceOperations_Execute,   NULL}
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_Time,       true, AwaResourceOperations_Execute,   NULL},
 
-/* DISBALED - ObjectLink type is not supported in the core.
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, (void *)(&detail::dummyObjectLink)},
-          detail::TestDefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_Execute,   NULL}
-*/
+
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, (void *)(&detail::dummyObjectLink)},
+          detail::DefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_ObjectLink, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true, AwaResourceOperations_Execute,   NULL}
+
 
 
         ));
@@ -460,16 +460,14 @@ INSTANTIATE_TEST_CASE_P(
           detail::DefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_TimeArray,       true, AwaResourceOperations_ReadWrite, NULL},
           detail::DefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_TimeArray,       true, AwaResourceOperations_ReadWrite, NULL},
           detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_TimeArray,       true, AwaResourceOperations_ReadWrite, NULL},
-          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_TimeArray,       true, AwaResourceOperations_Execute,   NULL}
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_TimeArray,       true, AwaResourceOperations_Execute,   NULL},
 
-/* DISBALED - ObjectLink type is not supported in the core.
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, false, AwaResourceOperations_ReadWrite, (void *)(&detail::dummyObjectLink)},
-          detail::TestDefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_Execute,   NULL}
-*/
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
+          //detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, false, AwaResourceOperations_ReadWrite, (void *)(&detail::dummyObjectLink)},
+          detail::DefineResource {AwaError_IDInvalid,         true,  -1, "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, false, 1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  NULL,              AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_DefinitionInvalid, true,  1,  "Test Resource 1", AwaResourceType_ObjectLinkArray, true, AwaResourceOperations_Execute,   NULL}
 
 
         ));
@@ -573,11 +571,11 @@ INSTANTIATE_TEST_CASE_P(
           detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_Opaque,     false, AwaResourceOperations_ReadWrite, NULL},
 
           detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_Time,       true,  AwaResourceOperations_ReadWrite, NULL},
-          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_Time,       false, AwaResourceOperations_ReadWrite, NULL}
-/* DISBALED - ObjectLink type is not supported in the core.
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true,  AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, NULL}
-*/
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_Time,       false, AwaResourceOperations_ReadWrite, NULL},
+
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true,  AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, NULL}
+
         ));
 
 
@@ -601,11 +599,11 @@ INSTANTIATE_TEST_CASE_P(
           detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_OpaqueArray,     false, AwaResourceOperations_ReadWrite, NULL},
 
           detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_TimeArray,       true,  AwaResourceOperations_ReadWrite, NULL},
-          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_TimeArray,       false, AwaResourceOperations_ReadWrite, NULL}
-/* DISBALED - ObjectLink type is not supported in the core.
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true,  AwaResourceOperations_ReadWrite, NULL},
-          detail::TestDefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, NULL}
-*/
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_TimeArray,       false, AwaResourceOperations_ReadWrite, NULL},
+
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, true,  AwaResourceOperations_ReadWrite, NULL},
+          detail::DefineResource {AwaError_Success,           true,  1,  "Test Resource 1", AwaResourceType_ObjectLink, false, AwaResourceOperations_ReadWrite, NULL}
+
         ));
 
 class TestDefineCommonResource_ResourceDefinitionIterator : public TestDefineCommonResource {};
