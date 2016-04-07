@@ -504,6 +504,11 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                         *dataPointer = temp->Data;
                         *dataSize = temp->Size;
                     }
+                    else if (resourceDefinition->Type == AwaResourceType_String)
+                    {
+                        *dataPointer = offset;
+                        *dataSize = strlen(offset);
+                    }
                     else
                     {
                         *dataPointer = offset;
@@ -694,6 +699,7 @@ AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, con
                                 minimumInstances, maximumInstances, operations, DefaultHandler,
                                 dataPointer, false, dataElementSize, dataStepSize);
     }
+
     return result;
 }
 
