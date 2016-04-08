@@ -588,6 +588,25 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
     return result;
 }
 
+const void * AwaStaticClient_GetResourceInstancePointer(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, size_t * resourceSize)
+{
+    const void * result = NULL;
+
+    if (client != NULL)
+    {
+        size_t resourceSizeValue = 0;
+
+        Lwm2mCore_GetResourceInstanceValue(client->Context, objectID, objectInstanceID, resourceID, resourceInstanceID, &result, &resourceSizeValue);
+
+        if (resourceSize != NULL)
+        {
+            *resourceSize = resourceSizeValue;
+        }
+    }
+
+    return result;
+}
+
 AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
 {
     AwaError result = AwaError_Unspecified;
