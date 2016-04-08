@@ -28,7 +28,9 @@
 
 namespace Awa {
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Invalid)
+class TestStaticClientWithPointerWithServer : public TestStaticClientWithServer {};
+
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Invalid)
 {
     AWA_OPAQUE(o, 10);
     EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_DefineObject(NULL, "TestObject", 7997, 0, 1));
@@ -44,7 +46,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Invalid)
     EXPECT_EQ(AwaError_DefinitionInvalid, AwaStaticClient_DefineResourceWithPointer(client_, NULL, 7997,  1, AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite, &o, sizeof(o), 0));
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointerArray)
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointerArray)
 {
     AWA_OPAQUE(o1, 10);
     AWA_OPAQUE(o2, 10);
@@ -64,7 +66,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointerArray)
 }
 
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_CreateObjectInstance_Resource_Invalid)
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_CreateObjectInstance_Resource_Invalid)
 {
     AwaInteger i = 0;
 
@@ -84,7 +86,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_CreateObjectInstance_Resource
     EXPECT_EQ(AwaError_CannotCreate, AwaStaticClient_CreateResource(client_, 205, 0, 1));
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Resource)
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Resource)
 {
     AwaInteger i = 10;
 
@@ -122,7 +124,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_
     ASSERT_EQ(5, i); 
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Opaque_Resource)
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Opaque_Resource)
 {
     // Static client definition
     AWA_OPAQUE(opaque, 16) = {0};

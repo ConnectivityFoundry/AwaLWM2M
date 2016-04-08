@@ -28,10 +28,9 @@
 
 namespace Awa {
 
-class TestStaticClient : public testing::Test {};
+class TestStaticClientHanlderWithServer : public TestStaticClientWithServer {};
 
-
-TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_for_Object_and_Resource)
+TEST_F(TestStaticClientHanlderWithServer, AwaStaticClient_Create_and_Write_Operation_for_Object_and_Resource)
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
@@ -125,7 +124,7 @@ TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Write_Operation_fo
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Read_Operation_for_Object_and_Resource)
+TEST_F(TestStaticClientHanlderWithServer, AwaStaticClient_Create_and_Read_Operation_for_Object_and_Resource)
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
@@ -217,7 +216,7 @@ void * do_delete_operation(void * attr)
     return 0;
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Delete_Operation_for_Object_and_Resource)
+TEST_F(TestStaticClientHanlderWithServer, AwaStaticClient_Create_and_Delete_Operation_for_Object_and_Resource)
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
@@ -314,7 +313,7 @@ void * do_execute_operation(void * attr)
     return 0;
 }
 
-TEST_F(TestStaticClientWithServer, AwaStaticClient_Create_and_Execute_Operation_for_Object_and_Resource)
+TEST_F(TestStaticClientHanlderWithServer, AwaStaticClient_Create_and_Execute_Operation_for_Object_and_Resource)
 {
     struct callback1 : public StaticClientCallbackPollCondition
     {
