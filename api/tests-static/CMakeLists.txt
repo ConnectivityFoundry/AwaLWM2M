@@ -7,7 +7,9 @@ set (test_static_api_runner_SOURCES
   ../tests/support/process.cc
   ../tests/support/daemon.cc
 
-  test_client.cc
+  support/static_api_support.cc
+  test_static_api.cc
+  test_static_api_with_pointer.cc
 )
 
 set (test_static_api_runner_INCLUDE_DIRS
