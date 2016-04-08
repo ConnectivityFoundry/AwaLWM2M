@@ -10,6 +10,7 @@ set (test_static_api_runner_SOURCES
   support/static_api_support.cc
   test_static_api.cc
   test_static_api_with_pointer.cc
+  test_static_api_handlers.cc
 )
 
 set (test_static_api_runner_INCLUDE_DIRS
