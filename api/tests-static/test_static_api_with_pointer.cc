@@ -191,6 +191,73 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     AwaServerReadOperation_Free(&readOperation);
 }
 
+TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_String_Resource)
+{
+    // Static client definition
+    char stringData[128] = {0};
+    EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", 7998, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "TestResource", 7998, 1, AwaResourceType_String, 1, 1, AwaResourceOperations_ReadWrite,
+                                                                            &stringData, sizeof(stringData), 0));
+    // Server definition
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    EXPECT_TRUE(condition.Wait());
+    AwaServerListClientsOperation_Free(&operation);
+
+    AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
+    EXPECT_TRUE(defineOpertaion != NULL);
+    AwaObjectDefinition * objectDefintion = AwaObjectDefinition_New(7998, "TestObject", 1, 1);
+    EXPECT_TRUE(objectDefintion != NULL);
+    EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsString(objectDefintion, 1, "TestResource", true, AwaResourceOperations_ReadWrite, ""));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOpertaion, objectDefintion));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, defaults::timeout));
+    AwaServerDefineOperation_Free(&defineOpertaion);
+    AwaObjectDefinition_Free(&objectDefintion);
+
+    // Write
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    EXPECT_TRUE(writeOperation != NULL);
+    const char * writeData = "Hello";
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/7998/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/7998/0/1", writeData));
+
+    pthread_t writeThread;
+    pthread_create(&writeThread, NULL, do_write_operation, (void *)writeOperation);
+    AwaStaticClient_Process(client_);
+    AwaStaticClient_Process(client_);
+    pthread_join(writeThread, NULL);
+
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    ASSERT_EQ(strlen(writeData), strlen(stringData));
+    ASSERT_EQ(0, memcmp(writeData, stringData, strlen(writeData)));
+
+    AwaStaticClient_Process(client_);
+    AwaStaticClient_Process(client_);
+
+    // Read
+    AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
+    EXPECT_TRUE(readOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/7998/0/1"));
+
+    pthread_t readThread;
+    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation);
+    AwaStaticClient_Process(client_);
+    AwaStaticClient_Process(client_);
+    pthread_join(readThread, NULL);
+
+    const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
+    EXPECT_TRUE(readResponse != NULL);
+
+    char * value;
+    ASSERT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsCStringPointer(readResponse, "/7998/0/1", (const char **)&value));
+    ASSERT_EQ(strlen(writeData), strlen(value));
+    ASSERT_EQ(0, memcmp(writeData, value, strlen(writeData)));
+
+    AwaServerReadOperation_Free(&readOperation);
+}
+
 namespace observeDetail
 {
 
