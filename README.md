@@ -56,11 +56,14 @@ Note that for our purposes the terms *user* and *developer* have the following d
 
 #### General documentation.
   
-* For project users:  
+* For project users:
+
 	* For build instructions, see the [Quick start guide](doc/starters_guide.md). 
 	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
 	* A sample application tutorial can be found [here](doc/example_app.md).
+
 * For contributors:
+
 	* An overview of the system can be found in the [Contributing developer guide](doc/developer_guide.md).  
 	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.  
 
