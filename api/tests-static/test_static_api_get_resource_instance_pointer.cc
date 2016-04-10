@@ -33,9 +33,9 @@ namespace TestStaticClientGetResourceInstancePointerDetail
 
 static AwaInteger dummyInteger1 = 123456;
 static const char * dummyString1 = "Lightweight M2M Server";
-//static AwaFloat dummyFloat1 = 1.0;
-//static AwaTime dummyTime1 = 0xA20AD72B;
-//static AwaBoolean dummyBoolean1 = true;
+static AwaFloat dummyFloat1 = 1.0;
+static AwaTime dummyTime1 = 0xA20AD72B;
+static AwaBoolean dummyBoolean1 = true;
 //static char dummyOpaqueData[] = {'a',0,'x','\0', 123};
 //static int dummyObjLinkData[] = {-1,-1};
 
@@ -228,6 +228,18 @@ TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointe
         case AwaResourceType_Integer:
             EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, StaticClientResourcePath_, (const AwaInteger **)&readValue));
             break;
+        case AwaResourceType_Float:
+            EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsFloatPointer(readResponse, StaticClientResourcePath_, (const AwaFloat **)&readValue));
+            break;
+        case AwaResourceType_Boolean:
+            EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, StaticClientResourcePath_, (const AwaBoolean **)&readValue));
+            break;
+        case AwaResourceType_Time:
+            EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsTimePointer(readResponse, StaticClientResourcePath_, (const AwaTime **)&readValue));
+            break;
+        case AwaResourceType_ObjectLink:
+            EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsObjectLinkPointer(readResponse, StaticClientResourcePath_, (const AwaObjectLink **)&readValue));
+            break;
         default:
             ASSERT_TRUE(false);
             break;
@@ -243,6 +255,18 @@ TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointe
             break;
         case AwaResourceType_Integer:
             EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation_, StaticClientResourcePath_, *((AwaInteger *)data.Value)));
+            break;
+        case AwaResourceType_Float:
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsFloat(writeOperation_, StaticClientResourcePath_, *((AwaFloat *)data.Value)));
+            break;
+        case AwaResourceType_Boolean:
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation_, StaticClientResourcePath_, *((AwaBoolean *)data.Value)));
+            break;
+        case AwaResourceType_Time:
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation_, StaticClientResourcePath_, *((AwaTime *)data.Value)));
+            break;
+        case AwaResourceType_ObjectLink:
+            EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation_, StaticClientResourcePath_, *((AwaObjectLink *)data.Value)));
             break;
         default:
             ASSERT_TRUE(false);
@@ -262,8 +286,12 @@ INSTANTIATE_TEST_CASE_P(
         TestStaticClientGetResourceInstancePointer,
         TestStaticClientGetResourceInstancePointer,
         ::testing::Values(
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_STRING, TestStaticClientGetResourceInstancePointerDetail::dummyString1, strlen(TestStaticClientGetResourceInstancePointerDetail::dummyString1) + 1, AwaResourceType_String},
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER, &TestStaticClientGetResourceInstancePointerDetail::dummyInteger1, sizeof(AwaInteger), AwaResourceType_Integer }
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_STRING,     TestStaticClientGetResourceInstancePointerDetail::dummyString1, strlen(TestStaticClientGetResourceInstancePointerDetail::dummyString1) + 1, AwaResourceType_String},
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyInteger1, sizeof(AwaInteger), AwaResourceType_Integer },
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyFloat1, sizeof(AwaFloat), AwaResourceType_Float },
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyBoolean1, sizeof(AwaBoolean), AwaResourceType_Boolean },
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyTime1, sizeof(AwaTime), AwaResourceType_Time },
+          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_OBJECTLINK, &TestStaticClientGetResourceInstancePointerDetail::dummyObjectLink1, sizeof(AwaObjectLink), AwaResourceType_ObjectLink}
         ));
 
 } // namespace Awa
