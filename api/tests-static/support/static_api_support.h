@@ -70,6 +70,41 @@ struct SingleStaticClientPollCondition : public PollCondition
     }
 };
 
+struct SingleStaticClientObjectPollCondition : public PollCondition
+{
+    AwaStaticClient * StaticClient;
+    AwaServerListClientsOperation * Operation;
+    std::string ClientEndpointName;
+    std::string ObjectPath;
+
+    SingleStaticClientObjectPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, std::string ObjectPath, int maxCount) :
+        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName), ObjectPath(ObjectPath) {}
+    virtual ~SingleStaticClientObjectPollCondition() {}
+
+    virtual bool Check()
+    {
+        bool found = false;
+
+        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
+        const AwaServerListClientsResponse * clientListResponse = AwaServerListClientsOperation_GetResponse(Operation, ClientEndpointName.c_str());
+        EXPECT_TRUE(clientListResponse != NULL);
+        AwaRegisteredEntityIterator * objectIterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(clientListResponse);
+        EXPECT_TRUE(objectIterator != NULL);
+
+        while (AwaRegisteredEntityIterator_Next(objectIterator))
+        {
+            if (ObjectPath.compare(AwaRegisteredEntityIterator_GetPath(objectIterator)) == 0)
+            {
+                found = true;
+            }
+        }
+
+        AwaRegisteredEntityIterator_Free(&objectIterator);
+        AwaStaticClient_Process(StaticClient);
+        return found;
+    }
+};
+
 class TestStaticClientWithServer : public TestServerWithConnectedSession
 {
 protected:

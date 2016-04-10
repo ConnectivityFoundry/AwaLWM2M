@@ -567,7 +567,7 @@ protected:
         cbHandler = new callback1(client_, 20, data);
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_SetApplicationContext(client_, cbHandler));
-        EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObjectWithHandler(client_, "Test Object Single", writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, 1, handler));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test String Resource",      writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_STRING,     AwaResourceType_String,     0, 1, AwaResourceOperations_ReadWrite, handler));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Integer Resource",     writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_INTEGER,    AwaResourceType_Integer,    0, 1, AwaResourceOperations_ReadWrite, handler));
         EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithHandler(client_, "Test Float Resource",       writeDetail::TEST_OBJECT_NON_ARRAY_TYPES, writeDetail::TEST_RESOURCE_FLOAT,      AwaResourceType_Float,      0, 1, AwaResourceOperations_ReadWrite, handler));
