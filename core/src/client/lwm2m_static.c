@@ -504,6 +504,11 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                         *dataPointer = temp->Data;
                         *dataSize = temp->Size;
                     }
+                    else if (resourceDefinition->Type == AwaResourceType_String)
+                    {
+                        *dataPointer = offset;
+                        *dataSize = strlen(offset);
+                    }
                     else
                     {
                         *dataPointer = offset;
@@ -578,6 +583,25 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
     else
     {
         result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+const void * AwaStaticClient_GetResourceInstancePointer(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, size_t * resourceSize)
+{
+    const void * result = NULL;
+
+    if (client != NULL)
+    {
+        size_t resourceSizeValue = 0;
+
+        Lwm2mCore_GetResourceInstanceValue(client->Context, objectID, objectInstanceID, resourceID, resourceInstanceID, &result, &resourceSizeValue);
+
+        if (resourceSize != NULL)
+        {
+            *resourceSize = resourceSizeValue;
+        }
     }
 
     return result;
@@ -694,6 +718,7 @@ AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, con
                                 minimumInstances, maximumInstances, operations, DefaultHandler,
                                 dataPointer, false, dataElementSize, dataStepSize);
     }
+
     return result;
 }
 
