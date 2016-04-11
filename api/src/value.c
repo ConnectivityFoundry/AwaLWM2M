@@ -165,7 +165,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                             AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
                             int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
 
-                            if (dataValue)
+                            if ((dataValue != NULL) && (dataLength >= 0))
                             {
                                 switch(type)
                                 {
