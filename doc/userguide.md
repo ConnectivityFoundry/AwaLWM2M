@@ -634,7 +634,7 @@ Full Awa API reference material is available [here](http://flowm2m.github.io/Awa
 
 ### Connecting to third party servers.
 
-A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
+A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](3rdparty.md).
 
 [Back to the table of contents](userguide.md#contents)
 
