@@ -43,7 +43,8 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
     AwaStaticClient * client = (AwaStaticClient *)context;
     AwaResult result = AwaResult_InternalError;
 
-    std::cout << "Handler for " << operation << std::endl;
+    if (global::logLevel == AwaLogLevel_Debug)
+        std::cout << "Handler for " << operation << std::endl;
 
     void * callback = AwaStaticClient_GetApplicationContext(client);
 
@@ -53,7 +54,8 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
         result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
     }
 
-    std::cout << "Handler result " << result << std::endl;
+    if (global::logLevel == AwaLogLevel_Debug)
+        std::cout << "Handler result " << result << std::endl;
 
     return result;
 }

@@ -535,7 +535,7 @@ int AwaStaticClient_Process(AwaStaticClient * client);
  ************************************************************************************************************/
 
 /**
- * @brief Retrieve a pointer to a resource instance's data, when defined used the with pointer method.
+ * @brief Retrieve a pointer to a resource instance's data, when defined with the with ::AwaStaticClient_DefineResourceWithPointer or ::AwaStaticClient_DefineResourceWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object for the specified resource instance.
@@ -553,9 +553,9 @@ const void * AwaStaticClient_GetResourceInstancePointer(AwaStaticClient * client
 /**
  * @brief Create an optional resource within the specified object instance.
  *
- * For a resource registered with a handler this will invoke a call back with the AwaOperation_CreateResource.
+ * For a resource registered with a handler this will invoke a callback with the AwaOperation_CreateResource.
  *
- * For a resource registered using a pointer this will create the resource. For a multi-instance resource, the number of resource instances created will be the maximum defined.
+ * For a resource registered by pointer this will create the resource. For a multi-instance resource, the number of resource instances created will be the maximum defined.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object for the specified resource.

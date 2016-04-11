@@ -374,7 +374,8 @@ public:
                                                                                               session_(session){};
         virtual bool Check()
         {
-            printf("Check...\n");
+            if (global::logLevel == AwaLogLevel_Debug)
+                std::cout << "Check..." << std::endl;
             if (!observeThreadAlive_)
             {
                 // only process the server session after we have successfully performed the observe operation.
