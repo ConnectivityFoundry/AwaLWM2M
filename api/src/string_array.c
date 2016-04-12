@@ -100,7 +100,7 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
 
                 if ((nonNulledValue != NULL) && (nulledValue != NULL) && (nonNulledLength >= 0))
                 {
-                    memcpy(nulledValue, nonNulledValue, nonNulledLength);
+                    memcpy(nulledValue, nonNulledValue, (size_t)nonNulledLength);
                     nulledValue[nonNulledLength] = '\0';
                     Array_SetValue(nulledStrings, index, nulledValue, nonNulledLength + 1);
                     free(nulledValue);
