@@ -864,7 +864,7 @@ static int TlvSerialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode * nod
     while (child != NULL)
     {
         int objectInstanceID;
-        uint8_t header[5];
+        uint8_t header[TLV_MAX_HEADER_SIZE];
         int headerLen;
 
         Lwm2mTreeNode_GetID(child, &objectInstanceID);
