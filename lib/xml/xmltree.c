@@ -354,39 +354,42 @@ TreeNode TreeNode_Navigate(const TreeNode rootNode, const char* path)
             {
                 // Tokenise path and ensure first pathElement matches
                 char *pathElement = strtok((char*) _path, (const char*) "/");
-                if (strcmp((const char*) currentNode->Name, (const char*) pathElement) == 0)
+                if (pathElement)
                 {
-                    bool childFound = false;
-                    bool pathError = false;
-                    do
+                    if (strcmp((const char*) currentNode->Name, (const char*) pathElement) == 0)
                     {
-                        // Then, get next path-token and find a match for a child node's name
-                        pathElement = strtok(0, "/");
-                        if (pathElement)
+                        bool childFound = false;
+                        bool pathError = false;
+                        do
                         {
-                            childFound = false;
-                            uint32_t childIndex = 0;
-                            for (childIndex = 0; childIndex < currentNode->ChildCount; childIndex++)
+                            // Then, get next path-token and find a match for a child node's name
+                            pathElement = strtok(0, "/");
+                            if (pathElement)
                             {
-                                // For each token, check if a child's node name matches the next token in the path
-                                _treeNode thisChild = (_treeNode) currentNode->Children[childIndex];
-                                if (strcmp((const char*) thisChild->Name, pathElement) == 0)
+                                childFound = false;
+                                uint32_t childIndex = 0;
+                                for (childIndex = 0; childIndex < currentNode->ChildCount; childIndex++)
                                 {
-                                    currentNode = thisChild;
-                                    childFound = true;
-                                    break;
+                                    // For each token, check if a child's node name matches the next token in the path
+                                    _treeNode thisChild = (_treeNode) currentNode->Children[childIndex];
+                                    if (strcmp((const char*) thisChild->Name, pathElement) == 0)
+                                    {
+                                        currentNode = thisChild;
+                                        childFound = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!childFound)
+                                {
+                                    currentNode = NULL;
+                                    pathError = true;
                                 }
                             }
-
-                            if (!childFound)
-                            {
-                                currentNode = NULL;
-                                pathError = true;
-                            }
-                        }
-                    } while(pathElement && !pathError);
-                    if (pathError)
-                        currentNode = NULL;
+                        } while(pathElement && !pathError);
+                        if (pathError)
+                            currentNode = NULL;
+                    }
                 }
             }
             Flow_MemFree((void **) &_path);
@@ -535,8 +538,7 @@ bool Tree_Delete(TreeNode node)
              // Move currentNode up to its parent before freeing this node
             _treeNode tempNode = currentNode;
             currentNode = (_treeNode) currentNode->Parent;
-            if (tempNode)
-                Flow_MemFree((void **) &tempNode);
+            Flow_MemFree((void **) &tempNode);
 
             // Rinse and repeat, now that we're at the new end of the old branch
         }
