@@ -52,7 +52,7 @@ Awa LWM2M documentation is available both at a general level (project informatio
 Note that for our purposes the terms *user* and *developer* have the following definitions:
 
 * *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of, or enhancement to, their own M2M application.  
-* *Contributor* - A developer who develops for and contributes to the Awa LightweightM2M project. 
+* *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project. 
 
 
 #### General documentation.
