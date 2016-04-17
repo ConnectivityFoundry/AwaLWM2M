@@ -288,6 +288,54 @@ TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_crea
     AwaClientGetOperation_Free(&getOperation);
 }
 
+TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_empty_default_value_from_created_custom_object_instance_opaque_resource)
+{
+    //Define our custom object
+    AwaClientDefineOperation * clientDefineOperation = AwaClientDefineOperation_New(client_session_);
+    AwaServerDefineOperation * serverDefineOperation = AwaServerDefineOperation_New(server_session_);
+    EXPECT_TRUE(clientDefineOperation != NULL);
+    EXPECT_TRUE(serverDefineOperation != NULL);
+
+    AwaOpaque defaultOpaque = (AwaOpaque){0};//{NULL, 0};
+    int customObjectID = 10000;
+
+    AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(customObjectID, "Test Object 0", 0, 1);
+    ASSERT_TRUE(NULL != customObjectDefinition);
+
+    ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque(customObjectDefinition, 0, "Test Resource", true, AwaResourceOperations_ReadWrite, defaultOpaque));
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+
+    AwaObjectDefinition_Free(&customObjectDefinition);
+    AwaClientDefineOperation_Free(&clientDefineOperation);
+    AwaServerDefineOperation_Free(&serverDefineOperation);
+
+    WaitForClientDefinition(customObjectID);
+
+    // Create a write operation to create the custom object.
+    // The write operation should add the defaults to the CoAP create packet.
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeOperation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/10000/0"));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    AwaClientGetOperation * getOperation = AwaClientGetOperation_New(client_session_);
+    ASSERT_TRUE(NULL != getOperation);
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/10000/0/0"));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
+    ASSERT_TRUE(NULL != getResponse);
+    AwaOpaque value = { 0 };
+    ASSERT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsOpaque(getResponse, "/10000/0/0", &value));
+    EXPECT_EQ(defaultOpaque.Size, value.Size);
+    ASSERT_TRUE(NULL == value.Data);
+    AwaClientGetOperation_Free(&getOperation);
+}
+
 TEST_F(TestServerDefineDefaultsWithDaemon, AwaClient_get_default_value_from_created_custom_object_instance_time_resource)
 {
     //Define our custom object
