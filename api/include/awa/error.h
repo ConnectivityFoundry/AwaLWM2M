@@ -103,7 +103,7 @@ typedef enum
     AwaLWM2MError_NotFound,             /**< Indicates a LWM2M 4.04 Not Found error was encountered */
     AwaLWM2MError_MethodNotAllowed,     /**< Indicates a LWM2M 4.05 Not Allowed error was encountered */
     AwaLWM2MError_NotAcceptable,        /**< Indicates a LWM2M 4.06 Not Acceptable error was encountered */
-
+    AwaLWM2MError_Timeout,              /**< Indicates a CoAP 5.04 Gateway timeout error was encountered */
     AwaLWM2MError_LAST                  /**< Reserved value */
 } AwaLWM2MError;
 

@@ -38,6 +38,7 @@ static const char * ServerErrorStrings[] =
     "AwaLWM2MError_NotFound",
     "AwaLWM2MError_MethodNotAllowed",
     "AwaLWM2MError_NotAcceptable",
+    "AwaLWM2MError_Timeout",
 };
 
 const char * AwaLWM2MError_ToString(AwaLWM2MError error)
@@ -91,6 +92,9 @@ AwaLWM2MError LWM2MError_FromCoapResponseCode(int responseCode)
         break;
     case 405:
         error = AwaLWM2MError_MethodNotAllowed;
+        break;
+    case 504:
+        error = AwaLWM2MError_Timeout;
         break;
     default:
         break;
