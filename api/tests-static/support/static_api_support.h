@@ -124,7 +124,7 @@ protected:
         sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
         sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
 
-        bootstrapinfo.ServerInfo.Lifetime = 30;
+        bootstrapinfo.ServerInfo.Lifetime = 60;
         bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
         bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
         bootstrapinfo.ServerInfo.DisableTimeout = 86400;

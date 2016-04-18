@@ -854,7 +854,7 @@ void coap_Process(void)
             if (tid == COAP_INVALID_TID)
             {
                 Lwm2m_Error("Transaction Timed out\n");
-                transaction->Callback(transaction->Context, &transaction->Address, NULL, 503, ContentType_None, NULL, 0);
+                transaction->Callback(transaction->Context, &transaction->Address, transaction->Path, 504, ContentType_None, NULL, 0);
 
                 remove_Transaction(transaction);
             }
