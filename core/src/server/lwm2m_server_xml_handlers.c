@@ -1435,7 +1435,7 @@ error:
 
 static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context, Lwm2mTreeNode * node)
 {
-    int result = 0;
+    int result = -1;
     int objectID = 0;
 
     switch(Lwm2mTreeNode_GetType(node))
@@ -1548,6 +1548,7 @@ static int xmlif_AddDefaultsForMissingMandatoryValues(Lwm2mContextType * context
             Lwm2m_Error("Resource definition not found for object ID %d, resource ID %d\n", objectID, resourceID);
         }
     }
+    result = 0;
 error:
     return result;
 }
