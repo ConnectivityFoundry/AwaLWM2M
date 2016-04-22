@@ -13,10 +13,10 @@
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 # SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #************************************************************************************************************************/
 
@@ -37,7 +37,7 @@ class TestSpawnMultipleClients(unittest.TestCase):
     """TestCase class that spawns LWM2M Server and multiple Client daemons before each test, then kills them afterwards."""
 
     NUM_CLIENTS = 5
-    
+
     def setUp(self):
         self.config = config.Config(tools_common.DefaultTestConfiguration)
 
@@ -46,6 +46,7 @@ class TestSpawnMultipleClients(unittest.TestCase):
                                                         self.config.serverAddress,
                                                         self.config.serverCoapPort,
                                                         self.config.serverLogFile)
+        self.addCleanup(self._serverDaemon.terminate)
         self._serverDaemon.spawn()
 
         self._clientDaemons = []
@@ -61,24 +62,11 @@ class TestSpawnMultipleClients(unittest.TestCase):
                                                 self.config.clientLogFile,
                                                 clientEndpointName,
                                                 self.config.bootstrapConfigFile)
+            self.addCleanup(client.terminate)
             self._clientDaemons.append(client)
             client.spawn()
             # wait for client to register with server
             common.waitForClient(clientEndpointName, self.config.serverIpcPort)
-
-    def doCleanups(self):
-        # kill clients first
-        for client in self._clientDaemons:
-            try:
-                client.terminate()
-            except AttributeError:
-                pass
-
-        try:
-            self._serverDaemon.terminate()
-        except AttributeError:
-            pass
-
 
 class TestListMultipleClients(TestSpawnMultipleClients):
 

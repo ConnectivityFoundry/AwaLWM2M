@@ -86,6 +86,7 @@ class SpawnDaemonsTestCase(unittest.TestCase):
                                                             self.config.serverCoapPort,
                                                             self.config.serverLogFile)
 
+            self.addCleanup(self._serverDaemon.terminate)
             self._serverDaemon.spawn()
 
         print "Starting client daemon"
@@ -95,26 +96,16 @@ class SpawnDaemonsTestCase(unittest.TestCase):
                                                             self.config.clientLogFile,
                                                             self.config.clientEndpointName,
                                                             self.config.bootstrapConfigFile)
+            self.addCleanup(self._clientDaemon.terminate)
             self._clientDaemon.spawn()
 
             # wait for client to register with server
             waitForClient(self.config.clientEndpointName, self.config.serverIpcPort)
 
     def tearDown(self):
-        # tearDown functionality moved to doCleanups as it will be called even if the test crashes
+        # tearDown functionality moved to cleanup functions as
+        # they will be called even if setUp raises an exception
         pass
-
-    def doCleanups(self):
-        # kill client first
-        try:
-            self._clientDaemon.terminate()
-        except AttributeError:
-            pass
-
-        try:
-            self._serverDaemon.terminate()
-        except AttributeError:
-            pass
 
     def sendClientRequest(self, requestType, responseType, path, value):
         """Send a client request, using a path tuple of the form: (ObjectID, ObjectInstanceID, ResourceID, ResourceInstanceID)."""
