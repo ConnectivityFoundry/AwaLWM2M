@@ -30,7 +30,7 @@ namespace Awa {
 
 class TestStaticClientCreateDeleteWithServer : public TestStaticClientWithServer {};
 
-TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_object_valid_inputs)
+TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Object_valid_inputs)
 {
 	AwaInteger i = 0;
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 0, 1)); // valid
@@ -41,19 +41,91 @@ TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_obje
     EXPECT_TRUE(NULL != operation);
 
     SingleStaticClientPollCondition bootstrap_condition(client_, operation, global::clientEndpointName, 20);
-    ASSERT_TRUE(bootstrap_condition.Wait());
+    EXPECT_TRUE(bootstrap_condition.Wait());
 
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 7997, 0));
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 7997, 0));
 
     SingleStaticClientObjectPollCondition create_condition(client_, operation, global::clientEndpointName, "/7997/0", 20);
     ASSERT_TRUE(create_condition.Wait());
 
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_DeleteObjectInstance(client_, 7997, 0));
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_DeleteObjectInstance(client_, 7997, 0));
 
     SingleStaticClientObjectPollCondition delete_condition(client_, operation, global::clientEndpointName, "/7997/0", 20, true);
     ASSERT_TRUE(delete_condition.Wait());
 
     AwaServerListClientsOperation_Free(&operation);
 }
+
+
+TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Resource_valid_inputs)
+{
+    AwaInteger i = 9999;
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 0, 1)); // valid
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Resource", 7997, 1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, &i, sizeof(i), 0));
+
+
+    AwaObjectDefinition * objectDefinition = AwaObjectDefinition_New(7997, "TestObject", 0, 1);
+    EXPECT_TRUE(NULL != objectDefinition);
+
+    EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 1, "Resource", false, AwaResourceOperations_ReadWrite, static_cast<AwaInteger>(0)));
+
+
+    AwaServerDefineOperation * defineOperation = AwaServerDefineOperation_New(session_);
+    EXPECT_TRUE(NULL != defineOperation);
+
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+
+    AwaServerDefineOperation_Free(&defineOperation);
+    AwaObjectDefinition_Free(&objectDefinition);
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+
+    SingleStaticClientPollCondition bootstrap_condition(client_, operation, global::clientEndpointName, 20);
+    EXPECT_TRUE(bootstrap_condition.Wait());
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, 7997, 0));
+
+    SingleStaticClientObjectPollCondition create_condition(client_, operation, global::clientEndpointName, "/7997/0", 20);
+    EXPECT_TRUE(create_condition.Wait());
+
+    AwaServerListClientsOperation_Free(&operation);
+
+    AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
+    EXPECT_TRUE(NULL != readOperation);
+
+    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/7997/0/1"));
+
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 7997, 0, 1));
+
+    pthread_t readThread;
+    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation);
+    AwaStaticClient_Process(client_);
+    AwaStaticClient_Process(client_);
+    pthread_join(readThread, NULL);
+
+    const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
+    EXPECT_TRUE(NULL != readResponse);
+
+    const AwaInteger * responseValue = NULL;
+    EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, "/7997/0/1", &responseValue));
+    ASSERT_EQ(i, *responseValue);
+
+    ASSERT_EQ(AwaError_Success, AwaStaticClient_DeleteResource(client_, 7997, 0, 1));
+
+    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation);
+    AwaStaticClient_Process(client_);
+    AwaStaticClient_Process(client_);
+    pthread_join(readThread, NULL);
+
+    readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
+    EXPECT_TRUE(NULL != readResponse);
+
+    ASSERT_EQ(AwaLWM2MError_NotFound, AwaPathResult_GetLWM2MError(AwaServerReadResponse_GetPathResult(readResponse, "/7997/0/1")));
+    AwaServerReadOperation_Free(&readOperation);
+}
+
+
 
 } // namespace Awa
