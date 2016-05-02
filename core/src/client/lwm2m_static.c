@@ -840,7 +840,11 @@ AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID ob
 AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, AwaStaticClientHandler handler)
 {
     AwaError result = AwaError_Unspecified;
-    if (handler == NULL)
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if (handler == NULL)
     {
         result = AwaError_DefinitionInvalid;
     }
@@ -854,7 +858,11 @@ AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, A
 AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result = AwaError_Unspecified;
-    if ((dataPointer == NULL) || (dataElementSize == 0))
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if ((dataPointer == NULL) || (dataElementSize == 0))
     {
         result = AwaError_DefinitionInvalid;
     }
@@ -868,7 +876,11 @@ AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client,
 AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointers[], size_t dataElementSize)
 {
     AwaError result = AwaError_Unspecified;
-    if ((dataPointers == NULL) || (dataElementSize == 0))
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if ((dataPointers == NULL) || (dataElementSize == 0))
     {
         result = AwaError_DefinitionInvalid;
     }

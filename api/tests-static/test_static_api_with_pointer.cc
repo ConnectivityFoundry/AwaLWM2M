@@ -79,7 +79,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorage
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceStorageWithPointerArray(client_, 7996, 2, pointers, sizeof(o1)));
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceStorageWithPointerArray(client_, 7996, 1, NULL,     sizeof(o1)));
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceStorageWithPointerArray(client_, 7996, 1, pointers, 0));
-    EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceStorageWithPointerArray(NULL,    7995, 2, NULL,     0));
+    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetResourceStorageWithPointerArray(NULL,    7995, 2, NULL,     0));
 }
 
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorageWithPointerArray_Success)
