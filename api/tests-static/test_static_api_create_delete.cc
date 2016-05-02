@@ -56,6 +56,33 @@ TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Obje
     AwaServerListClientsOperation_Free(&operation);
 }
 
+TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_invalid_inputs)
+{
+    AwaInteger i = 0;
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 0, 1)); // valid
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Resource", 7997,  1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, &i, sizeof(i), 0));
+
+    ASSERT_EQ(AwaError_CannotCreate , AwaStaticClient_CreateObjectInstance(client_, 7987, 0));
+    ASSERT_EQ(AwaError_CannotCreate , AwaStaticClient_CreateObjectInstance(client_, 7997, 1));
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteObjectInstance(client_, 7997, 0));
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteObjectInstance(client_, 7987, 0));
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteObjectInstance(client_, 7997, 1));
+
+    ASSERT_EQ(AwaError_CannotCreate, AwaStaticClient_CreateResource(client_, 7997, 0, 1));
+
+    EXPECT_EQ(AwaError_Success , AwaStaticClient_CreateObjectInstance(client_, 7997, 0));
+
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteResource(client_, 7997, 0, 1));
+
+    ASSERT_EQ(AwaError_CannotCreate, AwaStaticClient_CreateResource(client_, 7997, 0, 2));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateResource(client_, 7997, 0, 1));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DeleteResource(client_, 7997, 0, 1));
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteResource(client_, 7997, 0, 1));
+
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_DeleteObjectInstance(client_, 7997, 0));
+    ASSERT_EQ(AwaError_CannotDelete, AwaStaticClient_DeleteObjectInstance(client_, 7997, 0));
+}
 
 TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Resource_valid_inputs)
 {
