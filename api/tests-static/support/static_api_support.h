@@ -76,14 +76,15 @@ struct SingleStaticClientObjectPollCondition : public PollCondition
     AwaServerListClientsOperation * Operation;
     std::string ClientEndpointName;
     std::string ObjectPath;
+    bool inverse;
 
-    SingleStaticClientObjectPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, std::string ObjectPath, int maxCount) :
-        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName), ObjectPath(ObjectPath) {}
+    SingleStaticClientObjectPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, std::string ObjectPath, int maxCount, bool inverse = false) :
+        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName), ObjectPath(ObjectPath), inverse(inverse) {}
     virtual ~SingleStaticClientObjectPollCondition() {}
 
     virtual bool Check()
     {
-        bool found = false;
+        bool found = inverse;
 
         EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
         const AwaServerListClientsResponse * clientListResponse = AwaServerListClientsOperation_GetResponse(Operation, ClientEndpointName.c_str());
@@ -95,7 +96,7 @@ struct SingleStaticClientObjectPollCondition : public PollCondition
         {
             if (ObjectPath.compare(AwaRegisteredEntityIterator_GetPath(objectIterator)) == 0)
             {
-                found = true;
+                found = !inverse;
             }
         }
 

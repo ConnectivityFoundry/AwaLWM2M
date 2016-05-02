@@ -630,6 +630,29 @@ AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID ob
     return result;
 }
 
+AwaError AwaStaticClient_DeleteResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, false) == AwaResult_SuccessDeleted)
+		{
+			result = AwaError_Success;
+		}
+        else
+        {
+            result = AwaError_CannotDelete;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
 AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
 {
     AwaError result;
@@ -652,6 +675,30 @@ AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjec
 
     return result;
 }
+
+AwaError AwaStaticClient_DeleteObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID)
+{
+    AwaError result;
+
+    if (client != NULL)
+    {
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = AwaError_CannotDelete;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
 
 static AwaError DefineResource(AwaStaticClient * client, const char * resourceName,
                                AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
