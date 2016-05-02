@@ -422,7 +422,7 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
  *         @e minimumInstances or @e maximumInstances are invalid.
  * @return AwaError_StaticClientInvalid if @e client is NULL.
  */
-AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID objectID, const char * objectName,
                                       uint16_t minimumInstances, uint16_t maximumInstances);
 
 /**
@@ -459,8 +459,8 @@ AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, Awa
  *         @e minimumInstances or @e maximumInstances are invalid.
  * @return AwaError_StaticClientInvalid if @e client is NULL.
  */
-AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, const char * resourceName,
-                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID,
+                                        const char * resourceName, AwaResourceType resourceType,
                                         uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations);
 
 /**

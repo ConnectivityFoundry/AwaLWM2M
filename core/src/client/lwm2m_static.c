@@ -540,7 +540,7 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
     return result;
 }
 
-AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID objectID, const char * objectName,
                                       uint16_t minimumInstances, uint16_t maximumInstances)
 {
     AwaError result = AwaError_Unspecified;
@@ -827,8 +827,8 @@ static AwaError SetResourceStorage(AwaStaticClient * client, AwaObjectID objectI
     return result;
 }
 
-AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, const char * resourceName,
-                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID,
+                                        const char * resourceName, AwaResourceType resourceType,
                                         uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations)
 {
     return DefineResource(client, resourceName,

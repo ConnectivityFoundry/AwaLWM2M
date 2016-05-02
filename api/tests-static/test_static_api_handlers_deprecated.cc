@@ -28,6 +28,10 @@
 #include "awa/server.h"
 #include "support/static_api_support.h"
 
+// reverse the name and objectID to match updated API:
+#define AwaStaticClient_DefineObject(A, B, C, D, E) AwaStaticClient_DefineObject(A, C, B, D, E)
+#define AwaStaticClient_DefineResource(A, B, C, D, E, F, G, H) AwaStaticClient_DefineResource(A, C, D, B, E, F, G, H)
+
 namespace Awa {
 
 class TestStaticClientHandlerWithServerDeprecated : public TestStaticClientWithServer {};
