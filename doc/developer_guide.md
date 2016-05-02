@@ -165,5 +165,10 @@ Awa LightweightM2M was developed alongside a comprehensive test suite, implement
 
 TODO
 
+## Best Practices
 
+TODO
 
+## FAQ
+
+TODO

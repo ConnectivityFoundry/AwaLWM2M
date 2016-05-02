@@ -20,6 +20,8 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+// NOTE: this file uses deprecated API functions.
+
 #include <pthread.h>
 #include <gtest/gtest.h>
 #include "awa/static.h"
@@ -28,7 +30,7 @@
 
 namespace Awa {
 
-namespace TestStaticClientGetResourceInstancePointerDetail
+namespace TestStaticClientGetResourceInstancePointerDetailDeprecated
 {
 
 static AwaInteger dummyInteger1 = 123456;
@@ -71,9 +73,9 @@ const AwaResourceID TEST_RESOURCE_OPAQUEARRAY = 5;
 const AwaResourceID TEST_RESOURCE_TIMEARRAY = 6;
 const AwaResourceID TEST_RESOURCE_OBJECTLINKARRAY = 7;
 
-} // namespace TestStaticClientGetResourceInstancePointerDetail
+} // namespace TestStaticClientGetResourceInstancePointerDetailDeprecated
 
-struct TestGetResourceInstancePointerData
+struct TestGetResourceInstancePointerDataDeprecated
 {
     AwaObjectID ObjectID;
     AwaObjectInstanceID ObjectInstanceID;
@@ -84,7 +86,7 @@ struct TestGetResourceInstancePointerData
     AwaResourceType Type;
 };
 
-::std::ostream& operator<<(::std::ostream& os, const TestGetResourceInstancePointerData& item)
+::std::ostream& operator<<(::std::ostream& os, const TestGetResourceInstancePointerDataDeprecated& item)
 {
   return os << ", ObjectID " << item.ObjectID
             << ", ObjectInstanceID " << item.ObjectInstanceID
@@ -94,14 +96,14 @@ struct TestGetResourceInstancePointerData
             << ", Type " << item.Type;
 }
 
-class TestStaticClientGetResourceInstancePointer : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestGetResourceInstancePointerData >
+class TestStaticClientGetResourceInstancePointerDeprecated : public TestStaticClientWithServer, public ::testing::WithParamInterface< TestGetResourceInstancePointerDataDeprecated >
 {
 
 protected:
 
     void SetUp() {
         TestStaticClientWithServer::SetUp();
-        TestGetResourceInstancePointerData data = GetParam();
+        TestGetResourceInstancePointerDataDeprecated data = GetParam();
 
         EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", data.ObjectID, 0, 1));
 
@@ -118,8 +120,7 @@ protected:
                     StaticClientAllocedValue_ = malloc(data.ValueSize);
                     EXPECT_TRUE(StaticClientAllocedValue_ != NULL);
                     memset(StaticClientAllocedValue_, 0, data.ValueSize);
-                    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadWrite));
-                    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, StaticClientAllocedValue_, data.ValueSize, 0));
+                    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadWrite, StaticClientAllocedValue_, data.ValueSize, 0));
                 }
                 break;
         }
@@ -197,9 +198,9 @@ protected:
 };
 
 
-TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointer)
+TEST_P(TestStaticClientGetResourceInstancePointerDeprecated, TestGetResourceInstancePointer)
 {
-    TestGetResourceInstancePointerData data = GetParam();
+    TestGetResourceInstancePointerDataDeprecated data = GetParam();
 
     size_t ValueSize = 0;
     memcpy(StaticClientAllocedValue_, data.Value, data.ValueSize);
@@ -284,15 +285,15 @@ TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointe
 }
 
 INSTANTIATE_TEST_CASE_P(
-        TestStaticClientGetResourceInstancePointer,
-        TestStaticClientGetResourceInstancePointer,
+        TestStaticClientGetResourceInstancePointerDeprecated,
+        TestStaticClientGetResourceInstancePointerDeprecated,
         ::testing::Values(
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_STRING,     TestStaticClientGetResourceInstancePointerDetail::dummyString1, strlen(TestStaticClientGetResourceInstancePointerDetail::dummyString1) + 1, AwaResourceType_String},
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyInteger1, sizeof(AwaInteger), AwaResourceType_Integer },
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyFloat1, sizeof(AwaFloat), AwaResourceType_Float },
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyBoolean1, sizeof(AwaBoolean), AwaResourceType_Boolean },
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetail::dummyTime1, sizeof(AwaTime), AwaResourceType_Time },
-          TestGetResourceInstancePointerData { TestStaticClientGetResourceInstancePointerDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetail::TEST_RESOURCE_OBJECTLINK, &TestStaticClientGetResourceInstancePointerDetail::dummyObjectLink1, sizeof(AwaObjectLink), AwaResourceType_ObjectLink}
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_STRING,     TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyString1, strlen(TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyString1) + 1, AwaResourceType_String},
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyInteger1, sizeof(AwaInteger), AwaResourceType_Integer },
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyFloat1, sizeof(AwaFloat), AwaResourceType_Float },
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyBoolean1, sizeof(AwaBoolean), AwaResourceType_Boolean },
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_INTEGER,    &TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyTime1, sizeof(AwaTime), AwaResourceType_Time },
+          TestGetResourceInstancePointerDataDeprecated { TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_OBJECT_NON_ARRAY_TYPES, 0, TestStaticClientGetResourceInstancePointerDetailDeprecated::TEST_RESOURCE_OBJECTLINK, &TestStaticClientGetResourceInstancePointerDetailDeprecated::dummyObjectLink1, sizeof(AwaObjectLink), AwaResourceType_ObjectLink}
         ));
 
 } // namespace Awa
