@@ -16,6 +16,7 @@ set (test_static_api_runner_SOURCES
   test_static_api_get_resource_instance_pointer.cc
   test_static_api_get_resource_instance_pointer_deprecated.cc
   test_static_api_create_delete.cc
+  test_static_api_create_delete_deprecated.cc
 )
 
 set (test_static_api_runner_INCLUDE_DIRS
