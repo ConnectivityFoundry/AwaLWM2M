@@ -10,8 +10,11 @@ set (test_static_api_runner_SOURCES
   support/static_api_support.cc
   test_static_api.cc
   test_static_api_with_pointer.cc
+  test_static_api_with_pointer_deprecated.cc
   test_static_api_handlers.cc
+  test_static_api_handlers_deprecated.cc
   test_static_api_get_resource_instance_pointer.cc
+  test_static_api_get_resource_instance_pointer_deprecated.cc
   test_static_api_create_delete.cc
 )
 

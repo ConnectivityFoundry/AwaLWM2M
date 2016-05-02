@@ -116,7 +116,7 @@ protected:
 
         std::string serverURI = std::string("coap://127.0.0.1:") + std::to_string(global::serverCoapPort) + "/";
         client_ = AwaStaticClient_New();
-        EXPECT_TRUE(client_ != NULL);
+        ASSERT_TRUE(client_ != NULL);
 
         AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
 

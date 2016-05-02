@@ -540,27 +540,20 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
     return result;
 }
 
-AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID objectID, const char * objectName,
                                       uint16_t minimumInstances, uint16_t maximumInstances)
-{
-    return AwaStaticClient_DefineObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, DefaultHandler);
-}
-
-AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-                                                 uint16_t minimumInstances, uint16_t maximumInstances,
-                                                 AwaStaticClientHandler handler)
 {
     AwaError result = AwaError_Unspecified;
 
     if (client != NULL)
     {
-        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        if ((objectName != NULL) && (minimumInstances <= maximumInstances))
         {
-            ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)DefaultHandler);
 
-            if (defintion != NULL)
+            if (definition != NULL)
             {
-                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
                 {
                     Lwm2mCore_ObjectCreated(client->Context, objectID);
                     result = AwaError_Success;
@@ -573,6 +566,95 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
             else
             {
                 result = AwaError_OutOfMemory;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+/** @deprecated */
+AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                                 uint16_t minimumInstances, uint16_t maximumInstances,
+                                                 AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        {
+            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+
+            if (definition != NULL)
+            {
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
+                {
+                    Lwm2mCore_ObjectCreated(client->Context, objectID);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_Internal;
+                }
+            }
+            else
+            {
+                result = AwaError_OutOfMemory;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if (handler != NULL)
+        {
+            DefinitionRegistry * registry = Lwm2mCore_GetDefinitions(client->Context);
+            if (registry != NULL)
+            {
+                ObjectDefinition * definition = Definition_LookupObjectDefinition(registry, objectID);
+                if (definition != NULL)
+                {
+                    if (Definition_SetObjectHandler(definition, (LWM2MHandler)handler) == 0)
+                    {
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        result = AwaError_Internal;
+                    }
+                }
+                else
+                {
+                    result = AwaError_NotDefined;
+                }
+            }
+            else
+            {
+                result = AwaError_Internal;
             }
         }
         else
@@ -726,16 +808,19 @@ static AwaError DefineResource(AwaStaticClient * client, const char * resourceNa
                 }
                 else
                 {
+                    Lwm2m_Warning("resourceDefinition is NULL\n");
                     result = AwaError_DefinitionInvalid;
                 }
             }
             else
             {
+                Lwm2m_Warning("objFormat is NULL\n");
                 result = AwaError_DefinitionInvalid;
             }
         }
         else
         {
+            Lwm2m_Warning("One or more Define parameters are invalid\n");
             result = AwaError_DefinitionInvalid;
         }
     }
@@ -747,10 +832,117 @@ static AwaError DefineResource(AwaStaticClient * client, const char * resourceNa
     return result;
 }
 
+static AwaError SetResourceStorage(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID,
+                                   AwaStaticClientHandler handler,  void * dataPointers, bool isPointerArray,
+                                   size_t dataElementSize, size_t dataStepSize)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+        if (objFormat != NULL)
+        {
+            ResourceDefinition * resourceDefinition = Definition_LookupResourceDefinitionFromObjectDefinition(objFormat, resourceID);
+            if (resourceDefinition != NULL)
+            {
+                resourceDefinition->Handler = (LWM2MHandler)handler;
+                resourceDefinition->DataPointers = dataPointers;
+                resourceDefinition->IsPointerArray = isPointerArray;
+                resourceDefinition->DataElementSize = dataElementSize;
+                resourceDefinition->DataStepSize = dataStepSize;
+                result = AwaError_Success;
+            }
+            else
+            {
+                Lwm2m_Warning("resourceDefinition is NULL\n");
+                result = AwaError_DefinitionInvalid;
+            }
+        }
+        else
+        {
+            Lwm2m_Warning("objFormat is NULL\n");
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        Lwm2m_Warning("client is NULL\n");
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID,
+                                        const char * resourceName, AwaResourceType resourceType,
+                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations)
+{
+    return DefineResource(client, resourceName,
+                          objectID, resourceID, resourceType,
+                          minimumInstances, maximumInstances, operations,
+                          DefaultHandler, NULL, false, 0, 0);
+}
+
+AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if (handler == NULL)
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        result = SetResourceStorage(client, objectID, resourceID, handler, NULL, false, 0, 0);
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointer, size_t dataElementSize, size_t dataStepSize)
+{
+    AwaError result = AwaError_Unspecified;
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if ((dataPointer == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        result = SetResourceStorage(client, objectID, resourceID, DefaultHandler, dataPointer, false, dataElementSize, dataStepSize);
+    }
+    return result;
+}
+
+AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointers[], size_t dataElementSize)
+{
+    AwaError result = AwaError_Unspecified;
+    if (client == NULL)
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+    else if ((dataPointers == NULL) || (dataElementSize == 0))
+    {
+        result = AwaError_DefinitionInvalid;
+    }
+    else
+    {
+        result = SetResourceStorage(client, objectID, resourceID, DefaultHandler, dataPointers, true, dataElementSize, 0);
+    }
+    return result;
+}
+
+/** @deprecated */
 AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, const char * resourceName,
-                                                     AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                     uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                     void * dataPointer, size_t dataElementSize, size_t dataStepSize)
+                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
+                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
+                                                   void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 {
     AwaError result;
 
@@ -769,6 +961,7 @@ AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, con
     return result;
 }
 
+/** @deprecated */
 AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
                                                         AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
                                                         uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
@@ -804,6 +997,7 @@ AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client
     return result;
 }
 
+/** @deprecated */
 AwaError AwaStaticClient_DefineResourceWithHandler(AwaStaticClient * client, const char * resourceName,
                                                    AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
                                                    uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
