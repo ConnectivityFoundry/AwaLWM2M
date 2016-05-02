@@ -382,6 +382,8 @@ void AwaStaticClient_Free(AwaStaticClient ** client);
  ************************************************************************************************************/
 
 /**
+ * @deprecated Use ::AwaStaticClient_DefineObject followed by ::AwaStaticClient_SetObjectOperationHandler instead.
+ *
  * @brief Define a new custom LWM2M object with a user-specified callback handler
  *        that will be called whenever a LWM2M operation on any instance of the
  *        defined object is performed.
@@ -404,7 +406,8 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
                                                  uint16_t minimumInstances, uint16_t maximumInstances, AwaStaticClientHandler handler);
 
 /**
- * @brief Define a new custom LWM2M object, leaving handling of any instances of the object to the LWM2M Client.
+ * @brief Define a new custom LWM2M object. By default, the LWM2M Client will handle instance operations such as delete and create.
+ *        Use ::AwaStaticClient_SetObjectOperationHandler to override this default behaviour with a specified handler.
  *
  *        In order for an LWM2M server to perform operations on the defined object,
  *        a matching object must be defined on the LWM2M server.
@@ -421,6 +424,18 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
  */
 AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                       uint16_t minimumInstances, uint16_t maximumInstances);
+
+/**
+ * @brief Set the Object Operation handler function, to be called by the LWM2M Client when object instances are created or deleted.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID An ID that uniquely identifies the object for which the handler will be associated.
+ * @param[in] handler A user-specified callback handler.
+ * @return AwaError_Success on success.
+ * @return AwaError_DefinitionInvalid if @e objectID is invalid.
+ * @return AwaError_StaticClientInvalid if @e client is NULL.
+ */
+AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler);
 
 /**
  * @brief Define a new resource of an existing object with a user-specified callback handler

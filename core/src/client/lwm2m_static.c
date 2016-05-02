@@ -543,24 +543,17 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
 AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
                                       uint16_t minimumInstances, uint16_t maximumInstances)
 {
-    return AwaStaticClient_DefineObjectWithHandler(client, objectName, objectID, minimumInstances, maximumInstances, DefaultHandler);
-}
-
-AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-                                                 uint16_t minimumInstances, uint16_t maximumInstances,
-                                                 AwaStaticClientHandler handler)
-{
     AwaError result = AwaError_Unspecified;
 
     if (client != NULL)
     {
-        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        if ((objectName != NULL) && (minimumInstances <= maximumInstances))
         {
-            ObjectDefinition * defintion = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)DefaultHandler);
 
-            if (defintion != NULL)
+            if (definition != NULL)
             {
-                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), defintion) == 0)
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
                 {
                     Lwm2mCore_ObjectCreated(client->Context, objectID);
                     result = AwaError_Success;
@@ -573,6 +566,95 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
             else
             {
                 result = AwaError_OutOfMemory;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+/** @deprecated */
+AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+                                                 uint16_t minimumInstances, uint16_t maximumInstances,
+                                                 AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        {
+            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
+
+            if (definition != NULL)
+            {
+                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
+                {
+                    Lwm2mCore_ObjectCreated(client->Context, objectID);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = AwaError_Internal;
+                }
+            }
+            else
+            {
+                result = AwaError_OutOfMemory;
+            }
+        }
+        else
+        {
+            result = AwaError_DefinitionInvalid;
+        }
+    }
+    else
+    {
+        result = AwaError_StaticClientInvalid;
+    }
+
+    return result;
+}
+
+AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler)
+{
+    AwaError result = AwaError_Unspecified;
+
+    if (client != NULL)
+    {
+        if (handler != NULL)
+        {
+            DefinitionRegistry * registry = Lwm2mCore_GetDefinitions(client->Context);
+            if (registry != NULL)
+            {
+                ObjectDefinition * definition = Definition_LookupObjectDefinition(registry, objectID);
+                if (definition != NULL)
+                {
+                    if (Definition_SetObjectHandler(definition, (LWM2MHandler)handler) == 0)
+                    {
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        result = AwaError_Internal;
+                    }
+                }
+                else
+                {
+                    result = AwaError_NotDefined;
+                }
+            }
+            else
+            {
+                result = AwaError_Internal;
             }
         }
         else
