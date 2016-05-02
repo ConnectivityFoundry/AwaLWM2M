@@ -32,7 +32,7 @@ class TestStaticClientCreateDeleteWithServer : public TestStaticClientWithServer
 
 TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Object_valid_inputs)
 {
-	AwaInteger i = 0;
+    AwaInteger i = 0;
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, "TestObject", 7997, 0, 1)); // valid
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Resource", 7997,  1, AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite, &i, sizeof(i), 0));
 

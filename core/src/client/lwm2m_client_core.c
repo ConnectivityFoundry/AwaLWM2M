@@ -460,7 +460,7 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
                             {
                                 ResourceInstanceIDType resourceInstanceID = 0;
 
-                                for(resourceInstanceID = 0; resourceInstanceID < definition->MaximumInstances; resourceInstanceID++)
+                                for (resourceInstanceID = 0; resourceInstanceID < definition->MaximumInstances; resourceInstanceID++)
                                 {
                                     Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
                                 }
@@ -943,7 +943,7 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
         }
     }
 
-    if(!Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+    if (!Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
     {
         return AwaResult_NotFound;
     }
