@@ -547,30 +547,37 @@ AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID obje
 
     if (client != NULL)
     {
-        if ((objectName != NULL) && (minimumInstances <= maximumInstances))
+        if (client->Initialised)
         {
-            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)DefaultHandler);
-
-            if (definition != NULL)
+            if ((objectName != NULL) && (minimumInstances <= maximumInstances))
             {
-                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
+                ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)DefaultHandler);
+
+                if (definition != NULL)
                 {
-                    Lwm2mCore_ObjectCreated(client->Context, objectID);
-                    result = AwaError_Success;
+                    if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
+                    {
+                        Lwm2mCore_ObjectCreated(client->Context, objectID);
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        result = AwaError_Internal;
+                    }
                 }
                 else
                 {
-                    result = AwaError_Internal;
+                    result = AwaError_OutOfMemory;
                 }
             }
             else
             {
-                result = AwaError_OutOfMemory;
+                result = AwaError_DefinitionInvalid;
             }
         }
         else
         {
-            result = AwaError_DefinitionInvalid;
+            result = AwaError_StaticClientNotInitialized;
         }
     }
     else
@@ -792,37 +799,44 @@ static AwaError DefineResource(AwaStaticClient * client, const char * resourceNa
 
     if (client != NULL)
     {
-        if ((resourceName != NULL) && (minimumInstances <= maximumInstances))
+        if (client->Initialised)
         {
-            ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
-            if (objFormat != NULL)
+            if ((resourceName != NULL) && (minimumInstances <= maximumInstances))
             {
-                ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
-                if (resourceDefinition != NULL)
+                ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
+                if (objFormat != NULL)
                 {
-                    resourceDefinition->Handler = (LWM2MHandler)handler;
-                    resourceDefinition->DataPointers = dataPointers;
-                    resourceDefinition->IsPointerArray = isPointerArray;
-                    resourceDefinition->DataElementSize = dataElementSize;
-                    resourceDefinition->DataStepSize = dataStepSize;
-                    result = AwaError_Success;
+                    ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
+                    if (resourceDefinition != NULL)
+                    {
+                        resourceDefinition->Handler = (LWM2MHandler)handler;
+                        resourceDefinition->DataPointers = dataPointers;
+                        resourceDefinition->IsPointerArray = isPointerArray;
+                        resourceDefinition->DataElementSize = dataElementSize;
+                        resourceDefinition->DataStepSize = dataStepSize;
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        Lwm2m_Warning("resourceDefinition is NULL\n");
+                        result = AwaError_DefinitionInvalid;
+                    }
                 }
                 else
                 {
-                    Lwm2m_Warning("resourceDefinition is NULL\n");
+                    Lwm2m_Warning("objFormat is NULL\n");
                     result = AwaError_DefinitionInvalid;
                 }
             }
             else
             {
-                Lwm2m_Warning("objFormat is NULL\n");
+                Lwm2m_Warning("One or more Define parameters are invalid\n");
                 result = AwaError_DefinitionInvalid;
             }
         }
         else
         {
-            Lwm2m_Warning("One or more Define parameters are invalid\n");
-            result = AwaError_DefinitionInvalid;
+            result = AwaError_StaticClientNotInitialized;
         }
     }
     else
