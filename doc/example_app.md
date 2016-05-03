@@ -25,7 +25,6 @@ This example shows how to:
 * Enhance the initial application with the addition of another resource to the existing object
 * Create a server side application which uses the same object model
 
-
 The client-tutorial application makes use of the Awa API to define objects and resources and to register these with the client daemon:
 
 ![](client-tutorial.png)
@@ -156,21 +155,26 @@ Heater[/1000/0]:
 
 
 ## Adding further resources.
+
 Further object resources are easily defined. Note that a resource's data type is implied by the API function used to create it, e.g. resource 101, (defined above), was of type string and thus used *AwaObjectDefinition_AddResourceDefinitionAsString()*. Our new resource, 104, will be of type float, so we'll use *AwaObjectDefinition_AddResourceDefinitionAsFloat()* to create it. Function parameters remain the same.
 
 So our *client-tutorial.c* file now contains two additional lines:
 
-In the *DefineHeaterObject()* function...
-````
+In the *DefineHeaterObject()* function:
+
+```c
 AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition,  104, "Temperature", false, AwaResourceOperations_ReadWrite, 0.0);
-````
+```
+
 This defines the new resource.
 
-And in the *SetInitialValues()* function...
-````
+And in the *SetInitialValues()* function:
+
+```c
 AwaClientSetOperation_CreateOptionalResource(operation, "/1000/0/104");
     AwaClientSetOperation_AddValueAsCString(operation, "/1000/0/101", "HotAir Systems Inc");
-````
+```
+
 Which instantiates the resource.
 
 We've also added a function called *UpdateTemperature()* which accepts a float value *temperature* and writes it to the new resource, and a *while* loop in the *main()* function which accepts temperature values entered at the console, (to simulate actual sensor values from a device for example), and uses *UpdateTemperature()* to update the resource to the entered value.
@@ -281,7 +285,6 @@ So far our object definitions have remained local to the client. The next sectio
 
 ## Creating a server application using the Awa API.
 
-
 Let's create a server side application that makes use of our new object.
 
 ![](server-tutorial.png)
@@ -329,27 +332,28 @@ all:
         $(CC) server-tutorial.c -o server-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
 ```
 
-Build the new application...
+Build the new application:
 
 ```
 ~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
-Restart the client/server daemon...
-````
+Restart the client/server daemon:
+
+```
 ~/AwaLWM2M$ killall awa_serverd
 ~/AwaLWM2M$ killall awa_clientd
 ~/AwaLWM2M$ build/core/src/server/awa_serverd --verbose --daemonise --logFile /tmp/awa_serverd.log
 ~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./core/bootstrap-localhost.config --daemonise --logFile /tmp/awa_clientd.log
-````
+```
 
-And start the server application...
+And start the server application:
 
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./server-tutorial
 ```
 
-Now start client client application...
+Now start client client application:
 
 ```
 ~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
@@ -373,7 +377,7 @@ Client: client1
   /1000/0  Heater
 ```
 
-And read from the new resource using the server tool *awa-server-read*:
+Read from the new resource using the server tool *awa-server-read*:
 
 ```
 ~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000/0/104
@@ -399,7 +403,7 @@ Heater[/1000/0]:
 
 This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
 
-Create a new directory *static-client-tutorial*
+Create a new directory *static-client-tutorial*.
 
 Copy the following code into static-client-tutorial/*Makefile*:
 
@@ -491,11 +495,11 @@ The following code expands on the previous example, by demonstrating how to add 
 
 +static void DefineHeaterObject(AwaStaticClient * awaClient)
 +{
-+    AwaStaticClient_DefineObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
-+    AwaStaticClient_DefineResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
-+                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
-+    AwaStaticClient_DefineResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
-+                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
++    AwaStaticClient_DefineObject(awaClient, 1000, "Heater", 0, HEATER_INSTANCES);
++    AwaStaticClient_DefineResource(awaClient, 1000, 101, "Manufacturer", AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly);
++    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 101, &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
++    AwaStaticClient_DefineResource(awaClient, 1000, 104, "Temperature",  AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly);
++    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 104, &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
 +}
 
 +static void SetInitialValues(AwaStaticClient * awaClient)
@@ -515,7 +519,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
-	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -616,11 +620,11 @@ static HeaterObject heater[HEATER_INSTANCES];
 
 static void DefineHeaterObject(AwaStaticClient * awaClient)
 {
-    AwaStaticClient_DefineObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
-    AwaStaticClient_DefineResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
-                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
-    AwaStaticClient_DefineResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
-                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
+    AwaStaticClient_DefineObject(awaClient, 1000, "Heater", 0, HEATER_INSTANCES);
+    AwaStaticClient_DefineResource(awaClient, 1000, 101, "Manufacturer", AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly);
+    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 101, &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
+    AwaStaticClient_DefineResource(awaClient, 1000, 104, "Temperature", AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly);
+    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 104, &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
 }
 
 static void SetInitialValues(AwaStaticClient * awaClient)
