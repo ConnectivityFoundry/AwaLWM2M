@@ -581,49 +581,6 @@ AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID obje
     return result;
 }
 
-/** @deprecated */
-AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-                                                 uint16_t minimumInstances, uint16_t maximumInstances,
-                                                 AwaStaticClientHandler handler)
-{
-    AwaError result = AwaError_Unspecified;
-
-    if (client != NULL)
-    {
-        if ((objectName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
-        {
-            ObjectDefinition * definition = Definition_NewObjectTypeWithHandler(objectName, objectID, minimumInstances, maximumInstances, (LWM2MHandler)handler);
-
-            if (definition != NULL)
-            {
-                if (Definition_AddObjectType(Lwm2mCore_GetDefinitions(client->Context), definition) == 0)
-                {
-                    Lwm2mCore_ObjectCreated(client->Context, objectID);
-                    result = AwaError_Success;
-                }
-                else
-                {
-                    result = AwaError_Internal;
-                }
-            }
-            else
-            {
-                result = AwaError_OutOfMemory;
-            }
-        }
-        else
-        {
-            result = AwaError_DefinitionInvalid;
-        }
-    }
-    else
-    {
-        result = AwaError_StaticClientInvalid;
-    }
-
-    return result;
-}
-
 AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler)
 {
     AwaError result = AwaError_Unspecified;
@@ -937,77 +894,6 @@ AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * cl
         result = SetResourceStorage(client, objectID, resourceID, DefaultHandler, dataPointers, true, dataElementSize, 0);
     }
     return result;
-}
-
-/** @deprecated */
-AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, const char * resourceName,
-                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                   void * dataPointer, size_t dataElementSize, size_t dataStepSize)
-{
-    AwaError result;
-
-    if ((dataPointer == NULL) || (dataElementSize == 0))
-    {
-        result = AwaError_DefinitionInvalid;
-    }
-    else
-    {
-        result = DefineResource(client, resourceName,
-                                objectID, resourceID, resourceType,
-                                minimumInstances, maximumInstances, operations, DefaultHandler,
-                                dataPointer, false, dataElementSize, dataStepSize);
-    }
-
-    return result;
-}
-
-/** @deprecated */
-AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
-                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                        void * dataPointers[], size_t dataElementSize)
-{
-    AwaError result;
-
-    if ((dataPointers == NULL) || (dataElementSize == 0))
-    {
-        result = AwaError_DefinitionInvalid;
-    }
-    else
-    {
-        // check there are enough pointers in the array. There needs to be one pointer for each instance of the resource.
-        int count = 0;
-        while (dataPointers[count] != NULL)
-        {
-            count++;
-        }
-
-        if (count == maximumInstances)
-        {
-            result = DefineResource(client, resourceName,
-                                    objectID, resourceID, resourceType,
-                                    minimumInstances, maximumInstances, operations, DefaultHandler,
-                                    dataPointers, true, dataElementSize, 0);
-        }
-        else
-        {
-            result = AwaError_DefinitionInvalid;
-        }
-    }
-    return result;
-}
-
-/** @deprecated */
-AwaError AwaStaticClient_DefineResourceWithHandler(AwaStaticClient * client, const char * resourceName,
-                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                   AwaStaticClientHandler handler)
-{
-    return DefineResource(client, resourceName,
-                          objectID, resourceID, resourceType,
-                          minimumInstances, maximumInstances, operations, handler,
-                          NULL, false, 0 , 0);
 }
 
 AwaError AwaStaticClient_ResourceChanged(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID)
