@@ -66,15 +66,15 @@ While either of the above modes may be used to manage Objects and Resources, the
  
 ### Detailed functionality
 
-Sequence of operations (init, definition, start, process loop)
-init: configuring CoAP, endpoint name, bootstrap URI
-definition: setting up pointer and/or handler definitions for each object
-start: initialises CoAP (allows CoAP endpoints to be created)
-process loop: client-side create/delete, update values, generate notifications, handle LWM2M operations and bootstrap/register.
-Explain min/maxInstances in definition functions.
-Notification hierarchy explanation?
+>Sequence of operations (init, definition, start, process loop)
+>init: configuring CoAP, endpoint name, bootstrap URI
+>definition: setting up pointer and/or handler definitions for each object
+>start: initialises CoAP (allows CoAP endpoints to be created)
+>process loop: client-side create/delete, update values, generate notifications, handle LWM2M operations and bootstrap/register.
+>Explain min/maxInstances in definition functions.
+>Notification hierarchy explanation?
 
- [x]  Explain AwaResourceOperations and how they affect resource access.
+ - [x] Explain AwaResourceOperations and how they affect resource access.
 
  
 #### Pointer mode
@@ -151,15 +151,13 @@ The parameters required for handling operations on object and resource instances
 | *AwaOperation_Execute* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* |	Object Instance ID of object |	Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Resource Instance ID to Execute | Has a pointer to the execute arguments | Has the size of the execute arguments | not used (NULL) | AwaResult_Success when successful.  TODO: error codes |
 
 
-[Examples]()  [x] Link to examples in doxygen.  
+### Further information  
+
+[Examples](http://flowm2m.github.io/AwaLWM2M-docs/examples.html)
+ 
 [API Documentation](http://flowm2m.github.io/AwaLWM2M-docs/static_8h.html)
  
 ----
-
-
-> Not sure what this is for...
-
->typedef AwaResult(*AwaStaticClientHandler )(AwaStaticClient *client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void **dataPointer, size_t *dataSize, bool *changed)
 
 
 ----
