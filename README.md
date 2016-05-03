@@ -20,7 +20,7 @@ Awa LWM2M is a development suite that provides a number of components and tools 
 
 
 * When running on a larger Linux based device, Awa LWM2M can be deployed as a series of daemons that interact with your application via the Awa API.
-* For more constrained devices, your application code can be built against the Awa static API and compiled along with the Awa LWM2M client code into a binary to be deployed on your device.
+* For more constrained devices, your application code can be built against the [Awa static API](doc/Awa_Static_API.md) and compiled along with the Awa LWM2M client code into a binary to be deployed on your device.
 
 *Regardless of the method, adding LWM2M support for your device is simply a matter of incorporating any objects you need into your own M2M application.*
 
@@ -45,6 +45,8 @@ Further information can be found in the [Quick start guide](doc/starters_guide.m
 ----
 
 ### Documentation.
+
+This project assumes a basic knowledge of The Open Mobile Alliance's (OMA) LWM2M, its functionality and services. For more detail, see our [introductory LWM2M overview](doc/lwm2m_overview.md).
 
 Awa LWM2M documentation is available both at a general level (project information, user and developer guides), and a technical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
 
