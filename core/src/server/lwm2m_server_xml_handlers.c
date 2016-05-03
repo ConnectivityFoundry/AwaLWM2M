@@ -924,7 +924,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
         if (responsePath != NULL)
         {
             Lwm2m_Debug("Response path: %s\n", responsePath);
-            char * responsePathWithoutQueryString = malloc(strlen(responsePath) + 1);
+            char * responsePathWithoutQueryString = malloc(strlen(responsePath) + 2);
             if (responsePathWithoutQueryString != NULL)
             {
                 if (responsePath[0] == '/')
