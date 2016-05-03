@@ -177,8 +177,9 @@ void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
 }
 
 // This function is called when a new object instance is created
-static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
+static AwaResult Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    AwaResult result = AwaResult_SuccessCreated;
     char path[32];
     sprintf(path, "/%d/%d", objectID, objectInstanceID);
 
@@ -199,15 +200,19 @@ static void Lwm2mCore_ObjectInstanceCreated(Lwm2mContextType * context, ObjectID
             {
                 if (Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == -1)
                 {
+                    result = AwaResult_InternalError;
                     Lwm2m_Error("Failed to create optional resource for object %d instance %d resource %d\n", objectID, objectInstanceID, resourceID);
                 }
             }
         }
         else
         {
+            result = AwaResult_InternalError;
             Lwm2m_Error("No resource definition for object %d resource %d\n", objectID, resourceID);
         }
     }
+
+    return result;
 }
 
 static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
@@ -294,7 +299,7 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
 
                     if (lwm2mResult == AwaResult_SuccessCreated)
                     {
-                        Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
+                        lwm2mResult = Lwm2mCore_ObjectInstanceCreated(context, objectID, objectInstanceID);
                     }
                     else
                     {
@@ -313,9 +318,8 @@ int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType obje
 
                 if ((result = definition->Handlers.CreateInstance(context, objectID, objectInstanceID)) >= 0)
                 {
-                    Lwm2mCore_ObjectInstanceCreated(context, objectID, result);
+                    lwm2mResult = Lwm2mCore_ObjectInstanceCreated(context, objectID, result);
                     objectInstanceID = result;
-                    lwm2mResult = AwaResult_SuccessCreated;
                 }
                 else
                 {
@@ -439,45 +443,52 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
     {
         if (!Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
         {
-            if (definition->Handlers.CreateOptionalResource == NULL)
+            if (Lwm2mCore_Exists(context, objectID, objectInstanceID, AWA_INVALID_ID))
             {
-                if (definition->Handler == NULL)
+                if (definition->Handlers.CreateOptionalResource == NULL)
                 {
-                    Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
-                }
-                else
-                {
-                    lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
-
-                    if (lwm2mResult == AwaResult_SuccessCreated)
+                    if (definition->Handler != NULL)
                     {
-                        Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+                        lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_CreateResource, objectID, objectInstanceID, resourceID, 0, NULL, NULL, NULL);
 
-                        if (definition->MinimumInstances > 0)
+                        if (lwm2mResult == AwaResult_SuccessCreated)
                         {
-                            ResourceInstanceIDType resourceInstanceID = 0;
+                            Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
 
-                            for(resourceInstanceID = 0; resourceInstanceID < definition->MaximumInstances; resourceInstanceID++)
+                            if (definition->MinimumInstances > 0)
                             {
-                                Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                                ResourceInstanceIDType resourceInstanceID = 0;
+
+                                for (resourceInstanceID = 0; resourceInstanceID < definition->MaximumInstances; resourceInstanceID++)
+                                {
+                                    Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+                                }
                             }
                         }
-
-
+                        else
+                        {
+                            Lwm2m_Error("Create resource %d/%d/%d failed, handler returned %d (expected %d)\n", objectID, objectInstanceID, resourceID, lwm2mResult, AwaResult_SuccessCreated);
+                        }
                     }
                     else
                     {
-                        Lwm2m_Error("Create resource %d/%d/%d failed, handler returned %d (expected %d)\n", objectID, objectInstanceID, resourceID, lwm2mResult, AwaResult_SuccessCreated);
+                        Lwm2m_Error("Resource definition for object ID %d resource ID %d does not have a handler\n", objectID, resourceID);
+                        lwm2mResult = AwaResult_NotFound;
                     }
+                }
+                else
+                {
+                    if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0)
+                    {
+                        Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
+                    }
+                    lwm2mResult = AwaResult_SuccessCreated;
                 }
             }
             else
             {
-                if (definition->Handlers.CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == 0)
-                {
-                    Lwm2mCore_ResourceCreated(context, objectID, objectInstanceID, resourceID);
-                }
-                lwm2mResult = AwaResult_SuccessCreated;
+                Lwm2m_Error("Object instance %d/%d does not exist for resource %d \n", objectID, objectInstanceID, resourceID);
+                lwm2mResult = AwaResult_MethodNotAllowed;
             }
         }
         else
@@ -936,6 +947,10 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
         }
     }
 
+    if (!Lwm2mCore_Exists(context, objectID, objectInstanceID, resourceID))
+    {
+        return AwaResult_NotFound;
+    }
 
     int ret = -1;
     if (definition->Handlers.Delete == NULL)

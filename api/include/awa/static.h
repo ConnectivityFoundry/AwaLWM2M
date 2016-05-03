@@ -675,6 +675,23 @@ const void * AwaStaticClient_GetResourceInstancePointer(AwaStaticClient * client
 AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
 
 /**
+ * @brief Delete an optional resource within the specified object instance.
+ *
+ * For a resource registered with a handler this will invoke a callback with the AwaOperation_DeleteResource.
+ *
+ * For a resource registered by pointer this will delete the resource.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID The ID of the object for the specified resource.
+ * @param[in] objectInstanceID The ID of the object instance for the specified resource.
+ * @param[in] resourceID The ID of the optional resource to delete.
+ * @return AwaError_Success if the resource is created successfully.
+ * @return AwaError_CannotCreate if the resource already exists, or no resource is defined for the specified object, object instance and resource ID.
+ * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
+ */
+AwaError AwaStaticClient_DeleteResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
+
+/**
  * @brief Create an object instance within the specified object.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
@@ -686,6 +703,19 @@ AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID ob
  * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
  */
 AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
+
+/**
+ * @brief Delete an object instance within the specified object.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID The ID of the object for the specified object instance.
+ * @param[in] objectInstanceID The ID of the object instance to delete.
+ * @return AwaError_Success if the object instance is created successfully.
+ * @return AwaError_CannotCreate if the object instance already exists, the object already contains a maximum number of object instances,
+ *         or if no object is defined for the specified object ID.
+ * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
+ */
+AwaError AwaStaticClient_DeleteObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
 
 /**
  * @brief Mark the specified resource as changed, in order for the Awa Static Client to
