@@ -37,7 +37,7 @@ TEST_F(TestStaticClientHandler, AwaStaticClient_SetResourceOperationHandler_Inva
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client, 9999, "TestObject", 0, 1));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client, 9999, 1, "TestResource", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite));
 
-    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetResourceOperationHandler(NULL, 9999, 1, handler));
+    EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetResourceOperationHandler(NULL,   9999, 1, handler));
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceOperationHandler(client, 9999, 1, NULL));
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceOperationHandler(client, 9998, 1, handler));
     EXPECT_EQ(AwaError_DefinitionInvalid,   AwaStaticClient_SetResourceOperationHandler(client, 9999, 2, handler));

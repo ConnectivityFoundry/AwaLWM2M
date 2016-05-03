@@ -79,8 +79,7 @@ extern "C" {
   } name
 
 /**
- * Supported operations for resource and object handlers
- * defined with ::AwaStaticClient_DefineResourceWithHandler.
+ * Supported operations for resource and object handlers defined with ::AwaStaticClient_DefineResource.
  */
 typedef enum
 {
@@ -523,7 +522,7 @@ int AwaStaticClient_Process(AwaStaticClient * client);
  ************************************************************************************************************/
 
 /**
- * @brief Retrieve a pointer to a resource instance's data, when defined with the with ::AwaStaticClient_DefineResourceWithPointer or ::AwaStaticClient_DefineResourceWithPointerArray.
+ * @brief Retrieve a pointer to a resource instance's data, when defined with ::AwaStaticClient_SetResourceStorageWithPointer or ::AwaStaticClient_SetResourceStorageWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object for the specified resource instance.
