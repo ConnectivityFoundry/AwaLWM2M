@@ -38,7 +38,7 @@ The LWM2M Client supports the CoAP *Observe* operation. Observations are handled
 The majority of LWM2M operations happen 'under the hood' of the LWM2M Client. The device application code interacts with the Client via the Static API.
 
 Data are shared between the application code and the LWM2M client using pre-defined or custom Objects and Resources as described in the OMA LWM2M specification. Any server or management application that interacts with the device application must be aware of the Client's data model and have definitions for the same Objects and Resources to facilitate interoperability. It is recommended that OMA registered IDs are used that conform to registered LWM2M or IPSO objects.
-Since an Object is a container for a set of related Resources, an Object must be defined prior to the Resources associated with it. 
+Since an Object is a container for a set of related Resources, an Object must be defined prior to the Resources associated with it.
 Objects and Resources are defined in one of two ways:
 * **Pointer Mode** - Objects and Resources are defined in application memory and accessed via pointers which are registered with the LWM2M Client via the Static API.  
 * **Handler Mode** - Objects and Resources are defined by a handler function. Object and Resource memory is not directly accessible to the application code. Resource value operations are passed to the Resource handler for execution and any response values are returned by the handler to the application code.  
@@ -76,22 +76,36 @@ While either of the above modes may be used to manage Objects and Resources, the
 
  - [x] Explain AwaResourceOperations and how they affect resource access.
 
- 
+
+#### Resource definition
+
+Resources are defined with properties according to the LWM2M specification, and must be associated with a parent Object. Use AwaStaticClient_DefineResource to define a new resource within an existing object:
+````
+AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, const char * resourceName, AwaResourceType resourceType, uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations)
+````
+
+ - [x] Explain these parameters.
+
+The parameter **maximumInstances** specified in the earlier call to AwaStaticClient_DefineResource specifies the number of values (N) stored in memory.
+
+When a multiple instance resource is created that was defined using the pointer method, the number of resource instances that exist in that resource will be the *maximumInstances* value used in the resource definition.
+
+*Note that the maximumInstances parameter defines a resource as being single (maximumInstances = 1) or multiple instance (maximumInstances > 1) whereas the minimumInstances parameter determines whether a resource is mandatory (minimumInstances = 1) or optional (minimumInstances = 0)*
+
 #### Pointer mode
 Pointer mode defines Resource Instances in specific memory locations. The specified memory locations may be either *uniform* (of fixed length and contiguous spacing) or *sparse* (fixed length but not contiguous spacing).
 
 ##### Uniform resource distribution
 Where fixed length resource instances are defined contiguously in memory only the start point and the element size values are required to calculate the location of any resource instance value in the set.
-Use the AwaStaticClient_DefineResourceWithPointer prototype to specify resource instance values located uniformly in memory as below:
+Use the AwaStaticClient_SetResourceStorageWithPointer prototype to specify resource instance values located uniformly in memory as below:
 ```` 
-AwaError AwaStaticClient_DefineResourceWithPointer (AwaStaticClient *client, const char *resourceName, AwaObjectID objectID, AwaResourceIDresourceID, AwaResourceType resourceType, uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations, void *dataPointer, size_t dataElementSize, size_t dataStepSize)
+AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointer, size_t dataElementSize, size_t dataStepSize)
 ````
 This results in fixed length resource instances being distributed continuously in memory as shown below:
  
 ![](pointer_mode_uniform_resource_distribution.png)
 
-The parameters of the above function used to provide information about the location of each value in memory as shown in the diagram above are:  
-* **maximumInstances** - the number of values (N) in memory  
+The parameters of the above function used to provide information about the location of each value in memory as shown in the diagram above are:   
 * **dataPointer** - the value of the start point (dataPointer[0] in the diagram)  
 * **dataElementSize** - the size of an individual value in bytes  
 * **dataStepSize** - the number of bytes between values  
@@ -100,31 +114,27 @@ From the above parameters the location of any array element, dataPointer[N], can
  
 ##### Sparse resource distribution
 
-In this case, because the resource instance values will not be contiguous in memory, the location of each value must be explicitly stated as a set of pointer values passed in an array to the *AwaStaticClient_DefineResourceWithPointerArray* function.
+In this case, because the resource instance values will not be contiguous or evenly distributed in memory, the location of each value must be explicitly stated as a set of pointer values passed in an array to the *AwaStaticClient_SetResourceStorageWithPointerArray* function.
 
 The prototype for specifying a set of resource instance values that are located sparsely in memory is:
  
 ```` 
-AwaError AwaStaticClient_DefineResourceWithPointerArray (AwaStaticClient *client, const char *resourceName, AwaObjectID objectID, AwaResourceIDresourceID, AwaResourceType resourceType, uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations, void *dataPointers[], size_t dataElementSize)
+AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointers[], size_t dataElementSize)
 ````
  
-This results in fixed length resource instances being distributed discontinuously in memory as shown below:
+This results in fixed length resource instances being distributed arbitrarily in memory as shown below:
  
 ![](pointer_mode_sparse_resource_distribution.png)
- 
+
 The parameters that provide information about the location of each value in memory as shown in the diagram above are:
- 
-* **maximumInstances** - the number of values (N) in memory  
 * **dataPointers** - an array (of size N) of pointers to the values  
 * **dataElementSize** - the size of an individual value in bytes  
 
-When a multiple instance resource is created that was defined using the pointer method, the number of resource instances that exist in that resource will be the *maximumInstances* value used in the resource definition.
 
-*Note that the maximumInstances parameter defines a resource as being single (maximumInstances = 1) or multiple instance (maximumInstances > 1) whereas the minimumInstances parameter determines whether a resource is mandatory (minimumInstances = 1) or optional (minimumInstances = 0)*
+#### Handler mode
 
-#### Handler mode  
-Handler mode gives a low level control of both object and resource instances. A generic handler is used for handling LWM2M object and resource operations. Since handler functionality is determined parametrically some handler parameters may or may not be required, depending on the  operation.  
-The prototype for the handler function is shown below:  
+Handler mode gives a low level control of both object and resource instances. A generic handler is used for handling LWM2M object and resource operations. Since handler functionality is determined parametrically some handler parameters may or may not be required, depending on the operation.  
+The prototype for the handler callback function is shown below:  
 ````
 typedef AwaResult(*AwaStaticClientHandler )(AwaStaticClient *client, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void **dataPointer, size_t *dataSize, bool *changed)
 ````
@@ -132,7 +142,7 @@ typedef AwaResult(*AwaStaticClientHandler )(AwaStaticClient *client, AwaOperatio
 The parameters required for handling operations on object and resource instances are described below.  
 
 ##### Handler mode for Objects
-*AwaStaticClient_DefineObjectWithHandler* defines an object that calls a handler function when a LWM2M operation is performed on it. The table below lists the object operations that trigger the handler function.
+*AwaStaticClient_SetObjectOperationHandler* specifies a handler function that is called when a LWM2M operation is performed on an object. The table below lists the object operations that trigger the handler function.
  
 | operation | objectID | objectInstanceID | resourceID | resourceInstanceID | dataPointer | dataSize | changed | returns |
 |-----|-----|-----|-----|-----|-----|-----|-----|-----|
@@ -140,7 +150,8 @@ The parameters required for handling operations on object and resource instances
 | *AwaOperation_DeleteObjectInstance*  Deletes an existing object instance | Object ID from definition with *AwaStaticClient_DefineObjectWithHandler* | Object Instance ID of object to delete | not used (AWA_INVALID_ID) | not used  (AWA_INVALID_ID) | not used (NULL) | not used (NULL) | not used (NULL) | AwaResult_SuccessDeleted when object instance is deleted successfully  TODO: error codes |
 
 ##### Handler mode for Resources  
-*AwaStaticClient_DefineResourceWithHandler* defines a resource within an object that calls a handler function when LWM2M operations are performed on that resource. The table below lists the operations that trigger the handler function.
+
+*AwaStaticClient_SetResourceOperationHandler* specifies a handler function that is called when LWM2M operations are performed on a resource. The table below lists the resource operations that trigger the handler function.
  
 | operation | objectID | objectInstanceID | resourceID | resourceInstanceID | dataPointer | dataSize | changed | returns |
 |-----|-----|-----|-----|-----|-----|-----|-----|-----|
