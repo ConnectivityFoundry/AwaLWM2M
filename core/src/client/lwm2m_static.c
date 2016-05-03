@@ -792,7 +792,7 @@ static AwaError DefineResource(AwaStaticClient * client, const char * resourceNa
 
     if (client != NULL)
     {
-        if ((resourceName != NULL) && (handler != NULL) && (minimumInstances <= maximumInstances))
+        if ((resourceName != NULL) && (minimumInstances <= maximumInstances))
         {
             ObjectDefinition * objFormat = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
             if (objFormat != NULL)
@@ -800,6 +800,7 @@ static AwaError DefineResource(AwaStaticClient * client, const char * resourceNa
                 ResourceDefinition * resourceDefinition = Definition_NewResourceTypeWithHandler(objFormat, resourceName, resourceID, resourceType, minimumInstances, maximumInstances, operations, (LWM2MHandler)handler);
                 if (resourceDefinition != NULL)
                 {
+                    resourceDefinition->Handler = (LWM2MHandler)handler;
                     resourceDefinition->DataPointers = dataPointers;
                     resourceDefinition->IsPointerArray = isPointerArray;
                     resourceDefinition->DataElementSize = dataElementSize;
@@ -881,7 +882,7 @@ AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID ob
     return DefineResource(client, resourceName,
                           objectID, resourceID, resourceType,
                           minimumInstances, maximumInstances, operations,
-                          DefaultHandler, NULL, false, 0, 0);
+                          NULL, NULL, false, 0, 0);
 }
 
 AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, AwaStaticClientHandler handler)
