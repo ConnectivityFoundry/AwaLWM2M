@@ -354,6 +354,12 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
  *          - ::AwaStaticClient_SetBootstrapServerURI
  *
  *        After calling this function, the following functions @b may be called before calling ::AwaStaticClient_Process:
+ *          - ::AwaStaticClient_DefineObject
+ *          - ::AwaStaticClient_SetObjectOperationHandler
+ *          - ::AwaStaticClient_DefineResource
+ *          - ::AwaStaticClient_SetResourceOperationHandler
+ *          - ::AwaStaticClient_SetResourceStorageWithPointer
+ *          - ::AwaStaticClient_SetResourceStorageWithPointerArray
  *          - ::AwaStaticClient_SetFactoryBootstrapInformation
  *
  * @param[in] client A pointer to a valid Awa Static Client.
@@ -384,6 +390,8 @@ void AwaStaticClient_Free(AwaStaticClient ** client);
  * @brief Define a new custom LWM2M object. By default, the LWM2M Client will handle instance operations such as delete and create.
  *        Use ::AwaStaticClient_SetObjectOperationHandler to override this default behaviour with a specified handler.
  *
+ *        This function may only be called after a successful call to ::AwaStaticClient_Init.
+ *
  * @note  In order for an LWM2M server to perform operations on the defined object,
  *        a matching object must be defined on the LWM2M server.
  *
@@ -403,8 +411,10 @@ AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID obje
 /**
  * @brief Set the Object Operation handler function, to be called by the LWM2M Client when object instances are created or deleted.
  *
+ *        The target object must be defined with ::AwaStaticClient_DefineObject.
+ *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] objectID An ID that uniquely identifies the object for which the handler will be associated.
+ * @param[in] objectID An ID that uniquely identifies the defined object for which the handler will be associated.
  * @param[in] handler A user-specified callback handler.
  * @return AwaError_Success on success.
  * @return AwaError_DefinitionInvalid if @e objectID is invalid.
@@ -413,16 +423,18 @@ AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID obje
 AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler);
 
 /**
- * @brief Define a new resource of an existing object. By default, the LWM2M Client will handle resource operations.
+ * @brief Define a new resource as part of a defined object. By default, the LWM2M Client will handle resource operations.
  *        Use ::AwaStaticClient_SetResourceOperationHandler, ::AwaStaticClient_SetResourceStorageWithPointer or ::AwaStaticClient_SetResourceStorageWithPointerArray
  *        to configure whether operations are handled by the user, or directed to operate on static memory.
+ *
+ *        This function may only be called after a successful call to ::AwaStaticClient_Init, and the target object must be defined.
  *
  * @note  In order for an LWM2M server to perform operations on the defined resource,
  *        a matching object with resources must be defined on the LWM2M server.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] resourceName A human-friendly name for the new resource.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
+ * @param[in] objectID An ID that uniquely identifies the defined object which will contain the new resource.
  * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
  * @param[in] resourceType The type of the new resource.
  * @param[in] minimumInstances The minimum number of instances of this resource that must exist at any time. Must be less than or equal to @e maximumInstances.
@@ -441,11 +453,13 @@ AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID ob
 /**
  * @brief Set a user-specified callback handler that will be called whenever a LWM2M operation on the resource is performed.
  *
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
  * @note  This function overrides the effect of ::AwaStaticClient_SetResourceStorageWithPointer and ::AwaStaticClient_SetResourceStorageWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
- * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
  * @param[in] handler A user-specified callback handler.
  * @return AwaError_Success on success.
  * @return AwaError_DefinitionInvalid if @e objectID or @e resourceID is invalid or out of range.
@@ -460,12 +474,14 @@ AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, A
  *        within any of its instances may be directly modified at any time, however
  *        ::AwaStaticClient_ResourceChanged should be called to allow notifications to be sent to
  *        any observing LWM2M servers.
-
+ *
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
  * @note  This function overrides the effect of ::AwaStaticClient_SetResourceOperationHandler and ::AwaStaticClient_SetResourceStorageWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
- * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
  * @param[in] dataPointer A pointer to the resource's data.
  * @param[in] dataElementSize The size in bytes of the resource's data. Must be greater than or equal to 1.
  * @param[in] dataStepSize The step size in bytes between the resource's data per object instance.
@@ -484,11 +500,13 @@ AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client,
  *        ::AwaStaticClient_ResourceChanged should be called to allow notifications to be sent to any observing
  *        LWM2M servers.
  *
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
  * @note  This function overrides the effect of ::AwaStaticClient_SetResourceOperationHandler and ::AwaStaticClient_SetResourceStorageWithPointer.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
- * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
  * @param[in] dataPointers An array of pointers, each containing the location of the resource's data for a single object instance.
  * @param[in] dataElementSize The size in bytes of the resource's data. Must be greater than or equal to 1.
  * @return AwaError_Success on success.
@@ -507,6 +525,8 @@ AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * cl
  * @brief Process the Awa Static Client. This is the main process function which in turn processes
  *        the LWM2M Client core, updating the LWM2M state machine, handling any incoming CoAP messages,
  *        and sending notifications and registration updates to servers.
+ *
+ *        A successful call to ::AwaStaticClient_Init must precede a call to this function.
  *
  *        This function needs to be called regularly, usually as part of a loop, and returns the
  *        time to wait before calling again.

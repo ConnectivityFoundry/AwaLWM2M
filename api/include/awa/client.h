@@ -90,18 +90,18 @@ extern "C" {
  *************************************************************************************************/
 
 /// @cond ignore
-typedef struct _AwaClientSession AwaClientSession;
-typedef struct _AwaClientGetOperation AwaClientGetOperation;
-typedef struct _AwaClientGetResponse AwaClientGetResponse;
-typedef struct _AwaClientDefineOperation AwaClientDefineOperation;
-typedef struct _AwaClientSetOperation AwaClientSetOperation;
-typedef struct _AwaClientSetResponse AwaClientSetResponse;
-typedef struct _AwaClientDeleteOperation AwaClientDeleteOperation;
-typedef struct _AwaClientDeleteResponse AwaClientDeleteResponse;
+typedef struct _AwaClientSession            AwaClientSession;
+typedef struct _AwaClientGetOperation       AwaClientGetOperation;
+typedef struct _AwaClientGetResponse        AwaClientGetResponse;
+typedef struct _AwaClientDefineOperation    AwaClientDefineOperation;
+typedef struct _AwaClientSetOperation       AwaClientSetOperation;
+typedef struct _AwaClientSetResponse        AwaClientSetResponse;
+typedef struct _AwaClientDeleteOperation    AwaClientDeleteOperation;
+typedef struct _AwaClientDeleteResponse     AwaClientDeleteResponse;
 typedef struct _AwaClientSubscribeOperation AwaClientSubscribeOperation;
-typedef struct _AwaClientSubscribeResponse AwaClientSubscribeResponse;
-typedef struct _AwaClientSubscription AwaClientChangeSubscription;
-typedef struct _AwaClientSubscription AwaClientExecuteSubscription;
+typedef struct _AwaClientSubscribeResponse  AwaClientSubscribeResponse;
+typedef struct _AwaClientSubscription       AwaClientChangeSubscription;
+typedef struct _AwaClientSubscription       AwaClientExecuteSubscription;
 /// @endcond
 
 /**************************************************************************************************
