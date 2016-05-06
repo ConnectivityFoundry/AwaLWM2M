@@ -312,7 +312,7 @@ static void PrintUsage(void)
 
     printf("Options:\n");
     printf("  --port, -p PORT          : Use local port number PORT for CoAP communications\n");
-    printf("  --addressFamily, -f AF   : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
+    printf("  --addressFamily, -a AF   : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
     printf("  --ipcPort, -i PORT       : Use port number PORT for IPC communications\n");
     printf("  --endPointName, -e NAME  : Use NAME as client end point name\n");
     printf("  --bootstrap, -b URI      : Use bootstrap server URI\n");
@@ -338,7 +338,7 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName);
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap);
     printf("  LogFile              (--logFile)          : %s\n", options->LogFile);
-    printf("  AddressFamily        (--addressFamily)    : %d\n", options->AddressFamily);
+    printf("  AddressFamily        (--addressFamily)    : %d\n", options->AddressFamily == AF_INET? 4 : 6);
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile);
 }
 
