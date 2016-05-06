@@ -9,6 +9,6 @@ if (BUILD_TESTS)
 endif ()
 
 install (DIRECTORY include/awa
-  DESTINATION /usr/include
+  DESTINATION include
 )
 

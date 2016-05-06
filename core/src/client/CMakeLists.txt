@@ -105,9 +105,9 @@ if (ENABLE_GCOV)
 endif ()
 
 install (TARGETS awa_clientd
-    RUNTIME DESTINATION /bin
+    RUNTIME DESTINATION bin
 )
 
 install (TARGETS awa_static_shared
-    LIBRARY DESTINATION /usr/lib
+    LIBRARY DESTINATION lib
 )

@@ -60,7 +60,7 @@ foreach (tool ${DefineTools})
 endforeach ()
 
 install (TARGETS ${DefineTools}
-  RUNTIME DESTINATION /bin
+  RUNTIME DESTINATION bin
 )
 
 foreach (tool ${Tools})
@@ -79,7 +79,7 @@ foreach (tool ${Tools})
 endforeach (tool ${Tools})
 
 install (TARGETS ${Tools}
-  RUNTIME DESTINATION /bin
+  RUNTIME DESTINATION bin
 )
 
 if (BUILD_TESTS)

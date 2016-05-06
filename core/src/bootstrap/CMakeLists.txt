@@ -44,6 +44,6 @@ if (ENABLE_GCOV)
 endif ()
 
 install (TARGETS awa_bootstrapd
-    RUNTIME DESTINATION /bin
+    RUNTIME DESTINATION bin
 )
 
