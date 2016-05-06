@@ -140,7 +140,8 @@ ResourceDefinition * Definition_LookupResourceDefinitionFromObjectDefinition(con
 ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
                                             uint16_t minimumInstances, const ObjectOperationHandlers * handlers);
 ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t minimumInstances,
-                                            uint16_t maximumInstances, LWM2MHandler handler);
+                                                       uint16_t maximumInstances, LWM2MHandler handler);
+int Definition_SetObjectHandler(ObjectDefinition * objFormat, LWM2MHandler handler);
 void Definition_FreeObjectType(ObjectDefinition * definition);
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat);
 ObjectDefinition * Definition_CopyObjectDefinition(const ObjectDefinition * definition);

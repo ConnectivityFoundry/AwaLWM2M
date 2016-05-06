@@ -691,8 +691,8 @@ static TreeNode BuildRegisteredEntityTree(const Lwm2mClientType * client)
     {
         ObjectListEntry * entry = ListEntry(j, ObjectListEntry, list);
 
-        char path[256] = { 0 };
-        if (Path_MakePath(path, 256, entry->ObjectID, entry->InstanceID, AWA_INVALID_ID) == AwaError_Success)
+        char path[MAX_PATH_LENGTH] = { 0 };
+        if (Path_MakePath(path, MAX_PATH_LENGTH, entry->ObjectID, entry->InstanceID, AWA_INVALID_ID) == AwaError_Success)
         {
             printf("Add Object %d, Instance %d\n", entry->ObjectID, entry->InstanceID);
             ObjectsTree_AddPath(objectsTree, path, NULL);
@@ -924,31 +924,49 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
         if (responsePath != NULL)
         {
             Lwm2m_Debug("Response path: %s\n", responsePath);
-            char * responsePathWithoutQueryString = strdup(responsePath);
-            char * queryString = strchr(responsePathWithoutQueryString, '?');
-            if (queryString != NULL)
+            char * responsePathWithoutQueryString = malloc(strlen(responsePath) + 2);
+            if (responsePathWithoutQueryString != NULL)
             {
-                queryString[0] = '\0';
-            }
-
-            TreeNode pathNode = NULL;
-            InternalError result = ObjectsTree_FindPathNode(requestContext->ResponseObjectsTree, responsePathWithoutQueryString, &pathNode);
-            if (result == InternalError_Success)
-            {
-                if (AwaResult_IsSuccess(coapResponseCode))
+                if (responsePath[0] == '/')
                 {
-                    successCallback(requestContext, responsePathWithoutQueryString, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
+                    strcpy(responsePathWithoutQueryString, responsePath);
+                }
+                else 
+                {
+                    responsePathWithoutQueryString[0] = '/';
+                    strcpy(&responsePathWithoutQueryString[1], responsePath);
+                }
+            
+                char * queryString = strchr(responsePathWithoutQueryString, '?');
+                if (queryString != NULL)
+                {
+                    queryString[0] = '\0';
+                }
+
+                TreeNode pathNode = NULL;
+                InternalError result = ObjectsTree_FindPathNode(requestContext->ResponseObjectsTree, responsePathWithoutQueryString, &pathNode);
+                if (result == InternalError_Success)
+                {
+                    if (AwaResult_IsSuccess(coapResponseCode))
+                    {
+                        successCallback(requestContext, responsePathWithoutQueryString, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
+                    }
+                    else
+                    {
+                        IPC_AddServerResultTagToAllLeafNodes(pathNode, AwaError_LWM2MError, LWM2MError_FromCoapResponseCode(coapResponseCode));
+                    }
                 }
                 else
                 {
-                    IPC_AddServerResultTagToAllLeafNodes(pathNode, AwaError_LWM2MError, LWM2MError_FromCoapResponseCode(coapResponseCode));
+                    Lwm2m_Error("Could not find CoAP response path in IPC response: %s\n", responsePathWithoutQueryString);
                 }
+                free(responsePathWithoutQueryString);
             }
             else
             {
-                Lwm2m_Error("Could not find CoAP response path in IPC response: %s\n", responsePathWithoutQueryString);
+                Lwm2m_Error("Failed to allocate memory for response\n");
+                responseCode = AwaResult_OutOfMemory;
             }
-            free(responsePathWithoutQueryString);
         }
         else
         {

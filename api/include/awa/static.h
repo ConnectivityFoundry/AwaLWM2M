@@ -79,8 +79,7 @@ extern "C" {
   } name
 
 /**
- * Supported operations for resource and object handlers
- * defined with ::AwaStaticClient_DefineResourceWithHandler.
+ * Supported operations for resource and object handlers defined with ::AwaStaticClient_DefineResource.
  */
 typedef enum
 {
@@ -355,6 +354,12 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
  *          - ::AwaStaticClient_SetBootstrapServerURI
  *
  *        After calling this function, the following functions @b may be called before calling ::AwaStaticClient_Process:
+ *          - ::AwaStaticClient_DefineObject
+ *          - ::AwaStaticClient_SetObjectOperationHandler
+ *          - ::AwaStaticClient_DefineResource
+ *          - ::AwaStaticClient_SetResourceOperationHandler
+ *          - ::AwaStaticClient_SetResourceStorageWithPointer
+ *          - ::AwaStaticClient_SetResourceStorageWithPointerArray
  *          - ::AwaStaticClient_SetFactoryBootstrapInformation
  *
  * @param[in] client A pointer to a valid Awa Static Client.
@@ -382,31 +387,12 @@ void AwaStaticClient_Free(AwaStaticClient ** client);
  ************************************************************************************************************/
 
 /**
- * @brief Define a new custom LWM2M object with a user-specified callback handler
- *        that will be called whenever a LWM2M operation on any instance of the
- *        defined object is performed.
+ * @brief Define a new custom LWM2M object. By default, the LWM2M Client will handle instance operations such as delete and create.
+ *        Use ::AwaStaticClient_SetObjectOperationHandler to override this default behaviour with a specified handler.
  *
- *        In order for an LWM2M server to perform operations on the defined object,
- *        a matching object must be defined on the LWM2M server.
+ *        This function may only be called after a successful call to ::AwaStaticClient_Init.
  *
- * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] objectName A human-friendly name for the new object.
- * @param[in] objectID An ID that uniquely identifies the object.
- * @param[in] minimumInstances The minimum number of instances of this object that must exist at any time. Must be less than or equal to @e maximumInstances.
- * @param[in] maximumInstances The maximum number of instances of this object that must exist at any time. Must be greater than zero.
- * @param[in] handler A user-specified callback handler.
- * @return AwaError_Success on success.
- * @return AwaError_DefinitionInvalid if @e objectName is invalid or @e objectID is out of range, or
- *         @e minimumInstances or @e maximumInstances are invalid.
- * @return AwaError_StaticClientInvalid if @e client is NULL.
- */
-AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
-                                                 uint16_t minimumInstances, uint16_t maximumInstances, AwaStaticClientHandler handler);
-
-/**
- * @brief Define a new custom LWM2M object, leaving handling of any instances of the object to the LWM2M Client.
- *
- *        In order for an LWM2M server to perform operations on the defined object,
+ * @note  In order for an LWM2M server to perform operations on the defined object,
  *        a matching object must be defined on the LWM2M server.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
@@ -419,97 +405,116 @@ AwaError AwaStaticClient_DefineObjectWithHandler(AwaStaticClient * client, const
  *         @e minimumInstances or @e maximumInstances are invalid.
  * @return AwaError_StaticClientInvalid if @e client is NULL.
  */
-AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, const char * objectName, AwaObjectID objectID,
+AwaError AwaStaticClient_DefineObject(AwaStaticClient * client, AwaObjectID objectID, const char * objectName,
                                       uint16_t minimumInstances, uint16_t maximumInstances);
 
 /**
- * @brief Define a new resource of an existing object with a user-specified callback handler
- *        that will be called whenever a LWM2M operation on the resource is performed.
+ * @brief Set the Object Operation handler function, to be called by the LWM2M Client when object instances are created or deleted.
  *
- *        In order for an LWM2M server to perform operations on the defined resource,
+ *        The target object must be defined with ::AwaStaticClient_DefineObject.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID An ID that uniquely identifies the defined object for which the handler will be associated.
+ * @param[in] handler A user-specified callback handler.
+ * @return AwaError_Success on success.
+ * @return AwaError_DefinitionInvalid if @e objectID is invalid.
+ * @return AwaError_StaticClientInvalid if @e client is NULL.
+ */
+AwaError AwaStaticClient_SetObjectOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaStaticClientHandler handler);
+
+/**
+ * @brief Define a new resource as part of a defined object. By default, the LWM2M Client will handle resource operations.
+ *        Use ::AwaStaticClient_SetResourceOperationHandler, ::AwaStaticClient_SetResourceStorageWithPointer or ::AwaStaticClient_SetResourceStorageWithPointerArray
+ *        to configure whether operations are handled by the user, or directed to operate on static memory.
+ *
+ *        This function may only be called after a successful call to ::AwaStaticClient_Init, and the target object must be defined.
+ *
+ * @note  In order for an LWM2M server to perform operations on the defined resource,
  *        a matching object with resources must be defined on the LWM2M server.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] resourceName A human-friendly name for the new resource.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
+ * @param[in] objectID An ID that uniquely identifies the defined object which will contain the new resource.
  * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
  * @param[in] resourceType The type of the new resource.
  * @param[in] minimumInstances The minimum number of instances of this resource that must exist at any time. Must be less than or equal to @e maximumInstances.
  * @param[in] maximumInstances The maximum number of instances of this resource that must exist at any time. Must be greater than zero.
  * @param[in] operations The allowed LWM2M operations on the new resource.
- * @param[in] handler A user-specified callback handler.
  *
  * @return AwaError_Success on success.
  * @return AwaError_DefinitionInvalid if @e resourceName is invalid, or @e objectID or @e resourceID is out of range, or
  *         @e minimumInstances or @e maximumInstances are invalid.
  * @return AwaError_StaticClientInvalid if @e client is NULL.
  */
-AwaError AwaStaticClient_DefineResourceWithHandler(AwaStaticClient * client, const char * resourceName,
-                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                   AwaStaticClientHandler handler);
+AwaError AwaStaticClient_DefineResource(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID,
+                                        const char * resourceName, AwaResourceType resourceType,
+                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations);
 
 /**
- * @brief Define a new resource of an existing object with a pointer to the resource's data,
+ * @brief Set a user-specified callback handler that will be called whenever a LWM2M operation on the resource is performed.
+ *
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
+ * @note  This function overrides the effect of ::AwaStaticClient_SetResourceStorageWithPointer and ::AwaStaticClient_SetResourceStorageWithPointerArray.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
+ * @param[in] handler A user-specified callback handler.
+ * @return AwaError_Success on success.
+ * @return AwaError_DefinitionInvalid if @e objectID or @e resourceID is invalid or out of range.
+ * @return AwaError_StaticClientInvalid if @e client is NULL.
+ *
+ */
+AwaError AwaStaticClient_SetResourceOperationHandler(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, AwaStaticClientHandler handler);
+
+/**
+ * @brief Set a resource's storage with a pointer to the resource's data,
  *        leaving handling of the resource to the LWM2M Client. The resource's value
  *        within any of its instances may be directly modified at any time, however
  *        ::AwaStaticClient_ResourceChanged should be called to allow notifications to be sent to
  *        any observing LWM2M servers.
  *
- *        In order for an LWM2M server to perform operations on the defined
- *        resource, a matching object with resources must be defined on the LWM2M server.
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
+ * @note  This function overrides the effect of ::AwaStaticClient_SetResourceOperationHandler and ::AwaStaticClient_SetResourceStorageWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] resourceName A human-friendly name for the new resource.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
- * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
- * @param[in] resourceType The type of the new resource.
- * @param[in] minimumInstances The minimum number of instances of this resource that must exist at any time. Must be less than or equal to @e maximumInstances.
- * @param[in] maximumInstances The maximum number of instances of this resource that must exist at any time. Must be greater than zero.
- * @param[in] operations The allowed operations on the new resource.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
  * @param[in] dataPointer A pointer to the resource's data.
  * @param[in] dataElementSize The size in bytes of the resource's data. Must be greater than or equal to 1.
  * @param[in] dataStepSize The step size in bytes between the resource's data per object instance.
  * @return AwaError_Success on success.
- * @return AwaError_DefinitionInvalid if @e resourceName is invalid, or @e objectID or @e resourceID is out of range, or
- #         @e minimumInstances or @e maximumInstances are invalid, or @e dataPointer is NULL, or @e dataElementSize is less than 1.
- * @return AwaError_StaticClientInvalid if @e client is NULL.
+ * @return AwaError_DefinitionInvalid if @e objectID or @e resourceID is invalid is out of range, or
+ *         @e dataPointers is NULL, or @e dataElementSize is less than 1.
+ * @return AwaError_StaticClientInvalid if the client is NULL.
  */
-AwaError AwaStaticClient_DefineResourceWithPointer(AwaStaticClient * client, const char * resourceName,
-                                                   AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                   uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                   void * dataPointer, size_t dataElementSize, size_t dataStepSize);
+AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointer, size_t dataElementSize, size_t dataStepSize);
 
 /**
- * @brief Define a new resource of an existing object with an array of pointers to non-contiguous data,
+ * @brief Set a resource's storage with an array of pointers to non-contiguous data,
  *        where each piece of data stores the resource for a single instance of its object.
  *        Handling of the resource is left to the LWM2M Client. The resource's value
  *        within any of its instances may be directly modified at any time, however
  *        ::AwaStaticClient_ResourceChanged should be called to allow notifications to be sent to any observing
  *        LWM2M servers.
  *
- *        In order for an LWM2M server to perform operations on the defined resource,
- *        a matching object with resources must be defined on the LWM2M server.
+ *        The target resource must be defined with ::AwaStaticClient_DefineResource before this function is called.
+ *
+ * @note  This function overrides the effect of ::AwaStaticClient_SetResourceOperationHandler and ::AwaStaticClient_SetResourceStorageWithPointer.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] resourceName A human-friendly name for the new resource.
- * @param[in] objectID An ID that uniquely identifies the object which will contain the new resource.
- * @param[in] resourceID An ID that uniquely identifies the new resource within the object.
- * @param[in] resourceType The type of the new resource.
- * @param[in] minimumInstances The minimum number of instances of this resource that must exist at any time. Must be less than or equal to @e maximumInstances.
- * @param[in] maximumInstances The maximum number of instances of this resource that must exist at any time. Must be greater than zero.
- * @param[in] operations The allowed operations on the new resource.
+ * @param[in] objectID An ID that uniquely identifies the defined object that contains the defined resource.
+ * @param[in] resourceID An ID that uniquely identifies the defined resource within the object.
  * @param[in] dataPointers An array of pointers, each containing the location of the resource's data for a single object instance.
  * @param[in] dataElementSize The size in bytes of the resource's data. Must be greater than or equal to 1.
  * @return AwaError_Success on success.
- * @return AwaError_DefinitionInvalid if @e resourceName is invalid, or @e objectID or @e resourceID is out of range, or
- *         @e minimumInstances or @e maximumInstances is invalid, or @e dataPointers is NULL, or @e dataElementSize is less than 1.
+ * @return AwaError_DefinitionInvalid if @e objectID or @e resourceID is invalid or out of range, or
+ *         @e dataPointers is NULL, or @e dataElementSize is less than 1.
  * @return AwaError_StaticClientInvalid if the client is NULL.
  */
-AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client, const char * resourceName,
-                                                        AwaObjectID objectID, AwaResourceID resourceID, AwaResourceType resourceType,
-                                                        uint16_t minimumInstances, uint16_t maximumInstances, AwaResourceOperations operations,
-                                                        void * dataPointers[], size_t dataElementSize);
+AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * client, AwaObjectID objectID, AwaResourceID resourceID, void * dataPointers[], size_t dataElementSize);
 
 
 /************************************************************************************************************
@@ -520,6 +525,8 @@ AwaError AwaStaticClient_DefineResourceWithPointerArray(AwaStaticClient * client
  * @brief Process the Awa Static Client. This is the main process function which in turn processes
  *        the LWM2M Client core, updating the LWM2M state machine, handling any incoming CoAP messages,
  *        and sending notifications and registration updates to servers.
+ *
+ *        A successful call to ::AwaStaticClient_Init must precede a call to this function.
  *
  *        This function needs to be called regularly, usually as part of a loop, and returns the
  *        time to wait before calling again.
@@ -535,7 +542,7 @@ int AwaStaticClient_Process(AwaStaticClient * client);
  ************************************************************************************************************/
 
 /**
- * @brief Retrieve a pointer to a resource instance's data, when defined with the with ::AwaStaticClient_DefineResourceWithPointer or ::AwaStaticClient_DefineResourceWithPointerArray.
+ * @brief Retrieve a pointer to a resource instance's data, when defined with ::AwaStaticClient_SetResourceStorageWithPointer or ::AwaStaticClient_SetResourceStorageWithPointerArray.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
  * @param[in] objectID The ID of the object for the specified resource instance.
@@ -568,6 +575,23 @@ const void * AwaStaticClient_GetResourceInstancePointer(AwaStaticClient * client
 AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
 
 /**
+ * @brief Delete an optional resource within the specified object instance.
+ *
+ * For a resource registered with a handler this will invoke a callback with the AwaOperation_DeleteResource.
+ *
+ * For a resource registered by pointer this will delete the resource.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID The ID of the object for the specified resource.
+ * @param[in] objectInstanceID The ID of the object instance for the specified resource.
+ * @param[in] resourceID The ID of the optional resource to delete.
+ * @return AwaError_Success if the resource is created successfully.
+ * @return AwaError_CannotCreate if the resource already exists, or no resource is defined for the specified object, object instance and resource ID.
+ * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
+ */
+AwaError AwaStaticClient_DeleteResource(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID);
+
+/**
  * @brief Create an object instance within the specified object.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
@@ -579,6 +603,19 @@ AwaError AwaStaticClient_CreateResource(AwaStaticClient * client, AwaObjectID ob
  * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
  */
 AwaError AwaStaticClient_CreateObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
+
+/**
+ * @brief Delete an object instance within the specified object.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] objectID The ID of the object for the specified object instance.
+ * @param[in] objectInstanceID The ID of the object instance to delete.
+ * @return AwaError_Success if the object instance is created successfully.
+ * @return AwaError_CannotCreate if the object instance already exists, the object already contains a maximum number of object instances,
+ *         or if no object is defined for the specified object ID.
+ * @return AwaError_StaticClientInvalid if @e client is NULL or uninitialised.
+ */
+AwaError AwaStaticClient_DeleteObjectInstance(AwaStaticClient * client, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID);
 
 /**
  * @brief Mark the specified resource as changed, in order for the Awa Static Client to

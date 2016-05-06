@@ -71,7 +71,7 @@ const AwaResourceID TEST_RESOURCE_OPAQUEARRAY = 5;
 const AwaResourceID TEST_RESOURCE_TIMEARRAY = 6;
 const AwaResourceID TEST_RESOURCE_OBJECTLINKARRAY = 7;
 
-}
+} // namespace TestStaticClientGetResourceInstancePointerDetail
 
 struct TestGetResourceInstancePointerData
 {
@@ -103,13 +103,13 @@ protected:
         TestStaticClientWithServer::SetUp();
         TestGetResourceInstancePointerData data = GetParam();
 
-        EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, "TestObject", data.ObjectID, 0, 1));
+        EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, data.ObjectID, "TestObject", 0, 1));
 
         switch(data.Type)
         {
             case AwaResourceType_Opaque:
             {
-                //EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadWrite, &opaque_, sizeof(opaque_), 0));
+                //EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadWrite, &opaque_, sizeof(opaque_), 0));
                 ASSERT_TRUE(false);
                 break;
             }
@@ -118,7 +118,8 @@ protected:
                     StaticClientAllocedValue_ = malloc(data.ValueSize);
                     EXPECT_TRUE(StaticClientAllocedValue_ != NULL);
                     memset(StaticClientAllocedValue_, 0, data.ValueSize);
-                    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, "Test Resource", data.ObjectID, data.ResourceID, data.Type, 1, 1, AwaResourceOperations_ReadWrite, StaticClientAllocedValue_, data.ValueSize, 0));
+                    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadWrite));
+                    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, StaticClientAllocedValue_, data.ValueSize, 0));
                 }
                 break;
         }

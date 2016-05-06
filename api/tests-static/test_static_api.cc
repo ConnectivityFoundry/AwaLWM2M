@@ -28,7 +28,7 @@
 
 namespace Awa {
 
-class TestStaticClient : public testing::Test {};
+class TestStaticClient : public TestClientBase {};
 
 TEST_F(TestStaticClient, AwaStaticClient_New_Free)
 {
