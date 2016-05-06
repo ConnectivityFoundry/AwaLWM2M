@@ -21,9 +21,11 @@
 #
 ##
 
+# default location for out-of-source build:
 BUILD_DIR:=./build
 
-_STAGING_DIR:=./staging
+# default path prefix for installing build results:
+INSTALL_PREFIX:=/usr/local
 
 
 ###############################################################################
@@ -34,6 +36,8 @@ ifeq ($(DEBUG),)
 else
   CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Debug
 endif
+
+CMAKE_OPTIONS+=-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}
 
 # absolute path of BUILD_DIR
 BUILD_DIR_ABS:=$(shell pwd)/$(BUILD_DIR)
@@ -144,7 +148,6 @@ api-clean:
 
 clean: api-clean
 	rm -rf $(BUILD_DIR)
-	rm -rf $(_STAGING_DIR)
 	rm -rf $(VALGRIND_LOG_DIR)
 	rm -f *.log
 	rm -f *_out.xml
