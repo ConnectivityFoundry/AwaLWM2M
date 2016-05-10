@@ -29,23 +29,23 @@ The client-tutorial application makes use of the Awa API to define objects and r
 
 ![](client-tutorial.png)
 
-
+Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
 ## Awa LightweightM2M installation.
 
-Use the commands below to build and install Awa LightweightM2M to the  *./build/install* directory:
+Use the command below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
 ```
-~/AwaLWM2M$ make
-~/AwaLWM2M$ cd build
-~/AwaLWM2M/build$ make install DESTDIR=./install
+~/AwaLWM2M $ make install DESTDIR=install
 ```
 
-Alternatively, you can use the following command to install into the default directory given above:
+Alternatively, you can use the following command to install into the default directory on your system:
 
 ```
-~/AwaLWM2M$ make install
+~/AwaLWM2M $ sudo make install
 ```
+
+This example will assume that you have installed it to `~/AwaLWM2M/build/install`.
 
 ----
 
@@ -64,7 +64,7 @@ To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to r
 
 ```make
 all:
-	$(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
+	$(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
 ```
 
 Now is a good time to define our objects and resources:
@@ -123,7 +123,7 @@ int main(void)
 Now build the application...
 
 ```
-~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
+~/tutorial$ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
 Start the client daemon...
@@ -249,7 +249,7 @@ int main(void)
 After updating the application code, rebuild the application:
 
 ```
-~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
+~/tutorial$ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
 And restart the client daemon:
@@ -328,14 +328,14 @@ Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
 all:
-        $(CC) client-tutorial.c -o client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa
+        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
+        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
 ```
 
 Build the new application:
 
 ```
-~/tutorial$ make INSTALL_PATH=~/AwaLWM2M/build/install
+~/tutorial$ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
 Restart the client/server daemon:
@@ -409,7 +409,7 @@ Copy the following code into static-client-tutorial/*Makefile*:
 
 ```make
 all:
-	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(INSTALL_PATH)/usr/include -L$(INSTALL_PATH)/usr/lib -lawa_static
+	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa_static
 ```
 
 Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
@@ -445,7 +445,7 @@ Run "make" and specify the install path to Awa LWM2M:
 
 ```
 $ cd static-client-tutorial
-static-client-tutorial $ make INSTALL_PATH=~/AwaLWM2M/build/install
+static-client-tutorial $ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
 ```
 
 Start the bootstrap and server daemons:
