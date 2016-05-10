@@ -38,6 +38,12 @@ struct _AwaServerSession
     SessionCommon * SessionCommon;
     MapType * Observers;
     QueueType * NotificationQueue;
+
+    struct Events
+    {
+        AwaServerRegisterEventCallback RegisterEventCallback;
+        void * RegisterEventContext;
+    } Events;
 };
 
 AwaServerSession * AwaServerSession_New(void)
@@ -367,3 +373,18 @@ MapType * ServerSession_GetObservers(const AwaServerSession * session)
     return list;
 }
 
+AwaError AwaServerSession_SetRegisterEventCallback(AwaServerSession * session, const AwaServerRegisterEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        session->Events.RegisterEventCallback = callback;
+        session->Events.RegisterEventContext = context;
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}

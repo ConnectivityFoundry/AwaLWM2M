@@ -61,7 +61,7 @@ int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, c
                                                    AwaResourceOperations operations, ResourceOperationHandlers * handlers, Lwm2mTreeNode * defaultValueNode)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID, resourceType,
-            maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
+                                           maximumInstances, minimumInstances, operations, handlers, defaultValueNode);
 }
 
 int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resName, ObjectIDType objectID,
@@ -69,7 +69,7 @@ int Lwm2mCore_RegisterResourceType(Lwm2mContextType * context, const char * resN
                                    uint16_t minimumInstances, AwaResourceOperations operations, ResourceOperationHandlers * handlers)
 {
     return Definition_RegisterResourceType(context->Definitions, resName, objectID, resourceID,
-            resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
+                                           resourceType, maximumInstances, minimumInstances, operations, handlers, NULL);
 }
 
 ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * context, ObjectIDType  objectID, ObjectInstanceIDType objectInstanceID)

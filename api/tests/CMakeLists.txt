@@ -56,6 +56,7 @@ set (test_api_runner_SOURCES
   test_changeset.cc
   test_subscribe_observe_common.cc
   test_execute_operation.cc
+  test_server_event.cc
 
   test_bootstrap.cc
   test_daemon.cc
