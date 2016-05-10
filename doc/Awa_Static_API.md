@@ -66,14 +66,42 @@ While either of the above modes may be used to manage Objects and Resources, the
  
 ### Detailed functionality
 
->Sequence of operations (init, definition, start, process loop)
->init: configuring CoAP, endpoint name, bootstrap URI
->definition: setting up pointer and/or handler definitions for each object
->start: initialises CoAP (allows CoAP endpoints to be created)
->process loop: client-side create/delete, update values, generate notifications, handle LWM2M operations and bootstrap/register.
->Explain min/maxInstances in definition functions.
->Notification hierarchy explanation?
+#### Sequence of operations
+The client side sequence of operations is:  
+* Initialisation  
+* definition  
+* start  
+* process loop
 
+##### Initialisation
+* Include relevant libraries
+* Create a new AwaStaticClient
+* Name the AwaStaticClient endpoint 
+* Configure the CoAP address and port
+* Provide a bootstrap URI
+* Initialise the AwaStaticClient
+
+##### Object and Resource definitions 
+The definition process sets up pointer and/or handler mode definitions for each LWM2M Object and Resource. The steps required include:
+1.  Defining an Object which acts as a container for Resources  
+2.  Defining the required Resources that the Object will expose   
+3.  Allocating storage memory for the Resource value using a pointer. This allows the value to be shared by the device's application code.
+
+It's important to remember that Object and Resource definitions are *not instances*. The defined Object must be instantiated before it can be used.
+
+##### Start
+This is CoAP initialisation, which allows CoAP endpoints to be created.
+
+##### The process loop
+This is where the client-side operations take place such as:
+* Creation, deletion, and/or update of Resource values  
+* Generation of notifications  
+* LWM2M operations handling  
+* Bootstrapping and registration  
+
+Example code for implementing all of the above functionality can be found [here](http://flowm2m.github.io/AwaLWM2M-docs/examples.html).  
+
+ - [x] Notification hierarchy explanation?
  - [x] Explain AwaResourceOperations and how they affect resource access.
 
  
@@ -154,6 +182,7 @@ The parameters required for handling operations on object and resource instances
 ### Further information  
 
 [Examples](http://flowm2m.github.io/AwaLWM2M-docs/examples.html)
+
  
 [API Documentation](http://flowm2m.github.io/AwaLWM2M-docs/static_8h.html)
  
