@@ -82,7 +82,8 @@ The client side sequence of operations is:
 * Initialise the AwaStaticClient
 
 ##### Object and Resource definitions 
-The definition process sets up pointer and/or handler mode definitions for each LWM2M Object and Resource. The steps required include:
+The definition process sets up pointer and/or handler mode definitions for each LWM2M Object and Resource. The steps required include:  
+
 1.  Defining an Object which acts as a container for Resources  
 2.  Defining the required Resources that the Object will expose   
 3.  Allocating storage memory for the Resource value using a pointer. This allows the value to be shared by the device's application code.
