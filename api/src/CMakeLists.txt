@@ -105,6 +105,6 @@ set_target_properties (Awa_shared PROPERTIES OUTPUT_NAME "awa")
 target_link_libraries (Awa_shared libxml_static libb64_static libhmac_static)
 
 install (TARGETS Awa_shared
-   LIBRARY DESTINATION /usr/lib
+   LIBRARY DESTINATION lib
 )
 

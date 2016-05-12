@@ -37,11 +37,11 @@ static HeaterObject heater[HEATER_INSTANCES];
 
 static void DefineHeaterObject(AwaStaticClient * awaClient)
 {
-    AwaStaticClient_DefineObject(awaClient, "Heater", 1000, 0, HEATER_INSTANCES);
-    AwaStaticClient_DefineResourceWithPointer(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly,
-                                                &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
-    AwaStaticClient_DefineResourceWithPointer(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadOnly,
-                                                &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
+    AwaStaticClient_DefineObject(awaClient, 1000, "Heater", 0, HEATER_INSTANCES);
+    AwaStaticClient_DefineResource(awaClient, 1000, 101, "Manufacturer", AwaResourceType_String, 0, 1, AwaResourceOperations_ReadOnly);
+    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 101, &heater[0].Manufacturer, sizeof(heater[0].Manufacturer), sizeof(heater[0]));
+    AwaStaticClient_DefineResource(awaClient, 1000, 104, "Temperature",  AwaResourceType_Float,  0, 1, AwaResourceOperations_ReadOnly);
+    AwaStaticClient_SetResourceStorageWithPointer(awaClient, 1000, 104, &heater[0].Temperature, sizeof(heater[0].Temperature), sizeof(heater[0]));
 }
 
 static void SetInitialValues(AwaStaticClient * awaClient)

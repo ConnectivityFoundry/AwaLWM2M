@@ -76,8 +76,8 @@ ResourceDefinition * Definition_LookupResourceDefinition(const DefinitionRegistr
     return Definition_LookupResourceDefinitionFromObjectDefinition(objFormat, resourceID);
 }
 
-ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
-                                            uint16_t minimumInstances, const ObjectOperationHandlers * handlers, LWM2MHandler handler)
+static ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objectID, uint16_t maximumInstances,
+                                        uint16_t minimumInstances, const ObjectOperationHandlers * handlers, LWM2MHandler handler)
 {
     ObjectDefinition * objFormat = NULL;
     objFormat = (ObjectDefinition *)malloc(sizeof(ObjectDefinition));
@@ -118,28 +118,46 @@ ObjectDefinition * Definition_NewObjectType(const char * objName, ObjectIDType o
 }
 
 ObjectDefinition * Definition_NewObjectTypeWithHandler(const char * objName, ObjectIDType objectID, uint16_t minimumInstances,
-                                            uint16_t maximumInstances, LWM2MHandler handler)
+                                                       uint16_t maximumInstances, LWM2MHandler handler)
 {
     return NewObjectType(objName, objectID, maximumInstances, minimumInstances, NULL, handler);
+}
+
+int Definition_SetObjectHandler(ObjectDefinition * objectDefinition, LWM2MHandler handler)
+{
+    int result = -1;
+
+    if (objectDefinition != NULL)
+    {
+        objectDefinition->Handler = handler;
+        result = 0;
+    }
+    else
+    {
+        Lwm2m_Error("objectDefinition is NULL\n");
+        result = -1;
+    }
+
+    return result;
 }
 
 int Definition_AddObjectType(DefinitionRegistry * registry, ObjectDefinition * objFormat)
 {
     int result = -1;
-    ObjectDefinition * ExistingObjFormat = NULL;
+    ObjectDefinition * existingObjFormat = NULL;
 
-    if ((ExistingObjFormat = Definition_LookupObjectDefinition(registry, objFormat->ObjectID)))
+    if ((existingObjFormat = Definition_LookupObjectDefinition(registry, objFormat->ObjectID)))
     {
-        if (objFormat->MaximumInstances != ExistingObjFormat->MaximumInstances)
+        if (objFormat->MaximumInstances != existingObjFormat->MaximumInstances)
         {
             AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
-        else if (strlen(ExistingObjFormat->ObjectName) != strlen(objFormat->ObjectName) ||
-                 memcmp(ExistingObjFormat->ObjectName, objFormat->ObjectName, strlen(ExistingObjFormat->ObjectName)))
+        else if (strlen(existingObjFormat->ObjectName) != strlen(objFormat->ObjectName) ||
+                 memcmp(existingObjFormat->ObjectName, objFormat->ObjectName, strlen(existingObjFormat->ObjectName)))
         {
             AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }
-        else if (objFormat->MinimumInstances != ExistingObjFormat->MinimumInstances)
+        else if (objFormat->MinimumInstances != existingObjFormat->MinimumInstances)
         {
             AwaResult_SetResult(AwaResult_MismatchedDefinition);
         }

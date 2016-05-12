@@ -165,7 +165,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                             AwaResourceType lwm2mType = Utils_GetPrimativeResourceType(type);
                             int dataLength = xmlif_DecodeValue(&dataValue, lwm2mType, data, strlen(data));
 
-                            if (dataValue)
+                            if ((dataValue != NULL) && (dataLength >= 0))
                             {
                                 switch(type)
                                 {
@@ -174,7 +174,7 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                         char * stringValue = Awa_MemAlloc(dataLength + 1);
                                         if (stringValue != NULL)
                                         {
-                                            memcpy(stringValue, dataValue, dataLength);
+                                            memcpy(stringValue, dataValue, (size_t)dataLength);
                                             stringValue[dataLength] = 0;
                                             AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
                                             Awa_MemSafeFree(stringValue);

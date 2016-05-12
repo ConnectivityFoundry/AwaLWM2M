@@ -23,7 +23,6 @@ set (Examples
   server-execute-example
   server-execute-arguments-example
   
-  
   # TODO: set-array example uses single values and not an array. Add an example for that too and 
   # rename this set-array to set-array-individual-instances-example
   
@@ -31,17 +30,8 @@ set (Examples
   # TODO: subscribe iterate through changeset example
 )
 
-#if (ENABLE_GCOV)
-#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-#endif ()
-
 foreach (example ${Examples})
-
-  # disable -Wall warnings for _cmdline.c files
-  set_source_files_properties(${example}_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)
-  
-  add_executable (${example} ${example}.c)
+   add_executable (${example} ${example}.c)
   target_include_directories (${example} PRIVATE ${API_INCLUDE_DIR})
   target_link_libraries (${example} Awa_static)
   target_link_libraries (${example} libxml_static)
@@ -51,12 +41,4 @@ foreach (example ${Examples})
   endif ()
 endforeach (example ${Examples})
 
-#TODO should we install the examples?
-#install(TARGETS ${Examples}
-#  RUNTIME DESTINATION /bin
-#)
-
-#TODO
-#if (ENABLE_TEST)
-#  add_subdirectory (tests/gtest)
-#endif ()
+add_subdirectory (tutorials)

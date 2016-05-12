@@ -21,19 +21,36 @@
 #
 ##
 
+# The purpose of this makefile is to encapsulate the build system (e.g. cmake)
+# within a simple make interface, so that common tasks are simple to run.
+#
+# If desired, this makefile can be ignored and cmake run directly:
+#
+#   $ mkdir builddir
+#   $ cd builddir
+#   $ cmake ..
+#
+
+# Default location for out-of-source build results:
 BUILD_DIR:=./build
 
-_STAGING_DIR:=./staging
+# Default path prefix for installing build results:
+INSTALL_PREFIX:=/
+
+# Use 'make install DESTDIR=/path' to install into a staging directory.
+# Note that the resulting path will include INSTALL_PREFIX.
 
 
 ###############################################################################
 # Rules
 
 ifeq ($(DEBUG),)
-#  CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Release
+#  override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Release
 else
-  CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Debug
+  override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Debug
 endif
+
+override CMAKE_OPTIONS+=-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
 
 # absolute path of BUILD_DIR
 BUILD_DIR_ABS:=$(shell pwd)/$(BUILD_DIR)
@@ -43,8 +60,7 @@ all: $(BUILD_DIR)/Makefile
 	@echo "Build complete in directory $(BUILD_DIR)"
 
 install: all
-	cd $(BUILD_DIR); $(MAKE) install DESTDIR=./install
-	@echo "AwaLWM2M installed to $(BUILD_DIR)/install"
+	$(MAKE) -C $(BUILD_DIR) --no-print-directory install
 
 $(BUILD_DIR)/Makefile:
 	mkdir -p $(BUILD_DIR)
@@ -144,7 +160,6 @@ api-clean:
 
 clean: api-clean
 	rm -rf $(BUILD_DIR)
-	rm -rf $(_STAGING_DIR)
 	rm -rf $(VALGRIND_LOG_DIR)
 	rm -f *.log
 	rm -f *_out.xml

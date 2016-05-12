@@ -203,22 +203,15 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     const int maxCount = timeout_us / (tv.tv_sec * 1000000 + tv.tv_usec);
     while (!response && count < maxCount)
     {
-        int rc;
-
-        //printf("count %d\n", count);
-        //printf("Probing for active IPC\n");
-        rc = sendto(sockfd, request, requestLen, 0, (const struct sockaddr *)&fromAddr, fromAddrLen);
+        int rc = sendto(sockfd, request, requestLen, 0, (const struct sockaddr *)&fromAddr, fromAddrLen);
         if (rc == -1)
         {
             perror("sendto failed");
             close(sockfd);
-            //printf("sockfd %d, request %p, requestLen %zu, fromAddr %p, fromAddrLen %d\n", sockfd, request, requestLen, &fromAddr, fromAddrLen);
-            close(sockfd);
             return -1;
         }
 
-        // actual response is not important
-        //printf("Waiting for response\n");
+        // Actual response is not important
         rc = recvfrom(sockfd, &d, sizeof(d), 0, (struct sockaddr *)&theirAddr, &theirAddrLen);
         response = rc == sizeof(d);
         ++count;
