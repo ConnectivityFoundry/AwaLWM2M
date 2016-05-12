@@ -32,16 +32,25 @@
 
 #include <awa/static.h>
 
+static TreeNode IPC_NewNode(const char * type, const char * subType)
+{
+    TreeNode responseNode = Xml_CreateNode(type);
+    TreeNode subTypeNode = Xml_CreateNodeWithValue("Type", "%s", subType);
+    TreeNode_AddChild(responseNode, subTypeNode);
+    return responseNode;
+}
+
 TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
 {
-    TreeNode responseNode = Xml_CreateNode("Response");
-    TreeNode typeNode = Xml_CreateNodeWithValue("Type", "%s", type);
-    TreeNode_AddChild(responseNode, typeNode);
-
+    TreeNode responseNode = IPC_NewNode("Response", type);
     TreeNode codeNode = Xml_CreateNodeWithValue("Code", "%d", code);
     TreeNode_AddChild(responseNode, codeNode);
-
     return responseNode;
+}
+
+TreeNode IPC_NewEventNode(const char * type)
+{
+    return IPC_NewNode("Event", type);
 }
 
 TreeNode IPC_NewClientsNode()

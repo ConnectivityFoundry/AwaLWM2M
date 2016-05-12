@@ -37,9 +37,11 @@
 extern "C" {
 #endif
 
-#define MAXBUFLEN                (65536) // Should match api/src/ipc.c
-#define MSGTYPE_CONNECT          "Connect"
-#define MSGTYPE_DISCONNECT       "Disconnect"
+#define MAXBUFLEN                 (65536) // Should match api/src/ipc.c
+#define MSGTYPE_CONNECT           "Connect"
+#define MSGTYPE_CONNECT_NOTIFY    "ConnectNotify"
+#define MSGTYPE_DISCONNECT        "Disconnect"
+#define MSGTYPE_DISCONNECT_NOTIFY "DisconnectNotify"
 
 typedef struct
 {

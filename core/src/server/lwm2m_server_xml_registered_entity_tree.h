@@ -13,40 +13,18 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#ifndef LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H
+#define LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H
 
-#ifndef LWM2M_IPC_H
-#define LWM2M_IPC_H
+#include "lwm2m_registration.h"
 
-#include "lwm2m_result.h"
-#include "xmltree.h"
+TreeNode BuildRegisteredEntityTree(const Lwm2mClientType * client);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
-TreeNode IPC_NewEventNode(const char * type);
-TreeNode IPC_NewClientsNode();
-TreeNode IPC_NewContentNode();
-TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);
-
-// Serialise and send the IPC response back to the originator
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen);
-
-TreeNode IPC_AddResultTag(TreeNode leafNode, int error);
-TreeNode IPC_AddServerResultTag(TreeNode leafNode, int error, int serverError);
-void IPC_AddResultTagToAllLeafNodes(TreeNode objectInstanceNode, int error);
-void IPC_AddServerResultTagToAllLeafNodes(TreeNode objectInstanceNode, int error, int serverError);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // LWM2M_IPC_H
+#endif // LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H

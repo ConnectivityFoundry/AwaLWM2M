@@ -21,7 +21,6 @@
 ************************************************************************************************************************/
 
 
-#include <xmltree.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +34,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <inttypes.h>
+
+#include <xmltree.h>
 
 #include "lwm2m_server_xml_handlers.h"
 
@@ -56,6 +57,8 @@
 #include "xml.h"
 #include "lwm2m_ipc.h"
 #include "lwm2m_tree_node.h"
+#include "lwm2m_server_xml_events.h"
+#include "lwm2m_server_xml_registered_entity_tree.h"
 
 #include "../../api/src/path.h"
 #include "../../api/src/utils.h"
@@ -94,7 +97,9 @@ typedef struct
 } IpcCoapRequestContext;
 
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content);
+static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content);
+static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerObserveRequest(RequestInfoType * request, TreeNode content);
@@ -292,17 +297,19 @@ error:
 
 void xmlif_RegisterHandlers(void)
 {
-    xmlif_AddRequestHandler(MSGTYPE_CONNECT,          xmlif_HandlerConnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,       xmlif_HandlerDisconnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_LIST_CLIENTS,     xmlif_HandlerListClients);
-    xmlif_AddRequestHandler(MSGTYPE_DEFINE,           xmlif_HandlerDefineRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DELETE,           xmlif_HandlerDeleteRequest);
-    xmlif_AddRequestHandler(MSGTYPE_READ,             xmlif_HandlerReadRequest);
-    xmlif_AddRequestHandler(MSGTYPE_WRITE,            xmlif_HandlerWriteRequest);
-    xmlif_AddRequestHandler(MSGTYPE_EXECUTE,          xmlif_HandlerExecuteRequest);
-    xmlif_AddRequestHandler(MSGTYPE_OBSERVE,          xmlif_HandlerObserveRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DISCOVER,         xmlif_HandlerDiscoverRequest);
-    xmlif_AddRequestHandler(MSGTYPE_WRITE_ATTRIBUTES, xmlif_HandlerWriteAttributesRequest);
+    xmlif_AddRequestHandler(MSGTYPE_CONNECT,           xmlif_HandlerConnectRequest);
+    xmlif_AddRequestHandler(MSGTYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
+    xmlif_AddRequestHandler(MSGTYPE_LIST_CLIENTS,      xmlif_HandlerListClients);
+    xmlif_AddRequestHandler(MSGTYPE_DEFINE,            xmlif_HandlerDefineRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DELETE,            xmlif_HandlerDeleteRequest);
+    xmlif_AddRequestHandler(MSGTYPE_READ,              xmlif_HandlerReadRequest);
+    xmlif_AddRequestHandler(MSGTYPE_WRITE,             xmlif_HandlerWriteRequest);
+    xmlif_AddRequestHandler(MSGTYPE_EXECUTE,           xmlif_HandlerExecuteRequest);
+    xmlif_AddRequestHandler(MSGTYPE_OBSERVE,           xmlif_HandlerObserveRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DISCOVER,          xmlif_HandlerDiscoverRequest);
+    xmlif_AddRequestHandler(MSGTYPE_WRITE_ATTRIBUTES,  xmlif_HandlerWriteAttributesRequest);
 }
 
 const char * xmlif_GetURIForClient(Lwm2mClientType * client, ObjectInstanceResourceKey * key)
@@ -318,12 +325,12 @@ const char * xmlif_GetURIForClient(Lwm2mClientType * client, ObjectInstanceResou
     switch (client->Address.Addr.Sa.sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET,&client->Address.Addr.Sin.sin_addr,buffer,sizeof(buffer));
+            ip = inet_ntop(AF_INET,&client->Address.Addr.Sin.sin_addr, buffer, sizeof(buffer));
             port = ntohs(client->Address.Addr.Sin.sin_port);
             sprintf(addr, "%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6,&client->Address.Addr.Sin6.sin6_addr,buffer,sizeof(buffer));
+            ip = inet_ntop(AF_INET6,&client->Address.Addr.Sin6.sin6_addr, buffer, sizeof(buffer));
             port =  ntohs(client->Address.Addr.Sin6.sin6_port);
             sprintf(addr, "[%s]:%d", ip, port);
             break;
@@ -647,7 +654,11 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // create a default response if necessary
-    if (response == NULL)
+    if (response != NULL)
+    {
+        Lwm2m_Info("IPC connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+    }
+    else
     {
         response = Xml_CreateNode("Response");
         TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT));
@@ -662,10 +673,36 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     return 0;
 }
 
+static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content)
+{
+    TreeNode response = NULL;
+    char buffer[MAXBUFLEN];
+
+    Lwm2m_Info("IPC Notify connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+
+    // Set up registration callbacks for Events
+    // Use FromAddr port number as key to identify this IPC client.
+    unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+    Lwm2m_AddRegistrationEventCallback(request->Context, port, xmlif_HandleRegistrationEvent, request);
+
+    response = Xml_CreateNode("Response");
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT_NOTIFY));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+
+    Xml_TreeToString(response, buffer, sizeof(buffer));
+    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    Tree_Delete(response);
+
+    free(request);
+    return 0;
+}
+
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content)
 {
     TreeNode response = NULL;
     char buffer[MAXBUFLEN];
+
+    Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
     response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT));
@@ -680,25 +717,29 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     return 0;
 }
 
-static TreeNode BuildRegisteredEntityTree(const Lwm2mClientType * client)
+static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content)
 {
-    // returns an <Objects> node containing all registered entities as <Object> and <ObjectInstance> nodes.
-    TreeNode objectsTree = ObjectsTree_New();
+    TreeNode response = NULL;
+    char buffer[MAXBUFLEN];
 
-    // build object/instance list
-    struct ListHead * j;
-    ListForEach(j, &client->ObjectList)
-    {
-        ObjectListEntry * entry = ListEntry(j, ObjectListEntry, list);
+    Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-        char path[MAX_PATH_LENGTH] = { 0 };
-        if (Path_MakePath(path, MAX_PATH_LENGTH, entry->ObjectID, entry->InstanceID, AWA_INVALID_ID) == AwaError_Success)
-        {
-            printf("Add Object %d, Instance %d\n", entry->ObjectID, entry->InstanceID);
-            ObjectsTree_AddPath(objectsTree, path, NULL);
-        }
-    }
-    return objectsTree;
+    // remove event records for this IPC connection
+    // Use FromAddr port number as key to identify this IPC client.
+    unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+    Lwm2m_DeleteRegistrationEventCallback(request->Context, port);
+
+    response = Xml_CreateNode("Response");
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT_NOTIFY));
+
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+
+    Xml_TreeToString(response, buffer, sizeof(buffer));
+    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    Tree_Delete(response);
+
+    free(request);
+    return 0;
 }
 
 /* Handle incoming ListClients requests.
@@ -1117,7 +1158,9 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
                 if (client != NULL)
                 {
                     if (!requestCallback(requestContext, client, &key, currentLeafNode, responseObjectInstanceNode))
+                    {
                         goto error;
+                    }
                     numCoapRequests++;
                 }
                 else
@@ -1132,7 +1175,9 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
             if (client != NULL)
             {
                 if (!requestCallback(requestContext, client, &key, currentLeafNode, responseObjectNode))
+                {
                     goto error;
+                }
                 numCoapRequests++;
             }
             else
@@ -1244,9 +1289,9 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
                                                 ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
     bool result = true;
-    ContentType contentType = requestContext != NULL &&
-                              requestContext->Request != NULL && 
-                              requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
+    ContentType contentType = ((requestContext != NULL) &&
+                              (requestContext->Request != NULL) &&
+                              (requestContext->Request->Context != NULL)) ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
     TreeNode observeTypeNode = NULL;
     if ((observeTypeNode = Xml_Find(currentLeafNode, IPC_MSG_OBSERVE)) != NULL)
     {
@@ -1281,7 +1326,7 @@ static void xmlif_HandlerFreeIpcCoapRequestContext(void * ctxt)
 static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
-    bool successfulResponse = coapResponseCode >= 200 && coapResponseCode < 300;
+    bool successfulResponse = (coapResponseCode >= 200) && (coapResponseCode < 300);
     requestContext->Reusable = successfulResponse; // Context must only be freed when the notification is removed, or we received a bad request.
 
     if (++requestContext->ResponseCount == 1)
@@ -1292,7 +1337,7 @@ static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, cons
     }
     if (successfulResponse)
     {
-        //it's a notification containing value changes, or if this is the first response then it's the current value of the resources.
+        // it's a notification containing value changes, or if this is the first response then it's the current value of the resources.
         requestContext->AddResultTags = false;
         xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, MSGTYPE_NOTIFICATION, contentType, payload, payloadLen, xmlif_HandlerSuccessfulNotifyResponse);
     }

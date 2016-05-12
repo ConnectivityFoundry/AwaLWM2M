@@ -13,40 +13,36 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include <xmltree.h>
 
-#ifndef LWM2M_IPC_H
-#define LWM2M_IPC_H
+#include "lwm2m_server_xml_registered_entity_tree.h"
+#include "../../api/src/path.h"
+#include "../../api/src/objects_tree.h"
 
-#include "lwm2m_result.h"
-#include "xmltree.h"
+TreeNode BuildRegisteredEntityTree(const Lwm2mClientType * client)
+{
+    // returns an <Objects> node containing all registered entities as <Object> and <ObjectInstance> nodes.
+    TreeNode objectsTree = ObjectsTree_New();
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    // build object/instance list
+    struct ListHead * j;
+    ListForEach(j, &client->ObjectList)
+    {
+        ObjectListEntry * entry = ListEntry(j, ObjectListEntry, list);
 
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
-TreeNode IPC_NewEventNode(const char * type);
-TreeNode IPC_NewClientsNode();
-TreeNode IPC_NewContentNode();
-TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);
-
-// Serialise and send the IPC response back to the originator
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen);
-
-TreeNode IPC_AddResultTag(TreeNode leafNode, int error);
-TreeNode IPC_AddServerResultTag(TreeNode leafNode, int error, int serverError);
-void IPC_AddResultTagToAllLeafNodes(TreeNode objectInstanceNode, int error);
-void IPC_AddServerResultTagToAllLeafNodes(TreeNode objectInstanceNode, int error, int serverError);
-
-#ifdef __cplusplus
+        char path[MAX_PATH_LENGTH] = { 0 };
+        if (Path_MakePath(path, MAX_PATH_LENGTH, entry->ObjectID, entry->InstanceID, AWA_INVALID_ID) == AwaError_Success)
+        {
+            ObjectsTree_AddPath(objectsTree, path, NULL);
+        }
+    }
+    return objectsTree;
 }
-#endif
 
-#endif // LWM2M_IPC_H

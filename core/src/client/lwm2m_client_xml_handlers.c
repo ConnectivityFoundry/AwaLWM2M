@@ -80,7 +80,9 @@
 
 
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content);
+static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content);
+static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content);
@@ -100,13 +102,15 @@ void xmlif_RegisterHandlers(void)
 {
     ListInit(&executeHandlers);
 
-    xmlif_AddRequestHandler(MSGTYPE_CONNECT,    xmlif_HandlerConnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT, xmlif_HandlerDisconnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DEFINE,     xmlif_HandlerDefineRequest);
-    xmlif_AddRequestHandler(MSGTYPE_GET,        xmlif_HandlerGetRequest);
-    xmlif_AddRequestHandler(MSGTYPE_SET,        xmlif_HandlerSetRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DELETE,     xmlif_HandlerDeleteRequest);
-    xmlif_AddRequestHandler(MSGTYPE_SUBSCRIBE,  xmlif_HandlerSubscribeRequest);
+    xmlif_AddRequestHandler(MSGTYPE_CONNECT,           xmlif_HandlerConnectRequest);
+    xmlif_AddRequestHandler(MSGTYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DEFINE,            xmlif_HandlerDefineRequest);
+    xmlif_AddRequestHandler(MSGTYPE_GET,               xmlif_HandlerGetRequest);
+    xmlif_AddRequestHandler(MSGTYPE_SET,               xmlif_HandlerSetRequest);
+    xmlif_AddRequestHandler(MSGTYPE_DELETE,            xmlif_HandlerDeleteRequest);
+    xmlif_AddRequestHandler(MSGTYPE_SUBSCRIBE,         xmlif_HandlerSubscribeRequest);
 }
 
 int xmlif_AddExecuteHandler(RequestInfoType * request, ObjectInstanceResourceKey * key)
@@ -527,7 +531,11 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // Create a default response if necessary
-    if (response == NULL)
+    if (response != NULL)
+    {
+        Lwm2m_Info("IPC connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+    }
+    else
     {
         response = Xml_CreateNode("Response");
         TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT));
@@ -542,13 +550,33 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     return 0;
 }
 
-// Called to handle a request with the type "Connect". Returns 0 on success.
+static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content)
+{
+    TreeNode response = NULL;
+    char buffer[MAXBUFLEN];
+
+    Lwm2m_Info("IPC Notify connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+
+    response = Xml_CreateNode("Response");
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT_NOTIFY));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+
+    Xml_TreeToString(response, buffer, sizeof(buffer));
+    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    Tree_Delete(response);
+
+    free(request);
+    return 0;
+}
+
+// Called to handle a request with the type "Disconnect". Returns 0 on success.
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content)
 {
     // No check for known client - proceed regardless.
-
     TreeNode response = NULL;
     char buffer[MAXBUFLEN];
+
+    Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
     response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT));
@@ -562,6 +590,26 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     return 0;
 }
 
+// Called to handle a request with the type "DisconnectNotify". Returns 0 on success.
+static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content)
+{
+    // No check for known client - proceed regardless.
+    TreeNode response = NULL;
+    char buffer[MAXBUFLEN];
+
+    Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+
+    response = Xml_CreateNode("Response");
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT_NOTIFY));
+    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+
+    Xml_TreeToString(response, buffer, sizeof(buffer));
+    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    Tree_Delete(response);
+
+    free(request);
+    return 0;
+}
 
 // Called to handle a request with the type "Define". Returns 0 on success.
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content)

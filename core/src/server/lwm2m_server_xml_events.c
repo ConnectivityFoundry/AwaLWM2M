@@ -20,55 +20,47 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <gtest/gtest.h>
+#include "lwm2m_server_xml_events.h"
+#include "lwm2m_server_xml_handlers.h"
+#include "lwm2m_server_xml_registered_entity_tree.h"
+#include "lwm2m_xml_interface.h"
+#include "lwm2m_ipc.h"
 
-#include "support/support.h"
+#define MSGTYPE_EVENT_REGISTER "Register"
 
-namespace Awa {
-
-class TestServerEvent : public TestServerWithConnectedSession {};
-
-namespace detail {
-
-struct CallbackRecord {
-    CallbackRecord() : callbackCounter(0) {};
-    int callbackCounter;
-};
-
-static void RegisterEventCallback(const AwaServerRegisterEvent * event, void * context) {
-    CallbackRecord * record = static_cast<CallbackRecord *>(context);
-    record->callbackCounter++;
-}
-
-
-} // namespace detail
-
-
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_invalid_session)
+void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context)
 {
-    EXPECT_EQ(AwaError_SessionInvalid, AwaServerSession_SetRegisterEventCallback(NULL, NULL, NULL));
+    // request should refer to the Notify channel:
+    RequestInfoType * request = (RequestInfoType *)context;
+
+    // TODO
+    Lwm2m_Error("xmlif_HandleRegistrationEvent: %d %p\n", eventType, context);
+
+    Lwm2mContextType * lwm2mContext = (Lwm2mContextType*)request->Context;
+
+    TreeNode clientsNode = IPC_NewClientsNode();
+
+    struct ListHead * i;
+    ListForEach(i, Lwm2mCore_GetClientList(lwm2mContext))
+    {
+        const Lwm2mClientType * client = ListEntry(i, Lwm2mClientType, list);
+
+        TreeNode clientNode = IPC_AddClientNode(clientsNode, client->EndPointName);
+
+        // add tree of registered entities (objects and object instances)
+        TreeNode objectsTree = BuildRegisteredEntityTree(client);
+        TreeNode_AddChild(clientNode, objectsTree);
+    }
+
+    // Build response
+    TreeNode contentNode = IPC_NewContentNode();
+    TreeNode_AddChild(contentNode, clientsNode);
+
+    TreeNode responseNode = IPC_NewEventNode(MSGTYPE_EVENT_REGISTER);
+    TreeNode_AddChild(responseNode, contentNode);
+
+    IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
+
+    Tree_Delete(responseNode);
+    free(request);
 }
-
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_valid_null)
-{
-    detail::CallbackRecord record;
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, NULL, NULL));
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, NULL, &record));
-    EXPECT_EQ(0, record.callbackCounter);
-}
-
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_valid)
-{
-    detail::CallbackRecord record;
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, detail::RegisterEventCallback, &record));
-    EXPECT_EQ(0, record.callbackCounter);
-}
-
-// test register client
-
-// test overwrite callback
-
-// test clear callback
-
-
-} // namespace Awa

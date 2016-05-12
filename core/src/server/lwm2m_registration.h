@@ -53,6 +53,13 @@ typedef enum
 
 } BindingMode;
 
+typedef enum
+{
+    RegistrationEventType_Register,
+    RegistrationEventType_Update,
+    RegistrationEventType_Deregister,
+} RegistrationEventType;
+
 typedef struct
 {
     struct ListHead list;
@@ -89,6 +96,12 @@ Lwm2mClientType * Lwm2m_LookupClientByName(Lwm2mContextType * context, const cha
 Lwm2mClientType * Lwm2m_LookupClientByAddress(Lwm2mContextType * context, AddressType * address);
 
 bool Lwm2m_ClientSupportsObject(Lwm2mClientType * client, ObjectIDType objectID, ObjectInstanceIDType instanceID);
+
+// Functions to support Server Events
+
+typedef void (*RegistrationEventCallback)(RegistrationEventType eventType, void * context);
+int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext);
+int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id);
 
 #ifdef __cplusplus
 }

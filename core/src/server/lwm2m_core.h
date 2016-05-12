@@ -94,6 +94,7 @@ DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
 struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context);
 ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context);
 int Lwm2mCore_GetLastLocation(Lwm2mContextType * context);
+struct ListHead * Lwm2mCore_GetEventRecordList(Lwm2mContextType * context);
 void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location);
 
 #ifdef __cplusplus

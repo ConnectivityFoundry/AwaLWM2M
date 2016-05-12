@@ -42,7 +42,9 @@ extern "C" {
 
 // Common request message types:
 #define IPC_MSGTYPE_CONNECT              "Connect"
+#define IPC_MSGTYPE_CONNECT_NOTIFY       "ConnectNotify"
 #define IPC_MSGTYPE_DISCONNECT           "Disconnect"
+#define IPC_MSGTYPE_DISCONNECT_NOTIFY    "DisconnectNotify"
 #define IPC_MSGTYPE_DELETE               "Delete"
 
 // Client request message types:
