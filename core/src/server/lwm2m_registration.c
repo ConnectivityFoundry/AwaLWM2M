@@ -284,8 +284,30 @@ Lwm2mClientType * Lwm2m_LookupClientByAddress(Lwm2mContextType * context, Addres
     return client;
 }
 
+static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, RegistrationEventType eventType, void * parameter)
+{
+    struct ListHead * eventRecordList = Lwm2mCore_GetEventRecordList(lwm2mContext);
+    if (eventRecordList != NULL)
+    {
+        struct ListHead * i;
+        ListForEach(i, eventRecordList)
+        {
+            EventRecord * eventRecord = ListEntry(i, EventRecord, list);
+            if (eventRecord != NULL)
+            {
+                if (eventRecord->Callback != NULL)
+                {
+                    Lwm2m_Debug("Calling registration event callback with context %p\n", eventRecord->Context)
+                    eventRecord->Callback(eventType, eventRecord->Context, parameter);
+                }
+            }
+        }
+    }
+}
+
 static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int lifeTime, BindingMode bindingMode,
-                              AddressType * addr, ContentType contentType, const char * objectList, int objectListLength)
+                              AddressType * addr, ContentType contentType, const char * objectList, int objectListLength,
+                              RegistrationEventType registrationEventType)
 {
     int result = -1;
     Lwm2mClientType * client = Lwm2m_LookupClientByLocation(context, location);
@@ -311,6 +333,8 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
 
         client->LastUpdateTime = now;
 
+        DispatchRegistrationEventCallbacks(context, registrationEventType, client);
+
         result = 0;
     }
     else
@@ -318,26 +342,6 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
         Lwm2m_Error("Client not registered at location /rd/%d\n", location);
     }
     return result;
-}
-
-static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, RegistrationEventType eventType)
-{
-    struct ListHead * eventRecordList = Lwm2mCore_GetEventRecordList(lwm2mContext);
-    if (eventRecordList != NULL)
-    {
-        struct ListHead * i;
-        ListForEach(i, eventRecordList)
-        {
-            EventRecord * eventRecord = ListEntry(i, EventRecord, list);
-            if (eventRecord != NULL)
-            {
-                if (eventRecord->Callback != NULL)
-                {
-                    eventRecord->Callback(eventType, eventRecord->Context);
-                }
-            }
-        }
-    }
 }
 
 static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPointName, int lifeTime, BindingMode bindingMode,
@@ -366,9 +370,7 @@ static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPoin
             sprintf(RegisterLocation, "/rd/%d", client->Location);
             Lwm2mCore_AddResourceEndPoint(context, RegisterLocation, UpdateEndpointHandler);
 
-            result = Lwm2m_UpdateClient(context, client->Location, lifeTime, bindingMode, addr, contentType, objectList, objectListLength);
-
-            DispatchRegistrationEventCallbacks(context, RegistrationEventType_Register);
+            result = Lwm2m_UpdateClient(context, client->Location, lifeTime, bindingMode, addr, contentType, objectList, objectListLength, RegistrationEventType_Register);
 
             Lwm2m_Info("Client registered: \'%s\'\n", endPointName);
         }
@@ -395,6 +397,8 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
     Lwm2mCore_RemoveResourceEndPoint(context, RegisterLocation);
 
     Lwm2m_Info("Client deregistered: \'%s\'\n", client->EndPointName);
+
+    DispatchRegistrationEventCallbacks(context, RegistrationEventType_Deregister, client);
 
     free(client->EndPointName);
     free(client);
@@ -489,7 +493,7 @@ static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
 
     Lwm2m_SplitUpQuery(query, &q);
 
-    if (Lwm2m_UpdateClient(context, location, q.LifeTime, q.BindingModeValue, addr, contentType, requestContent, requestContentLen) == 0)
+    if (Lwm2m_UpdateClient(context, location, q.LifeTime, q.BindingModeValue, addr, contentType, requestContent, requestContentLen, RegistrationEventType_Update) == 0)
     {
         *responseCode = AwaResult_SuccessChanged;
     }
@@ -671,6 +675,29 @@ void Lwm2m_RegistrationDestroy(Lwm2mContextType * context)
 {
     DestroyClientList(Lwm2mCore_GetClientList(context));
     DestroyEventList(Lwm2mCore_GetEventRecordList(context));
+}
+
+void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id)
+{
+    void * result = NULL;
+    if (lwm2mContext != NULL)
+    {
+        struct ListHead * i;
+        struct ListHead * eventRecordList = Lwm2mCore_GetEventRecordList(lwm2mContext);
+        ListForEach(i, eventRecordList)
+        {
+            EventRecord * eventRecord = ListEntry(i, EventRecord, list);
+            if (eventRecord != NULL)
+            {
+                if (eventRecord->ID == id)
+                {
+                    result = eventRecord->Context;
+                    break;
+                }
+            }
+        }
+    }
+    return result;
 }
 
 int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext)

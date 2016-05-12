@@ -99,7 +99,9 @@ bool Lwm2m_ClientSupportsObject(Lwm2mClientType * client, ObjectIDType objectID,
 
 // Functions to support Server Events
 
-typedef void (*RegistrationEventCallback)(RegistrationEventType eventType, void * context);
+typedef void (*RegistrationEventCallback)(RegistrationEventType eventType, void * context, void * parameter);
+
+void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id);
 int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext);
 int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id);
 

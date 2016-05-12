@@ -26,41 +26,61 @@
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_ipc.h"
 
-#define MSGTYPE_EVENT_REGISTER "Register"
+#define MSGTYPE_EVENT_REGISTER   "Register"
+#define MSGTYPE_EVENT_UPDATE     "Update"
+#define MSGTYPE_EVENT_DEREGISTER "Deregister"
 
-void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context)
+void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context, void * parameter)
 {
-    // request should refer to the Notify channel:
-    RequestInfoType * request = (RequestInfoType *)context;
+    // should refer to the Notify channel:
+    EventContext * eventContext = (EventContext *)context;
+    const Lwm2mClientType * client = (const Lwm2mClientType *)parameter;
 
-    // TODO
-    Lwm2m_Error("xmlif_HandleRegistrationEvent: %d %p\n", eventType, context);
-
-    Lwm2mContextType * lwm2mContext = (Lwm2mContextType*)request->Context;
-
-    TreeNode clientsNode = IPC_NewClientsNode();
-
-    struct ListHead * i;
-    ListForEach(i, Lwm2mCore_GetClientList(lwm2mContext))
+    if ((eventContext != NULL) && (client != NULL))
     {
-        const Lwm2mClientType * client = ListEntry(i, Lwm2mClientType, list);
+        Lwm2m_Debug("Event Callback: eventType %d, context %p, parameter %p\n", eventType, context, parameter);
 
+        TreeNode clientsNode = IPC_NewClientsNode();
         TreeNode clientNode = IPC_AddClientNode(clientsNode, client->EndPointName);
 
-        // add tree of registered entities (objects and object instances)
-        TreeNode objectsTree = BuildRegisteredEntityTree(client);
-        TreeNode_AddChild(clientNode, objectsTree);
+        if ((eventType == RegistrationEventType_Register) || (eventType == RegistrationEventType_Update))
+        {
+            // add tree of registered entities (objects and object instances)
+            TreeNode objectsTree = BuildRegisteredEntityTree(client);
+            TreeNode_AddChild(clientNode, objectsTree);
+        }
+
+        // Build response
+        TreeNode contentNode = IPC_NewContentNode();
+        TreeNode_AddChild(contentNode, clientsNode);
+
+        const char * msgType = NULL;
+        switch (eventType)
+        {
+        case RegistrationEventType_Register:
+            msgType = MSGTYPE_EVENT_REGISTER;
+            break;
+        case RegistrationEventType_Update:
+            msgType = MSGTYPE_EVENT_UPDATE;
+            break;
+        case RegistrationEventType_Deregister:
+            msgType = MSGTYPE_EVENT_DEREGISTER;
+            break;
+        default:
+            Lwm2m_Error("Unhandled eventType %d\n", eventType)
+        }
+
+        if (msgType != NULL)
+        {
+            TreeNode responseNode = IPC_NewEventNode(msgType);
+            TreeNode_AddChild(responseNode, contentNode);
+
+            IPC_SendResponse(responseNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
+            Tree_Delete(responseNode);
+        }
     }
-
-    // Build response
-    TreeNode contentNode = IPC_NewContentNode();
-    TreeNode_AddChild(contentNode, clientsNode);
-
-    TreeNode responseNode = IPC_NewEventNode(MSGTYPE_EVENT_REGISTER);
-    TreeNode_AddChild(responseNode, contentNode);
-
-    IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
-
-    Tree_Delete(responseNode);
-    free(request);
+    else
+    {
+        Lwm2m_Error("Bad callback: eventType %d, context %p, parameter %p\n", eventType, context, parameter);
+    }
 }

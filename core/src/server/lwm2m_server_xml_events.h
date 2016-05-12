@@ -24,9 +24,22 @@
 #ifndef LWM2M_SERVER_XML_EVENTS_H
 #define LWM2M_SERVER_XML_EVENTS_H
 
-#include "lwm2m_registration.h"
+#include <sys/types.h>
+#include <sys/socket.h>
 
-void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context);
+#include "lwm2m_registration.h"
+#include "lwm2m_context.h"
+
+typedef struct
+{
+    int Sockfd;
+    struct sockaddr FromAddr;
+    int AddrLen;
+    Lwm2mContextType * Lwm2mContext;
+
+} EventContext;
+
+void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context, void * parameter);
 
 
 #endif // LWM2M_SERVER_XML_EVENTS_H

@@ -683,7 +683,17 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
     // Set up registration callbacks for Events
     // Use FromAddr port number as key to identify this IPC client.
     unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
-    Lwm2m_AddRegistrationEventCallback(request->Context, port, xmlif_HandleRegistrationEvent, request);
+    EventContext * eventContext = malloc(sizeof(*eventContext));
+    Lwm2m_Debug("eventContext %p, sizeof(*eventContext) %d\n", eventContext, (int)sizeof(*eventContext));
+    if (eventContext != NULL)
+    {
+        memset(eventContext, 0, sizeof(*eventContext));
+        eventContext->Sockfd = request->Sockfd;
+        eventContext->FromAddr = request->FromAddr;
+        eventContext->AddrLen = request->AddrLen;
+        eventContext->Lwm2mContext = request->Context;
+        Lwm2m_AddRegistrationEventCallback(request->Context, port, xmlif_HandleRegistrationEvent, eventContext);
+    }
 
     response = Xml_CreateNode("Response");
     TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT_NOTIFY));
@@ -727,6 +737,9 @@ static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeN
     // remove event records for this IPC connection
     // Use FromAddr port number as key to identify this IPC client.
     unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+    EventContext * eventContext = Lwm2m_GetEventContext(request->Context, port);
+    Lwm2m_Debug("Freeing Event Context %p\n", eventContext);
+    free(eventContext);
     Lwm2m_DeleteRegistrationEventCallback(request->Context, port);
 
     response = Xml_CreateNode("Response");
