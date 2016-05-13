@@ -23,10 +23,31 @@
 #include <gtest/gtest.h>
 
 #include "support/support.h"
+#include "server_events.h"
 
 namespace Awa {
 
-class TestServerEvent : public TestServerWithConnectedSession {};
+class TestServerEvents : public TestAwaBase {};
+
+TEST_F(TestServerEvents, ServerEvents_New_and_Free)
+{
+    ServerEvents * serverEvents = ServerEvents_New();
+    ASSERT_TRUE(NULL != serverEvents);
+    ServerEvents_Free(&serverEvents);
+    ASSERT_EQ(NULL, serverEvents);
+}
+
+TEST_F(TestServerEvents, ServerEvents_Free_handles_null)
+{
+    ServerEvents_Free(NULL);
+}
+
+
+
+
+
+
+class TestServerEventsWithConnectedSession : public TestServerWithConnectedSession {};
 
 namespace detail {
 
@@ -35,7 +56,7 @@ struct CallbackRecord {
     int callbackCounter;
 };
 
-static void RegisterEventCallback(const AwaServerRegisterEvent * event, void * context) {
+static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, void * context) {
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->callbackCounter++;
 }
@@ -44,23 +65,23 @@ static void RegisterEventCallback(const AwaServerRegisterEvent * event, void * c
 } // namespace detail
 
 
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_invalid_session)
+TEST_F(TestServerEventsWithConnectedSession, AwaServerSession_SetClientRegisterEventCallback_invalid_session)
 {
-    EXPECT_EQ(AwaError_SessionInvalid, AwaServerSession_SetRegisterEventCallback(NULL, NULL, NULL));
+    EXPECT_EQ(AwaError_SessionInvalid, AwaServerSession_SetClientRegisterEventCallback(NULL, NULL, NULL));
 }
 
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_valid_null)
+TEST_F(TestServerEventsWithConnectedSession, AwaServerSession_SetClientRegisterEventCallback_valid_null)
 {
     detail::CallbackRecord record;
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, NULL, NULL));
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, NULL, &record));
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, NULL, NULL));
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, NULL, &record));
     EXPECT_EQ(0, record.callbackCounter);
 }
 
-TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_valid)
+TEST_F(TestServerEventsWithConnectedSession, AwaServerSession_SetRegisterEventCallback_valid)
 {
     detail::CallbackRecord record;
-    EXPECT_EQ(AwaError_Success, AwaServerSession_SetRegisterEventCallback(session_, detail::RegisterEventCallback, &record));
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, detail::RegisterEventCallback, &record));
     EXPECT_EQ(0, record.callbackCounter);
 }
 
@@ -69,6 +90,12 @@ TEST_F(TestServerEvent, AwaServerSession_SetRegisterEventCallback_valid)
 // test overwrite callback
 
 // test clear callback
+
+
+
+
+
+
 
 
 } // namespace Awa

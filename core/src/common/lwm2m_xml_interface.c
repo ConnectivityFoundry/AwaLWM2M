@@ -46,6 +46,7 @@
 #include "lwm2m_result.h"
 #include "lwm2m_xml_serdes.h"
 #include "lwm2m_ipc.h"
+#include "../../api/src/ipc_defs.h"
 
 typedef struct
 {
@@ -141,7 +142,7 @@ int xmlif_init(void * context, int port)
 
 static void HandleInvalidRequest(const RequestInfoType * request)
 {
-    TreeNode responseNode = IPC_NewResponseNode(MSGTYPE_INVALID, AwaResult_BadRequest);
+    TreeNode responseNode = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_INVALID, AwaResult_BadRequest);
     IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(responseNode);
 }
@@ -149,14 +150,14 @@ static void HandleInvalidRequest(const RequestInfoType * request)
 int xmlif_process(int sockfd)
 {
     struct sockaddr_storage their_addr;
-    char buf[MAXBUFLEN] = {0};
+    char buf[IPC_MAX_BUFFER_LEN] = {0};
     socklen_t addr_len;
     int numbytes;
     TreeNode root;
 
     // Read data from socket. Assume the XML is all in one UDP packet.
     addr_len = sizeof(their_addr);
-    if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
+    if ((numbytes = recvfrom(sockfd, buf, IPC_MAX_BUFFER_LEN-1 , 0,
             (struct sockaddr *)&their_addr, &addr_len)) == -1)
     {
         perror("recvfrom");
@@ -308,7 +309,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
     }
 
 end: ;
-    TreeNode response = IPC_NewResponseNode(MSGTYPE_CONNECT, result);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, result);
     TreeNode_AddChild(response, content);
     return response;
 }

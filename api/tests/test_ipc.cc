@@ -107,8 +107,7 @@ TEST_F(TestIPC, IPCMessage_GetType_called_with_null_type)
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(NULL, NULL, &SubType));
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(NULL, NULL, NULL));
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, NULL, &SubType));
-    EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, &Type, NULL));
+    // type or subType can be NULL, but not both:
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, NULL, NULL));
     IPCMessage_Free(&message);
 }
@@ -118,19 +117,26 @@ TEST_F(TestIPC, IPCMessage_SetType_GetType_are_equal)
     const char * expectedSubType = "ABCDEF";
     const char * expectedType = "123456";
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, expectedSubType, expectedSubType));
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, expectedType, expectedSubType));
 
     const char * returnedSubType = NULL;
     const char * returnedType = NULL;
-
     EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, &returnedType, &returnedSubType));
+    EXPECT_STREQ(expectedSubType, returnedSubType);
+    EXPECT_STREQ(expectedType, returnedType);
 
-    ASSERT_STREQ(expectedSubType, expectedSubType);
-    ASSERT_STREQ(expectedType, expectedType);
+    returnedSubType = NULL;
+    returnedType = NULL;
+    EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, &returnedType, NULL));
+    EXPECT_STREQ(expectedType, returnedType);
+
+    returnedSubType = NULL;
+    returnedType = NULL;
+    EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, NULL, &returnedSubType));
+    EXPECT_STREQ(expectedSubType, returnedSubType);
 
     IPCMessage_Free(&message);
 }
-
 
 TEST_F(TestIPC, IPCMessage_GetType_on_empty_message)
 {

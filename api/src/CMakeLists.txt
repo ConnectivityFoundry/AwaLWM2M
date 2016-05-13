@@ -60,7 +60,7 @@ set (Awa_SOURCES
   subscribe_observe_common.c
   write_attributes_operation.c
   execute_operation.c
-  server_event.c
+  server_events.c
 
   unsupported.c
 

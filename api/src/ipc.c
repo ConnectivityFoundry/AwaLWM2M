@@ -196,7 +196,7 @@ IPCChannel * IPCChannel_New(const IPCInfo * ipcInfo)
 
 void IPCChannel_Free(IPCChannel ** channel)
 {
-    if (channel != NULL && *channel != NULL)
+    if ((channel != NULL) && (*channel != NULL))
     {
         if ((*channel)->Socket > 0)
         {
@@ -208,7 +208,7 @@ void IPCChannel_Free(IPCChannel ** channel)
             close((*channel)->NotifySocket);
             (*channel)->NotifySocket = 0;
         }
-        LogFree("IPCChannel", channel);
+        LogFree("IPCChannel", *channel);
         Awa_MemSafeFree(*channel);
         *channel = NULL;
     }
@@ -335,40 +335,43 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
     return result;
 }
 
-InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const char ** subType)
+InternalError IPCMessage_GetType(IPCMessage * message, const char ** type_, const char ** subType_)
 {
     InternalError result = InternalError_Unspecified;
+    const char * type = NULL;
+    const char * subType = NULL;
 
-    if (message && type && subType)
+    // message must be non-null, and either type or subType must be non-null, or both.
+    if ((message != NULL) && !((type_ == NULL) && (subType_ == NULL)))
     {
-        if (message->RootNode && (*type = TreeNode_GetName(message->RootNode)) != NULL)
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
         {
             char * path = NULL;
-            if (msprintf(&path, "%s/Type", *type) > 0)
+            if (msprintf(&path, "%s/Type", type) > 0)
             {
                 TreeNode subTypeNode = TreeNode_Navigate(message->RootNode, path);
 
                 if (subTypeNode)
                 {
-                    if ((*subType = (const char *)TreeNode_GetValue(subTypeNode)) != NULL)
+                    if ((subType = (const char *)TreeNode_GetValue(subTypeNode)) != NULL)
                     {
                         result = InternalError_Success;
                     }
                     else
                     {
-                        *type = NULL;
+                        type = NULL;
                         result = InternalError_InvalidMessage;
                     }
                 }
                 else
                 {
-                    *type = NULL;
+                    type = NULL;
                     result = InternalError_InvalidMessage;
                 }
             }
             else
             {
-                *type = NULL;
+                type = NULL;
                 result = InternalError_InvalidMessage;
             }
 
@@ -385,6 +388,16 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const
     else
     {
         result = InternalError_ParameterInvalid;
+    }
+
+    if (type_)
+    {
+        *type_ = type;
+    }
+
+    if (subType_)
+    {
+        *subType_ = subType;
     }
 
     return result;
@@ -687,27 +700,34 @@ AwaError IPC_ReceiveNotification(IPCChannel * channel, IPCMessage ** notificatio
             LogDebug("IPC notify:\n%s", recvBuffer);
             *notification = IPC_DeserialiseMessageFromXML(recvBuffer, recvBufferLen);
 
-            if (*notification != NULL)
+            const char * type = NULL;
+            IPCMessage_GetType(*notification, &type, NULL);
+            if (strcmp(IPC_MESSAGE_TYPE_NOTIFICATION, type) == 0)
             {
-                //TODO: check response code
-                result = AwaError_Success;
+                if (*notification != NULL)
+                {
+                    // Notifications have no response code
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise message.");
+                }
             }
             else
             {
-                result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise XML.");
+                result = LogErrorWithEnum(AwaError_IPCError, "Unexpected message on notification channel.");
             }
         }
         else
         {
             if (errno == EAGAIN)
             {
-                LogPError("Timed out receiving notification on IPC UDP");
-                result = AwaError_Timeout;
+                result = LogErrorWithEnum(AwaError_Timeout, "Timed out receiving notification on IPC UDP");
             }
             else
             {
-                LogPError("Could not receive notification on IPC UDP");
-                result = AwaError_IPCError;
+                result = LogErrorWithEnum(AwaError_IPCError, "Could not receive notification on IPC UDP");
             }
         }
     }

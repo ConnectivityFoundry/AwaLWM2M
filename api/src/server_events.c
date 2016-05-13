@@ -20,9 +20,23 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include "server_events.h"
 #include "awa/server.h"
 #include "log.h"
 #include "server_session.h"
+#include "memalloc.h"
+
+struct _ServerEvents
+{
+    AwaServerClientRegisterEventCallback ClientRegisterEventCallback;
+    void * ClientRegisterEventContext;
+
+    AwaServerClientDeregisterEventCallback ClientDeregisterEventCallback;
+    void * ClientDeregisterEventContext;
+
+    AwaServerClientUpdateEventCallback ClientUpdateEventCallback;
+    void * ClientUpdateEventContext;
+};
 
 // Common event data:
 typedef struct
@@ -31,8 +45,38 @@ typedef struct
 } ServerEvent;
 
 // Specific event data:
-struct _AwaServerRegisterEvent
+struct _AwaServerClientRegisterEvent
 {
     ServerEvent * ServerEvent;
-    // TODO
 };
+
+struct _AwaServerClientDeregisterEvent
+{
+    ServerEvent * ServerEvent;
+};
+
+struct _AwaServerClientUpdateEvent
+{
+    ServerEvent * ServerEvent;
+};
+
+ServerEvents * ServerEvents_New(void)
+{
+    ServerEvents * serverEvents = Awa_MemAlloc(sizeof(*serverEvents));
+    if (serverEvents != NULL)
+    {
+        memset(serverEvents, 0, sizeof(*serverEvents));
+        LogNew("ServerEvents", serverEvents);
+    }
+    return serverEvents;
+}
+
+void ServerEvents_Free(ServerEvents ** serverEvents)
+{
+    if ((serverEvents != NULL) && (*serverEvents != NULL))
+    {
+        LogFree("ServerEvents", *serverEvents);
+        Awa_MemSafeFree(*serverEvents);
+        *serverEvents = NULL;
+    }
+}

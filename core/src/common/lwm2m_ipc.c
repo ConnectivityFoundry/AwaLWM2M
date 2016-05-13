@@ -26,6 +26,7 @@
 #include "lwm2m_ipc.h"
 
 #include "../../../api/src/objects_tree.h"
+#include "../../api/src/ipc_defs.h"
 #include "xml.h"
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_debug.h"
@@ -76,7 +77,7 @@ int IPC_SendResponse(TreeNode responseNode, int sockfd, const struct sockaddr * 
 {
     int rc = 0;
     // Serialise response
-    char buffer[MAXBUFLEN] = { 0 };
+    char buffer[IPC_MAX_BUFFER_LEN] = { 0 };
     if (Xml_TreeToString(responseNode, buffer, sizeof(buffer)) > 0)
     {
         xmlif_SendTo(sockfd, buffer, strlen(buffer), 0, fromAddr, addrLen);
