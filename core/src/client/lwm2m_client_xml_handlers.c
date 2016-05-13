@@ -83,10 +83,10 @@ void xmlif_RegisterHandlers(void)
 {
     ListInit(&executeHandlers);
 
-    xmlif_AddRequestHandler(MSGTYPE_CONNECT,           xmlif_HandlerConnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_CONNECT,           xmlif_HandlerConnectRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DEFINE,            xmlif_HandlerDefineRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_GET,               xmlif_HandlerGetRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_SET,               xmlif_HandlerSetRequest);
@@ -512,7 +512,7 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     }
     else
     {
-        response = IPC_NewResponseNode(MSGTYPE_CONNECT, AwaResult_BadRequest);
+        response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, AwaResult_BadRequest);
     }
 
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
@@ -526,7 +526,7 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
 {
     Lwm2m_Info("IPC Notify connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    TreeNode response = IPC_NewResponseNode(MSGTYPE_CONNECT_NOTIFY, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success);
 
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
@@ -541,7 +541,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     // No check for known client - proceed regardless.
     Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    TreeNode response = IPC_NewResponseNode(MSGTYPE_DISCONNECT, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT, AwaResult_Success);
 
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
@@ -556,7 +556,7 @@ static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeN
     // No check for known client - proceed regardless.
     Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    TreeNode response = IPC_NewResponseNode(MSGTYPE_DISCONNECT_NOTIFY, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, AwaResult_Success);
 
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);

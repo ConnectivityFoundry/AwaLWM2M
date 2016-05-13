@@ -37,49 +37,11 @@
 #include "xml.h"
 #include "observe_operation.h"
 
-//static AwaError HandleObserveNotification(AwaServerSession * session, IPCMessage * notification)
-//{
-//    AwaError result = AwaError_Success;
-//    if (notification)
-//    {
-//        TreeNode contentNode = IPCMessage_GetContentNode(notification);
-//        if (contentNode != NULL)
-//        {
-//            TreeNode clientsNode = Xml_Find(contentNode, "Clients");
-//            if (clientsNode != NULL)
-//            {
-//                result = ServerObserveOperation_CallObservers(session, clientsNode);
-//            }
-//            else
-//            {
-//                result = LogErrorWithEnum(AwaError_IPCError, "Clients node not found");
-//            }
-//        }
-//        else
-//        {
-//            result = LogErrorWithEnum(AwaError_IPCError, "Content node not found");
-//        }
-//    }
-//    return result;
-//}
-
-//HandleEventNotification
-
-AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * notification)
+static AwaError HandleObserveNotification(AwaServerSession * session, IPCMessage * notification)
 {
-//    const char * type = NULL;
-//    const char * subType = NULL;
-//    if (IPCMessage_GetType(notification, &type, &subType) == InternalError_Success)
-//    {
-//        if ((type != NULL) && (subType != NULL))
-//        {
-//            if (strcmp(type, ))
-//
-//        }
-//    }
-
+    LogDebug("Handle Observe Notification");
     AwaError result = AwaError_Success;
-    if (notification)
+    if (notification != NULL)
     {
         TreeNode contentNode = IPCMessage_GetContentNode(notification);
         if (contentNode != NULL)
@@ -99,6 +61,81 @@ AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * not
             result = LogErrorWithEnum(AwaError_IPCError, "Content node not found");
         }
     }
+    return result;
+}
+
+static AwaError HandleClientRegisterNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Success;
+//    if (session != NULL)
+//    {
+//        if (session->Events.ClientRegisterEventCallback != NULL)
+//        {
+//            AwaServerClientRegisterEvent * event = AwaServerClientRegisterEvent_New(notification);
+//            if (event != NULL)
+//            {
+//                session->Events.ClientRegisterEventCallback(event, session->Events.ClientRegisterEventContext);
+//            }
+//        }
+//    }
+//    else
+//    {
+//        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+//    }
+    return result;
+}
+
+static AwaError HandleClientDeregisterNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    return result;
+}
+
+static AwaError HandleClientUpdateNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    return result;
+}
+
+AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    const char * type = NULL;
+    const char * subType = NULL;
+    if (IPCMessage_GetType(notification, &type, &subType) == InternalError_Success)
+    {
+        if ((type != NULL) && (subType != NULL))
+        {
+            if (strcmp(type, IPC_MESSAGE_TYPE_NOTIFICATION) == 0)
+            {
+                if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_OBSERVE) == 0)
+                {
+                    result = HandleObserveNotification(session, notification);
+                }
+                else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER) == 0)
+                {
+                    result = HandleClientRegisterNotification(session, notification);
+                }
+                else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER) == 0)
+                {
+                    result = HandleClientDeregisterNotification(session, notification);
+                }
+                else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE) == 0)
+                {
+                    result = HandleClientUpdateNotification(session, notification);
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Unexpected notification sub-type '%s'", subType);
+                }
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_IPCError, "Unexpected message type '%s'", type);
+            }
+        }
+    }
+
     return result;
 }
 

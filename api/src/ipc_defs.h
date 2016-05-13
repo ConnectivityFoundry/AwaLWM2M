@@ -23,9 +23,11 @@
 #ifndef IPC_DEFS_H
 #define IPC_DEFS_H
 
-#define IPC_DEFAULT_ADDRESS     "127.0.0.1"
-#define IPC_DEFAULT_CLIENT_PORT (12345)
-#define IPC_DEFAULT_SERVER_PORT (54321)
+#define IPC_MAX_BUFFER_LEN                          (65536)
+
+#define IPC_DEFAULT_ADDRESS                         "127.0.0.1"
+#define IPC_DEFAULT_CLIENT_PORT                     (12345)
+#define IPC_DEFAULT_SERVER_PORT                     (54321)
 
 // IPC message types:
 #define IPC_MESSAGE_TYPE_REQUEST                    "Request"
@@ -33,6 +35,7 @@
 #define IPC_MESSAGE_TYPE_NOTIFICATION               "Notification"
 
 // Common request message sub-types:
+#define IPC_MESSAGE_SUB_TYPE_INVALID                "Invalid"
 #define IPC_MESSAGE_SUB_TYPE_CONNECT                "Connect"
 #define IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY         "ConnectNotify"
 #define IPC_MESSAGE_SUB_TYPE_DISCONNECT             "Disconnect"

@@ -32,18 +32,14 @@
 #include "queue.h"
 #include "server_notification.h"
 #include "observe_operation.h"
+#include "server_events.h"
 
 struct _AwaServerSession
 {
     SessionCommon * SessionCommon;
     MapType * Observers;
     QueueType * NotificationQueue;
-
-    struct Events
-    {
-        AwaServerRegisterEventCallback RegisterEventCallback;
-        void * RegisterEventContext;
-    } Events;
+    ServerEvents * ServerEvents;
 };
 
 AwaServerSession * AwaServerSession_New(void)
@@ -57,9 +53,34 @@ AwaServerSession * AwaServerSession_New(void)
         if (session->SessionCommon != NULL)
         {
             session->Observers = Map_New();
-            if (session->Observers)
+            if (session->Observers != NULL)
             {
                 session->NotificationQueue = Queue_New();
+                if (session->NotificationQueue != NULL)
+                {
+                    session->ServerEvents = ServerEvents_New();
+                    if (session->ServerEvents != NULL)
+                    {
+                        LogNew("AwaServerSession", session);
+                    }
+                    else
+                    {
+                        LogErrorWithEnum(AwaError_OutOfMemory, "Could not create server events");
+                        Queue_Free(&session->NotificationQueue);
+                        Map_Free(&session->Observers);
+                        SessionCommon_Free(&session->SessionCommon);
+                        Awa_MemSafeFree(session);
+                        session = NULL;
+                    }
+                }
+                else
+                {
+                    LogErrorWithEnum(AwaError_OutOfMemory, "Could not create notification queue");
+                    Map_Free(&session->Observers);
+                    SessionCommon_Free(&session->SessionCommon);
+                    Awa_MemSafeFree(session);
+                    session = NULL;
+                }
             }
             else
             {
@@ -84,7 +105,7 @@ AwaServerSession * AwaServerSession_New(void)
     return session;
 }
 
-void RemoveObservationLinkToSession(const char * key, void * value, void * context)
+static void RemoveObservationLinkToSession(const char * key, void * value, void * context)
 {
     AwaServerObservation * observation = (AwaServerObservation *)value;
     ServerObservation_RemoveSession(observation);
@@ -101,6 +122,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
         Map_ForEach((*session)->Observers, RemoveObservationLinkToSession, NULL);
         Map_Free(&(*session)->Observers);
         Queue_Free(&((*session)->NotificationQueue));
+        ServerEvents_Free(&((*session)->ServerEvents));
 
         // Free the session itself
         LogFree("AwaServerSession", *session);
@@ -329,11 +351,9 @@ AwaError AwaServerSession_DispatchCallbacks(AwaServerSession * session)
     if (session != NULL)
     {
         IPCMessage * notification;
-
         while (Queue_Pop(session->NotificationQueue, (void **)&notification))
         {
             ServerNotification_Process(session, notification);
-
             IPCMessage_Free(&notification);
         }
         result = AwaError_Success;
@@ -373,13 +393,42 @@ MapType * ServerSession_GetObservers(const AwaServerSession * session)
     return list;
 }
 
-AwaError AwaServerSession_SetRegisterEventCallback(AwaServerSession * session, const AwaServerRegisterEventCallback callback, void * context)
+AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
 {
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        session->Events.RegisterEventCallback = callback;
-        session->Events.RegisterEventContext = context;
+        //result = ServerEvents_SetClientRegisterCallback(callback, context);
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        //result = ServerEvents_SetClientDeregisterCallback(callback, context);
+        result = AwaError_Success;
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        //result = ServerEvents_SetClientUpdateCallback(callback, context);
         result = AwaError_Success;
     }
     else

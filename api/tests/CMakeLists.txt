@@ -56,7 +56,7 @@ set (test_api_runner_SOURCES
   server/test_changeset.cc 
   server/test_server_delete_operation.cc
   server/test_execute_operation.cc
-  server/test_server_event.cc
+  server/test_server_events.cc
   server/test_server_response.cc
   server/test_server.cc
 
