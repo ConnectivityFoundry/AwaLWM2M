@@ -87,11 +87,11 @@ void xmlif_RegisterHandlers(void)
     xmlif_AddRequestHandler(MSGTYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
     xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
     xmlif_AddRequestHandler(MSGTYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
-    xmlif_AddRequestHandler(IPC_MSGTYPE_DEFINE,            xmlif_HandlerDefineRequest);
-    xmlif_AddRequestHandler(IPC_MSGTYPE_GET,               xmlif_HandlerGetRequest);
-    xmlif_AddRequestHandler(IPC_MSGTYPE_SET,               xmlif_HandlerSetRequest);
-    xmlif_AddRequestHandler(IPC_MSGTYPE_DELETE,            xmlif_HandlerDeleteRequest);
-    xmlif_AddRequestHandler(IPC_MSGTYPE_SUBSCRIBE,         xmlif_HandlerSubscribeRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DEFINE,            xmlif_HandlerDefineRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_GET,               xmlif_HandlerGetRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_SET,               xmlif_HandlerSetRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DELETE,            xmlif_HandlerDeleteRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_SUBSCRIBE,         xmlif_HandlerSubscribeRequest);
 }
 
 int xmlif_AddExecuteHandler(RequestInfoType * request, ObjectInstanceResourceKey * key)
@@ -209,7 +209,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
 
         do
         {
-            TreeNode response = IPC_NewNotificationNode(IPC_MSGTYPE_EXECUTE_NOTIFICATION);
+            TreeNode response = IPC_NewNotificationNode(IPC_MESSAGE_SUB_TYPE_SERVER_EXECUTE);
 
             TreeNode content = Xml_CreateNode("Content");
             TreeNode_AddChild(response, content);
@@ -583,7 +583,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
         objectDefinition = (objectDefinitions != NULL) ? TreeNode_GetChild(objectDefinitions, objectDefinitionIndex++) : NULL;
     }
 
-    TreeNode response = IPC_NewResponseNode(IPC_MSGTYPE_DEFINE, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DEFINE, AwaResult_Success);
 
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
@@ -796,7 +796,7 @@ static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlReques
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_GET, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MESSAGE_SUB_TYPE_GET, responseObjectsTree);
     return result;
 }
 
@@ -1084,7 +1084,7 @@ static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_SET, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MESSAGE_SUB_TYPE_SET, responseObjectsTree);
     return result;
 }
 
@@ -1099,7 +1099,7 @@ int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int s
 
     memcpy(request, contextData, sizeof(RequestInfoType));
 
-    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, IPC_MSGTYPE_CHANGE_NOTIFICATION);
+    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, IPC_MESSAGE_SUB_TYPE_SERVER_CHANGE);
 
     return 0;
 }
@@ -1159,27 +1159,27 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
         {
             AwaSubscribeType subscribeType = AwaSubscribeType_None;
             bool cancel = false;
-            if (Xml_Find(currentLeafNode, IPC_MSG_SUBSCRIBE_TO_CHANGE) != NULL)
+            if (Xml_Find(currentLeafNode, IPC_MESSAGE_TAG_SUBSCRIBE_TO_CHANGE) != NULL)
             {
                 subscribeType = AwaSubscribeType_Change;
-                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MSG_SUBSCRIBE_TO_CHANGE));
+                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MESSAGE_TAG_SUBSCRIBE_TO_CHANGE));
             }
-            else if (Xml_Find(currentLeafNode, IPC_MSG_SUBSCRIBE_TO_EXECUTE) != NULL)
+            else if (Xml_Find(currentLeafNode, IPC_MESSAGE_TAG_SUBSCRIBE_TO_EXECUTE) != NULL)
             {
                 subscribeType = AwaSubscribeType_Execute;
-                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MSG_SUBSCRIBE_TO_EXECUTE));
+                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MESSAGE_TAG_SUBSCRIBE_TO_EXECUTE));
             }
-            else if (Xml_Find(currentLeafNode, IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE) != NULL)
+            else if (Xml_Find(currentLeafNode, IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_CHANGE) != NULL)
             {
                 subscribeType = AwaSubscribeType_Change;
                 cancel = true;
-                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE));
+                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_CHANGE));
             }
-            else if (Xml_Find(currentLeafNode, IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE) != NULL)
+            else if (Xml_Find(currentLeafNode, IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_EXECUTE) != NULL)
             {
                 subscribeType = AwaSubscribeType_Execute;
                 cancel = true;
-                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE));
+                TreeNode_AddChild(responseLeafNode, Xml_CreateNode(IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_EXECUTE));
             }
 
             if (subscribeType != AwaSubscribeType_None)
@@ -1284,7 +1284,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_SUBSCRIBE, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MESSAGE_SUB_TYPE_SUBSCRIBE, responseObjectsTree);
     return result;
 }
 
@@ -1411,7 +1411,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_DELETE, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MESSAGE_SUB_TYPE_DELETE, responseObjectsTree);
     return result;
 }
 

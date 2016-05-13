@@ -154,7 +154,7 @@ AwaError AwaServerWriteOperation_Perform(AwaServerWriteOperation * operation, co
                                 {
                                     // build an IPC message and inject our content into it
                                     IPCMessage * request = IPCMessage_New();
-                                    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_WRITE);
+                                    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_WRITE);
 
                                     // Add client node
                                     TreeNode clientsNode = Xml_CreateNode("Clients");
@@ -268,7 +268,7 @@ InternalError ServerWriteOperation_AddCreate(TreeNode node)
     {
         if (strcmp(TreeNode_GetName(node),"Object") == 0 || strcmp(TreeNode_GetName(node),"ObjectInstance") == 0)
         {
-            if (TreeNode_AddChild(node, Xml_CreateNode(IPC_MSG_CREATE)))
+            if (TreeNode_AddChild(node, Xml_CreateNode(IPC_MESSAGE_TAG_CREATE)))
             {
                 result = InternalError_Success;
             }

@@ -116,7 +116,7 @@ AwaError AwaServerListClientsOperation_Perform(AwaServerListClientsOperation * o
         {
             // build an IPC message and inject our content (object paths) into it
             IPCMessage * request = IPCMessage_New();
-            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_LIST_CLIENTS);
+            IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS);
 
             IPCMessage * response = NULL;
             result = IPC_SendAndReceive(ServerSession_GetChannel(ServerOperation_GetSession(operation->ServerOperation)), request, &response, timeout > 0 ? timeout : -1);

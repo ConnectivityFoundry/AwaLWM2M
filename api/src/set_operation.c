@@ -119,7 +119,7 @@ InternalError ClientSetOperation_AddCreate(TreeNode node)
             node = ObjectsTreeInternal_AddChildNode(node, "ObjectInstance");
         }
 
-        if (TreeNode_AddChild(node, Xml_CreateNode(IPC_MSG_CREATE)))
+        if (TreeNode_AddChild(node, Xml_CreateNode(IPC_MESSAGE_TAG_CREATE)))
         {
             result = InternalError_Success;
         }
@@ -450,7 +450,7 @@ AwaError AwaClientSetOperation_Perform(AwaClientSetOperation * operation, AwaTim
                         {
                             // Add Content to message
                             IPCMessage * setRequest = IPCMessage_New();
-                            IPCMessage_SetType(setRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_SET);
+                            IPCMessage_SetType(setRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SET);
                             IPCMessage_AddContent(setRequest, objectsTree);
 
                             // Serialise message

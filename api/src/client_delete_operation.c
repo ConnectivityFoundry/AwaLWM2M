@@ -140,7 +140,7 @@ AwaError AwaClientDeleteOperation_Perform(AwaClientDeleteOperation * operation, 
                 {
                     //build an IPC message and inject our content (object paths) into it
                     IPCMessage * request = IPCMessage_New();
-                    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_DELETE);
+                    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DELETE);
 
                     IPCMessage_AddContent(request, objectsTree);
 

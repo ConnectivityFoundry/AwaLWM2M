@@ -266,7 +266,7 @@ AwaError AwaServerObservation_Free(AwaServerObservation ** observation)
 InternalError ServerObserve_AddObserveType(TreeNode leafNode, AwaServerObservation * subscription)
 {
     InternalError result = InternalError_Unspecified;
-    const char * messageType = subscription->Cancel? IPC_MSG_CANCEL_OBSERVATION : IPC_MSG_OBSERVE;
+    const char * messageType = subscription->Cancel? IPC_MESSAGE_TAG_CANCEL_OBSERVATION : IPC_MESSAGE_TAG_OBSERVE;
 
     if (leafNode != NULL)
     {
@@ -365,7 +365,7 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
                         // build an IPC message and inject our content (object paths) into it
                         IPCMessage * observeRequest = IPCMessage_New();
 
-                        IPCMessage_SetType(observeRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_OBSERVE);
+                        IPCMessage_SetType(observeRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_OBSERVE);
 
                         IPCMessage_AddContent(observeRequest, clientsTree);
 

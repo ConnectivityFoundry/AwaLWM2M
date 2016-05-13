@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-#define IPC_MSGTYPE_REQUEST      "Request"
-#define IPC_MSGTYPE_RESPONSE     "Response"
-#define IPC_MSGTYPE_NOTIFICATION "Notification"
+#define IPC_MESSAGE_TYPE_REQUEST      "Request"
+#define IPC_MESSAGE_TYPE_RESPONSE     "Response"
+#define IPC_MESSAGE_TYPE_NOTIFICATION "Notification"
 
 TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
 TreeNode IPC_NewNotificationNode(const char * type);

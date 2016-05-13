@@ -143,7 +143,7 @@ AwaError AwaServerReadOperation_Perform(AwaServerReadOperation * operation, AwaT
                         {
                             // build an IPC message and inject our content into it
                             IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_READ);
+                            IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_READ);
 
                             // Add Content to message
                             IPCMessage_AddContent(request, clientsTree);

@@ -147,7 +147,7 @@ TEST_F(TestIPC, IPC_SerialiseMessageToXML)
 {
     const char * expectedSubType = "ABCDEF";
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, IPC_MSGTYPE_REQUEST, expectedSubType));
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, IPC_MESSAGE_TYPE_REQUEST, expectedSubType));
     char * buffer = IPC_SerialiseMessageToXML(message);
     const size_t bufferLen = strlen(buffer);
     TreeNode root = TreeNode_ParseXML(reinterpret_cast<uint8_t *>(buffer), bufferLen, true);
@@ -197,7 +197,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_channel)
 {
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
     EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(NULL, request, &response, defaults::timeout));
     IPCMessage_Free(&request);
 }
@@ -219,7 +219,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_response)
     IPCInfo * info = IPCInfo_NewUDP(detail::NonRoutableIPv4Address, 55555);  EXPECT_TRUE(NULL != info);
     IPCChannel * channel = IPCChannel_New(info);        EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, NULL, defaults::timeout));
     IPCMessage_Free(&request);
     IPCChannel_Free(&channel);
@@ -237,7 +237,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_failed_response_is_null)
     IPCChannel * channel = IPCChannel_New(info);          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_NE(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     ASSERT_EQ(NULL, response);
@@ -254,7 +254,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_is_not_null)
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     ASSERT_TRUE(NULL != response);
@@ -273,7 +273,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_and_correct_type)
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);
@@ -282,8 +282,8 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_and_correct_type)
     const char * subType = NULL;
     ASSERT_EQ(InternalError_Success, IPCMessage_GetType(response, &Type, &subType));
 
-    ASSERT_STREQ(Type, IPC_MSGTYPE_RESPONSE);
-    ASSERT_STREQ(subType, IPC_MSGTYPE_CONNECT);
+    ASSERT_STREQ(Type, IPC_MESSAGE_TYPE_RESPONSE);
+    ASSERT_STREQ(subType, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     IPCMessage_Free(&request);
     IPCMessage_Free(&response);
@@ -297,7 +297,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_content_is_not_
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);
@@ -316,7 +316,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_code_is_success
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);

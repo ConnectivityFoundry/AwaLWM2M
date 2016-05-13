@@ -242,7 +242,7 @@ AwaError AwaServerWriteAttributesOperation_Perform(AwaServerWriteAttributesOpera
                         {
                             // build an IPC message and inject our content into it
                             IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_WRITE_ATTRIBUTES);
+                            IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_WRITE_ATTRIBUTES);
 
                             // Add Content to message
                             IPCMessage_AddContent(request, clientsTree);

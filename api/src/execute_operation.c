@@ -180,7 +180,7 @@ AwaError AwaServerExecuteOperation_Perform(AwaServerExecuteOperation * operation
                         {
                             // build an IPC message and inject our content into it
                             IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_EXECUTE);
+                            IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_EXECUTE);
 
                             // Add Content to message
                             IPCMessage_AddContent(request, clientsTree);

@@ -23,46 +23,53 @@
 #ifndef IPC_DEFS_H
 #define IPC_DEFS_H
 
-#define IPC_DEFAULT_ADDRESS "127.0.0.1"
+#define IPC_DEFAULT_ADDRESS     "127.0.0.1"
 #define IPC_DEFAULT_CLIENT_PORT (12345)
 #define IPC_DEFAULT_SERVER_PORT (54321)
 
-#define IPC_MSGTYPE_REQUEST      "Request"
-#define IPC_MSGTYPE_RESPONSE     "Response"
-#define IPC_MSGTYPE_NOTIFICATION "Notification"
+// IPC message types:
+#define IPC_MESSAGE_TYPE_REQUEST                    "Request"
+#define IPC_MESSAGE_TYPE_RESPONSE                   "Response"
+#define IPC_MESSAGE_TYPE_NOTIFICATION               "Notification"
 
-// Common request message types:
-#define IPC_MSGTYPE_CONNECT              "Connect"
-#define IPC_MSGTYPE_CONNECT_NOTIFY       "ConnectNotify"
-#define IPC_MSGTYPE_DISCONNECT           "Disconnect"
-#define IPC_MSGTYPE_DISCONNECT_NOTIFY    "DisconnectNotify"
-#define IPC_MSGTYPE_DELETE               "Delete"
-#define IPC_MSGTYPE_DEFINE               "Define"
+// Common request message sub-types:
+#define IPC_MESSAGE_SUB_TYPE_CONNECT                "Connect"
+#define IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY         "ConnectNotify"
+#define IPC_MESSAGE_SUB_TYPE_DISCONNECT             "Disconnect"
+#define IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY      "DisconnectNotify"
+#define IPC_MESSAGE_SUB_TYPE_DELETE                 "Delete"
+#define IPC_MESSAGE_SUB_TYPE_DEFINE                 "Define"
 
-// Client request message types:
-#define IPC_MSGTYPE_GET                  "Get"
-#define IPC_MSGTYPE_SET                  "Set"
-#define IPC_MSGTYPE_SUBSCRIBE            "Subscribe"
-#define IPC_MSGTYPE_CHANGE_NOTIFICATION  "ServerChange"
-#define IPC_MSGTYPE_EXECUTE_NOTIFICATION "ServerExecute"
+// Client request message sub-types:
+#define IPC_MESSAGE_SUB_TYPE_GET                    "Get"
+#define IPC_MESSAGE_SUB_TYPE_SET                    "Set"
+#define IPC_MESSAGE_SUB_TYPE_SUBSCRIBE              "Subscribe"
+
+// Client notification message sub-types:
+#define IPC_MESSAGE_SUB_TYPE_SERVER_CHANGE          "ServerChange"
+#define IPC_MESSAGE_SUB_TYPE_SERVER_EXECUTE         "ServerExecute"
 
 // Server request message types:
-#define IPC_MSGTYPE_LIST_CLIENTS         "ListClients"
-#define IPC_MSGTYPE_WRITE                "Write"
-#define IPC_MSGTYPE_READ                 "Read"
-#define IPC_MSGTYPE_OBSERVE              "Observe"
-#define IPC_MSGTYPE_EXECUTE              "Execute"
-#define IPC_MSGTYPE_WRITE_ATTRIBUTES     "WriteAttributes"
-#define IPC_MSGTYPE_DISCOVER             "Discover"
+#define IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS           "ListClients"
+#define IPC_MESSAGE_SUB_TYPE_WRITE                  "Write"
+#define IPC_MESSAGE_SUB_TYPE_READ                   "Read"
+#define IPC_MESSAGE_SUB_TYPE_OBSERVE                "Observe"
+#define IPC_MESSAGE_SUB_TYPE_EXECUTE                "Execute"
+#define IPC_MESSAGE_SUB_TYPE_WRITE_ATTRIBUTES       "WriteAttributes"
+#define IPC_MESSAGE_SUB_TYPE_DISCOVER               "Discover"
+
+// Server notification message sub-types:
+#define IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER        "ClientRegister"
+#define IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER      "ClientDeregister"
+#define IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE          "ClientUpdate"
 
 // IPC message tags:
-#define IPC_MSG_CREATE                      "Create"
-#define IPC_MSG_SUBSCRIBE_TO_CHANGE         "SubscribeToChange"
-#define IPC_MSG_SUBSCRIBE_TO_EXECUTE        "SubscribeToExecute"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE  "CancelSubscribeToChange"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
-
-#define IPC_MSG_OBSERVE "Observe"
-#define IPC_MSG_CANCEL_OBSERVATION "CancelObserve"
+#define IPC_MESSAGE_TAG_CREATE                      "Create"
+#define IPC_MESSAGE_TAG_SUBSCRIBE_TO_CHANGE         "SubscribeToChange"
+#define IPC_MESSAGE_TAG_SUBSCRIBE_TO_EXECUTE        "SubscribeToExecute"
+#define IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_CHANGE  "CancelSubscribeToChange"
+#define IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
+#define IPC_MESSAGE_TAG_OBSERVE                     "Observe"
+#define IPC_MESSAGE_TAG_CANCEL_OBSERVATION          "CancelObserve"
 
 #endif // IPC_DEFS_H
