@@ -55,29 +55,10 @@
 #include "../../../api/src/objects_tree.h"
 #include "../../api/include/awa/common.h"
 #include "../../../api/src/lwm2m_error.h"
-
+#include "../../api/src/ipc_defs.h"
 
 #define STR(s) # s
 #define STRINGIFY(s) STR(s)
-
-#define MSGTYPE_DEFINE               "Define"
-#define MSGTYPE_GET                  "Get"
-#define MSGTYPE_SET                  "Set"
-#define MSGTYPE_DELETE               "Delete"
-#define MSGTYPE_SUBSCRIBE            "Subscribe"
-
-#define MSGTYPE_CHANGE_NOTIFICATION "ChangeNotification"
-#define MSGTYPE_EXECUTE_NOTIFICATION "ExecuteNotification"
-
-// Match with ipc.h
-#define IPC_MSG_SUBSCRIBE_TO_CHANGE         "SubscribeToChange"
-#define IPC_MSG_SUBSCRIBE_TO_EXECUTE        "SubscribeToExecute"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE  "CancelSubscribeToChange"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
-
-// IPC tags
-#define IPC_MSG_CREATE "Create"
-
 
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content);
@@ -106,11 +87,11 @@ void xmlif_RegisterHandlers(void)
     xmlif_AddRequestHandler(MSGTYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
     xmlif_AddRequestHandler(MSGTYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
     xmlif_AddRequestHandler(MSGTYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DEFINE,            xmlif_HandlerDefineRequest);
-    xmlif_AddRequestHandler(MSGTYPE_GET,               xmlif_HandlerGetRequest);
-    xmlif_AddRequestHandler(MSGTYPE_SET,               xmlif_HandlerSetRequest);
-    xmlif_AddRequestHandler(MSGTYPE_DELETE,            xmlif_HandlerDeleteRequest);
-    xmlif_AddRequestHandler(MSGTYPE_SUBSCRIBE,         xmlif_HandlerSubscribeRequest);
+    xmlif_AddRequestHandler(IPC_MSGTYPE_DEFINE,            xmlif_HandlerDefineRequest);
+    xmlif_AddRequestHandler(IPC_MSGTYPE_GET,               xmlif_HandlerGetRequest);
+    xmlif_AddRequestHandler(IPC_MSGTYPE_SET,               xmlif_HandlerSetRequest);
+    xmlif_AddRequestHandler(IPC_MSGTYPE_DELETE,            xmlif_HandlerDeleteRequest);
+    xmlif_AddRequestHandler(IPC_MSGTYPE_SUBSCRIBE,         xmlif_HandlerSubscribeRequest);
 }
 
 int xmlif_AddExecuteHandler(RequestInfoType * request, ObjectInstanceResourceKey * key)
@@ -228,9 +209,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
 
         do
         {
-            char buffer[MAXBUFLEN];
-            TreeNode response = Xml_CreateNode("Response");
-            TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_EXECUTE_NOTIFICATION));
+            TreeNode response = IPC_NewNotificationNode(IPC_MSGTYPE_EXECUTE_NOTIFICATION);
 
             TreeNode content = Xml_CreateNode("Content");
             TreeNode_AddChild(response, content);
@@ -252,9 +231,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
 
             TreeNode_AddChild(resource, Xml_CreateNodeWithValue("Value", "%s", base64content ? base64content : ""));
 
-            Xml_TreeToString(response, buffer, sizeof(buffer));
-            xmlif_SendTo(executeHandler->ExecuteTarget.Sockfd, buffer, strlen(buffer), 0, &executeHandler->ExecuteTarget.FromAddr, executeHandler->ExecuteTarget.AddrLen);
-
+            IPC_SendResponse(response, executeHandler->ExecuteTarget.Sockfd, &executeHandler->ExecuteTarget.FromAddr, executeHandler->ExecuteTarget.AddrLen);
             Tree_Delete(response);
 
             executeHandler = xmlif_GetNextExecuteHandler(executeHandler, objectID, objectInstanceID, resourceID);
@@ -524,11 +501,9 @@ error:
 // Called to handle a request with the type "Connect". Returns 0 on success.
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
-    TreeNode response = NULL;
-    char buffer[MAXBUFLEN];
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
-    response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
+    TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
 
     // Create a default response if necessary
     if (response != NULL)
@@ -537,13 +512,10 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     }
     else
     {
-        response = Xml_CreateNode("Response");
-        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT));
-        TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_BadRequest));
+        response = IPC_NewResponseNode(MSGTYPE_CONNECT, AwaResult_BadRequest);
     }
 
-    Xml_TreeToString(response, buffer, sizeof(buffer));
-    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
     free(request);
@@ -552,17 +524,11 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
 
 static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content)
 {
-    TreeNode response = NULL;
-    char buffer[MAXBUFLEN];
-
     Lwm2m_Info("IPC Notify connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    response = Xml_CreateNode("Response");
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT_NOTIFY));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+    TreeNode response = IPC_NewResponseNode(MSGTYPE_CONNECT_NOTIFY, AwaResult_Success);
 
-    Xml_TreeToString(response, buffer, sizeof(buffer));
-    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
     free(request);
@@ -573,17 +539,11 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content)
 {
     // No check for known client - proceed regardless.
-    TreeNode response = NULL;
-    char buffer[MAXBUFLEN];
-
     Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    response = Xml_CreateNode("Response");
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+    TreeNode response = IPC_NewResponseNode(MSGTYPE_DISCONNECT, AwaResult_Success);
 
-    Xml_TreeToString(response, buffer, sizeof(buffer));
-    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
     free(request);
@@ -594,17 +554,11 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
 static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content)
 {
     // No check for known client - proceed regardless.
-    TreeNode response = NULL;
-    char buffer[MAXBUFLEN];
-
     Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    response = Xml_CreateNode("Response");
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DISCONNECT_NOTIFY));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+    TreeNode response = IPC_NewResponseNode(MSGTYPE_DISCONNECT_NOTIFY, AwaResult_Success);
 
-    Xml_TreeToString(response, buffer, sizeof(buffer));
-    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
     free(request);
@@ -614,7 +568,6 @@ static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeN
 // Called to handle a request with the type "Define". Returns 0 on success.
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content)
 {
-    char buffer[MAXBUFLEN];
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
     TreeNode objectDefinitions = TreeNode_Navigate(content, "Content/ObjectDefinitions");
@@ -630,12 +583,9 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
         objectDefinition = (objectDefinitions != NULL) ? TreeNode_GetChild(objectDefinitions, objectDefinitionIndex++) : NULL;
     }
 
-    TreeNode response = Xml_CreateNode("Response");
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_DEFINE));
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", AwaResult_Success));
+    TreeNode response = IPC_NewResponseNode(IPC_MSGTYPE_DEFINE, AwaResult_Success);
 
-    Xml_TreeToString(response, buffer, sizeof(buffer));
-    xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
     // Send an update so that all servers this client is connected to know that the client has this object defined.
@@ -658,17 +608,9 @@ static void xmlif_GenerateResponse(void * ctxt, AddressType* address, const char
         TreeNode_AddChild(response, content);
     }
 
-    char buffer[MAXBUFLEN];
-    if (Xml_TreeToString(response, buffer, sizeof(buffer)) <= 0)
-    {
-        Lwm2m_Error("Xml_TreeToString failed\n");
-    }
-    else
-    {
-        xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
-    }
-
+    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
+
     free(request);
 }
 
@@ -854,7 +796,7 @@ static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlReques
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, MSGTYPE_GET, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_GET, responseObjectsTree);
     return result;
 }
 
@@ -1142,7 +1084,7 @@ static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, MSGTYPE_SET, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_SET, responseObjectsTree);
     return result;
 }
 
@@ -1157,7 +1099,7 @@ int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int s
 
     memcpy(request, contextData, sizeof(RequestInfoType));
 
-    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, MSGTYPE_CHANGE_NOTIFICATION);
+    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, IPC_MSGTYPE_CHANGE_NOTIFICATION);
 
     return 0;
 }
@@ -1342,7 +1284,7 @@ static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xml
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, MSGTYPE_SUBSCRIBE, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_SUBSCRIBE, responseObjectsTree);
     return result;
 }
 
@@ -1353,7 +1295,6 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
     RequestInfoType * request = ctxt;
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
 
-    int result = responseCode;
     TreeNode content = NULL;
 
     // CoAP 2.XX responses indicate success, 2.05 and 2.04 may both have content in the old spec.
@@ -1429,19 +1370,10 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
 
 done:
     {
-        TreeNode response = IPC_NewResponseNode(responseType, result);
+        TreeNode response = IPC_NewNotificationNode(responseType);
         TreeNode_AddChild(response, content);
 
-        char buffer[MAXBUFLEN];
-        if (Xml_TreeToString(response, buffer, sizeof(buffer)) <= 0)
-        {
-            Lwm2m_Error("Xml_TreeToString failed\n");
-        }
-        else
-        {
-            xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
-        }
-
+        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
     }
     free(request);
@@ -1479,7 +1411,7 @@ static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode conten
     }
 
 error:
-    xmlif_GenerateResponse(request, NULL, NULL, result, MSGTYPE_DELETE, responseObjectsTree);
+    xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MSGTYPE_DELETE, responseObjectsTree);
     return result;
 }
 

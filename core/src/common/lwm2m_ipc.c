@@ -48,9 +48,9 @@ TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
     return responseNode;
 }
 
-TreeNode IPC_NewEventNode(const char * type)
+TreeNode IPC_NewNotificationNode(const char * type)
 {
-    return IPC_NewNode("Event", type);
+    return IPC_NewNode("Notification", type);
 }
 
 TreeNode IPC_NewClientsNode()
@@ -72,7 +72,7 @@ TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID)
     return clientNode;
 }
 
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen)
+int IPC_SendResponse(TreeNode responseNode, int sockfd, const struct sockaddr * fromAddr, int addrLen)
 {
     int rc = 0;
     // Serialise response

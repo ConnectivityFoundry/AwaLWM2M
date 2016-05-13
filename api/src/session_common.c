@@ -793,7 +793,7 @@ AwaError SessionCommon_SendDefineMessage(const SessionCommon * session, const Tr
         IPCMessage * registerRequest = IPCMessage_New();
         if (registerRequest != NULL)
         {
-            if (IPCMessage_SetType(registerRequest, IPC_MSGTYPE_REQUEST, "Define") == InternalError_Success)
+            if (IPCMessage_SetType(registerRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_DEFINE) == InternalError_Success)
             {
                 if ((result = IPCMessage_AddContent(registerRequest, objectDefinitionsNode)) == AwaError_Success)
                 {

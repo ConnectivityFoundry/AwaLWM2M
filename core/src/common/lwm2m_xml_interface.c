@@ -45,6 +45,7 @@
 #include "xml.h"
 #include "lwm2m_result.h"
 #include "lwm2m_xml_serdes.h"
+#include "lwm2m_ipc.h"
 
 typedef struct
 {
@@ -140,20 +141,8 @@ int xmlif_init(void * context, int port)
 
 static void HandleInvalidRequest(const RequestInfoType * request)
 {
-    TreeNode responseNode = Xml_CreateNode("Response");
-    TreeNode code = Xml_CreateNodeWithValue("Code", "%d", AwaResult_BadRequest);
-    TreeNode_AddChild(responseNode, code);
-
-    char buffer[MAXBUFLEN];
-    if (Xml_TreeToString(responseNode, buffer, sizeof(buffer)) <= 0)
-    {
-        Lwm2m_Error("Xml_TreeToString failed\n");
-    }
-    else
-    {
-        xmlif_SendTo(request->Sockfd, buffer, strlen(buffer), 0, &request->FromAddr, request->AddrLen);
-    }
-
+    TreeNode responseNode = IPC_NewResponseNode(MSGTYPE_INVALID, AwaResult_BadRequest);
+    IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(responseNode);
 }
 
@@ -289,13 +278,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
     ObjectDefinition * objFormat = 0;
     int result = AwaResult_Success;
 
-    TreeNode response = Xml_CreateNode("Response");
-
-    TreeNode type = Xml_CreateNodeWithValue("Type", "%s", MSGTYPE_CONNECT);
-    TreeNode_AddChild(response, type);
-
     TreeNode content = Xml_CreateNode("Content");
-    TreeNode_AddChild(response, content);
 
     // Create a container for object definitions.
     TreeNode objectDefinitionsNode = Xml_CreateNode("ObjectDefinitions");
@@ -309,7 +292,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         if (objFormat == NULL)
         {
             result = AwaResult_NotFound;
-            goto error;
+            goto end;
         }
 
         TreeNode objectMetaData = xmlif_ConstructObjectDefinitionNode(definitionRegistry, objFormat, objectID);
@@ -324,8 +307,9 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
         }
     }
 
-error:
-    TreeNode_AddChild(response, Xml_CreateNodeWithValue("Code", "%d", result));
+end: ;
+    TreeNode response = IPC_NewResponseNode(MSGTYPE_CONNECT, result);
+    TreeNode_AddChild(response, content);
     return response;
 }
 

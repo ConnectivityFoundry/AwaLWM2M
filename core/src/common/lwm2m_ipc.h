@@ -31,14 +31,18 @@
 extern "C" {
 #endif
 
+#define IPC_MSGTYPE_REQUEST      "Request"
+#define IPC_MSGTYPE_RESPONSE     "Response"
+#define IPC_MSGTYPE_NOTIFICATION "Notification"
+
 TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
-TreeNode IPC_NewEventNode(const char * type);
+TreeNode IPC_NewNotificationNode(const char * type);
 TreeNode IPC_NewClientsNode();
 TreeNode IPC_NewContentNode();
 TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);
 
 // Serialise and send the IPC response back to the originator
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen);
+int IPC_SendResponse(TreeNode responseNode, int sockfd, const struct sockaddr * fromAddr, int addrLen);
 
 TreeNode IPC_AddResultTag(TreeNode leafNode, int error);
 TreeNode IPC_AddServerResultTag(TreeNode leafNode, int error, int serverError);

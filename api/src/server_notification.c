@@ -37,8 +37,47 @@
 #include "xml.h"
 #include "observe_operation.h"
 
+//static AwaError HandleObserveNotification(AwaServerSession * session, IPCMessage * notification)
+//{
+//    AwaError result = AwaError_Success;
+//    if (notification)
+//    {
+//        TreeNode contentNode = IPCMessage_GetContentNode(notification);
+//        if (contentNode != NULL)
+//        {
+//            TreeNode clientsNode = Xml_Find(contentNode, "Clients");
+//            if (clientsNode != NULL)
+//            {
+//                result = ServerObserveOperation_CallObservers(session, clientsNode);
+//            }
+//            else
+//            {
+//                result = LogErrorWithEnum(AwaError_IPCError, "Clients node not found");
+//            }
+//        }
+//        else
+//        {
+//            result = LogErrorWithEnum(AwaError_IPCError, "Content node not found");
+//        }
+//    }
+//    return result;
+//}
+
+//HandleEventNotification
+
 AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * notification)
 {
+//    const char * type = NULL;
+//    const char * subType = NULL;
+//    if (IPCMessage_GetType(notification, &type, &subType) == InternalError_Success)
+//    {
+//        if ((type != NULL) && (subType != NULL))
+//        {
+//            if (strcmp(type, ))
+//
+//        }
+//    }
+
     AwaError result = AwaError_Success;
     if (notification)
     {

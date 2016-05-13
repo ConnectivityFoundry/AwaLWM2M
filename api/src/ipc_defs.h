@@ -20,33 +20,49 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#ifndef IPC_DEFS_H
+#define IPC_DEFS_H
 
-#ifndef LWM2M_SERVER_XML_EVENTS_H
-#define LWM2M_SERVER_XML_EVENTS_H
+#define IPC_DEFAULT_ADDRESS "127.0.0.1"
+#define IPC_DEFAULT_CLIENT_PORT (12345)
+#define IPC_DEFAULT_SERVER_PORT (54321)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define IPC_MSGTYPE_REQUEST      "Request"
+#define IPC_MSGTYPE_RESPONSE     "Response"
+#define IPC_MSGTYPE_NOTIFICATION "Notification"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+// Common request message types:
+#define IPC_MSGTYPE_CONNECT              "Connect"
+#define IPC_MSGTYPE_CONNECT_NOTIFY       "ConnectNotify"
+#define IPC_MSGTYPE_DISCONNECT           "Disconnect"
+#define IPC_MSGTYPE_DISCONNECT_NOTIFY    "DisconnectNotify"
+#define IPC_MSGTYPE_DELETE               "Delete"
+#define IPC_MSGTYPE_DEFINE               "Define"
 
-#include "lwm2m_registration.h"
-#include "lwm2m_context.h"
+// Client request message types:
+#define IPC_MSGTYPE_GET                  "Get"
+#define IPC_MSGTYPE_SET                  "Set"
+#define IPC_MSGTYPE_SUBSCRIBE            "Subscribe"
+#define IPC_MSGTYPE_CHANGE_NOTIFICATION  "ServerChange"
+#define IPC_MSGTYPE_EXECUTE_NOTIFICATION "ServerExecute"
 
-typedef struct
-{
-    int Sockfd;
-    struct sockaddr FromAddr;
-    int AddrLen;
-    Lwm2mContextType * Lwm2mContext;
+// Server request message types:
+#define IPC_MSGTYPE_LIST_CLIENTS         "ListClients"
+#define IPC_MSGTYPE_WRITE                "Write"
+#define IPC_MSGTYPE_READ                 "Read"
+#define IPC_MSGTYPE_OBSERVE              "Observe"
+#define IPC_MSGTYPE_EXECUTE              "Execute"
+#define IPC_MSGTYPE_WRITE_ATTRIBUTES     "WriteAttributes"
+#define IPC_MSGTYPE_DISCOVER             "Discover"
 
-} EventContext;
+// IPC message tags:
+#define IPC_MSG_CREATE                      "Create"
+#define IPC_MSG_SUBSCRIBE_TO_CHANGE         "SubscribeToChange"
+#define IPC_MSG_SUBSCRIBE_TO_EXECUTE        "SubscribeToExecute"
+#define IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE  "CancelSubscribeToChange"
+#define IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
 
-void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context, void * parameter);
+#define IPC_MSG_OBSERVE "Observe"
+#define IPC_MSG_CANCEL_OBSERVATION "CancelObserve"
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // LWM2M_SERVER_XML_EVENTS_H
+#endif // IPC_DEFS_H
