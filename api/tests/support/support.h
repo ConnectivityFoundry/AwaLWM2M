@@ -34,6 +34,7 @@
 #include "awa/server.h"
 
 #include "daemon.h"
+#include "process.h"
 
 // Convert a preprocessor definition to a string
 #define str(x) #x
@@ -121,7 +122,16 @@ protected:
       if (global::spawnClientDaemon)
       {
           // round-robin the IPC port to avoid port reuse issues during testing
-          global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
+          int count = 0;
+          do
+          {
+              global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
+              if (++count > 2 * defaults::serverIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          } while (IsUDPPortInUse(global::clientIpcPort) != false);
       }
       daemon_.Stop();
       TestClientBase::TearDown();
@@ -208,7 +218,16 @@ protected:
       if (global::spawnServerDaemon)
       {
           // round-robin the IPC port to avoid port reuse issues during testing
-          global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
+          int count = 0;
+          do
+          {
+              global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
+              if (++count > 2 * defaults::serverIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          } while (IsUDPPortInUse(global::serverIpcPort) != false);
       }
       daemon_.Stop();
       TestServerBase::TearDown();
