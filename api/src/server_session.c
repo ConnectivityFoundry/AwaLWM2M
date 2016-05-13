@@ -122,7 +122,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
         Map_ForEach((*session)->Observers, RemoveObservationLinkToSession, NULL);
         Map_Free(&(*session)->Observers);
         Queue_Free(&((*session)->NotificationQueue));
-        ServerEvents(&((*session)->ServerEvents));
+        ServerEvents_Free(&((*session)->ServerEvents));
 
         // Free the session itself
         LogFree("AwaServerSession", *session);
