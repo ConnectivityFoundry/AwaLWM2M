@@ -63,7 +63,7 @@ tool_tests tools_tests:
 
 # gtest runners
 TEST_SRC_BIN:=$(BUILD_DIR)/core/tests/test_core_runner
-TEST_STATIC_API_BIN:=$(BUILD_DIR)/api/tests-static/test_static_api_runner
+TEST_STATIC_API_BIN:=$(BUILD_DIR)/api/tests/test_static_api_runner
 TEST_API_BIN:=$(BUILD_DIR)/api/tests/test_api_runner
 TEST_TOOLS_BIN:=$(BUILD_DIR)/tools/tests/gtest/test_tools_runner
 
