@@ -75,7 +75,7 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
             TreeNode notificationNode = IPC_NewNotificationNode(msgType);
             TreeNode_AddChild(notificationNode, contentNode);
 
-            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
+//            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
             Tree_Delete(notificationNode);
         }
     }
