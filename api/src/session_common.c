@@ -365,12 +365,11 @@ error:
 
 static AwaError ConnectChannel(SessionCommon * session)
 {
-    AwaError result = AwaError_Unspecified;
     IPCMessage * connectRequest = IPCMessage_New();
     IPCMessage_SetType(connectRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     IPCMessage * connectResponse = NULL;
-    result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
+    AwaError result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
 
     if (result == AwaError_Success)
     {
@@ -506,12 +505,11 @@ AwaError SessionCommon_ConnectSession(SessionCommon * session)
 
 static AwaError DisconnectChannel(IPCChannel * ipcChannel)
 {
-    AwaError result = AwaError_Unspecified;
     IPCMessage * connectRequest = IPCMessage_New();
     IPCMessage_SetType(connectRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DISCONNECT);
 
     IPCMessage * connectResponse = NULL;
-    result = IPC_SendAndReceive(ipcChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
+    AwaError result = IPC_SendAndReceive(ipcChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
 
     if (result == AwaError_Success)
     {
@@ -534,12 +532,11 @@ static AwaError DisconnectChannel(IPCChannel * ipcChannel)
 
 static AwaError DisconnectNotifyChannel(IPCChannel * ipcChannel)
 {
-    AwaError result = AwaError_Unspecified;
     IPCMessage * connectRequest = IPCMessage_New();
     IPCMessage_SetType(connectRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY);
 
     IPCMessage * connectResponse = NULL;
-    result = IPC_SendAndReceiveOnNotifySocket(ipcChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
+    AwaError result = IPC_SendAndReceiveOnNotifySocket(ipcChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
 
     if (result == AwaError_Success)
     {
