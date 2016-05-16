@@ -655,6 +655,7 @@ static void DestroyClientList(struct ListHead * clientList)
     }
 }
 
+// Note: this will free all stored callback contexts
 static void DestroyEventList(struct ListHead * eventRecordList)
 {
     if (eventRecordList != NULL)
@@ -665,6 +666,8 @@ static void DestroyEventList(struct ListHead * eventRecordList)
             EventRecord * eventRecord = ListEntry(i, EventRecord, list);
             if (eventRecord != NULL)
             {
+                free(eventRecord->Context);
+                eventRecord->Context = NULL;
                 free(eventRecord);
             }
         }
@@ -700,6 +703,7 @@ void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id)
     return result;
 }
 
+// Note: callbackContext *MUST* be heap-allocated, as it will be freed later.
 int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext)
 {
     int result = 0;
@@ -717,6 +721,7 @@ int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, 
     return result;
 }
 
+// Note: this will free the stored callback context
 int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id)
 {
     int result = 0;
@@ -732,6 +737,8 @@ int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int i
                 if (eventRecord->ID == id)
                 {
                     ListRemove(i);
+                    free(eventRecord->Context);
+                    eventRecord->Context = NULL;
                     free(eventRecord);
                     Lwm2m_Debug("Removed EventRecord %d: %p\n", id, eventRecord);
                 }
