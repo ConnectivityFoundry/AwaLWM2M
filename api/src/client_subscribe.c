@@ -382,7 +382,7 @@ AwaError AwaClientSubscribeOperation_Perform(AwaClientSubscribeOperation * opera
                         IPCMessage * subscribeRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SUBSCRIBE, OperationCommon_GetSessionID(operation->Common));
                         IPCMessage_AddContent(subscribeRequest, objectsTree);
                         IPCMessage * subscribeResponse = NULL;
-                        result = IPC_SendAndReceiveOnNotifySocket(ClientSession_GetChannel(session), subscribeRequest, &subscribeResponse, timeout);
+                        result = IPC_SendAndReceive(ClientSession_GetChannel(session), subscribeRequest, &subscribeResponse, timeout);
 
                         if (result == AwaError_Success)
                         {

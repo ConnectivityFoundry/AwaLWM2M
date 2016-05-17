@@ -32,6 +32,7 @@ EventContext * EventContext_New(const RequestInfoType * request)
         eventContext->FromAddr = request->FromAddr;
         eventContext->AddrLen = request->AddrLen;
         eventContext->Lwm2mContext = request->Context;
+        eventContext->SessionID = request->SessionID;
     }
     return eventContext;
 }

@@ -51,6 +51,7 @@
 #include "lwm2m_ipc.h"
 #include "lwm2m_registration.h"
 #include "../common/ipc_session.h"
+// #include "lwm2m_events.h"
 
 // Components from API
 #include "../../../api/src/objects_tree.h"
@@ -531,11 +532,11 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
     {
         Lwm2m_Info("IPC Notify session %d connected from %s\n", request->SessionID, Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    //    // Set up registration callbacks for Events
-    //    // Use FromAddr port number as key to identify this IPC client.
-    //    IPCSessionID sessionID = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
-    //    EventContext * eventContext = EventContext_New(request);
-    //    Lwm2m_AddRegistrationEventCallback(request->Context, sessionID, xmlif_HandleRegistrationEvent, eventContext);
+//        // Set up registration callbacks for Events
+//        // Use FromAddr port number as key to identify this IPC client.
+//        IPCSessionID sessionID = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+//        EventContext * eventContext = EventContext_New(request);
+//        Lwm2m_AddRegistrationEventCallback(request->Context, sessionID, xmlif_HandleRegistrationEvent, eventContext);
 
         TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success, request->SessionID);
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
@@ -1383,11 +1384,22 @@ static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, 
 
 done:
     {
-        TreeNode response = IPC_NewNotificationNode(responseType, request->SessionID);
-        TreeNode_AddChild(response, content);
+        int IPCSockFd = 0;
+        const struct sockaddr * IPCAddr = NULL;
+        int IPCAddrLen = 0;
 
-        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
-        Tree_Delete(response);
+        if (IPCSession_GetNotifyChannel(request->SessionID, &IPCSockFd, &IPCAddr, &IPCAddrLen) == 0)
+        {
+            TreeNode response = IPC_NewNotificationNode(responseType, request->SessionID);
+            TreeNode_AddChild(response, content);
+
+            IPC_SendResponse(response, IPCSockFd, IPCAddr, IPCAddrLen);
+            Tree_Delete(response);
+        }
+        else
+        {
+            Lwm2m_Error("Unable to get IPC session (%d) to send notification on.", request->SessionID);
+        }
     }
     free(request);
 }

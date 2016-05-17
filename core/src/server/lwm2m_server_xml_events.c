@@ -73,10 +73,10 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
 
         if (msgType != NULL)
         {
-//            TreeNode notificationNode = IPC_NewNotificationNode(msgType);
-//            TreeNode_AddChild(notificationNode, contentNode);
-//            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
-//            Tree_Delete(notificationNode);
+            TreeNode notificationNode = IPC_NewNotificationNode(msgType, eventContext->SessionID);
+            TreeNode_AddChild(notificationNode, contentNode);
+            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
+            Tree_Delete(notificationNode);
         }
     }
     else

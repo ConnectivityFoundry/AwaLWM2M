@@ -33,6 +33,7 @@ extern "C" {
 
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_context.h"
+#include "ipc_session.h"
 
 typedef struct
 {
@@ -40,6 +41,7 @@ typedef struct
     struct sockaddr FromAddr;
     int AddrLen;
     Lwm2mContextType * Lwm2mContext;
+    IPCSessionID SessionID;
 
 } EventContext;
 

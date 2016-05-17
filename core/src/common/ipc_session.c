@@ -155,6 +155,34 @@ int IPCSession_AddNotifyChannel(IPCSessionID sessionID, int sockfd, const struct
     return result;
 }
 
+
+int IPCSession_GetNotifyChannel(IPCSessionID sessionID, int * sockfd, const struct sockaddr ** fromAddr, int * addrLen)
+{
+    int result = -1;
+    IPCSession * session = NULL;
+    if ((session = FindSessionByID(sessionID)) != NULL)
+    {
+        if ((sockfd != NULL) && (fromAddr != NULL) && (addrLen != NULL))
+        {
+            *sockfd = session->NotifyChannel.Sockfd;
+            *fromAddr = &session->NotifyChannel.FromAddr;
+            *addrLen = session->NotifyChannel.AddrLen;
+            result = 0;
+        }
+        else
+        {
+            Lwm2m_Error("NULL parameter - could not return notification channel information\n");
+            result = -1;
+        }
+    }
+    else
+    {
+        Lwm2m_Error("No session with ID %d found\n", sessionID);
+        result = -1;
+    }
+    return result;
+}
+
 IPCSessionID IPCSession_AssignSessionID(void)
 {
     static IPCSessionID sessionID = -1;

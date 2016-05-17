@@ -367,7 +367,7 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
                         IPCMessage_AddContent(observeRequest, clientsTree);
 
                         IPCMessage * observeResponse = NULL;
-                        result = IPC_SendAndReceiveOnNotifySocket(ServerSession_GetChannel(session), observeRequest, &observeResponse, timeout);
+                        result = IPC_SendAndReceive(ServerSession_GetChannel(session), observeRequest, &observeResponse, timeout);
 
                         if (result == AwaError_Success)
                         {
