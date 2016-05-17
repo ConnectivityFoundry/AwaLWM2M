@@ -212,30 +212,42 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
 
         do
         {
-            TreeNode response = IPC_NewNotificationNode(IPC_MESSAGE_SUB_TYPE_SERVER_EXECUTE, executeHandler->SessionID);
+            int IPCSockFd = 0;
+            const struct sockaddr * IPCAddr = NULL;
+            int IPCAddrLen = 0;
 
-            TreeNode content = Xml_CreateNode("Content");
-            TreeNode_AddChild(response, content);
+            if (IPCSession_GetNotifyChannel(executeHandler->SessionID, &IPCSockFd, &IPCAddr, &IPCAddrLen) == 0)
+            {
 
-            TreeNode objects = Xml_CreateNode("Objects");
-            TreeNode_AddChild(content, objects);
+                TreeNode response = IPC_NewNotificationNode(IPC_MESSAGE_SUB_TYPE_SERVER_EXECUTE, executeHandler->SessionID);
 
-            TreeNode object = Xml_CreateNode("Object");
-            TreeNode_AddChild(object, Xml_CreateNodeWithValue("ID", "%d", objectID));
-            TreeNode_AddChild(objects, object);
+                TreeNode content = Xml_CreateNode("Content");
+                TreeNode_AddChild(response, content);
 
-            TreeNode instance = Xml_CreateNode("ObjectInstance");
-            TreeNode_AddChild(instance, Xml_CreateNodeWithValue("ID", "%d", objectInstanceID));
-            TreeNode_AddChild(object, instance);
+                TreeNode objects = Xml_CreateNode("Objects");
+                TreeNode_AddChild(content, objects);
 
-            TreeNode resource = Xml_CreateNode("Resource");
-            TreeNode_AddChild(resource, Xml_CreateNodeWithValue("ID", "%d", resourceID));
-            TreeNode_AddChild(instance, resource);
+                TreeNode object = Xml_CreateNode("Object");
+                TreeNode_AddChild(object, Xml_CreateNodeWithValue("ID", "%d", objectID));
+                TreeNode_AddChild(objects, object);
 
-            TreeNode_AddChild(resource, Xml_CreateNodeWithValue("Value", "%s", base64content ? base64content : ""));
+                TreeNode instance = Xml_CreateNode("ObjectInstance");
+                TreeNode_AddChild(instance, Xml_CreateNodeWithValue("ID", "%d", objectInstanceID));
+                TreeNode_AddChild(object, instance);
 
-            IPC_SendResponse(response, executeHandler->ExecuteTarget.Sockfd, &executeHandler->ExecuteTarget.FromAddr, executeHandler->ExecuteTarget.AddrLen);
-            Tree_Delete(response);
+                TreeNode resource = Xml_CreateNode("Resource");
+                TreeNode_AddChild(resource, Xml_CreateNodeWithValue("ID", "%d", resourceID));
+                TreeNode_AddChild(instance, resource);
+
+                TreeNode_AddChild(resource, Xml_CreateNodeWithValue("Value", "%s", base64content ? base64content : ""));
+
+                IPC_SendResponse(response, IPCSockFd, IPCAddr, IPCAddrLen);
+                Tree_Delete(response);
+            }
+            else
+            {
+                Lwm2m_Error("Unable to get IPC session (%d) to send notification on.", executeHandler->SessionID);
+            }
 
             executeHandler = xmlif_GetNextExecuteHandler(executeHandler, objectID, objectInstanceID, resourceID);
 
