@@ -32,6 +32,8 @@ class IpcError(Exception):
 
 class ContentNull(ipc_core.IpcContent):
     """There is no content in the message."""
+    def __init__(self, element=None):
+        pass
 
     def __str__(self):
         return "NoContent"
@@ -144,11 +146,29 @@ class IpcNotification(ipc_core.IpcNotification):
 
 # Messages
 
-## Register
-# TODO: need metadata
+## Connect
+class ConnectRequest(IpcRequest):
+    MessageType = "Connect"
+    ContentType = ContentNull
 
+class ConnectResponse(IpcResponse):
+    MessageType = "Connect"
+    ContentType = ContentNull
+    # TODO: handle definitions in response
 
-## GetClientList
+## Disconnect
+class DisconnectRequest(IpcRequest):
+    MessageType = "Disconnect"
+    ContentType = ContentNull
+
+class DisconnectResponse(IpcResponse):
+    MessageType = "Disconnect"
+    ContentType = ContentNull
+
+## Define
+# TODO: need metadata first
+
+## ListClients
 class ListClientsRequest(IpcRequest):
     MessageType = "ListClients"
     ContentType = ContentNull

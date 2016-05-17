@@ -39,12 +39,11 @@ class ServerAPI(object):
 
     def __del__(self):
         # Disconnect
-        import pdb; pdb.set_trace()
         if self._session_id is not None:
             request = server.DisconnectRequest(session_id=self._session_id)
             response = ipc.send_request_and_receive_response(self._ipc, request.serialize())
-            data, addr = sock.recvfrom(65536)
-            print "data " + data
+            #print "data " + ipc.receive_datagram(self._ipc)
+            #import pdb; pdb.set_trace()
 
     def GetClientList(self, clientID):
         request = server.ListClientsRequest(session_id=self._session_id)

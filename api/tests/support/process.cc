@@ -170,11 +170,10 @@ bool IsUDPPortInUse(int port)
         si.sin_addr.s_addr = htonl(INADDR_ANY);
         if (bind(sockfd, (const sockaddr *)&si, sizeof(si)) == -1)
         {
-            perror("bind");
+            //perror("bind");
             if (errno == EADDRINUSE)
             {
-                std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                std::cerr << "Port " << port << " is already in use!" << std::endl;
+                std::cerr << "Port " << port << " is already in use - skipping" << std::endl;
                 inUse = true;
             }
         }

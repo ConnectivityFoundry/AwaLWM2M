@@ -13,10 +13,10 @@
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 # SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #************************************************************************************************************************/
 
@@ -34,6 +34,8 @@ g_epilog = """Examples:
   echo "<xml..." | ipc.py             # Pipe XML in
   ipc.py --ipc udp://127.0.0.1:54321  # Specify IPC channel
 """
+
+g_DEBUG = False
 
 def main():
 
@@ -61,6 +63,12 @@ def send_request_and_receive_response(channel, request):
         raise Exception("Invalid IPC protocol");
     return response
 
+def receive_datagram(channel):
+    protocol, ipc_id = channel.split("://")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    data, addr = sock.recvfrom(65536)
+    return data
+
 def udp_ipc(id, request):
 
     address, port = id.split(":")
@@ -68,10 +76,12 @@ def udp_ipc(id, request):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # send UDP packet
+    if g_DEBUG: print("IPC SEND:\n" + request)
     sock.sendto(request, (address, port))
 
     # retrieve and print response
     data, addr = sock.recvfrom(65536)
+    if g_DEBUG: print("IPC RECV:\n" + data)
     return data
 
 if __name__ == "__main__":

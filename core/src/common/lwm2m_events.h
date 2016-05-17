@@ -13,55 +13,40 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
 
-#ifndef LWM2M_CLIENT_XML_HANDLER_H
-#define LWM2M_CLIENT_XML_HANDLER_H
+#ifndef LWM2M_EVENTS_H
+#define LWM2M_EVENTS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <xmltree.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
-#include "lwm2m_object_store.h"
-#include "lwm2m_util.h"
 #include "lwm2m_xml_interface.h"
-#include "../../api/src/ipc_defs.h"
+#include "lwm2m_context.h"
 
 typedef struct
 {
-    struct ListHead List;
-    ObjectIDType ObjectID;
-    ObjectInstanceIDType ObjectInstanceID;
-    ResourceIDType ResourceID;
-    RequestInfoType ExecuteTarget;
-    IPCSessionID SessionID;
-} ExecuteHandlerType;
+    int Sockfd;
+    struct sockaddr FromAddr;
+    int AddrLen;
+    Lwm2mContextType * Lwm2mContext;
 
+} EventContext;
 
-int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                 uint8_t * inValueBuffer, size_t inValueBufferLen);
-
-int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
-
-int xmlif_AddExecuteHandler(RequestInfoType * request, ObjectInstanceResourceKey * key);
-
-ExecuteHandlerType * xmlif_GetExecuteHandler(ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
-
-void xmlif_RegisterHandlers(void);
-
-void xmlif_DestroyExecuteHandlers(void);
-
+EventContext * EventContext_New(const RequestInfoType * request);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // LWM2M_CLIENT_XML_HANDLER_H
+#endif // LWM2M_EVENTS_H

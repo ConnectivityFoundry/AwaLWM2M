@@ -30,6 +30,7 @@
 
 #include "lwm2m_core.h"
 #include "coap_abstraction.h"
+#include "../../api/src/ipc_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,9 +102,9 @@ bool Lwm2m_ClientSupportsObject(Lwm2mClientType * client, ObjectIDType objectID,
 
 typedef void (*RegistrationEventCallback)(RegistrationEventType eventType, void * context, void * parameter);
 
-void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id);
-int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext);
-int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id);
+void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID);
+int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID, RegistrationEventCallback callback, void * callbackContext);
+int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID);
 
 #ifdef __cplusplus
 }

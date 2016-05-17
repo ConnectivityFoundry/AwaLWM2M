@@ -448,9 +448,7 @@ AwaError AwaClientSetOperation_Perform(AwaClientSetOperation * operation, AwaTim
                     {
                         if (TreeNode_GetChildCount(objectsTree) > 0)
                         {
-                            // Add Content to message
-                            IPCMessage * setRequest = IPCMessage_New();
-                            IPCMessage_SetType(setRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SET);
+                            IPCMessage * setRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SET, OperationCommon_GetSessionID(operation->Common));
                             IPCMessage_AddContent(setRequest, objectsTree);
 
                             // Serialise message

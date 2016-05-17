@@ -32,6 +32,7 @@
 #include "lwm2m_types.h"
 #include "lwm2m_definition.h"
 #include "xmltree.h"
+#include "ipc_session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,10 +43,12 @@ typedef struct
     int Sockfd;
     struct sockaddr FromAddr;
     int AddrLen;
+    IPCSessionID SessionID;
     //void * contextData;
     void * Context;
     void * Client;
 } RequestInfoType;
+
 
 typedef int (*XmlRequestHandler)(RequestInfoType *, TreeNode);
 
@@ -66,7 +69,7 @@ int xmlif_process(int sockfd);
 
 void xmlif_destroy(int sockfd);
 
-TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry);
+TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry, IPCSessionID sessionID);
 
 TreeNode xmlif_ConstructObjectDefinitionNode(const DefinitionRegistry * definitions, const ObjectDefinition * objFormat, int objectID);
 

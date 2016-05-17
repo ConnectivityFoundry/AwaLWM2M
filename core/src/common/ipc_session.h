@@ -13,55 +13,52 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+// Contains data related to an IPC Session.
 
-#ifndef LWM2M_CLIENT_XML_HANDLER_H
-#define LWM2M_CLIENT_XML_HANDLER_H
+#ifndef LWM2M_SESSION_H
+#define LWM2M_SESSION_H
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include "../../api/src/ipc_defs.h"
+#include "lwm2m_context.h"
+#include "xmltree.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <xmltree.h>
+typedef struct _IPCSession IPCSession;
 
-#include "lwm2m_object_store.h"
-#include "lwm2m_util.h"
-#include "lwm2m_xml_interface.h"
-#include "../../api/src/ipc_defs.h"
+void IPCSession_Init(void);
 
-typedef struct
-{
-    struct ListHead List;
-    ObjectIDType ObjectID;
-    ObjectInstanceIDType ObjectInstanceID;
-    ResourceIDType ResourceID;
-    RequestInfoType ExecuteTarget;
-    IPCSessionID SessionID;
-} ExecuteHandlerType;
+void IPCSession_Shutdown(void);
 
+// Return 0 on success, -1 on error
+int IPCSession_New(IPCSessionID sessionID);
 
-int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
-                                 uint8_t * inValueBuffer, size_t inValueBufferLen);
+// Return 0 on success, -1 on error
+int IPCSession_AddRequestChannel(IPCSessionID sessionID, int sockfd, const struct sockaddr * fromAddr, int addrLen);
 
-int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+// Return 0 on success, -1 on error
+int IPCSession_AddNotifyChannel(IPCSessionID sessionID, int sockfd, const struct sockaddr * fromAddr, int addrLen);
 
-int xmlif_AddExecuteHandler(RequestInfoType * request, ObjectInstanceResourceKey * key);
+IPCSessionID IPCSession_AssignSessionID(void);
 
-ExecuteHandlerType * xmlif_GetExecuteHandler(ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+bool IPCSession_IsValid(IPCSessionID sessionID);
 
-void xmlif_RegisterHandlers(void);
-
-void xmlif_DestroyExecuteHandlers(void);
-
+void IPCSession_Dump(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // LWM2M_CLIENT_XML_HANDLER_H
+#endif // LWM2M_SESSION_H

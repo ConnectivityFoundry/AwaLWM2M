@@ -25,6 +25,7 @@
 #include "lwm2m_server_xml_registered_entity_tree.h"
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_ipc.h"
+#include "lwm2m_events.h"
 
 #define MSGTYPE_EVENT_REGISTER   "Register"
 #define MSGTYPE_EVENT_UPDATE     "Update"
@@ -72,11 +73,10 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
 
         if (msgType != NULL)
         {
-            TreeNode notificationNode = IPC_NewNotificationNode(msgType);
-            TreeNode_AddChild(notificationNode, contentNode);
-
+//            TreeNode notificationNode = IPC_NewNotificationNode(msgType);
+//            TreeNode_AddChild(notificationNode, contentNode);
 //            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
-            Tree_Delete(notificationNode);
+//            Tree_Delete(notificationNode);
         }
     }
     else

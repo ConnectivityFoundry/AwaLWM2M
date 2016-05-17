@@ -23,6 +23,8 @@
 #ifndef IPC_DEFS_H
 #define IPC_DEFS_H
 
+typedef int IPCSessionID;
+
 #define IPC_MAX_BUFFER_LEN                          (65536)
 
 #define IPC_DEFAULT_ADDRESS                         "127.0.0.1"

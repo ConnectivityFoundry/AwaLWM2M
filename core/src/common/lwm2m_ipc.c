@@ -33,25 +33,66 @@
 
 #include <awa/static.h>
 
-static TreeNode IPC_NewNode(const char * type, const char * subType)
+static TreeNode IPC_NewNode(const char * type, const char * subType, IPCSessionID sessionID)
 {
     TreeNode responseNode = Xml_CreateNode(type);
     TreeNode subTypeNode = Xml_CreateNodeWithValue("Type", "%s", subType);
     TreeNode_AddChild(responseNode, subTypeNode);
+    if (sessionID > 0)
+    {
+        IPC_SetSessionID(responseNode, sessionID);
+    }
     return responseNode;
 }
 
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
+TreeNode IPC_NewResponseNode(const char * subType, AwaResult code, IPCSessionID sessionID)
 {
-    TreeNode responseNode = IPC_NewNode("Response", type);
+    TreeNode responseNode = IPC_NewNode("Response", subType, sessionID);
     TreeNode codeNode = Xml_CreateNodeWithValue("Code", "%d", code);
     TreeNode_AddChild(responseNode, codeNode);
     return responseNode;
 }
 
-TreeNode IPC_NewNotificationNode(const char * type)
+TreeNode IPC_NewNotificationNode(const char * subType, IPCSessionID sessionID)
 {
-    return IPC_NewNode("Notification", type);
+    return IPC_NewNode("Notification", subType, sessionID);
+}
+
+void IPC_SetSessionID(TreeNode message, IPCSessionID sessionID)
+{
+    // assume there is no session ID already
+    // TODO: check this assumption!
+    TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", "%d", sessionID);
+    TreeNode_AddChild(message, sessionIDNode);
+}
+
+IPCSessionID IPC_GetSessionID(const TreeNode content)
+{
+    IPCSessionID sessionID = -1;
+    if (content != NULL)
+    {
+        const char * type = NULL;
+        if ((type = TreeNode_GetName(content)) != NULL)
+        {
+            enum { PATH_LEN = 128 };
+            char path[PATH_LEN] = { 0 };
+            if (snprintf(path, PATH_LEN, "%s/SessionID", type) > 0)
+            {
+                TreeNode sessionIDNode = TreeNode_Navigate(content, path);
+                const char * sessionIDStr = NULL;
+
+                if ((sessionIDStr = (const char *)TreeNode_GetValue(sessionIDNode)) != NULL)
+                {
+                    sessionID = atoi(sessionIDStr);
+                }
+            }
+        }
+    }
+    else
+    {
+        Lwm2m_Error("content is NULL");
+    }
+    return sessionID;
 }
 
 TreeNode IPC_NewClientsNode()

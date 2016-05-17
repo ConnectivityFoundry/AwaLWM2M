@@ -59,12 +59,13 @@
 #include "lwm2m_tree_node.h"
 #include "lwm2m_server_xml_events.h"
 #include "lwm2m_server_xml_registered_entity_tree.h"
-
+//#include "lwm2m_events.h"
 #include "../../api/src/path.h"
 #include "../../api/src/utils.h"
 #include "../../api/include/awa/common.h"
 #include "../../api/include/awa/server.h"
 #include "../../api/src/ipc_defs.h"
+#include "../common/ipc_session.h"
 
 #define MAX_PAYLOAD_SIZE (10240)
 #define MAX_URI_LENGTH   (256)
@@ -629,24 +630,25 @@ error:
     return result;
 }
 
+// Called to handle a request with the type "Connect". Returns 0 on success.
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
-
-    TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context));
-
-    // create a default response if necessary
-    if (response != NULL)
+    TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context), request->SessionID);
+    if ((response != NULL) &&
+        (IPCSession_New(request->SessionID) == 0) &&
+        (IPCSession_AddRequestChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0))
     {
-        Lwm2m_Info("IPC connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
+        Lwm2m_Info("IPC connected from %s - allocated session ID %d\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr), request->SessionID);
+        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
+        Tree_Delete(response);
     }
     else
     {
-        response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, AwaResult_BadRequest);
+        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, AwaResult_BadRequest, request->SessionID);
+        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
+        Tree_Delete(response);
     }
-
-    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
-    Tree_Delete(response);
 
     free(request);
     return 0;
@@ -654,25 +656,27 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
 
 static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2m_Info("IPC Notify connected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
-
-    // Set up registration callbacks for Events
-    // Use FromAddr port number as key to identify this IPC client.
-    unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
-    EventContext * eventContext = malloc(sizeof(*eventContext));
-    if (eventContext != NULL)
+    if (IPCSession_AddNotifyChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0)
     {
-        memset(eventContext, 0, sizeof(*eventContext));
-        eventContext->Sockfd = request->Sockfd;
-        eventContext->FromAddr = request->FromAddr;
-        eventContext->AddrLen = request->AddrLen;
-        eventContext->Lwm2mContext = request->Context;
-        Lwm2m_AddRegistrationEventCallback(request->Context, port, xmlif_HandleRegistrationEvent, eventContext);
-    }
+        Lwm2m_Info("IPC Notify session %d connected from %s\n", request->SessionID, Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success);
-    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
-    Tree_Delete(response);
+    //    // Set up registration callbacks for Events
+    //    // Use FromAddr port number as key to identify this IPC client.
+    //    IPCSessionID sessionID = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+    //    EventContext * eventContext = EventContext_New(request);
+    //    Lwm2m_AddRegistrationEventCallback(request->Context, sessionID, xmlif_HandleRegistrationEvent, eventContext);
+
+        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success, request->SessionID);
+        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
+        Tree_Delete(response);
+    }
+    else
+    {
+        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_BadRequest, request->SessionID);
+        IPC_SetSessionID(response, request->SessionID);
+        IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
+        Tree_Delete(response);
+    }
 
     free(request);
     return 0;
@@ -682,7 +686,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
 {
     Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT, AwaResult_Success, request->SessionID);
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
@@ -696,10 +700,10 @@ static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeN
 
     // remove event records for this IPC connection
     // Use FromAddr port number as key to identify this IPC client.
-    unsigned short port = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
-    Lwm2m_DeleteRegistrationEventCallback(request->Context, port);
+    IPCSessionID sessionID = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
+    Lwm2m_DeleteRegistrationEventCallback(request->Context, sessionID);
 
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, AwaResult_Success, request->SessionID);
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
@@ -735,9 +739,8 @@ static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content)
     TreeNode contentNode = IPC_NewContentNode();
     TreeNode_AddChild(contentNode, clientsNode);
 
-    TreeNode responseNode = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS, AwaResult_Success);
+    TreeNode responseNode = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS, AwaResult_Success, request->SessionID);
     TreeNode_AddChild(responseNode, contentNode);
-
     rc = IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
 
     Tree_Delete(responseNode);
@@ -762,7 +765,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
         objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, objectDefinitionIndex++) : NULL;
     }
 
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DEFINE, AwaResult_Success);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DEFINE, AwaResult_Success, request->SessionID);
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 
@@ -774,7 +777,7 @@ static void xmlif_GenerateResponse(void * ctxt, AddressType* address, const char
 {
     RequestInfoType * request = ctxt;
     Lwm2mContextType * lwm2mContext = (Lwm2mContextType*)request->Context;
-    TreeNode response = IPC_NewResponseNode(responseType, responseCode);
+    TreeNode response = IPC_NewResponseNode(responseType, responseCode, request->SessionID);
 
     Lwm2mClientType * client = address? Lwm2m_LookupClientByAddress(lwm2mContext, address) : NULL;
 
@@ -967,11 +970,11 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
     TreeNode responseNode = NULL;
     if (strcmp(type, IPC_MESSAGE_TYPE_NOTIFICATION) == 0)
     {
-        responseNode = IPC_NewNotificationNode(subType);
+        responseNode = IPC_NewNotificationNode(subType, request->SessionID);
     }
     else if (strcmp(type, IPC_MESSAGE_TYPE_RESPONSE) == 0)
     {
-        responseNode = IPC_NewResponseNode(subType, responseCode);
+        responseNode = IPC_NewResponseNode(subType, responseCode, request->SessionID);
     }
     else
     {
@@ -985,7 +988,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
     }
     else
     {
-        responseNode = IPC_NewResponseNode(subType, AwaResult_InternalError);
+        responseNode = IPC_NewResponseNode(subType, AwaResult_InternalError, request->SessionID);
     }
     IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
 

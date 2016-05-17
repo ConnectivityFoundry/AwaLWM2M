@@ -74,6 +74,8 @@ AwaError OperationCommon_AddPathToObjectsTree(TreeNode objectsTree, const char *
 AwaError OperationCommon_AddPathV2(OperationCommon * operation, const char * path, TreeNode * resultNode);
 AwaError OperationCommon_AddPathWithArrayRange(OperationCommon * operation, const char * path, AwaArrayIndex startIndex, AwaArrayLength indexCount);
 
+IPCSessionID OperationCommon_GetSessionID(const OperationCommon * operation);
+
 #ifdef __cplusplus
 }
 #endif

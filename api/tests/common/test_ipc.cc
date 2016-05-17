@@ -82,7 +82,19 @@ TEST_F(TestIPC, IPCChannel_Free_handles_null)
     IPCChannel_Free(NULL);
 }
 
-//// INVALID: // Not able to test IPCMessage_SetType as it is hidden
+TEST_F(TestIPC, IPCMessage_NewPlus_handles_null)
+{
+    EXPECT_EQ(NULL, IPCMessage_NewPlus(NULL, NULL, 1));
+    EXPECT_EQ(NULL, IPCMessage_NewPlus("Request", NULL, 1));
+    EXPECT_EQ(NULL, IPCMessage_NewPlus(NULL, "Get", 1));
+}
+
+TEST_F(TestIPC, IPCMessage_NewPlus_handles_valid)
+{
+    IPCMessage * message = IPCMessage_NewPlus("Request", "Get", 1);
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_Free(&message);
+}
 
 TEST_F(TestIPC, IPCMessage_SetType_called_with_null_type)
 {
@@ -145,6 +157,48 @@ TEST_F(TestIPC, IPCMessage_GetType_on_empty_message)
     IPCMessage * message = IPCMessage_New();
 
     ASSERT_EQ(InternalError_InvalidMessage, IPCMessage_GetType(message, &returnedType, &returnedSubType));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_handles_null)
+{
+    EXPECT_EQ(InternalError_InvalidMessage, IPCMessage_SetSessionID(NULL, 1));
+}
+
+TEST_F(TestIPC, IPCMessage_GetSessionID_handles_null)
+{
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(NULL));
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_without_type)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+
+    // no call to IPCMessage_SetType
+    EXPECT_EQ(InternalError_InvalidMessage, IPCMessage_SetSessionID(message, 42));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_GetSessionID_are_equal)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_SetType(message, "Request", "Get");
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 42));
+    EXPECT_EQ(42, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 99));
+    EXPECT_EQ(99, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, -1));
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 0));
+    EXPECT_EQ(0, IPCMessage_GetSessionID(message));
 
     IPCMessage_Free(&message);
 }

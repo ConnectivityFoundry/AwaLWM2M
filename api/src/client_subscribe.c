@@ -379,8 +379,7 @@ AwaError AwaClientSubscribeOperation_Perform(AwaClientSubscribeOperation * opera
                     if (TreeNode_GetChildCount(objectsTree) > 0)
                     {
                         // build an IPC message and inject our content (object paths) into it
-                        IPCMessage * subscribeRequest = IPCMessage_New();
-                        IPCMessage_SetType(subscribeRequest, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SUBSCRIBE);
+                        IPCMessage * subscribeRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SUBSCRIBE, OperationCommon_GetSessionID(operation->Common));
                         IPCMessage_AddContent(subscribeRequest, objectsTree);
                         IPCMessage * subscribeResponse = NULL;
                         result = IPC_SendAndReceiveOnNotifySocket(ClientSession_GetChannel(session), subscribeRequest, &subscribeResponse, timeout);

@@ -142,10 +142,7 @@ AwaError AwaServerReadOperation_Perform(AwaServerReadOperation * operation, AwaT
                         if (TreeNode_GetChildCount(clientsTree) > 0)
                         {
                             // build an IPC message and inject our content into it
-                            IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_READ);
-
-                            // Add Content to message
+                            IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_READ, ServerOperation_GetSessionID(operation->ServerOperation));
                             IPCMessage_AddContent(request, clientsTree);
 
                             // Send via IPC

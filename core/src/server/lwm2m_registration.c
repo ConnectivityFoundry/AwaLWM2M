@@ -30,10 +30,12 @@
 #include "lwm2m_result.h"
 #include "lwm2m_endpoints.h"
 #include "server/lwm2m_registration.h"
+#include "lwm2m_events.h"
+#include "../../api/src/ipc_defs.h"
 
-#define QUERY_EP_NAME "ep="
+#define QUERY_EP_NAME  "ep="
 #define QUERY_LIFETIME "lt="
-#define QUERY_BINDING "b="
+#define QUERY_BINDING  "b="
 
 typedef struct
 {
@@ -46,7 +48,7 @@ typedef struct
 typedef struct
 {
     struct ListHead list;
-    int ID;
+    IPCSessionID SessionID;
     RegistrationEventCallback Callback;
     void * Context;
 
@@ -680,7 +682,7 @@ void Lwm2m_RegistrationDestroy(Lwm2mContextType * context)
     DestroyEventList(Lwm2mCore_GetEventRecordList(context));
 }
 
-void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id)
+void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID)
 {
     void * result = NULL;
     if (lwm2mContext != NULL)
@@ -692,7 +694,7 @@ void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id)
             EventRecord * eventRecord = ListEntry(i, EventRecord, list);
             if (eventRecord != NULL)
             {
-                if (eventRecord->ID == id)
+                if (eventRecord->SessionID == sessionID)
                 {
                     result = eventRecord->Context;
                     break;
@@ -704,25 +706,24 @@ void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, int id)
 }
 
 // Note: callbackContext *MUST* be heap-allocated, as it will be freed later.
-int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id, RegistrationEventCallback callback, void * callbackContext)
+int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID, RegistrationEventCallback callback, void * callbackContext)
 {
     int result = 0;
     EventRecord * eventRecord = malloc(sizeof(*eventRecord));
     if (eventRecord != NULL)
     {
         memset(eventRecord, 0, sizeof(*eventRecord));
-        eventRecord->ID = id;
+        eventRecord->SessionID = sessionID;
         eventRecord->Callback = callback;
         eventRecord->Context = callbackContext;
         ListAdd(&eventRecord->list, Lwm2mCore_GetEventRecordList(lwm2mContext));
-        Lwm2m_Debug("Added EventRecord %d: %p\n", id, eventRecord);
+        Lwm2m_Debug("Added EventRecord %d: %p\n", sessionID, eventRecord);
     }
-
     return result;
 }
 
 // Note: this will free the stored callback context
-int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int id)
+int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID)
 {
     int result = 0;
     if (lwm2mContext != NULL)
@@ -734,18 +735,17 @@ int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, int i
             EventRecord * eventRecord = ListEntry(i, EventRecord, list);
             if (eventRecord != NULL)
             {
-                if (eventRecord->ID == id)
+                if (eventRecord->SessionID == sessionID)
                 {
                     ListRemove(i);
                     free(eventRecord->Context);
                     eventRecord->Context = NULL;
                     free(eventRecord);
-                    Lwm2m_Debug("Removed EventRecord %d: %p\n", id, eventRecord);
+                    Lwm2m_Debug("Removed EventRecord %d: %p\n", sessionID, eventRecord);
                 }
             }
         }
     }
-
     return result;
 }
 

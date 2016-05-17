@@ -153,8 +153,7 @@ AwaError AwaServerWriteOperation_Perform(AwaServerWriteOperation * operation, co
                                 if (TreeNode_GetChildCount(objectsTree) > 0)
                                 {
                                     // build an IPC message and inject our content into it
-                                    IPCMessage * request = IPCMessage_New();
-                                    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_WRITE);
+                                    IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_WRITE, ServerOperation_GetSessionID(operation->ServerOperation));
 
                                     // Add client node
                                     TreeNode clientsNode = Xml_CreateNode("Clients");

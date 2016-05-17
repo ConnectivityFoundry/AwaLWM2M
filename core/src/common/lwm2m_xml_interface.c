@@ -46,6 +46,7 @@
 #include "lwm2m_result.h"
 #include "lwm2m_xml_serdes.h"
 #include "lwm2m_ipc.h"
+#include "ipc_session.h"
 #include "../../api/src/ipc_defs.h"
 
 typedef struct
@@ -57,6 +58,7 @@ typedef struct
 
 static struct ListHead handlerList;
 static void * g_context = NULL;
+
 
 int xmlif_AddRequestHandler(const char * msgType, XmlRequestHandler handler)
 {
@@ -137,12 +139,14 @@ int xmlif_init(void * context, int port)
     g_context = context;
     ListInit(&handlerList);
 
+    IPCSession_Init();
+
     return sockfd;
 }
 
 static void HandleInvalidRequest(const RequestInfoType * request)
 {
-    TreeNode responseNode = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_INVALID, AwaResult_BadRequest);
+    TreeNode responseNode = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_INVALID, AwaResult_BadRequest, request->SessionID);
     IPC_SendResponse(responseNode, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(responseNode);
 }
@@ -197,6 +201,26 @@ int xmlif_process(int sockfd)
                         memcpy(&request->FromAddr, &their_addr, addr_len);
                         request->AddrLen = addr_len;
                         request->Context = g_context;
+
+                        // Ensure requests have a valid SessionID
+                        if (strcmp(IPC_MESSAGE_SUB_TYPE_CONNECT, value) == 0)
+                        {
+                            // CONNECT requests should have no session ID - allocate one
+                            request->SessionID = IPCSession_AssignSessionID();
+                        }
+                        else
+                        {
+                            IPCSessionID sessionID = IPC_GetSessionID(root);
+                            if (!IPCSession_IsValid(sessionID))
+                            {
+                                Lwm2m_Error("Invalid Session ID %d\n", sessionID);
+                                goto error;
+                            }
+                            else
+                            {
+                                request->SessionID = sessionID;
+                            }
+                        }
 
                         handler->Function(request, content);
                         handled = true;
@@ -262,19 +286,24 @@ void xmlif_destroy(int sockfd)
         close(sockfd);
     }
 
-    struct ListHead * i, * n;
-    ListForEachSafe(i, n, &handlerList)
+    // clean up handlerList
     {
-        IpcHandlerType * handler = ListEntry(i, IpcHandlerType, list);
-        if (handler != NULL)
+        struct ListHead * i, * n;
+        ListForEachSafe(i, n, &handlerList)
         {
-            free(handler->Name);
-            free(handler);
+            IpcHandlerType * handler = ListEntry(i, IpcHandlerType, list);
+            if (handler != NULL)
+            {
+                free(handler->Name);
+                free(handler);
+            }
         }
     }
+
+    IPCSession_Shutdown();
 }
 
-TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
+TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry, IPCSessionID sessionID)
 {
     ObjectDefinition * objFormat = 0;
     int result = AwaResult_Success;
@@ -309,7 +338,7 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry)
     }
 
 end: ;
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, result);
+    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT, result, sessionID);
     TreeNode_AddChild(response, content);
     return response;
 }

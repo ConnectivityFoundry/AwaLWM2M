@@ -20,24 +20,19 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include "lwm2m_events.h"
 
-#ifndef LWM2M_SERVER_XML_EVENTS_H
-#define LWM2M_SERVER_XML_EVENTS_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include "lwm2m_registration.h"
-#include "lwm2m_context.h"
-
-void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context, void * parameter);
-
-#ifdef __cplusplus
+EventContext * EventContext_New(const RequestInfoType * request)
+{
+    EventContext * eventContext = malloc(sizeof(*eventContext));
+    if (eventContext != NULL)
+    {
+        memset(eventContext, 0, sizeof(*eventContext));
+        eventContext->Sockfd = request->Sockfd;
+        eventContext->FromAddr = request->FromAddr;
+        eventContext->AddrLen = request->AddrLen;
+        eventContext->Lwm2mContext = request->Context;
+    }
+    return eventContext;
 }
-#endif
 
-#endif // LWM2M_SERVER_XML_EVENTS_H

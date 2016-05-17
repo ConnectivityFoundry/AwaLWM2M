@@ -230,6 +230,25 @@ IPCMessage * IPCMessage_New(void)
     return message;
 }
 
+IPCMessage * IPCMessage_NewPlus(const char * type, const char * subType, IPCSessionID sessionID)
+{
+    IPCMessage * message = IPCMessage_New();
+    if (message != NULL)
+    {
+        if ((IPCMessage_SetType(message, type, subType) != InternalError_Success) ||
+            (IPCMessage_SetSessionID(message, sessionID) != InternalError_Success))
+        {
+            LogError("Failed to set message headers");
+            IPCMessage_Free(&message);
+        }
+    }
+    else
+    {
+        LogError("Failed to create message");
+    }
+    return message;
+}
+
 void IPCMessage_Free(IPCMessage ** message)
 {
     if (message != NULL && *message != NULL)
@@ -335,7 +354,7 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
     return result;
 }
 
-InternalError IPCMessage_GetType(IPCMessage * message, const char ** type_, const char ** subType_)
+InternalError IPCMessage_GetType(const IPCMessage * message, const char ** type_, const char ** subType_)
 {
     InternalError result = InternalError_Unspecified;
     const char * type = NULL;
@@ -403,7 +422,134 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type_, cons
     return result;
 }
 
-IPCResponseCode IPCMessage_GetResponseCode(IPCMessage * message)
+InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID sessionID)
+{
+    InternalError result = InternalError_Success;
+
+    if (sessionID <= 0)
+    {
+        return InternalError_Success;
+    }
+
+    if (message != NULL)
+    {
+        if (message->RootNode != NULL)
+        {
+            const char * rootName = TreeNode_GetName(message->RootNode);
+            if (rootName != NULL)
+            {
+                // determine length of path
+                char * path = NULL;
+                if (msprintf(&path, "%s/SessionID", TreeNode_GetName(message->RootNode)) > 0)
+                {
+                    TreeNode sessionIDNode = TreeNode_Navigate(message->RootNode, path);
+
+                    char * value = NULL;
+                    if (msprintf(&value, "%d", sessionID) > 0)
+                    {
+                        if (sessionIDNode)
+                        {
+                            TreeNode_SetValue(sessionIDNode, (const uint8_t *)value, strlen(value));
+                            result = InternalError_Success;
+                        }
+                        else
+                        {
+                            TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", value);
+                            if (sessionIDNode != NULL)
+                            {
+                                if (TreeNode_AddChild(message->RootNode, sessionIDNode) != false)
+                                {
+                                    result = InternalError_Success;
+                                }
+                                else
+                                {
+                                    LogError("TreeNode_AddChild failed");
+                                    result = InternalError_Tree;
+                                }
+                            }
+                            else
+                            {
+                                LogError("Xml_CreateNodeWithValue failed");
+                                result = InternalError_OutOfMemory;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LogError("msprintf failed");
+                        result = InternalError_OutOfMemory;
+                    }
+
+                    if (value != NULL)
+                    {
+                        Awa_MemSafeFree(value);
+                        value = NULL;
+                    }
+                }
+                else
+                {
+                    LogError("msprintf failed");
+                    result = InternalError_OutOfMemory;
+                }
+
+                if (path != NULL)
+                {
+                    Awa_MemSafeFree(path);
+                    path = NULL;
+                }
+            }
+            else
+            {
+                LogError("message root name is NULL");
+                result = InternalError_InvalidMessage;
+            }
+        }
+        else
+        {
+            LogError("message root is NULL");
+            result = InternalError_InvalidMessage;
+        }
+    }
+    else
+    {
+        LogError("message is NULL");
+        result = InternalError_InvalidMessage;
+    }
+
+    return result;
+}
+
+IPCSessionID IPCMessage_GetSessionID(const IPCMessage * message)
+{
+    IPCSessionID sessionID = -1;
+
+    if (message != NULL)
+    {
+        const char * type = NULL;
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+        {
+            char * path = NULL;
+            if (msprintf(&path, "%s/SessionID", type) > 0)
+            {
+               TreeNode sessionIDNode = TreeNode_Navigate(message->RootNode, path);
+               const char * sessionIDStr = NULL;
+
+               if ((sessionIDStr = (const char *)TreeNode_GetValue(sessionIDNode)) != NULL)
+               {
+                   sessionID = atoi(sessionIDStr);
+               }
+            }
+            Awa_MemSafeFree(path);
+        }
+    }
+    else
+    {
+        LogError("message is NULL");
+    }
+    return sessionID;
+}
+
+IPCResponseCode IPCMessage_GetResponseCode(const IPCMessage * message)
 {
     IPCResponseCode code = IPCResponseCode_NotSet;
 

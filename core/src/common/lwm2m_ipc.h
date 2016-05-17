@@ -26,6 +26,7 @@
 
 #include "lwm2m_result.h"
 #include "xmltree.h"
+#include "../../api/src/ipc_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,8 +36,12 @@ extern "C" {
 #define IPC_MESSAGE_TYPE_RESPONSE     "Response"
 #define IPC_MESSAGE_TYPE_NOTIFICATION "Notification"
 
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
-TreeNode IPC_NewNotificationNode(const char * type);
+TreeNode IPC_NewResponseNode(const char * subType, AwaResult code, IPCSessionID sessionID);
+TreeNode IPC_NewNotificationNode(const char * subType, IPCSessionID sessionID);
+
+void IPC_SetSessionID(TreeNode message, IPCSessionID sessionID);
+IPCSessionID IPC_GetSessionID(const TreeNode content);
+
 TreeNode IPC_NewClientsNode();
 TreeNode IPC_NewContentNode();
 TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);

@@ -83,12 +83,16 @@ void IPCChannel_Free(IPCChannel ** channel);
 
 // IPC Messages
 IPCMessage * IPCMessage_New(void);
+IPCMessage * IPCMessage_NewPlus(const char * type, const char * subType, IPCSessionID sessionID);
 void IPCMessage_Free(IPCMessage ** message);
 
 InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const char * subType);
-InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const char ** subType);
+InternalError IPCMessage_GetType(const IPCMessage * message, const char ** type, const char ** subType);
 
-IPCResponseCode IPCMessage_GetResponseCode(IPCMessage * message);
+InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID sessionID);
+IPCSessionID IPCMessage_GetSessionID(const IPCMessage * message);
+
+IPCResponseCode IPCMessage_GetResponseCode(const IPCMessage * message);
 TreeNode IPCMessage_GetContentNode(IPCMessage * message);
 AwaError IPCMessage_AddContent(IPCMessage * message, TreeNode content);
 AwaError IPCMessage_RemoveContentNode(IPCMessage * message, TreeNode contentNode);
