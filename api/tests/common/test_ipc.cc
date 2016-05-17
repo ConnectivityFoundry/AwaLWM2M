@@ -211,40 +211,37 @@ TEST_F(TestIPC, IPCMessage_GetSessionID_default)
     IPCMessage_Free(&message);
 }
 
-TEST_F(TestIPC, IPCMessage_SetSessionID_invalid_ID_doesnt_set)
+TEST_F(TestIPC, IPCMessage_SetSessionID_invalid_ID_clears)
 {
     IPCMessage * message = IPCMessage_New();
     ASSERT_TRUE(NULL != message);
     IPCMessage_SetType(message, "Request", "Get");
 
-    // -1 doesn't set or overwrite existing ID
-    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, -1));
-    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
-
+    // -1 clears existing ID
     EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 56));
     EXPECT_EQ(56, IPCMessage_GetSessionID(message));
 
     EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, -1));
-    EXPECT_EQ(56, IPCMessage_GetSessionID(message));
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
 
     IPCMessage_Free(&message);
 }
 
-TEST_F(TestIPC, IPCMessage_SetSessionID_zero_ID_doesnt_set)
+TEST_F(TestIPC, IPCMessage_SetSessionID_zero_ID)
 {
     IPCMessage * message = IPCMessage_New();
     ASSERT_TRUE(NULL != message);
     IPCMessage_SetType(message, "Request", "Get");
 
-    // 0 doesn't set or overwrite existing ID
+    // 0 behaves like any other valid session ID
     EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 0));
-    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
+    EXPECT_EQ(0, IPCMessage_GetSessionID(message));
 
     EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 56));
     EXPECT_EQ(56, IPCMessage_GetSessionID(message));
 
     EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 0));
-    EXPECT_EQ(56, IPCMessage_GetSessionID(message));
+    EXPECT_EQ(0, IPCMessage_GetSessionID(message));
 
     IPCMessage_Free(&message);
 }

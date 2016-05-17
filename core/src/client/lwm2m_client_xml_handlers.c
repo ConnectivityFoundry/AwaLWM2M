@@ -504,7 +504,6 @@ error:
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
-
     TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context), request->SessionID);
 
     if ((response != NULL) &&
@@ -549,7 +548,6 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
     }
-
     free(request);
     return 0;
 }
@@ -575,7 +573,6 @@ static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeN
     Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
     TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, AwaResult_Success, request->SessionID);
-
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
 

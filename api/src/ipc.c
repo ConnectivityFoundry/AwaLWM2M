@@ -426,10 +426,7 @@ InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID session
 {
     InternalError result = InternalError_Success;
 
-    if (sessionID <= 0)
-    {
-        return InternalError_Success;
-    }
+    // a session ID of -1 will clear any existing tag
 
     if (message != NULL)
     {
@@ -444,46 +441,60 @@ InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID session
                 {
                     TreeNode sessionIDNode = TreeNode_Navigate(message->RootNode, path);
 
-                    char * value = NULL;
-                    if (msprintf(&value, "%d", sessionID) > 0)
+                    if (sessionID == -1)
                     {
+                        // clear existing
                         if (sessionIDNode)
                         {
-                            TreeNode_SetValue(sessionIDNode, (const uint8_t *)value, strlen(value));
-                            result = InternalError_Success;
+                            Tree_DetachNode(sessionIDNode);
+                            Tree_Delete(sessionIDNode);
                         }
-                        else
-                        {
-                            TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", value);
-                            if (sessionIDNode != NULL)
-                            {
-                                if (TreeNode_AddChild(message->RootNode, sessionIDNode) != false)
-                                {
-                                    result = InternalError_Success;
-                                }
-                                else
-                                {
-                                    LogError("TreeNode_AddChild failed");
-                                    result = InternalError_Tree;
-                                }
-                            }
-                            else
-                            {
-                                LogError("Xml_CreateNodeWithValue failed");
-                                result = InternalError_OutOfMemory;
-                            }
-                        }
+                        // else do nothing
                     }
                     else
                     {
-                        LogError("msprintf failed");
-                        result = InternalError_OutOfMemory;
-                    }
+                        // set
+                        char * value = NULL;
+                        if (msprintf(&value, "%d", sessionID) > 0)
+                        {
+                            if (sessionIDNode)
+                            {
+                                TreeNode_SetValue(sessionIDNode, (const uint8_t *)value, strlen(value));
+                                result = InternalError_Success;
+                            }
+                            else
+                            {
+                                TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", value);
+                                if (sessionIDNode != NULL)
+                                {
+                                    if (TreeNode_AddChild(message->RootNode, sessionIDNode) != false)
+                                    {
+                                        result = InternalError_Success;
+                                    }
+                                    else
+                                    {
+                                        LogError("TreeNode_AddChild failed");
+                                        result = InternalError_Tree;
+                                    }
+                                }
+                                else
+                                {
+                                    LogError("Xml_CreateNodeWithValue failed");
+                                    result = InternalError_OutOfMemory;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            LogError("msprintf failed");
+                            result = InternalError_OutOfMemory;
+                        }
 
-                    if (value != NULL)
-                    {
-                        Awa_MemSafeFree(value);
-                        value = NULL;
+                        if (value != NULL)
+                        {
+                            Awa_MemSafeFree(value);
+                            value = NULL;
+                        }
                     }
                 }
                 else

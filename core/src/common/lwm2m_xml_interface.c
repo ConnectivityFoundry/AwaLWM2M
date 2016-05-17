@@ -214,6 +214,7 @@ int xmlif_process(int sockfd)
                             if (!IPCSession_IsValid(sessionID))
                             {
                                 Lwm2m_Error("Invalid Session ID %d\n", sessionID);
+                                free(request);
                                 goto error;
                             }
                             else

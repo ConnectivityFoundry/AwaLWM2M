@@ -23,6 +23,8 @@
 #include "ipc_session.h"
 
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "lwm2m_debug.h"
 #include "lwm2m_list.h"
@@ -155,7 +157,11 @@ int IPCSession_AddNotifyChannel(IPCSessionID sessionID, int sockfd, const struct
 
 IPCSessionID IPCSession_AssignSessionID(void)
 {
-    static IPCSessionID sessionID = 1;
+    static IPCSessionID sessionID = -1;
+    if (sessionID == -1)
+    {
+        sessionID = getpid() * 7487;
+    }
     return sessionID++;
 }
 
