@@ -24,20 +24,32 @@
 #define SERVER_EVENTS_H
 
 #include "awa/server.h"
+#include "client_iterator.h"
+#include "ipc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// forward-declare to avoid circular dependency of including registered_entity_iterator.h
+typedef struct _RegisteredEntityIterator RegisteredEntityIterator;
+
 
 typedef struct _ServerEventsCallbackInfo ServerEventsCallbackInfo;
 
 typedef struct _ClientRegisterEvent ClientRegisterEvent;
 
 
+// ClientRegisterEvent functions:
 ClientRegisterEvent * ClientRegisterEvent_New(void);
 
 void ClientRegisterEvent_Free(ClientRegisterEvent ** event);
 
+int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage * notification, const AwaServerSession * session);
+
+ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event);
+
+RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(const ClientRegisterEvent * event, const char * clientID);
 
 
 // ServerEventsCallbackInfo functions:

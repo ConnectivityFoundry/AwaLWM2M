@@ -275,9 +275,13 @@ AwaClientIterator * AwaServerExecuteOperation_NewClientIterator(const AwaServerE
 {
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+    {
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->Response);
+    }
     else
+    {
         LogErrorWithEnum(AwaError_OperationInvalid, "operation is NULL");
+    }
     return iterator;
 }
 

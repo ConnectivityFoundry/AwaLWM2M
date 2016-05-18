@@ -220,7 +220,7 @@ AwaClientIterator * AwaServerReadOperation_NewClientIterator(const AwaServerRead
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
     {
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->Response);
     }
     else
     {

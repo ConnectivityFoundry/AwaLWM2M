@@ -25,6 +25,8 @@
 #include "log.h"
 #include "server_session.h"
 #include "memalloc.h"
+#include "server_response.h"
+#include "registered_entity_iterator.h"
 
 struct _ServerEventsCallbackInfo
 {
@@ -38,35 +40,35 @@ struct _ServerEventsCallbackInfo
     void * ClientUpdateEventContext;
 };
 
-// Common event data:
-typedef struct
-{
-    const char * ClientID;
-} ServerEvent;
 
-// Specific event data:
-//struct _AwaServerClientRegisterEvent
-//{
-//    ServerEvent * ServerEvent;
-//};
-
-struct _AwaServerClientDeregisterEvent
-{
-    ServerEvent * ServerEvent;
-};
-
-struct _AwaServerClientUpdateEvent
-{
-    ServerEvent * ServerEvent;
-};
 
 // This struct is used for API type safety and is never instantiated.
 // DO NOT USE THIS STRUCTURE!
 struct _AwaServerClientRegisterEvent {};
 
+// translate between API types and internal types with casts:
+AwaClientIterator * AwaServerClientRegisterEvent_NewClientIterator(const AwaServerClientRegisterEvent * event)
+{
+    return (AwaClientIterator *)ClientRegisterEvent_NewClientIterator((ClientRegisterEvent *)event);
+}
+
+AwaRegisteredEntityIterator * AwaServerClientRegisterEvent_NewRegisteredEntityIterator(const AwaServerClientRegisterEvent * event, const char * clientID)
+{
+    return (AwaRegisteredEntityIterator *)ClientRegisterEvent_NewRegisteredEntityIterator((ClientRegisterEvent *)event, clientID);
+}
+
+
+
+// ClientRegisterEvent implementation:
+
 struct _ClientRegisterEvent
 {
+    IPCMessage * Notification;
 
+    // These are needed to construct a ServerResponse so that ListClients code can be reused
+    const AwaServerSession * ServerSession;
+    ServerOperation * ServerOperation;
+    ServerResponse * ServerResponse;
 };
 
 ClientRegisterEvent * ClientRegisterEvent_New(void)
@@ -89,10 +91,151 @@ void ClientRegisterEvent_Free(ClientRegisterEvent ** event)
     if ((event != NULL) && (*event != NULL))
     {
         LogFree("ClientRegisterEvent", *event);
+        ServerOperation_Free(&(*event)->ServerOperation);
+        ServerResponse_Free(&(*event)->ServerResponse);
         Awa_MemSafeFree(*event);
         *event = NULL;
     }
 }
+
+int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage * notification, const AwaServerSession * session)
+{
+    int result = -1;
+    if (event != NULL)
+    {
+        if (notification != NULL)
+        {
+            if (session != NULL)
+            {
+                // check it's the right Notification
+                const char * type = NULL;
+                const char * subType = NULL;
+                if (IPCMessage_GetType(notification, &type, &subType) == InternalError_Success)
+                {
+                    if (strcmp(IPC_MESSAGE_TYPE_NOTIFICATION, type) == 0)
+                    {
+                        if (strcmp(IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, subType) == 0)
+                        {
+                            event->Notification = notification;
+                            event->ServerSession = session;
+                            result = 0;
+                        }
+                        else
+                        {
+                            LogError("message sub0type '%s' is unexpected", subType);
+                        }
+                    }
+                    else
+                    {
+                        LogError("message type '%s' is unexpected", type);
+                    }
+                }
+                else
+                {
+                    LogError("message is malformed");
+                }
+            }
+            else
+            {
+                LogError("session is NULL");
+            }
+        }
+        else
+        {
+            LogError("notification is NULL");
+        }
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return result;
+}
+
+ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event)
+{
+    ClientIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        if (event->Notification != NULL)
+        {
+            if (event->ServerSession != NULL)
+            {
+                TreeNode contentNode = IPCMessage_GetContentNode(event->Notification);
+                TreeNode clientsNode = Xml_Find(contentNode, "Clients");
+                if (event->ServerResponse == NULL)
+                {
+                    if (event->ServerOperation == NULL)
+                    {
+                        event->ServerOperation = ServerOperation_New(event->ServerSession);
+                    }
+
+                    if (event->ServerOperation != NULL)
+                    {
+                        event->ServerResponse = ServerResponse_NewFromServerOperation(event->ServerOperation, clientsNode);
+                    }
+                    else
+                    {
+                        LogError("Cannot create serverOperation");
+                    }
+                }
+                iterator = ServerResponse_NewClientIterator(event->ServerResponse);
+            }
+            else
+            {
+                LogError("Event session is NULL");
+            }
+        }
+        else
+        {
+            LogError("Event notification is NULL");
+        }
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(const ClientRegisterEvent * event, const char * clientID)
+{
+    RegisteredEntityIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        if (clientID != NULL)
+        {
+            if (event->ServerResponse != NULL)
+            {
+                const ResponseCommon * clientResponse = ServerResponse_GetClientResponse(event->ServerResponse, clientID);
+                if (clientResponse != NULL)
+                {
+                    iterator = RegisteredEntityIterator_New(clientResponse);
+                }
+                else
+                {
+                    LogError("No client response for client ID '%s'", clientID);
+                }
+            }
+            else
+            {
+                LogError("Event server response is NULL");
+            }
+        }
+        else
+        {
+            LogError("clientID is NULL");
+        }
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+
+// ServerEventsCallbackInfo implementation:
 
 ServerEventsCallbackInfo * ServerEventsCallbackInfo_New(void)
 {

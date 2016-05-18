@@ -498,7 +498,7 @@ AwaClientIterator * AwaServerWriteOperation_NewClientIterator(const AwaServerWri
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
     {
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->Response);
     }
     else
     {

@@ -67,6 +67,25 @@ static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, vo
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->RegisterCallbackCounter++;
     record->LastEvent = event;
+
+    AwaClientIterator * clientIterator = AwaServerClientRegisterEvent_NewClientIterator(event);
+    EXPECT_TRUE(NULL != clientIterator);
+
+    while (AwaClientIterator_Next(clientIterator))
+    {
+        const char * clientID = AwaClientIterator_GetClientID(clientIterator);
+        std::cout << "Client ID: " << clientID << std::endl;
+
+        AwaRegisteredEntityIterator * entityIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
+        while (AwaRegisteredEntityIterator_Next(entityIterator))
+        {
+            const char * path = AwaRegisteredEntityIterator_GetPath(entityIterator);
+            std::cout << "  " << path << std::endl;
+        }
+        AwaRegisteredEntityIterator_Free(&entityIterator);
+    }
+
+    AwaClientIterator_Free(&clientIterator);
 }
 
 }
@@ -74,61 +93,61 @@ static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, vo
 TEST_F(TestServerNotification, ServerNotification_Process_handles_client_register_notification)
 {
     const char * xml =
-            "    <Clients>"
-            "      <Client>"
-            "        <ID>imagination1</ID>"
-            "        <Objects>"
-            "          <Object>"
-            "            <ID>1</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>2</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "            <ObjectInstance>"
-            "              <ID>1</ID>"
-            "            </ObjectInstance>"
-            "            <ObjectInstance>"
-            "              <ID>2</ID>"
-            "            </ObjectInstance>"
-            "            <ObjectInstance>"
-            "              <ID>3</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>3</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>4</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>7</ID>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>5</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "          <Object>"
-            "            <ID>6</ID>"
-            "            <ObjectInstance>"
-            "              <ID>0</ID>"
-            "            </ObjectInstance>"
-            "          </Object>"
-            "        </Objects>"
-            "      </Client>"
-            "    </Clients>";
+            "<Clients>"
+            "  <Client>"
+            "    <ID>imagination1</ID>"
+            "    <Objects>"
+            "      <Object>"
+            "        <ID>1</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>2</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>1</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>2</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>3</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>3</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>4</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>7</ID>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>5</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>6</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "    </Objects>"
+            "  </Client>"
+            "</Clients>";
 
     TreeNode contentNode = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
     ASSERT_TRUE(NULL != contentNode);
@@ -152,6 +171,7 @@ TEST_F(TestServerNotification, ServerNotification_Process_handles_client_registe
     // check Event
     auto event = static_cast<const ClientRegisterEvent *>(record.LastEvent);
     ASSERT_TRUE(NULL != event);
+    //IPCMessage * eventNotification = ClientRegisterEvent_GetNotification(event);
 
     IPCMessage_Free(&notification);
     Tree_Delete(contentNode);

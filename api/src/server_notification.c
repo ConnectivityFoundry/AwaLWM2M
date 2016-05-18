@@ -76,9 +76,16 @@ static AwaError HandleClientRegisterNotification(AwaServerSession * session, IPC
             ClientRegisterEvent * event = ClientRegisterEvent_New();
             if (event != NULL)
             {
-                ServerEventsCallbackInfo_InvokeClientRegisterCallback(info, event);
+                if (ClientRegisterEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientRegisterCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
                 ClientRegisterEvent_Free(&event);
-                result = AwaError_Success;
             }
             else
             {
