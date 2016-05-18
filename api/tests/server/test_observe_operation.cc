@@ -388,8 +388,15 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation_Free(&writeOperation);
 
         cbHandler.callbackCount = 0;
-        ASSERT_TRUE(cbHandler.Wait());
-        //TODO: fixme
+        if(i != 1)
+        {
+            ASSERT_TRUE(cbHandler.Wait());
+        }
+        else
+        {
+            //This should timeout as 5 is written down - no notifications should be generated.
+            ASSERT_FALSE(cbHandler.Wait());
+        }
     }
 
     ASSERT_EQ(3, cbHandler.count);
@@ -501,7 +508,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     pminTimer.Stop();
     printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_GE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -678,7 +685,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     pminTimer.Stop();
     printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_GE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -1010,7 +1017,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     AwaServerWriteOperation_Free(&writeOperation);
 
     cbHandler.callbackCount = 0;
-    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_FALSE(cbHandler.Wait());
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
