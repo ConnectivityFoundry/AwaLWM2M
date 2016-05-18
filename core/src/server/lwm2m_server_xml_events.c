@@ -73,10 +73,21 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
 
         if (msgType != NULL)
         {
-            TreeNode notificationNode = IPC_NewNotificationNode(msgType, eventContext->SessionID);
-            TreeNode_AddChild(notificationNode, contentNode);
-            IPC_SendResponse(notificationNode, eventContext->Sockfd, &eventContext->FromAddr, eventContext->AddrLen);
-            Tree_Delete(notificationNode);
+            int IPCSockFd = 0;
+            const struct sockaddr * IPCAddr = NULL;
+            int IPCAddrLen = 0;
+
+            if (IPCSession_GetNotifyChannel(eventContext->SessionID, &IPCSockFd, &IPCAddr, &IPCAddrLen) == 0)
+            {
+                TreeNode notificationNode = IPC_NewNotificationNode(msgType, eventContext->SessionID);
+                TreeNode_AddChild(notificationNode, contentNode);
+                IPC_SendResponse(notificationNode, IPCSockFd, IPCAddr, IPCAddrLen);
+                Tree_Delete(notificationNode);
+            }
+            else
+            {
+                Lwm2m_Error("Unable to get IPC Notify channel for session %d", eventContext->SessionID);
+            }
         }
     }
     else

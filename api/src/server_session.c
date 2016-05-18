@@ -39,7 +39,7 @@ struct _AwaServerSession
     SessionCommon * SessionCommon;
     MapType * Observers;
     QueueType * NotificationQueue;
-    ServerEvents * ServerEvents;
+    ServerEventsCallbackInfo * ServerEvents;
 };
 
 AwaServerSession * AwaServerSession_New(void)

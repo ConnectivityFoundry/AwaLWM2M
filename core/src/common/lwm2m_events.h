@@ -37,10 +37,6 @@ extern "C" {
 
 typedef struct
 {
-    int Sockfd;
-    struct sockaddr FromAddr;
-    int AddrLen;
-    Lwm2mContextType * Lwm2mContext;
     IPCSessionID SessionID;
 
 } EventContext;

@@ -26,7 +26,7 @@
 #include "server_session.h"
 #include "memalloc.h"
 
-struct _ServerEvents
+struct _ServerEventsCallbackInfo
 {
     AwaServerClientRegisterEventCallback ClientRegisterEventCallback;
     void * ClientRegisterEventContext;
@@ -60,9 +60,9 @@ struct _AwaServerClientUpdateEvent
     ServerEvent * ServerEvent;
 };
 
-ServerEvents * ServerEvents_New(void)
+ServerEventsCallbackInfo * ServerEvents_New(void)
 {
-    ServerEvents * serverEvents = Awa_MemAlloc(sizeof(*serverEvents));
+    ServerEventsCallbackInfo * serverEvents = Awa_MemAlloc(sizeof(*serverEvents));
     if (serverEvents != NULL)
     {
         memset(serverEvents, 0, sizeof(*serverEvents));
@@ -71,7 +71,7 @@ ServerEvents * ServerEvents_New(void)
     return serverEvents;
 }
 
-void ServerEvents_Free(ServerEvents ** serverEvents)
+void ServerEvents_Free(ServerEventsCallbackInfo ** serverEvents)
 {
     if ((serverEvents != NULL) && (*serverEvents != NULL))
     {
@@ -80,3 +80,4 @@ void ServerEvents_Free(ServerEvents ** serverEvents)
         *serverEvents = NULL;
     }
 }
+

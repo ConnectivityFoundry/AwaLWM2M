@@ -23,6 +23,7 @@
 #include <gtest/gtest.h>
 
 #include "support/support.h"
+#include "support/static_api_support.h"
 #include "server_events.h"
 
 namespace Awa {
@@ -31,7 +32,7 @@ class TestServerEvents : public TestAwaBase {};
 
 TEST_F(TestServerEvents, ServerEvents_New_and_Free)
 {
-    ServerEvents * serverEvents = ServerEvents_New();
+    ServerEventsCallbackInfo * serverEvents = ServerEvents_New();
     ASSERT_TRUE(NULL != serverEvents);
     ServerEvents_Free(&serverEvents);
     ASSERT_EQ(NULL, serverEvents);
@@ -43,10 +44,7 @@ TEST_F(TestServerEvents, ServerEvents_Free_handles_null)
 }
 
 
-
-
-
-
+//class TestServerEventsWithConnectedSession : public TestStaticClientWithServer {};
 class TestServerEventsWithConnectedSession : public TestServerWithConnectedSession {};
 
 namespace detail {
@@ -60,7 +58,6 @@ static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, vo
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->callbackCounter++;
 }
-
 
 } // namespace detail
 
@@ -86,6 +83,55 @@ TEST_F(TestServerEventsWithConnectedSession, AwaServerSession_SetRegisterEventCa
 }
 
 // test register client
+
+
+
+//struct EventPollCondition : public PollCondition
+//{
+//    AwaStaticClient * StaticClient;
+//    AwaServerListClientsOperation * Operation;
+//    std::string ClientEndpointName;
+//
+//    EventPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
+//        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
+//    virtual ~SingleStaticClientPollCondition() {}
+//
+//    static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, void * context) {
+//        CallbackRecord * record = static_cast<CallbackRecord *>(context);
+//
+//        event->
+//        record->callbackCounter++;
+//    }
+//
+//    virtual bool Check()
+//    {
+//        bool found = false;
+//
+//        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
+//        AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(Operation);
+//        EXPECT_TRUE(iterator != NULL);
+//        if (AwaClientIterator_Next(iterator))
+//        {
+//            if (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
+//            {
+//                found = true;
+//            }
+//        }
+//        AwaClientIterator_Free(&iterator);
+//        AwaStaticClient_Process(StaticClient);
+//        return found;
+//    }
+//};
+//
+//TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
+//{
+//    detail::CallbackRecord record;
+//    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, detail::RegisterEventCallback, &record));
+//    EXPECT_EQ(0, record.callbackCounter);
+//
+//    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+//    ASSERT_TRUE(condition.Wait());
+//}
 
 // test overwrite callback
 

@@ -27,12 +27,12 @@
 extern "C" {
 #endif
 
-typedef struct _ServerEvents ServerEvents;
+typedef struct _ServerEventsCallbackInfo ServerEventsCallbackInfo;
 
 
-ServerEvents * ServerEvents_New(void);
+ServerEventsCallbackInfo * ServerEvents_New(void);
 
-void ServerEvents_Free(ServerEvents ** serverEvents);
+void ServerEvents_Free(ServerEventsCallbackInfo ** serverEvents);
 
 #ifdef __cplusplus
 }

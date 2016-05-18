@@ -44,7 +44,6 @@ typedef struct
     struct sockaddr FromAddr;
     int AddrLen;
     IPCSessionID SessionID;
-    //void * contextData;
     void * Context;
     void * Client;
 } RequestInfoType;

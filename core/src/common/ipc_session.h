@@ -47,6 +47,7 @@ int IPCSession_New(IPCSessionID sessionID);
 
 // Return 0 on success, -1 on error
 int IPCSession_AddRequestChannel(IPCSessionID sessionID, int sockfd, const struct sockaddr * fromAddr, int addrLen);
+int IPCSession_GetRequestChannel(IPCSessionID sessionID, int * sockfd, const struct sockaddr ** fromAddr, int * addrLen);
 
 // Return 0 on success, -1 on error
 int IPCSession_AddNotifyChannel(IPCSessionID sessionID, int sockfd, const struct sockaddr * fromAddr, int addrLen);

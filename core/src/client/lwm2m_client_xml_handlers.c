@@ -246,7 +246,7 @@ int xmlif_ExecuteResourceHandler(void * context, ObjectIDType objectID, ObjectIn
             }
             else
             {
-                Lwm2m_Error("Unable to get IPC session (%d) to send notification on.", executeHandler->SessionID);
+                Lwm2m_Error("Unable to get IPC Notify channel for session %d", executeHandler->SessionID);
             }
 
             executeHandler = xmlif_GetNextExecuteHandler(executeHandler, objectID, objectInstanceID, resourceID);
@@ -543,12 +543,6 @@ static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode
     if (IPCSession_AddNotifyChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0)
     {
         Lwm2m_Info("IPC Notify session %d connected from %s\n", request->SessionID, Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
-
-//        // Set up registration callbacks for Events
-//        // Use FromAddr port number as key to identify this IPC client.
-//        IPCSessionID sessionID = ntohs(request->FromAddr.sa_family == AF_INET ? ((struct sockaddr_in *)(&request->FromAddr))->sin_port : ((struct sockaddr_in6 *)(&request->FromAddr))->sin6_port);
-//        EventContext * eventContext = EventContext_New(request);
-//        Lwm2m_AddRegistrationEventCallback(request->Context, sessionID, xmlif_HandleRegistrationEvent, eventContext);
 
         TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success, request->SessionID);
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
@@ -1410,7 +1404,7 @@ done:
         }
         else
         {
-            Lwm2m_Error("Unable to get IPC session (%d) to send notification on.", request->SessionID);
+            Lwm2m_Error("Unable to get IPC Notify channel for session %d", request->SessionID);
         }
     }
     free(request);

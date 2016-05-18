@@ -28,10 +28,6 @@ EventContext * EventContext_New(const RequestInfoType * request)
     if (eventContext != NULL)
     {
         memset(eventContext, 0, sizeof(*eventContext));
-        eventContext->Sockfd = request->Sockfd;
-        eventContext->FromAddr = request->FromAddr;
-        eventContext->AddrLen = request->AddrLen;
-        eventContext->Lwm2mContext = request->Context;
         eventContext->SessionID = request->SessionID;
     }
     return eventContext;
