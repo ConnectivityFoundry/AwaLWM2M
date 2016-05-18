@@ -131,7 +131,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid, "Session is NULL");
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -168,7 +168,7 @@ AwaError AwaServerSession_Connect(AwaServerSession * session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
 out:
     return result;
@@ -183,7 +183,7 @@ AwaError AwaServerSession_Disconnect(AwaServerSession * session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -197,7 +197,7 @@ const AwaObjectDefinition * AwaServerSession_GetObjectDefinition(const AwaServer
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return objectDefinition;
 }
@@ -211,7 +211,7 @@ AwaObjectDefinitionIterator * AwaServerSession_NewObjectDefinitionIterator(const
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return iterator;
 }
@@ -225,7 +225,7 @@ bool ServerSession_IsConnected(const AwaServerSession * session)
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -239,7 +239,7 @@ IPCChannel * ServerSession_GetChannel(const AwaServerSession * session)
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return channel;
 }
@@ -253,7 +253,7 @@ DefinitionRegistry * ServerSession_GetDefinitionRegistry(const AwaServerSession 
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return definitions;
 }
@@ -267,7 +267,7 @@ AwaError AwaServerSession_PathToIDs(const AwaServerSession * session, const char
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -281,7 +281,7 @@ AwaError ServerSession_CheckResourceTypeFromPath(const AwaServerSession * sessio
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -295,7 +295,7 @@ const AwaResourceDefinition * ServerSession_GetResourceDefinitionFromPath(const 
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -309,7 +309,7 @@ bool AwaServerSession_IsObjectDefined(const AwaServerSession * session, AwaObjec
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }

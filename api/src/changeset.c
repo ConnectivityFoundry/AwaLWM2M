@@ -153,7 +153,7 @@ static const Session * AwaChangeSet_GetSession(const AwaChangeSet * changeSet, S
         session = OperationCommon_GetSession(ResponseCommon_GetOperation(changeSet->ResponseCommon), &actualSessionType);
         if (sessionType != actualSessionType)
         {
-            LogErrorWithEnum(AwaError_OperationInvalid, "Changeset does not hold a session of type %d. Requesting Session type %d\n", actualSessionType, sessionType);
+            LogErrorWithEnum(AwaError_OperationInvalid, "Changeset does not hold a session of type %d. Requesting Session type %d", actualSessionType, sessionType);
             session = NULL;
         }
     }

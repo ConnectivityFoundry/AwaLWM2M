@@ -27,10 +27,6 @@
 #include "lwm2m_ipc.h"
 #include "lwm2m_events.h"
 
-#define MSGTYPE_EVENT_REGISTER   "Register"
-#define MSGTYPE_EVENT_UPDATE     "Update"
-#define MSGTYPE_EVENT_DEREGISTER "Deregister"
-
 void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * context, void * parameter)
 {
     // should refer to the Notify channel:
@@ -59,13 +55,13 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
         switch (eventType)
         {
         case RegistrationEventType_Register:
-            msgType = MSGTYPE_EVENT_REGISTER;
+            msgType = IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER;
             break;
         case RegistrationEventType_Update:
-            msgType = MSGTYPE_EVENT_UPDATE;
+            msgType = IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE;
             break;
         case RegistrationEventType_Deregister:
-            msgType = MSGTYPE_EVENT_DEREGISTER;
+            msgType = IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER;
             break;
         default:
             Lwm2m_Error("Unhandled eventType %d\n", eventType)

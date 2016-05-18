@@ -42,7 +42,6 @@ set (test_api_runner_SOURCES
   client/test_get_operation.cc
   client/test_client_delete_operation.cc
   client/test_subscribe_operation.cc
-  client/test_observe_operation.cc
   client/test_client_iterator.cc
 
   server/test_server_session.cc
@@ -59,7 +58,7 @@ set (test_api_runner_SOURCES
   server/test_server_events.cc
   server/test_server_response.cc
   server/test_server.cc
-
+  server/test_observe_operation.cc
 )
 
 set (test_static_api_runner_SOURCES

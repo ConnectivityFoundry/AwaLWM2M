@@ -1030,7 +1030,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(cancelObserveOperation, defaults::timeout));
 
 
-
     // write via server api. Should NOT trigger a notification since we are no longer observing the resource.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
