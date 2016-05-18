@@ -39,7 +39,7 @@ struct _AwaServerSession
     SessionCommon * SessionCommon;
     MapType * Observers;
     QueueType * NotificationQueue;
-    ServerEventsCallbackInfo * ServerEvents;
+    ServerEventsCallbackInfo * ServerEventsCallbackInfo;
 };
 
 AwaServerSession * AwaServerSession_New(void)
@@ -58,8 +58,8 @@ AwaServerSession * AwaServerSession_New(void)
                 session->NotificationQueue = Queue_New();
                 if (session->NotificationQueue != NULL)
                 {
-                    session->ServerEvents = ServerEvents_New();
-                    if (session->ServerEvents != NULL)
+                    session->ServerEventsCallbackInfo = ServerEventsCallbackInfo_New();
+                    if (session->ServerEventsCallbackInfo != NULL)
                     {
                         LogNew("AwaServerSession", session);
                     }
@@ -122,7 +122,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
         Map_ForEach((*session)->Observers, RemoveObservationLinkToSession, NULL);
         Map_Free(&(*session)->Observers);
         Queue_Free(&((*session)->NotificationQueue));
-        ServerEvents_Free(&((*session)->ServerEvents));
+        ServerEventsCallbackInfo_Free(&((*session)->ServerEventsCallbackInfo));
 
         // Free the session itself
         LogFree("AwaServerSession", *session);
@@ -393,13 +393,12 @@ MapType * ServerSession_GetObservers(const AwaServerSession * session)
     return list;
 }
 
-AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
+AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * session, AwaServerClientRegisterEventCallback callback, void * context)
 {
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        //result = ServerEvents_SetClientRegisterCallback(callback, context);
-        result = AwaError_Success;
+        result = ServerEventsCallbackInfo_SetClientRegisterCallback(session->ServerEventsCallbackInfo, callback, context);
     }
     else
     {
@@ -408,13 +407,12 @@ AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * sess
     return result;
 }
 
-AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
+AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * session, AwaServerClientDeregisterEventCallback callback, void * context)
 {
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        //result = ServerEvents_SetClientDeregisterCallback(callback, context);
-        result = AwaError_Success;
+        result = ServerEventsCallbackInfo_SetClientDeregisterCallback(session->ServerEventsCallbackInfo, callback, context);
     }
     else
     {
@@ -423,17 +421,30 @@ AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * se
     return result;
 }
 
-AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * session, const AwaServerClientRegisterEventCallback callback, void * context)
+AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * session, AwaServerClientUpdateEventCallback callback, void * context)
 {
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        //result = ServerEvents_SetClientUpdateCallback(callback, context);
-        result = AwaError_Success;
+        result = ServerEventsCallbackInfo_SetClientUpdateCallback(session->ServerEventsCallbackInfo, callback, context);
     }
     else
     {
         result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
+}
+
+ServerEventsCallbackInfo * ServerSession_GetServerEventsCallbackInfo(const AwaServerSession * session)
+{
+    ServerEventsCallbackInfo * info = NULL;
+    if (session != NULL)
+    {
+        info = session->ServerEventsCallbackInfo;
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return info;
 }

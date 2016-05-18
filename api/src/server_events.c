@@ -45,10 +45,10 @@ typedef struct
 } ServerEvent;
 
 // Specific event data:
-struct _AwaServerClientRegisterEvent
-{
-    ServerEvent * ServerEvent;
-};
+//struct _AwaServerClientRegisterEvent
+//{
+//    ServerEvent * ServerEvent;
+//};
 
 struct _AwaServerClientDeregisterEvent
 {
@@ -60,7 +60,41 @@ struct _AwaServerClientUpdateEvent
     ServerEvent * ServerEvent;
 };
 
-ServerEventsCallbackInfo * ServerEvents_New(void)
+// This struct is used for API type safety and is never instantiated.
+// DO NOT USE THIS STRUCTURE!
+struct _AwaServerClientRegisterEvent {};
+
+struct _ClientRegisterEvent
+{
+
+};
+
+ClientRegisterEvent * ClientRegisterEvent_New(void)
+{
+    ClientRegisterEvent * event = Awa_MemAlloc(sizeof(*event));
+    if (event != NULL)
+    {
+        memset(event, 0, sizeof(*event));
+        LogNew("ClientRegisterEvent", event);
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_OutOfMemory);
+    }
+    return event;
+}
+
+void ClientRegisterEvent_Free(ClientRegisterEvent ** event)
+{
+    if ((event != NULL) && (*event != NULL))
+    {
+        LogFree("ClientRegisterEvent", *event);
+        Awa_MemSafeFree(*event);
+        *event = NULL;
+    }
+}
+
+ServerEventsCallbackInfo * ServerEventsCallbackInfo_New(void)
 {
     ServerEventsCallbackInfo * serverEvents = Awa_MemAlloc(sizeof(*serverEvents));
     if (serverEvents != NULL)
@@ -71,7 +105,7 @@ ServerEventsCallbackInfo * ServerEvents_New(void)
     return serverEvents;
 }
 
-void ServerEvents_Free(ServerEventsCallbackInfo ** serverEvents)
+void ServerEventsCallbackInfo_Free(ServerEventsCallbackInfo ** serverEvents)
 {
     if ((serverEvents != NULL) && (*serverEvents != NULL))
     {
@@ -79,5 +113,90 @@ void ServerEvents_Free(ServerEventsCallbackInfo ** serverEvents)
         Awa_MemSafeFree(*serverEvents);
         *serverEvents = NULL;
     }
+}
+
+int ServerEventsCallbackInfo_SetClientRegisterCallback(ServerEventsCallbackInfo * info, AwaServerClientRegisterEventCallback callback, void * context)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        // callback may be NULL
+        info->ClientRegisterEventCallback = callback;
+        info->ClientRegisterEventContext = context;
+        result = 0;
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
+}
+
+int ServerEventsCallbackInfo_SetClientDeregisterCallback(ServerEventsCallbackInfo * info, AwaServerClientDeregisterEventCallback callback, void * context)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        // callback may be NULL
+        info->ClientDeregisterEventCallback = callback;
+        info->ClientDeregisterEventContext = context;
+        result = 0;
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
+}
+
+int ServerEventsCallbackInfo_SetClientUpdateCallback(ServerEventsCallbackInfo * info, AwaServerClientUpdateEventCallback callback, void * context)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        // callback may be NULL
+        info->ClientUpdateEventCallback = callback;
+        info->ClientUpdateEventContext = context;
+        result = 0;
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
+}
+
+int ServerEventsCallbackInfo_InvokeClientRegisterCallback(ServerEventsCallbackInfo * info, const ClientRegisterEvent * event)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        if (event != NULL)
+        {
+            if (info->ClientRegisterEventCallback != NULL)
+            {
+                info->ClientRegisterEventCallback((AwaServerClientRegisterEvent *)event, info->ClientRegisterEventContext);
+            }
+            else
+            {
+                LogDebug("No ClientRegisterCallback set");
+            }
+            result = 0;
+        }
+        else
+        {
+            LogError("event is NULL");
+            result = -1;
+        }
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
 }
 

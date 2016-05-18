@@ -33,7 +33,7 @@ struct _StringIterator
 
 StringIterator * StringIterator_New(void)
 {
-    StringIterator * iterator = Awa_MemAlloc(sizeof (*iterator));
+    StringIterator * iterator = Awa_MemAlloc(sizeof(*iterator));
     if (iterator != NULL)
     {
         memset(iterator, 0, sizeof(*iterator));

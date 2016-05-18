@@ -23,16 +23,36 @@
 #ifndef SERVER_EVENTS_H
 #define SERVER_EVENTS_H
 
+#include "awa/server.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct _ServerEventsCallbackInfo ServerEventsCallbackInfo;
 
+typedef struct _ClientRegisterEvent ClientRegisterEvent;
 
-ServerEventsCallbackInfo * ServerEvents_New(void);
 
-void ServerEvents_Free(ServerEventsCallbackInfo ** serverEvents);
+ClientRegisterEvent * ClientRegisterEvent_New(void);
+
+void ClientRegisterEvent_Free(ClientRegisterEvent ** event);
+
+
+
+// ServerEventsCallbackInfo functions:
+ServerEventsCallbackInfo * ServerEventsCallbackInfo_New(void);
+
+void ServerEventsCallbackInfo_Free(ServerEventsCallbackInfo ** serverEvents);
+
+int ServerEventsCallbackInfo_SetClientRegisterCallback(ServerEventsCallbackInfo * info, AwaServerClientRegisterEventCallback callback, void * context);
+
+int ServerEventsCallbackInfo_SetClientDeregisterCallback(ServerEventsCallbackInfo * info, AwaServerClientDeregisterEventCallback callback, void * context);
+
+int ServerEventsCallbackInfo_SetClientUpdateCallback(ServerEventsCallbackInfo * info, AwaServerClientUpdateEventCallback callback, void * context);
+
+int ServerEventsCallbackInfo_InvokeClientRegisterCallback(ServerEventsCallbackInfo * info, const ClientRegisterEvent * event);
+
 
 #ifdef __cplusplus
 }
