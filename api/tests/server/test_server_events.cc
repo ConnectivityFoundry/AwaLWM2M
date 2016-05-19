@@ -200,11 +200,11 @@ TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_handles_single_c
         const char * clientID = ClientIterator_GetClientID(clientIterator);
         actualClientIDs.push_back(clientID);
     }
+    ClientIterator_Free(&clientIterator);
 
     EXPECT_EQ(expectedClientIDs.size(), actualClientIDs.size());
     if (expectedClientIDs.size() == actualClientIDs.size())
         EXPECT_TRUE(std::is_permutation(expectedClientIDs.begin(), expectedClientIDs.end(), actualClientIDs.begin()));
-    ClientIterator_Free(&clientIterator);
 
     ClientRegisterEvent_Free(&event);
     IPCMessage_Free(&notification);
@@ -270,11 +270,11 @@ TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_handles_multiple
         const char * clientID = ClientIterator_GetClientID(clientIterator);
         actualClientIDs.push_back(clientID);
     }
+    ClientIterator_Free(&clientIterator);
 
     EXPECT_EQ(expectedClientIDs.size(), actualClientIDs.size());
     if (expectedClientIDs.size() == actualClientIDs.size())
         EXPECT_TRUE(std::is_permutation(expectedClientIDs.begin(), expectedClientIDs.end(), actualClientIDs.begin()));
-    ClientIterator_Free(&clientIterator);
 
     ClientRegisterEvent_Free(&event);
     IPCMessage_Free(&notification);
@@ -362,11 +362,11 @@ TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_handles_register
         const char * clientID = ClientIterator_GetClientID(clientIterator);
         actualClientIDs.push_back(clientID);
     }
+    ClientIterator_Free(&clientIterator);
 
     EXPECT_EQ(expectedClientIDs.size(), actualClientIDs.size());
     if (expectedClientIDs.size() == actualClientIDs.size())
         EXPECT_TRUE(std::is_permutation(expectedClientIDs.begin(), expectedClientIDs.end(), actualClientIDs.begin()));
-    ClientIterator_Free(&clientIterator);
 
     // check for registered entities using first client ID
     const char * clientID = actualClientIDs[0].c_str();
@@ -380,24 +380,130 @@ TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_handles_register
         actualPaths.push_back(path);
     }
 
-    std::cout << "Expected:" << std::endl;
-    for (auto i : expectedPaths)
-        std::cout << i << std::endl;
-
-    std::cout << "Actual:" << std::endl;
-    for (auto i : actualPaths)
-        std::cout << i << std::endl;
+//    std::cout << "Expected:" << std::endl;
+//    for (auto i : expectedPaths)
+//        std::cout << i << std::endl;
+//
+//    std::cout << "Actual:" << std::endl;
+//    for (auto i : actualPaths)
+//        std::cout << i << std::endl;
 
     EXPECT_EQ(expectedPaths.size(), actualPaths.size());
     if (expectedPaths.size() == actualPaths.size())
         EXPECT_TRUE(std::is_permutation(expectedPaths.begin(), expectedPaths.end(), actualPaths.begin()));
-    ClientIterator_Free(&clientIterator);
 
     RegisteredEntityIterator_Free(&entityIterator);
     ClientRegisterEvent_Free(&event);
     IPCMessage_Free(&notification);
     Tree_Delete(contentNode);
 }
+
+TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_NewRegisteredEntityIterator_without_ClientIterator)
+{
+    const char * xml =
+            "<Clients>"
+            "  <Client>"
+            "    <ID>imagination1</ID>"
+            "    <Objects>"
+            "      <Object>"
+            "        <ID>1</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>2</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>1</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>2</ID>"
+            "        </ObjectInstance>"
+            "        <ObjectInstance>"
+            "          <ID>3</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "      <Object>"
+            "        <ID>7</ID>"
+            "      </Object>"
+            "    </Objects>"
+            "  </Client>"
+            "</Clients>";
+
+    std::vector<std::string> expectedPaths = { "/1/0", "/2/0", "/2/1", "/2/2", "/2/3", "/7" };
+
+    TreeNode contentNode = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
+    ASSERT_TRUE(NULL != contentNode);
+    IPCMessage * notification = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_NOTIFICATION, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, 1234567);
+    ASSERT_TRUE(NULL != notification);
+    IPCMessage_AddContent(notification, contentNode);
+
+    ClientRegisterEvent * event = ClientRegisterEvent_New();
+    ASSERT_TRUE(NULL != event);
+    EXPECT_EQ(0, ClientRegisterEvent_AddNotification(event, notification, session_));
+
+    // check for registered entities using pre-known client ID
+    const char * clientID = "imagination1";
+    RegisteredEntityIterator * entityIterator = ClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
+    EXPECT_TRUE(NULL != entityIterator);
+
+    std::vector<std::string> actualPaths;
+    while (RegisteredEntityIterator_Next(entityIterator))
+    {
+        const char * path = RegisteredEntityIterator_GetPath(entityIterator);
+        actualPaths.push_back(path);
+    }
+
+    EXPECT_EQ(expectedPaths.size(), actualPaths.size());
+    if (expectedPaths.size() == actualPaths.size())
+        EXPECT_TRUE(std::is_permutation(expectedPaths.begin(), expectedPaths.end(), actualPaths.begin()));
+
+    RegisteredEntityIterator_Free(&entityIterator);
+    ClientRegisterEvent_Free(&event);
+    IPCMessage_Free(&notification);
+    Tree_Delete(contentNode);
+}
+
+TEST_F(TestServerEventsClientRegisterEvent, ClientRegisterEvent_NewRegisteredEntityIterator_with_invalid_clientID)
+{
+    const char * xml =
+            "<Clients>"
+            "  <Client>"
+            "    <ID>imagination1</ID>"
+            "    <Objects>"
+            "      <Object>"
+            "        <ID>1</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "    </Objects>"
+            "  </Client>"
+            "</Clients>";
+
+    TreeNode contentNode = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
+    ASSERT_TRUE(NULL != contentNode);
+    IPCMessage * notification = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_NOTIFICATION, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, 1234567);
+    ASSERT_TRUE(NULL != notification);
+    IPCMessage_AddContent(notification, contentNode);
+
+    ClientRegisterEvent * event = ClientRegisterEvent_New();
+    ASSERT_TRUE(NULL != event);
+    EXPECT_EQ(0, ClientRegisterEvent_AddNotification(event, notification, session_));
+
+    // check for registered entities using invalid client ID
+    const char * clientID = "imaginationBAD";
+    RegisteredEntityIterator * entityIterator = ClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
+    EXPECT_EQ(NULL, entityIterator);
+
+    ClientRegisterEvent_Free(&event);
+    IPCMessage_Free(&notification);
+    Tree_Delete(contentNode);
+}
+
 
 
 // ServerEventsCallbackInfo tests:

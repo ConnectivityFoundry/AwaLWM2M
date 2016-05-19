@@ -49,7 +49,7 @@ int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage 
 
 ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event);
 
-RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(const ClientRegisterEvent * event, const char * clientID);
+RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(ClientRegisterEvent * event, const char * clientID);
 
 
 // ServerEventsCallbackInfo functions:

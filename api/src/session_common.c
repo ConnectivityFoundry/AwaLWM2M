@@ -435,7 +435,7 @@ static AwaError ConnectChannel(SessionCommon * session)
     return result;
 }
 
-static AwaError ConnectNotifyChannel(IPCChannel * ipcChannel, IPCSessionID sessionID)
+static AwaError EstablishNotifyChannel(IPCChannel * ipcChannel, IPCSessionID sessionID)
 {
     AwaError result = AwaError_Unspecified;
     if (ipcChannel != NULL)
@@ -484,7 +484,7 @@ AwaError SessionCommon_ConnectSession(SessionCommon * session)
                     result = ConnectChannel(session);
                     if (result == AwaError_Success)
                     {
-                        result = ConnectNotifyChannel(session->IPCChannel, session->SessionID);
+                        result = EstablishNotifyChannel(session->IPCChannel, session->SessionID);
                         if (result == AwaError_Success)
                         {
                             LogVerbose("Session connected");
@@ -557,21 +557,6 @@ static AwaError DisconnectChannel(IPCChannel * ipcChannel, IPCSessionID sessionI
     return result;
 }
 
-static AwaError DisconnectNotifyChannel(IPCChannel * ipcChannel, IPCSessionID sessionID)
-{
-    AwaError result = AwaError_Unspecified;
-    if (ipcChannel != NULL)
-    {
-        LogDebug("Disconnect Notify OK");
-        result = AwaError_Success;
-    }
-    else
-    {
-        result = LogErrorWithEnum(AwaError_IPCError, "ipcChannel is NULL");
-    }
-    return result;
-}
-
 AwaError SessionCommon_DisconnectSession(SessionCommon * session)
 {
     AwaError result = AwaError_Unspecified;
@@ -586,11 +571,7 @@ AwaError SessionCommon_DisconnectSession(SessionCommon * session)
                 result = DisconnectChannel(session->IPCChannel, session->SessionID);
                 if (result == AwaError_Success)
                 {
-                    result = DisconnectNotifyChannel(session->IPCChannel, session->SessionID);
-                    if (result == AwaError_Success)
-                    {
-                        LogVerbose("Session disconnected");
-                    }
+                    LogVerbose("Session disconnected");
                 }
 
                 IPCChannel_Free(&session->IPCChannel);

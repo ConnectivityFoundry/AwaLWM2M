@@ -152,19 +152,18 @@ int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage 
     return result;
 }
 
-ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event)
+static const ServerResponse * GetServerResponse(ClientRegisterEvent * event)
 {
-    ClientIterator * iterator = NULL;
     if (event != NULL)
     {
-        if (event->Notification != NULL)
+        if (event->ServerResponse == NULL)
         {
-            if (event->ServerSession != NULL)
+            if (event->Notification != NULL)
             {
-                TreeNode contentNode = IPCMessage_GetContentNode(event->Notification);
-                TreeNode clientsNode = Xml_Find(contentNode, "Clients");
-                if (event->ServerResponse == NULL)
+                if (event->ServerSession != NULL)
                 {
+                    TreeNode contentNode = IPCMessage_GetContentNode(event->Notification);
+                    TreeNode clientsNode = Xml_Find(contentNode, "Clients");
                     if (event->ServerOperation == NULL)
                     {
                         event->ServerOperation = ServerOperation_New(event->ServerSession);
@@ -176,20 +175,33 @@ ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * eve
                     }
                     else
                     {
-                        LogError("Cannot create serverOperation");
+                        LogError("Cannot create ServerOperation");
                     }
                 }
-                iterator = ServerResponse_NewClientIterator(event->ServerResponse);
+                else
+                {
+                    LogError("Event session is NULL");
+                }
             }
             else
             {
-                LogError("Event session is NULL");
+                LogError("Event notification is NULL");
             }
         }
-        else
-        {
-            LogError("Event notification is NULL");
-        }
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return event->ServerResponse;
+}
+
+ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event)
+{
+    ClientIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ServerResponse_NewClientIterator(GetServerResponse(event));
     }
     else
     {
@@ -198,28 +210,21 @@ ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * eve
     return iterator;
 }
 
-RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(const ClientRegisterEvent * event, const char * clientID)
+RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(ClientRegisterEvent * event, const char * clientID)
 {
     RegisteredEntityIterator * iterator = NULL;
     if (event != NULL)
     {
         if (clientID != NULL)
         {
-            if (event->ServerResponse != NULL)
+            const ResponseCommon * clientResponse = ServerResponse_GetClientResponse(GetServerResponse(event), clientID);
+            if (clientResponse != NULL)
             {
-                const ResponseCommon * clientResponse = ServerResponse_GetClientResponse(event->ServerResponse, clientID);
-                if (clientResponse != NULL)
-                {
-                    iterator = RegisteredEntityIterator_New(clientResponse);
-                }
-                else
-                {
-                    LogError("No client response for client ID '%s'", clientID);
-                }
+                iterator = RegisteredEntityIterator_New(clientResponse);
             }
             else
             {
-                LogError("Event server response is NULL");
+                LogError("No client response for client ID '%s'", clientID);
             }
         }
         else
