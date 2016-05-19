@@ -440,7 +440,7 @@ static AwaError ConnectNotifyChannel(IPCChannel * ipcChannel, IPCSessionID sessi
     AwaError result = AwaError_Unspecified;
     if (ipcChannel != NULL)
     {
-        IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, sessionID);
+        IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, sessionID);
         if (connectRequest != NULL)
         {
             IPCMessage * connectResponse = NULL;
@@ -562,33 +562,8 @@ static AwaError DisconnectNotifyChannel(IPCChannel * ipcChannel, IPCSessionID se
     AwaError result = AwaError_Unspecified;
     if (ipcChannel != NULL)
     {
-        IPCMessage * disconnectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, sessionID);
-        if (disconnectRequest != NULL)
-        {
-            IPCMessage * disconnectResponse = NULL;
-            result = IPC_SendAndReceiveOnNotifySocket(ipcChannel, disconnectRequest, &disconnectResponse, SESSION_CONNECT_TIMEOUT);
-
-            if (result == AwaError_Success)
-            {
-                IPCResponseCode code = IPCMessage_GetResponseCode(disconnectResponse);
-                if (code == IPCResponseCode_Success)
-                {
-                    LogDebug("Disconnect Notify OK");
-                    result = AwaError_Success;
-                }
-                else
-                {
-                    LogErrorWithEnum(AwaError_IPCError, "Disconnect failed with code %d", code);
-                }
-                IPCMessage_Free(&disconnectResponse);
-            }
-
-            IPCMessage_Free(&disconnectRequest);
-        }
-        else
-        {
-            result = LogErrorWithEnum(AwaError_IPCError, "Failed to create message");
-        }
+        LogDebug("Disconnect Notify OK");
+        result = AwaError_Success;
     }
     else
     {

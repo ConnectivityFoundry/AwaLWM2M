@@ -39,9 +39,8 @@ typedef int IPCSessionID;
 // Common request message sub-types:
 #define IPC_MESSAGE_SUB_TYPE_INVALID                "Invalid"
 #define IPC_MESSAGE_SUB_TYPE_CONNECT                "Connect"
-#define IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY         "ConnectNotify"
+#define IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY       "EstablishNotify"
 #define IPC_MESSAGE_SUB_TYPE_DISCONNECT             "Disconnect"
-#define IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY      "DisconnectNotify"
 #define IPC_MESSAGE_SUB_TYPE_DELETE                 "Delete"
 #define IPC_MESSAGE_SUB_TYPE_DEFINE                 "Define"
 

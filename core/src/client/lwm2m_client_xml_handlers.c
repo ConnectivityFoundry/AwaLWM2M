@@ -63,9 +63,8 @@
 #define STRINGIFY(s) STR(s)
 
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content);
-static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content);
+static int xmlif_HandlerEstablishNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content);
-static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode content);
 static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content);
@@ -86,9 +85,8 @@ void xmlif_RegisterHandlers(void)
     ListInit(&executeHandlers);
 
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_CONNECT,           xmlif_HandlerConnectRequest);
-    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY,    xmlif_HandlerConnectNotifyRequest);
+    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY,  xmlif_HandlerEstablishNotifyRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DISCONNECT,        xmlif_HandlerDisconnectRequest);
-    xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, xmlif_HandlerDisconnectNotifyRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_DEFINE,            xmlif_HandlerDefineRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_GET,               xmlif_HandlerGetRequest);
     xmlif_AddRequestHandler(IPC_MESSAGE_SUB_TYPE_SET,               xmlif_HandlerSetRequest);
@@ -538,20 +536,20 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
     return 0;
 }
 
-static int xmlif_HandlerConnectNotifyRequest(RequestInfoType * request, TreeNode content)
+static int xmlif_HandlerEstablishNotifyRequest(RequestInfoType * request, TreeNode content)
 {
     if (IPCSession_AddNotifyChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0)
     {
         Lwm2m_Info("IPC Notify session %d connected from %s\n", request->SessionID, Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
-        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_Success, request->SessionID);
+        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, AwaResult_Success, request->SessionID);
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
     }
     else
     {
         Lwm2m_Error("Bad IPC ConnectNotify request\n");
-        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_CONNECT_NOTIFY, AwaResult_BadRequest, request->SessionID);
+        TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, AwaResult_BadRequest, request->SessionID);
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
     }
@@ -565,6 +563,8 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     // No check for known client - proceed regardless.
     Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
 
+    //TODO: cleanup for notify channel
+
     TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT, AwaResult_Success, request->SessionID);
     IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
     Tree_Delete(response);
@@ -573,19 +573,6 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
     return 0;
 }
 
-// Called to handle a request with the type "DisconnectNotify". Returns 0 on success.
-static int xmlif_HandlerDisconnectNotifyRequest(RequestInfoType * request, TreeNode content)
-{
-    // No check for known client - proceed regardless.
-    Lwm2m_Info("IPC Notify disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
-
-    TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT_NOTIFY, AwaResult_Success, request->SessionID);
-    IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
-    Tree_Delete(response);
-
-    free(request);
-    return 0;
-}
 
 // Called to handle a request with the type "Define". Returns 0 on success.
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content)
