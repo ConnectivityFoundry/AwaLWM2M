@@ -102,6 +102,8 @@ set (test_static_api_runner_INCLUDE_DIRS
 set (test_api_runner_LIBRARIES
   gtest
   pthread
+  awa_static
+  awa_common_static
   Awa_static
   libb64_static
 )

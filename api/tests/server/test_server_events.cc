@@ -50,8 +50,8 @@ TEST_F(TestServerEvents, ServerEventsCallbackInfo_Free_handles_null)
     ServerEventsCallbackInfo_Free(NULL);
 }
 
-//class TestServerEventsWithConnectedSession : public TestStaticClientWithServer {};
-class TestServerEventsWithConnectedSession : public TestServerWithConnectedSession {};
+class TestServerEventsWithConnectedSession : public TestStaticClientWithServer {};
+//class TestServerEventsWithConnectedSession : public TestServerWithConnectedSession {};
 
 namespace detail {
 
@@ -526,64 +526,88 @@ TEST_F(TestServerEventsWithConnectedSession, AwaServerSession_SetRegisterEventCa
 
 // test register client
 
+struct EventWaitCondition : public WaitCondition
+{
+    AwaServerSession * ServerSession;
+    AwaStaticClient * StaticClient;
+    std::string ClientEndpointName;
+    int callbackCountMax;
+    int callbackCount;
+
+    EventWaitCondition(AwaServerSession * ServerSession, AwaStaticClient * StaticClient, std::string ClientEndpointName, int callbackCountMax) :
+        WaitCondition(50e4), ServerSession(ServerSession), StaticClient(StaticClient), ClientEndpointName(ClientEndpointName), callbackCountMax(callbackCountMax), callbackCount(0) {}
+    virtual ~EventWaitCondition() {}
 
 
-//struct EventPollCondition : public PollCondition
-//{
-//    AwaStaticClient * StaticClient;
-//    AwaServerListClientsOperation * Operation;
-//    std::string ClientEndpointName;
-//
-//    EventPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
-//        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
-//    virtual ~SingleStaticClientPollCondition() {}
-//
-//    static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, void * context) {
-//        CallbackRecord * record = static_cast<CallbackRecord *>(context);
-//
-//        event->
-//        record->callbackCounter++;
-//    }
-//
-//    virtual bool Check()
-//    {
-//        bool found = false;
-//
-//        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
-//        AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(Operation);
-//        EXPECT_TRUE(iterator != NULL);
-//        if (AwaClientIterator_Next(iterator))
-//        {
-//            if (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
-//            {
-//                found = true;
-//            }
-//        }
-//        AwaClientIterator_Free(&iterator);
-//        AwaStaticClient_Process(StaticClient);
-//        return found;
-//    }
-//};
-//
-//TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
-//{
-//    detail::CallbackRecord record;
-//    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, detail::RegisterEventCallback, &record));
-//    EXPECT_EQ(0, record.callbackCounter);
-//
-//    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
-//    ASSERT_TRUE(condition.Wait());
-//}
+    virtual bool Check()
+    {
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
+        AwaStaticClient_Process(StaticClient);
+        return callbackCount >= callbackCountMax;
+    }
+
+    virtual void internalCallbackHandler(const void * event)
+    {
+        this->callbackCount++;
+        this->callbackHandler(event);
+    };
+
+    virtual void callbackHandler(const void * event) = 0;
+};
+
+
+void ClientEventCallback(const void * event, void * context)
+{
+    printf("internal callback handler %p %p\n", event, context);
+    if (context)
+    {
+        auto * that = static_cast<EventWaitCondition*>(context);
+        that->internalCallbackHandler(event);
+    }
+}
+
+TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
+{
+
+    struct CallbackHandler1 : public EventWaitCondition
+    {
+        int count;
+
+        CallbackHandler1(AwaServerSession * ServerSession, AwaStaticClient * StaticClient, std::string ClientEndpointName, int callbackCountMax = 1) :
+            EventWaitCondition(ServerSession, StaticClient, ClientEndpointName, callbackCountMax), count(0) {}
+
+        void callbackHandler(const void * event)
+        {
+            count ++;
+            AwaServerClientRegisterEvent * registerEvent = (AwaServerClientRegisterEvent *)event;
+            EXPECT_TRUE(registerEvent != NULL);
+
+            AwaClientIterator * clientIterator = AwaServerClientRegisterEvent_NewClientIterator(registerEvent);
+            EXPECT_TRUE(clientIterator != NULL);
+
+            EXPECT_TRUE(AwaClientIterator_Next(clientIterator));
+
+            EXPECT_STREQ(global::clientEndpointName, AwaClientIterator_GetClientID(clientIterator));
+
+            AwaRegisteredEntityIterator * entityIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(registerEvent, global::clientEndpointName);
+            EXPECT_TRUE(entityIterator != NULL);
+
+            AwaRegisteredEntityIterator_Free(&entityIterator);
+
+            AwaClientIterator_Free(&clientIterator);
+        }
+    };
+    CallbackHandler1 cbHandler(session_, client_, global::clientEndpointName);
+
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientRegisterEventCallback(session_, (void (*)(const _AwaServerClientRegisterEvent*, void*))ClientEventCallback, &cbHandler));
+
+    EXPECT_TRUE(cbHandler.Wait());
+    EXPECT_EQ(1, cbHandler.count);
+}
 
 // test overwrite callback
 
 // test clear callback
-
-
-
-
-
-
-
 
 } // namespace Awa
