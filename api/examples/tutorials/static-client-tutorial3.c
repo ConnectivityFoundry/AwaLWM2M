@@ -35,9 +35,10 @@ typedef struct
 
 static HeaterObject heater[HEATER_INSTANCES];
 
+
 AwaResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID objectID,
-                       AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
-                       void ** dataPointer, uint16_t * dataSize, bool * changed)
+                  AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
+                  void ** dataPointer, size_t * dataSize, bool * changed)
 {
     AwaResult result = AwaResult_InternalError;
 
@@ -129,9 +130,12 @@ AwaResult handler(AwaStaticClient * client, AwaOperation operation, AwaObjectID 
 
 static void DefineHeaterObject(AwaStaticClient * awaClient)
 {
-    AwaStaticClient_DefineObjectWithHandler(awaClient, "Heater", 1000, 0, HEATER_INSTANCES, handler);
-    AwaStaticClient_DefineResourceWithHandler(awaClient, "Manufacturer", 1000, 101, AwaResourceType_String, 0, 1, AwaResourceOperations_ReadWrite, handler);
-    AwaStaticClient_DefineResourceWithHandler(awaClient, "Temperature",  1000, 104, AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadWrite, handler);
+    AwaStaticClient_DefineObject(awaClient, 1000, "Heater", 0, HEATER_INSTANCES);
+    AwaStaticClient_SetObjectOperationHandler(awaClient, 1000, handler);
+    AwaStaticClient_DefineResource(awaClient, 1000, 101, "Manufacturer", AwaResourceType_String, 0, 1, AwaResourceOperations_ReadWrite);
+    AwaStaticClient_SetResourceOperationHandler(awaClient, 1000, 101, handler);
+    AwaStaticClient_DefineResource(awaClient, 1000, 104, "Temperature", AwaResourceType_Float, 0, 1, AwaResourceOperations_ReadWrite);
+    AwaStaticClient_SetResourceOperationHandler(awaClient, 1000, 104, handler);
 }
 
 static void CreateHeaterObject(AwaStaticClient * awaClient)

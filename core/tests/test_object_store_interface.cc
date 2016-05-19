@@ -56,7 +56,8 @@ TEST_F(ObjectStoreInterfaceTestSuite, test_WriteAndReadSingleResource)
     int len = Lwm2mCore_GetResourceInstanceValue(context, 0, 0, 0, 0, (const void **)&buffer, &bufferSize);
 
     EXPECT_EQ(static_cast<size_t>(len), strlen(expected));
-    EXPECT_TRUE(memcmp(expected, buffer, len) == 0);
+    ASSERT_TRUE(len >= 0);
+    EXPECT_TRUE(memcmp(expected, buffer, static_cast<size_t>(len)) == 0);
 }
 
 //TEST_F(ObjectStoreInterfaceTestSuite, DISABLED_test_EnumerateObjectsAndResources)

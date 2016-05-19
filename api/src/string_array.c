@@ -98,9 +98,9 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
                 int nonNulledLength = Array_GetValueLength((AwaArray *)array, index);
                 char *  nulledValue = (char *)malloc(nonNulledLength + 1);
 
-                if ((nonNulledValue != NULL) && (nulledValue != NULL))
+                if ((nonNulledValue != NULL) && (nulledValue != NULL) && (nonNulledLength >= 0))
                 {
-                    memcpy(nulledValue, nonNulledValue, nonNulledLength);
+                    memcpy(nulledValue, nonNulledValue, (size_t)nonNulledLength);
                     nulledValue[nonNulledLength] = '\0';
                     Array_SetValue(nulledStrings, index, nulledValue, nonNulledLength + 1);
                     free(nulledValue);

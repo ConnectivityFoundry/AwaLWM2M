@@ -132,8 +132,8 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                             case AwaResourceType_Integer: // no-break
                             case AwaResourceType_Time:
                             {
-                                int64_t oldValueAsInteger = *((int64_t *)observer->OldValue);
-                                int64_t newValueAsInteger = *((int64_t *)newValue);
+                                AwaInteger oldValueAsInteger = observer->OldValueLength == sizeof(AwaInteger) ? *((AwaInteger *)observer->OldValue) : 0;
+                                AwaInteger newValueAsInteger = newValueLength == sizeof(AwaInteger) ? *((AwaInteger *)newValue) : 0;
 
                                 if ((greaterThanAttributes != NULL) &&
                                         ((oldValueAsInteger > greaterThanAttributes->GreaterThan) == (newValueAsInteger > greaterThanAttributes->GreaterThan)))
@@ -157,8 +157,8 @@ void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstan
                             }
                             case AwaResourceType_Float:
                             {
-                                double oldValueAsFloat = *((double *)observer->OldValue);
-                                double newValueAsFloat = *((double *)newValue);
+                                AwaFloat oldValueAsFloat = observer->OldValueLength == sizeof(AwaInteger) ? *((AwaFloat *)observer->OldValue) : 0;
+                                AwaFloat newValueAsFloat = newValueLength == sizeof(AwaInteger) ? *((AwaFloat *)newValue) : 0;
 
                                 if ((greaterThanAttributes != NULL) &&
                                         ((oldValueAsFloat > greaterThanAttributes->GreaterThan) == (newValueAsFloat > greaterThanAttributes->GreaterThan)))

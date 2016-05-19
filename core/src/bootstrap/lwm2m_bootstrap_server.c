@@ -282,7 +282,7 @@ static void PrintOptions(const Options * options)
     printf("Options provided:\n");
     printf("  IPAddress      (--ip)             : %s\n", options->IPAddress);
     printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName);
-    printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily);
+    printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily == AF_INET? 4 : 6);
     printf("  Port           (--port)           : %d\n", options->Port);
     int i;
     for (i = 0; i < options->ConfigCount; ++i)

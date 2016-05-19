@@ -1,23 +1,18 @@
 #imglogo {
-	padding-left:0px;
-	background: url(imgteclogo.png) no-repeat right center #770172;
-	height:80px;
+    padding-left:0px;
+    background: url(imgteclogo.png) no-repeat left center #770172;
+    height:80px;
 }
-#creatorlogo {
-	background: url(creatorlogo.png) no-repeat left center transparent;
-	display:block;
-	width:260px;
-	height:80px;
-}
+
 #version {
     color: white;
-	background: #770172;
+    background: #770172;
     display: block;
     width: 100%;
     height: 18px;
     text-align: right;
 }
 .copyright_footer {
-	margin-left: 10px;
-	color: #666666;
+    margin-left: 10px;
+    color: #666666;
 }

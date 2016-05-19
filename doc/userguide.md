@@ -268,7 +268,7 @@ Both server and client APIs are implemented in the *libawa* library.   Applicati
 
 Useful examples can be found in the *api/example* folder. 
 
-The tools directory contains a number of useful tools. These are built with the daemons, by default. A complete toolset reference can be found [here](Awa_tools_reference.md).
+The tools directory contains a number of useful tools. By default these are built at the same time as the daemons.
 
 [Back to the table of contents](userguide.md#contents)
 
@@ -473,8 +473,8 @@ For example: ````./awa-server-list-clients --verbose ````
     
 Returns:
 ````
-1 imagination1
-2 chris
+1 ClientA
+2 ClientB
 ````
 
 The option *--objects/-o* can be specified to retrieve and display the objects and object instances currently registered with the LWM2M server in the format ````<ObjectID>```` or ````<ObjectID/InstanceID>````. 
@@ -482,7 +482,7 @@ The option *--objects/-o* can be specified to retrieve and display the objects a
 For example: ````./awa-server-list-clients --objects ````  
 Returns
 ````
-1 imagination1 <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
+1 ClientA <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
 ````
 
 [Back to the table of contents](userguide.md#contents)
@@ -634,10 +634,11 @@ Full Awa API reference material is available [here](http://flowm2m.github.io/Awa
 
 ### Connecting to third party servers.
 
-A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](doc/3rdparty.md).
+A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](3rdparty.md).
 
 [Back to the table of contents](userguide.md#contents)
 
 
 ----
+
 ----
