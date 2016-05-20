@@ -64,7 +64,7 @@ To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to r
 
 ```make
 all:
-	$(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
+	$(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
 ```
 
 Now is a good time to define our objects and resources:
@@ -138,7 +138,7 @@ Note that in this case *libawa.so* isn't in the library path. We'll tell the sys
  it by setting the *LD_LIBRARY_PATH* variable.
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 ````
 
 The application will then exit, leaving the new object/resource registered within the client daemon.
@@ -262,7 +262,7 @@ And restart the client daemon:
 Then restart the client application and set the temperature...
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 enter temperature or any other key to exit:10.0
 set temperature /1000/0/104 to 10.000000
 enter temperature or any other key to exit:q
@@ -328,8 +328,8 @@ Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
 all:
-        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
+        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
+        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
 ```
 
 Build the new application:
@@ -350,13 +350,13 @@ Restart the client/server daemon:
 And start the server application:
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./server-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./server-tutorial
 ```
 
 Now start client client application:
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 ```
 
 Use the server tool *awa-server-list-clients* to check that the client is registered with the server (look for object /1000/0 ):
@@ -409,7 +409,7 @@ Copy the following code into static-client-tutorial/*Makefile*:
 
 ```make
 all:
-	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa_static
+	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa_static
 ```
 
 Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
@@ -458,7 +458,7 @@ $ ./build/install/bin/awa_serverd -d
 Run your new application:
 
 ```
-$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./static-client-tutorial
+$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./static-client-tutorial
 ```
 
 Query the server for connected clients:
