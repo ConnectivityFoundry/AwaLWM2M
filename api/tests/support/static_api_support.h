@@ -174,6 +174,7 @@ public:
 AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed);
 void * do_write_operation(void * attr);
 void * do_read_operation(void * attr);
+void * do_execute_operation(void * attr);
 
 } // namespace Awa
 

@@ -74,4 +74,12 @@ void * do_read_operation(void * attr)
     return 0;
 }
 
+void * do_execute_operation(void * attr)
+{
+    AwaServerExecuteOperation * executeOperation = (AwaServerExecuteOperation *)attr;
+    AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout);
+    return 0;
+}
+
+
 } // namespace Awa

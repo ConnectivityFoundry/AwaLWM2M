@@ -6,6 +6,7 @@ set (test_api_runner_SOURCES
   support/support.cc
   support/process.cc
   support/daemon.cc
+  support/static_api_support.cc
 
   common/test_log.cc
   common/test_error.cc

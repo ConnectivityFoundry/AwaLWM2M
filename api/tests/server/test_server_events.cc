@@ -1350,6 +1350,58 @@ TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
     EXPECT_EQ(1, cbHandler.count);
 }
 
+TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
+{
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    ASSERT_TRUE(condition.Wait());
+
+    AwaServerListClientsOperation_Free(&operation);
+
+    struct CallbackHandler1 : public EventWaitCondition
+    {
+        int count;
+
+        CallbackHandler1(AwaServerSession * ServerSession, AwaStaticClient * StaticClient, std::string ClientEndpointName, int callbackCountMax = 2) :
+            EventWaitCondition(ServerSession, StaticClient, ClientEndpointName, callbackCountMax), count(0) {}
+
+        void callbackHandler(const void * event)
+        {
+            count ++;
+            AwaServerClientDeregisterEvent * deregisterEvent = (AwaServerClientDeregisterEvent *)event;
+            EXPECT_TRUE(deregisterEvent != NULL);
+
+            AwaClientIterator * clientIterator = AwaServerClientDeregisterEvent_NewClientIterator(deregisterEvent);
+            EXPECT_TRUE(clientIterator != NULL);
+
+            EXPECT_TRUE(AwaClientIterator_Next(clientIterator));
+
+            EXPECT_STREQ(global::clientEndpointName, AwaClientIterator_GetClientID(clientIterator));
+
+            AwaClientIterator_Free(&clientIterator);
+        }
+    };
+    CallbackHandler1 cbHandler(session_, client_, global::clientEndpointName);
+
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetClientUpdateEventCallback(session_, (void (*)(const _AwaServerClientUpdateEvent*, void*))ClientEventCallback, &cbHandler));
+
+    AwaServerExecuteOperation * updateExecute = AwaServerExecuteOperation_New(session_);
+    EXPECT_TRUE(updateExecute != NULL);
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(updateExecute, global::clientEndpointName, "/1/0/8", NULL));
+
+    pthread_t executeThread;
+    pthread_create(&executeThread, NULL, do_execute_operation, (void *)updateExecute);
+    EXPECT_TRUE(cbHandler.Wait());
+    //Expecting two registration updates
+    EXPECT_EQ(2, cbHandler.count);
+    pthread_join(executeThread, NULL);
+
+    AwaServerExecuteOperation_Free(&updateExecute);
+}
+
 TEST_F(TestServerEventsWithConnectedSession, ClientDeregisterEvent)
 {
 
