@@ -110,6 +110,18 @@ protected:
       TestClientBase::SetUp();
       if (global::spawnClientDaemon)
       {
+          int count = 0;
+          while (IsUDPPortInUse(global::clientIpcPort) != false)
+          {
+              global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
+              if (++count > 2 * defaults::clientIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          }
+
+          daemon_.SetIpcPort(global::clientIpcPort);
           ASSERT_TRUE(daemon_.Start(testDescription_));
       }
       else
@@ -122,16 +134,7 @@ protected:
       if (global::spawnClientDaemon)
       {
           // round-robin the IPC port to avoid port reuse issues during testing
-          int count = 0;
-          do
-          {
-              global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
-              if (++count > 2 * defaults::serverIpcPortRange)
-              {
-                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
-                  exit(-1);
-              }
-          } while (IsUDPPortInUse(global::clientIpcPort) != false);
+          global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
       }
       daemon_.Stop();
       TestClientBase::TearDown();
@@ -206,6 +209,18 @@ protected:
       TestServerBase::SetUp();
       if (global::spawnServerDaemon)
       {
+          int count = 0;
+          while (IsUDPPortInUse(global::serverIpcPort) != false)
+          {
+              global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
+              if (++count > 2 * defaults::serverIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          }
+
+          daemon_.SetIpcPort(global::serverIpcPort);
           ASSERT_TRUE(daemon_.Start(testDescription_));
       }
       else
@@ -218,16 +233,7 @@ protected:
       if (global::spawnServerDaemon)
       {
           // round-robin the IPC port to avoid port reuse issues during testing
-          int count = 0;
-          do
-          {
-              global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
-              if (++count > 2 * defaults::serverIpcPortRange)
-              {
-                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
-                  exit(-1);
-              }
-          } while (IsUDPPortInUse(global::serverIpcPort) != false);
+          global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
       }
       daemon_.Stop();
       TestServerBase::TearDown();
