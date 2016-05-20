@@ -294,7 +294,7 @@ public:
         log_ << "Spawned Awa Bootstrap Server: "
              << "pid " << pid_
              << ", CoAP port " << coapPort_
-             << ", Config file " << configFile_
+             << ", config file " << configFile_
              << ", logging to " << logFile_
              << ", " << logMessage << std::endl;
         return pid_ >= 0;

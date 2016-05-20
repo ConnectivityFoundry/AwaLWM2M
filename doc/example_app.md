@@ -498,7 +498,7 @@ At this point, you should be able to build this application and run it with an A
 
 The next step is to determine the name (ID) of the newly registered client and use this to print out the registered entities, which are the registered objects and object instances managed by the client. An event may contain information for more than one client, so multiple client names (IDs) may be available in a single event. Client names are obtained from an `AwaClientIterator`. As used elsewhere in the API, an `AwaClientIterator` can be passed to `AwaClientIterator_Next()` to obtain the next entry, and each client name is then returned by `AwaClientIterator_GetClientID()`.
 
-Once we have a client name, we can use this to obtain the list of registered LWM2M entities (objects and object instances) for this client. This is done by using an `AwaRegisteredEntityIterator`, which behaves in a similar way to `AwaClientIterator`. The entity *paths* are returned by `AwaRegisteredEntityIterator_GetPath()`. These are strings in the form of `/OOO` or `/OOO/III` where `OOO` is the Object ID and `III` is the Object Instance ID.
+Once we have a client name, we can use this to obtain the list of registered LWM2M entities (objects and object instances) for this client. This is done by using an `AwaRegisteredEntityIterator`, which behaves in a similar way to `AwaClientIterator`. The entity *paths* are returned by `AwaRegisteredEntityIterator_GetPath()`. These are strings in the form of `/3` or `/3/0` where `3` is the Object ID and `0` is the Object Instance ID.
 
 ```c
 ...
