@@ -1350,7 +1350,7 @@ TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
     EXPECT_EQ(1, cbHandler.count);
 }
 
-TEST_F(TestServerEventsWithConnectedSession, ClientDeregisterEvent)
+TEST_F(TestServerEventsWithConnectedSession, DISABLED_ClientDeregisterEvent)
 {
 
     struct CallbackHandler1 : public EventWaitCondition
