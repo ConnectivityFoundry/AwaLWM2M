@@ -525,9 +525,7 @@ static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, v
 ...
 ```
 
-The application should now print the name of the client and the list of registered entity paths.
-
-This example can be improved by cleanly removing a client's observations on receipt of a Client Deregister event.
+The application should now print the name of each registering client and the list of registered entity paths.
 
 ## Example: Create a standalone LWM2M client on a gateway device using the Awa Static API.
 
