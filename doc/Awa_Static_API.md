@@ -198,6 +198,14 @@ The parameters that provide information about the location of each value in memo
 * **dataPointers** - an array (of size N) of pointers to the values  
 * **dataElementSize** - the size of an individual value in bytes  
 
+##### Opaque resource types in Pointer mode
+
+Opaque resources that are defined in the Pointer mode will always have the length given in the parameter ```dataElementSize``` when operated upon by LWM2M. 
+
+For a LWM2M write operation that uses a resource instance length less than ```dataElementSize``` the remaining memory will be zeroed for that resource instance. For a LWM2M read operation the length of the resource instance returned will be ```dataElementSize```.
+
+If opaque resources with variable lengths are required then the Handler mode must be used.
+
 #### Handler mode
 
 Handler mode gives a low level control of both object and resource instances. A generic handler is used for handling LWM2M object and resource operations. Since handler functionality is determined parametrically some handler parameters may or may not be required, depending on the operation.
@@ -225,11 +233,11 @@ The parameters required for handling operations on object and resource instances
  
 | operation | objectID | objectInstanceID | resourceID | resourceInstanceID | dataPointer | dataSize | changed | returns |
 |-----|-----|-----|-----|-----|-----|-----|-----|-----|
-| *AwaOperation_CreateResource* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Object Instance ID of object |	Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | not used  (AWA_INVALID_ID) | not used (NULL) | not used (NULL) | not used (NULL) | *AwaResult_SuccessCreated* when a resource is created successfully TODO: error codes |
-| *AwaOperation_DeleteResource* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Object  Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | not used  (AWA_INVALID_ID) | not used (NULL) | not used (NULL) | not used (NULL) | *AwaResult_SuccessDeleted* when resource is deleted successfully TODO: error codes |
-| *AwaOperation_Read* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Object Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Resource Instance ID to Read a value from | Set to a pointer to the resource instance value | Set to the size of the resource Instance value | not used (NULL) | *AwaResult_SuccessContent*  when successful.  dataPointer and dataSize represent the resource instance.  TODO: error codes |
-| *AwaOperation_Write* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Object Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* |	Resource Instance ID to Write a value to | Has a pointer to the resource value that must be copied | Has the size of the resource value to be copied | *True* if the resource instance value has changed, *False* if the resource instance value has not changed | *AwaResult_SuccessChanged* when successful. Resource instance value set to *dataPointer* value. TODO: error codes |  
-| *AwaOperation_Execute* | Object ID from definition with *AwaStaticClient_DefineResourceWithHandler* |	Object Instance ID of object |	Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Resource Instance ID to Execute | Has a pointer to the execute arguments | Has the size of the execute arguments | not used (NULL) | AwaResult_Success when successful.  TODO: error codes |
+| *AwaOperation_CreateResource* | Object ID from definition with *AwaStaticClient_DefineResource* | Object Instance ID of object |	Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | not used  (AWA_INVALID_ID) | not used (NULL) | not used (NULL) | not used (NULL) | *AwaResult_SuccessCreated* when a resource is created successfully TODO: error codes |
+| *AwaOperation_DeleteResource* | Object ID from definition with *AwaStaticClient_DefineResource* | Object  Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | not used  (AWA_INVALID_ID) | not used (NULL) | not used (NULL) | not used (NULL) | *AwaResult_SuccessDeleted* when resource is deleted successfully TODO: error codes |
+| *AwaOperation_Read* | Object ID from definition with *AwaStaticClient_DefineResource* | Object Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Resource Instance ID to Read a value from | Set to a pointer to the resource instance value | Set to the size of the resource Instance value | not used (NULL) | *AwaResult_SuccessContent*  when successful.  dataPointer and dataSize represent the resource instance.  TODO: error codes |
+| *AwaOperation_Write* | Object ID from definition with *AwaStaticClient_DefineResource* | Object Instance ID of object | Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* |	Resource Instance ID to Write a value to | Has a pointer to the resource value that must be copied | Has the size of the resource value to be copied | *True* if the resource instance value has changed, *False* if the resource instance value has not changed | *AwaResult_SuccessChanged* when successful. Resource instance value set to *dataPointer* value. TODO: error codes |  
+| *AwaOperation_Execute* | Object ID from definition with *AwaStaticClient_DefineResource* |	Object Instance ID of object |	Resource ID from definition with *AwaStaticClient_DefineResourceWithHandler* | Resource Instance ID to Execute | Has a pointer to the execute arguments | Has the size of the execute arguments | not used (NULL) | AwaResult_Success when successful.  TODO: error codes |
 
 
 ### Further information  
