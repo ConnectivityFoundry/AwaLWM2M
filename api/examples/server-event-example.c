@@ -59,12 +59,13 @@ static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, v
     while (AwaClientIterator_Next(clientIterator))
     {
         const char * clientID =  AwaClientIterator_GetClientID(clientIterator);
-        printf("Event %d: Client %s registered:\n", *eventCount, clientID);
+        printf("Event %d: Client %s registered:\n  ", *eventCount, clientID);
         AwaRegisteredEntityIterator * entityIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
         while (AwaRegisteredEntityIterator_Next(entityIterator))
         {
-            printf("  %s\n", AwaRegisteredEntityIterator_GetPath(entityIterator));
+            printf(" %s", AwaRegisteredEntityIterator_GetPath(entityIterator));
         }
+        printf("\n");
         AwaRegisteredEntityIterator_Free(&entityIterator);
     }
     AwaClientIterator_Free(&clientIterator);
@@ -107,12 +108,13 @@ static void clientUpdateCallback(const AwaServerClientUpdateEvent * event, void 
     while (AwaClientIterator_Next(clientIterator))
     {
         const char * clientID =  AwaClientIterator_GetClientID(clientIterator);
-        printf("Event %d: Client %s updated:\n", *eventCount, clientID);
+        printf("Event %d: Client %s updated:\n  ", *eventCount, clientID);
         AwaRegisteredEntityIterator * entityIterator = AwaServerClientUpdateEvent_NewRegisteredEntityIterator(event, clientID);
         while (AwaRegisteredEntityIterator_Next(entityIterator))
         {
-            printf("  %s\n", AwaRegisteredEntityIterator_GetPath(entityIterator));
+            printf(" %s", AwaRegisteredEntityIterator_GetPath(entityIterator));
         }
+        printf("\n");
         AwaRegisteredEntityIterator_Free(&entityIterator);
     }
     AwaClientIterator_Free(&clientIterator);
@@ -132,8 +134,6 @@ static void stop(int ignore)
 int main(void)
 {
     signal(SIGINT, stop);
-
-    AwaLog_SetLevel(3);
 
     /* Create and initialise server session */
     AwaServerSession * session = AwaServerSession_New();
