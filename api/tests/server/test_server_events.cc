@@ -1350,8 +1350,16 @@ TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
     EXPECT_EQ(1, cbHandler.count);
 }
 
-TEST_F(TestServerEventsWithConnectedSession, DISABLED_ClientDeregisterEvent)
+TEST_F(TestServerEventsWithConnectedSession, ClientDeregisterEvent)
 {
+
+    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
+    EXPECT_TRUE(NULL != operation);
+
+    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    ASSERT_TRUE(condition.Wait());
+
+    AwaServerListClientsOperation_Free(&operation);
 
     struct CallbackHandler1 : public EventWaitCondition
     {
@@ -1382,6 +1390,7 @@ TEST_F(TestServerEventsWithConnectedSession, DISABLED_ClientDeregisterEvent)
 
     // stop the static client, to cause a deregister
     cbHandler.Deregister();
+    client_ = NULL;
 
     EXPECT_TRUE(cbHandler.Wait());
     EXPECT_EQ(1, cbHandler.count);
