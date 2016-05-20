@@ -398,7 +398,14 @@ AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * sess
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        result = ServerEventsCallbackInfo_SetClientRegisterCallback(session->ServerEventsCallbackInfo, callback, context);
+        if (ServerEventsCallbackInfo_SetClientRegisterCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
     }
     else
     {
@@ -412,7 +419,14 @@ AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * se
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        result = ServerEventsCallbackInfo_SetClientDeregisterCallback(session->ServerEventsCallbackInfo, callback, context);
+        if (ServerEventsCallbackInfo_SetClientDeregisterCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
     }
     else
     {
@@ -426,7 +440,14 @@ AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * sessio
     AwaError result = AwaError_Unspecified;
     if (session != NULL)
     {
-        result = ServerEventsCallbackInfo_SetClientUpdateCallback(session->ServerEventsCallbackInfo, callback, context);
+        if (ServerEventsCallbackInfo_SetClientUpdateCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
     }
     else
     {

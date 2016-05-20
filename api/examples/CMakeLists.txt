@@ -22,7 +22,8 @@ set (Examples
   server-defineset-example
   server-execute-example
   server-execute-arguments-example
-  
+  server-event-example
+
   # TODO: set-array example uses single values and not an array. Add an example for that too and 
   # rename this set-array to set-array-individual-instances-example
   

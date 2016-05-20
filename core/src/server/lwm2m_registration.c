@@ -299,7 +299,7 @@ static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, 
             {
                 if (eventRecord->Callback != NULL)
                 {
-                    Lwm2m_Debug("Calling registration event callback with context %p\n", eventRecord->Context)
+                    Lwm2m_Debug("Calling registration event callback with type %d, context %p\n", eventType, eventRecord->Context)
                     eventRecord->Callback(eventType, eventRecord->Context, parameter);
                 }
             }

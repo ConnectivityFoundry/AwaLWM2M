@@ -107,12 +107,78 @@ static AwaError HandleClientRegisterNotification(AwaServerSession * session, IPC
 static AwaError HandleClientDeregisterNotification(AwaServerSession * session, IPCMessage * notification)
 {
     AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        ServerEventsCallbackInfo * info = ServerSession_GetServerEventsCallbackInfo(session);
+        if (info != NULL)
+        {
+            ClientDeregisterEvent * event = ClientDeregisterEvent_New();
+            if (event != NULL)
+            {
+                if (ClientDeregisterEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientDeregisterCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
+                ClientDeregisterEvent_Free(&event);
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_OutOfMemory, "Cannot create event");
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "info is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
     return result;
 }
 
 static AwaError HandleClientUpdateNotification(AwaServerSession * session, IPCMessage * notification)
 {
     AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        ServerEventsCallbackInfo * info = ServerSession_GetServerEventsCallbackInfo(session);
+        if (info != NULL)
+        {
+            ClientUpdateEvent * event = ClientUpdateEvent_New();
+            if (event != NULL)
+            {
+                if (ClientUpdateEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientUpdateCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
+                ClientUpdateEvent_Free(&event);
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_OutOfMemory, "Cannot create event");
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "info is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
     return result;
 }
 

@@ -78,6 +78,8 @@ extern "C" {
 *        Create, process and free a basic request to execute a single resource.
 * @example server-execute-arguments-example.c
 *        Create, process and free a basic request to execute a single resource.
+* @example server-event-example.c
+*        Respond to events such as Client Register, Client Deregister and Client Update.
 */
 
 
@@ -120,8 +122,8 @@ typedef struct _AwaServerObserveOperation AwaServerObserveOperation;
 typedef struct _AwaServerObservation AwaServerObservation;
 typedef struct _AwaServerObserveResponse AwaServerObserveResponse;
 typedef struct _AwaServerClientRegisterEvent AwaServerClientRegisterEvent;
-typedef struct _AwaServerClientRegisterEvent AwaServerClientUpdateEvent;
-typedef struct _AwaServerClientRegisterEvent AwaServerClientDeregisterEvent;
+typedef struct _AwaServerClientUpdateEvent AwaServerClientUpdateEvent;
+typedef struct _AwaServerClientDeregisterEvent AwaServerClientDeregisterEvent;
 /// @endcond
 
 
@@ -1680,45 +1682,80 @@ const char * AwaChangeSet_GetClientID(const AwaChangeSet * changeSet);
  *************************************************************************************************/
 
 /**
- * @brief Sets a callback function to be called whenever a client registers with the server.
- *        Any existing callback function is overwritten.
+ * @brief Sets a callback function to be called whenever a Client registers with the server.
+ *        Any existing callback function is replaced.
+ *
+ *        The callback of type ::AwaServerClientRegisterEventCallback will be passed an event
+ *        object and the context pointer specified here.
  *
  * @param[in] session A pointer to a valid session.
- * @param[in] callback Pointer to function to call when the entity specified by path is created, changed or deleted.
- * @param[in] context A pointer to a user specified object for use in the change callback.
+ * @param[in] callback Function pointer to call when a client registers with the server. Pass NULL to clear.
+ * @param[in] context A pointer to a user specified object for use in the callback.
  * @return AwaError_Success on success.
  * @return AwaError_SessionInvalid if the specified session is invalid.
  */
 AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * session, AwaServerClientRegisterEventCallback callback, void * context);
 
 /**
- * @todo
+ * @brief Sets a callback function to be called whenever a Client updates its registration with the server.
+ *        Any existing callback function is replaced.
+ *
+ *        The callback of type ::AwaServerClientUpdateEventCallback will be passed an event
+ *        object and the context pointer specified here.
+ *
+ * @param[in] session A pointer to a valid session.
+ * @param[in] callback Function pointer to call when a client updates its registration with the server. Pass NULL to clear.
+ * @param[in] context A pointer to a user specified object for use in the callback.
+ * @return AwaError_Success on success.
+ * @return AwaError_SessionInvalid if the specified session is invalid.
  */
 AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * session, AwaServerClientUpdateEventCallback callback, void * context);
 
 /**
- * @todo
+ * @brief Sets a callback function to be called whenever a Client deregisters with the server.
+ *        Any existing callback function is replaced.
+ *
+ *        The callback of type ::AwaServerClientDeregisterEventCallback will be passed an event
+ *        object and the context pointer specified here.
+ *
+ * @param[in] session A pointer to a valid session.
+ * @param[in] callback Function pointer to call when a client deregisters with the server. Pass NULL to clear.
+ * @param[in] context A pointer to a user specified object for use in the callback.
+ * @return AwaError_Success on success.
+ * @return AwaError_SessionInvalid if the specified session is invalid.
  */
 AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * session, AwaServerClientDeregisterEventCallback callback, void * context);
 
 /**
  * @brief Create a new Client Iterator from a Client Register Event, used to iterate through
- *        the list of client endpoint names held by the event.
+ *        the list of client endpoint names (IDs) held by the event.
  *        The resulting iterator is owned by the caller and should eventually be freed with ::AwaClientIterator_Free.
  *        This function can only be successful within a Client Register Event callback.
- * @param[in] event A pointer to a Client Register Event to iterate through
+ * @param[in] event A pointer to a Client Register Event to iterate through.
  * @return A pointer to a new AwaClientIterator instance on success.
  * @return NULL on failure.
  */
 AwaClientIterator * AwaServerClientRegisterEvent_NewClientIterator(const AwaServerClientRegisterEvent * event);
 
 /**
- * @todo
+ * @brief Create a new Client Iterator from a Client Update Event, used to iterate through
+ *        the list of client endpoint names (IDs) held by the event.
+ *        The resulting iterator is owned by the caller and should eventually be freed with ::AwaClientIterator_Free.
+ *        This function can only be successful within a Client Update Event callback.
+ * @param[in] event A pointer to a Client Update Event to iterate through.
+ * @return A pointer to a new AwaClientIterator instance on success.
+ * @return NULL on failure.
  */
 AwaClientIterator * AwaServerClientUpdateEvent_NewClientIterator(const AwaServerClientUpdateEvent * event);
 
 /**
- * @todo
+ * @brief Create a new Client Iterator from a Client Deregister Event, used to iterate through
+ *        the list of client endpoint names (IDs) held by the event.
+ *        The resulting iterator is owned by the caller and should eventually be freed with ::AwaClientIterator_Free.
+ *        This function can only be successful within a Client Deregister Event callback.
+ * @param[in] event A pointer to a Client Register Event to iterate through.
+ * @return A pointer to a new AwaClientIterator instance on success.
+ * @return NULL on failure.
  */
 AwaClientIterator * AwaServerClientDeregisterEvent_NewClientIterator(const AwaServerClientDeregisterEvent * event);
 
@@ -1726,21 +1763,23 @@ AwaClientIterator * AwaServerClientDeregisterEvent_NewClientIterator(const AwaSe
  * @brief Create a new Registered Entity iterator for a Client Register Event, used to iterate through the list of
  *        objects and object instances that exist within the client the event relates to.
  *        The resulting iterator is owned by the caller and should eventually be freed with ::AwaRegisteredEntityIterator_Free.
- *        This function can only be successful within the context of an event callback.
+ *        This function can only be successful within a Client Register Event callback.
  * @param[in] event A pointer to the Client Register Event to search.
- * @param[in] clientID The endpoint name of the connected client to search.
- * @return A pointer to a new AwaRegisteredEntityIterator instance on success
+ * @param[in] clientID The endpoint name of the registered client to search.
+ * @return A pointer to a new AwaRegisteredEntityIterator instance on success.
  * @return NULL on failure.
  */
 AwaRegisteredEntityIterator * AwaServerClientRegisterEvent_NewRegisteredEntityIterator(const AwaServerClientRegisterEvent * event, const char * clientID);
 
 /**
- * @todo
- */
-AwaRegisteredEntityIterator * AwaServerClientUpdateEvent_NewRegisteredEntityIterator(const AwaServerClientUpdateEvent * event, const char * clientID);
-
-/**
- * @todo
+ * @brief Create a new Registered Entity iterator for a Client Update Event, used to iterate through the list of
+ *        objects and object instances that exist within the client the event relates to.
+ *        The resulting iterator is owned by the caller and should eventually be freed with ::AwaRegisteredEntityIterator_Free.
+ *        This function can only be successful within a Client Update Event callback.
+ * @param[in] event A pointer to the Client Update Event to search.
+ * @param[in] clientID The endpoint name of the registered client to search.
+ * @return A pointer to a new AwaRegisteredEntityIterator instance on success.
+ * @return NULL on failure.
  */
 AwaRegisteredEntityIterator * AwaServerClientUpdateEvent_NewRegisteredEntityIterator(const AwaServerClientUpdateEvent * event, const char * clientID);
 

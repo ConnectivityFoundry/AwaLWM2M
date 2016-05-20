@@ -42,9 +42,11 @@ struct _ServerEventsCallbackInfo
 
 
 
-// This struct is used for API type safety and is never instantiated.
-// DO NOT USE THIS STRUCTURE!
+// These structs are used for API type safety and are never instantiated.
+// DO NOT USE THESE STRUCTURES!
 struct _AwaServerClientRegisterEvent {};
+struct _AwaServerClientDeregisterEvent {};
+struct _AwaServerClientUpdateEvent {};
 
 // translate between API types and internal types with casts:
 AwaClientIterator * AwaServerClientRegisterEvent_NewClientIterator(const AwaServerClientRegisterEvent * event)
@@ -57,11 +59,26 @@ AwaRegisteredEntityIterator * AwaServerClientRegisterEvent_NewRegisteredEntityIt
     return (AwaRegisteredEntityIterator *)ClientRegisterEvent_NewRegisteredEntityIterator((ClientRegisterEvent *)event, clientID);
 }
 
+AwaClientIterator * AwaServerClientDeregisterEvent_NewClientIterator(const AwaServerClientDeregisterEvent * event)
+{
+    return (AwaClientIterator *)ClientDeregisterEvent_NewClientIterator((ClientDeregisterEvent *)event);
+}
+
+AwaClientIterator * AwaServerClientUpdateEvent_NewClientIterator(const AwaServerClientUpdateEvent * event)
+{
+    return (AwaClientIterator *)ClientUpdateEvent_NewClientIterator((ClientUpdateEvent *)event);
+}
+
+AwaRegisteredEntityIterator * AwaServerClientUpdateEvent_NewRegisteredEntityIterator(const AwaServerClientUpdateEvent * event, const char * clientID)
+{
+    return (AwaRegisteredEntityIterator *)ClientUpdateEvent_NewRegisteredEntityIterator((ClientUpdateEvent *)event, clientID);
+}
 
 
-// ClientRegisterEvent implementation:
 
-struct _ClientRegisterEvent
+// Generic ClientEvent implementation:
+
+typedef struct
 {
     IPCMessage * Notification;
 
@@ -69,15 +86,16 @@ struct _ClientRegisterEvent
     const AwaServerSession * ServerSession;
     ServerOperation * ServerOperation;
     ServerResponse * ServerResponse;
-};
 
-ClientRegisterEvent * ClientRegisterEvent_New(void)
+} ClientEvent;
+
+static ClientEvent * ClientEvent_New(void)
 {
-    ClientRegisterEvent * event = Awa_MemAlloc(sizeof(*event));
+    ClientEvent * event = Awa_MemAlloc(sizeof(*event));
     if (event != NULL)
     {
         memset(event, 0, sizeof(*event));
-        LogNew("ClientRegisterEvent", event);
+        LogNew("ClientEvent", event);
     }
     else
     {
@@ -86,11 +104,11 @@ ClientRegisterEvent * ClientRegisterEvent_New(void)
     return event;
 }
 
-void ClientRegisterEvent_Free(ClientRegisterEvent ** event)
+static void ClientEvent_Free(ClientEvent ** event)
 {
     if ((event != NULL) && (*event != NULL))
     {
-        LogFree("ClientRegisterEvent", *event);
+        LogFree("ClientEvent", *event);
         ServerOperation_Free(&(*event)->ServerOperation);
         ServerResponse_Free(&(*event)->ServerResponse);
         Awa_MemSafeFree(*event);
@@ -98,7 +116,7 @@ void ClientRegisterEvent_Free(ClientRegisterEvent ** event)
     }
 }
 
-int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage * notification, const AwaServerSession * session)
+static int ClientEvent_AddNotification(ClientEvent * event, IPCMessage * notification, const char * expectedSubType, const AwaServerSession * session)
 {
     int result = -1;
     if (event != NULL)
@@ -114,15 +132,22 @@ int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage 
                 {
                     if (strcmp(IPC_MESSAGE_TYPE_NOTIFICATION, type) == 0)
                     {
-                        if (strcmp(IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, subType) == 0)
+                        if (expectedSubType != NULL)
                         {
-                            event->Notification = notification;
-                            event->ServerSession = session;
-                            result = 0;
+                            if (strcmp(expectedSubType, subType) == 0)
+                            {
+                                event->Notification = notification;
+                                event->ServerSession = session;
+                                result = 0;
+                            }
+                            else
+                            {
+                                LogError("message sub-type '%s' is unexpected", subType);
+                            }
                         }
                         else
                         {
-                            LogError("message sub0type '%s' is unexpected", subType);
+                            LogError("expectedSubType is NULL");
                         }
                     }
                     else
@@ -152,7 +177,7 @@ int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage 
     return result;
 }
 
-static const ServerResponse * GetServerResponse(ClientRegisterEvent * event)
+static const ServerResponse * GetServerResponse(ClientEvent * event)
 {
     if (event != NULL)
     {
@@ -196,7 +221,7 @@ static const ServerResponse * GetServerResponse(ClientRegisterEvent * event)
     return event->ServerResponse;
 }
 
-ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event)
+static ClientIterator * ClientEvent_NewClientIterator(ClientEvent * event)
 {
     ClientIterator * iterator = NULL;
     if (event != NULL)
@@ -210,7 +235,7 @@ ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * eve
     return iterator;
 }
 
-RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(ClientRegisterEvent * event, const char * clientID)
+static RegisteredEntityIterator * ClientEvent_NewRegisteredEntityIterator(ClientEvent * event, const char * clientID)
 {
     RegisteredEntityIterator * iterator = NULL;
     if (event != NULL)
@@ -231,6 +256,234 @@ RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(Clien
         {
             LogError("clientID is NULL");
         }
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+
+
+
+// ClientRegisterEvent implementation:
+
+struct _ClientRegisterEvent
+{
+    ClientEvent * ClientEvent;
+};
+
+ClientRegisterEvent * ClientRegisterEvent_New(void)
+{
+    ClientRegisterEvent * event = Awa_MemAlloc(sizeof(*event));
+    if (event != NULL)
+    {
+        memset(event, 0, sizeof(*event));
+        event->ClientEvent = ClientEvent_New();
+        if (event->ClientEvent != NULL)
+        {
+            LogNew("ClientRegisterEvent", event);
+        }
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_OutOfMemory);
+    }
+    return event;
+}
+
+void ClientRegisterEvent_Free(ClientRegisterEvent ** event)
+{
+    if ((event != NULL) && (*event != NULL))
+    {
+        LogFree("ClientRegisterEvent", *event);
+        ClientEvent_Free(&(*event)->ClientEvent);
+        Awa_MemSafeFree(*event);
+        *event = NULL;
+    }
+}
+
+int ClientRegisterEvent_AddNotification(ClientRegisterEvent * event, IPCMessage * notification, const AwaServerSession * session)
+{
+    int result = -1;
+    if (event != NULL)
+    {
+        result = ClientEvent_AddNotification(event->ClientEvent, notification, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, session);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return result;
+}
+
+ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * event)
+{
+    ClientIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ClientEvent_NewClientIterator(event->ClientEvent);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(ClientRegisterEvent * event, const char * clientID)
+{
+    RegisteredEntityIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ClientEvent_NewRegisteredEntityIterator(event->ClientEvent, clientID);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+
+// ClientDeregisterEvent implementation:
+
+struct _ClientDeregisterEvent
+{
+    ClientEvent * ClientEvent;
+};
+
+ClientDeregisterEvent * ClientDeregisterEvent_New(void)
+{
+    ClientDeregisterEvent * event = Awa_MemAlloc(sizeof(*event));
+    if (event != NULL)
+    {
+        memset(event, 0, sizeof(*event));
+        event->ClientEvent = ClientEvent_New();
+        if (event->ClientEvent != NULL)
+        {
+            LogNew("ClientDeregisterEvent", event);
+        }
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_OutOfMemory);
+    }
+    return event;
+}
+
+void ClientDeregisterEvent_Free(ClientDeregisterEvent ** event)
+{
+    if ((event != NULL) && (*event != NULL))
+    {
+        LogFree("ClientDeregisterEvent", *event);
+        ClientEvent_Free(&(*event)->ClientEvent);
+        Awa_MemSafeFree(*event);
+        *event = NULL;
+    }
+}
+
+int ClientDeregisterEvent_AddNotification(ClientDeregisterEvent * event, IPCMessage * notification, const AwaServerSession * session)
+{
+    int result = -1;
+    if (event != NULL)
+    {
+        result = ClientEvent_AddNotification(event->ClientEvent, notification, IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER, session);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return result;
+}
+
+ClientIterator * ClientDeregisterEvent_NewClientIterator(ClientDeregisterEvent * event)
+{
+    ClientIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ClientEvent_NewClientIterator(event->ClientEvent);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+
+// ClientDeregisterEvent implementation:
+
+struct _ClientUpdateEvent
+{
+    ClientEvent * ClientEvent;
+};
+
+ClientUpdateEvent * ClientUpdateEvent_New(void)
+{
+    ClientUpdateEvent * event = Awa_MemAlloc(sizeof(*event));
+    if (event != NULL)
+    {
+        memset(event, 0, sizeof(*event));
+        event->ClientEvent = ClientEvent_New();
+        if (event->ClientEvent != NULL)
+        {
+            LogNew("ClientUpdateEvent", event);
+        }
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_OutOfMemory);
+    }
+    return event;
+}
+
+void ClientUpdateEvent_Free(ClientUpdateEvent ** event)
+{
+    if ((event != NULL) && (*event != NULL))
+    {
+        LogFree("ClientUpdateEvent", *event);
+        ClientEvent_Free(&(*event)->ClientEvent);
+        Awa_MemSafeFree(*event);
+        *event = NULL;
+    }
+}
+
+int ClientUpdateEvent_AddNotification(ClientUpdateEvent * event, IPCMessage * notification, const AwaServerSession * session)
+{
+    int result = -1;
+    if (event != NULL)
+    {
+        result = ClientEvent_AddNotification(event->ClientEvent, notification, IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE, session);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return result;
+}
+
+ClientIterator * ClientUpdateEvent_NewClientIterator(ClientUpdateEvent * event)
+{
+    ClientIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ClientEvent_NewClientIterator(event->ClientEvent);
+    }
+    else
+    {
+        LogError("event is NULL");
+    }
+    return iterator;
+}
+
+RegisteredEntityIterator * ClientUpdateEvent_NewRegisteredEntityIterator(ClientUpdateEvent * event, const char * clientID)
+{
+    RegisteredEntityIterator * iterator = NULL;
+    if (event != NULL)
+    {
+        iterator = ClientEvent_NewRegisteredEntityIterator(event->ClientEvent, clientID);
     }
     else
     {
@@ -348,3 +601,64 @@ int ServerEventsCallbackInfo_InvokeClientRegisterCallback(ServerEventsCallbackIn
     return result;
 }
 
+int ServerEventsCallbackInfo_InvokeClientDeregisterCallback(ServerEventsCallbackInfo * info, const ClientDeregisterEvent * event)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        if (event != NULL)
+        {
+            if (info->ClientDeregisterEventCallback != NULL)
+            {
+                info->ClientDeregisterEventCallback((AwaServerClientDeregisterEvent *)event, info->ClientDeregisterEventContext);
+            }
+            else
+            {
+                LogDebug("No ClientDeregisterCallback set");
+            }
+            result = 0;
+        }
+        else
+        {
+            LogError("event is NULL");
+            result = -1;
+        }
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
+}
+
+int ServerEventsCallbackInfo_InvokeClientUpdateCallback(ServerEventsCallbackInfo * info, const ClientUpdateEvent * event)
+{
+    int result = -1;
+    if (info != NULL)
+    {
+        if (event != NULL)
+        {
+            if (info->ClientUpdateEventCallback != NULL)
+            {
+                info->ClientUpdateEventCallback((AwaServerClientUpdateEvent *)event, info->ClientUpdateEventContext);
+            }
+            else
+            {
+                LogDebug("No ClientUpdateCallback set");
+            }
+            result = 0;
+        }
+        else
+        {
+            LogError("event is NULL");
+            result = -1;
+        }
+    }
+    else
+    {
+        LogError("info is NULL");
+        result = -1;
+    }
+    return result;
+}

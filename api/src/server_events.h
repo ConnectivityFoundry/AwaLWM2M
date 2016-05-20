@@ -38,6 +38,8 @@ typedef struct _RegisteredEntityIterator RegisteredEntityIterator;
 typedef struct _ServerEventsCallbackInfo ServerEventsCallbackInfo;
 
 typedef struct _ClientRegisterEvent ClientRegisterEvent;
+typedef struct _ClientDeregisterEvent ClientDeregisterEvent;
+typedef struct _ClientUpdateEvent ClientUpdateEvent;
 
 
 // ClientRegisterEvent functions:
@@ -52,6 +54,28 @@ ClientIterator * ClientRegisterEvent_NewClientIterator(ClientRegisterEvent * eve
 RegisteredEntityIterator * ClientRegisterEvent_NewRegisteredEntityIterator(ClientRegisterEvent * event, const char * clientID);
 
 
+// ClientDeregisterEvent functions:
+ClientDeregisterEvent * ClientDeregisterEvent_New(void);
+
+void ClientDeregisterEvent_Free(ClientDeregisterEvent ** event);
+
+int ClientDeregisterEvent_AddNotification(ClientDeregisterEvent * event, IPCMessage * notification, const AwaServerSession * session);
+
+ClientIterator * ClientDeregisterEvent_NewClientIterator(ClientDeregisterEvent * event);
+
+
+// ClientUpdateEvent functions:
+ClientUpdateEvent * ClientUpdateEvent_New(void);
+
+void ClientUpdateEvent_Free(ClientUpdateEvent ** event);
+
+int ClientUpdateEvent_AddNotification(ClientUpdateEvent * event, IPCMessage * notification, const AwaServerSession * session);
+
+ClientIterator * ClientUpdateEvent_NewClientIterator(ClientUpdateEvent * event);
+
+RegisteredEntityIterator * ClientUpdateEvent_NewRegisteredEntityIterator(ClientUpdateEvent * event, const char * clientID);
+
+
 // ServerEventsCallbackInfo functions:
 ServerEventsCallbackInfo * ServerEventsCallbackInfo_New(void);
 
@@ -64,6 +88,10 @@ int ServerEventsCallbackInfo_SetClientDeregisterCallback(ServerEventsCallbackInf
 int ServerEventsCallbackInfo_SetClientUpdateCallback(ServerEventsCallbackInfo * info, AwaServerClientUpdateEventCallback callback, void * context);
 
 int ServerEventsCallbackInfo_InvokeClientRegisterCallback(ServerEventsCallbackInfo * info, const ClientRegisterEvent * event);
+
+int ServerEventsCallbackInfo_InvokeClientDeregisterCallback(ServerEventsCallbackInfo * info, const ClientDeregisterEvent * event);
+
+int ServerEventsCallbackInfo_InvokeClientUpdateCallback(ServerEventsCallbackInfo * info, const ClientUpdateEvent * event);
 
 
 #ifdef __cplusplus
