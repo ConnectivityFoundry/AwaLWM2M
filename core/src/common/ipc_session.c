@@ -30,6 +30,10 @@
 #include "lwm2m_list.h"
 #include "lwm2m_util.h"
 
+// This number is used to space out session IDs. It is multiplied by the process ID to generate the Session ID.
+// It is fairly arbitrary but large enough to provide a reasonable numerical distance between adjacent process IDs.
+#define SUITABLY_LARGE_NUMBER (7487)
+
 typedef struct
 {
     int Sockfd;
@@ -215,7 +219,7 @@ IPCSessionID IPCSession_AssignSessionID(void)
     static IPCSessionID sessionID = -1;
     if (sessionID == -1)
     {
-        sessionID = getpid() * 7487;
+        sessionID = getpid() * SUITABLY_LARGE_NUMBER;
     }
     return sessionID++;
 }

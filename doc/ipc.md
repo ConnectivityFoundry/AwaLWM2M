@@ -16,9 +16,9 @@ Any requests that are unrecognised or malformed will generate a 400 error respon
 
 ```xml
 <Response>
- <Type>Invalid</Type>
- <Code>400</Code>
- </Response>
+  <Type>Invalid</Type>
+  <Code>400</Code>
+</Response>
 ```
 
 ## Connect
@@ -172,8 +172,10 @@ Define requests the definition of object metadata. It replaces use 1 of the Regi
 
 Other per-resource status codes could include:
 
+```xml
 <AlreadyExists/>   <!-- implies it hasn't been changed -->
 <Invalid/>
+```
 
 # LWM2M Client Daemon
 

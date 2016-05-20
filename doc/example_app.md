@@ -422,9 +422,9 @@ int main(void)
     AwaServerSession * session = AwaServerSession_New();
     AwaServerSession_Connect(session);
 
-	AwaServerSession_Disconnect(session);
+    AwaServerSession_Disconnect(session);
     AwaServerSession_Free(&session);
-	return 0;
+    return 0;
 }
 ```
 
@@ -456,9 +456,9 @@ int main(void)
 +       AwaServerSession_DispatchCallbacks(session);
 +   }
 
-	AwaServerSession_Disconnect(session);
+    AwaServerSession_Disconnect(session);
     AwaServerSession_Free(&session);
-	return 0;
+    return 0;
 }
 ```
 
@@ -488,9 +488,9 @@ int main(void)
         AwaServerSession_DispatchCallbacks(session);
     }
 
-	AwaServerSession_Disconnect(session);
+    AwaServerSession_Disconnect(session);
     AwaServerSession_Free(&session);
-	return 0;
+    return 0;
 }
 ```
 
@@ -551,7 +551,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
-	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -779,7 +779,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
 
     awaClient = AwaStaticClient_New();
 
-	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCoAPListenAddressPort(awaClient, "", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");

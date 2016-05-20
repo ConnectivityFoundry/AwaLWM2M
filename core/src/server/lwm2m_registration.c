@@ -708,7 +708,7 @@ void * Lwm2m_GetEventContext(Lwm2mContextType * lwm2mContext, IPCSessionID sessi
 // Note: callbackContext *MUST* be heap-allocated, as it will be freed later.
 int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID, RegistrationEventCallback callback, void * callbackContext)
 {
-    int result = 0;
+    int result = -1;
     EventRecord * eventRecord = malloc(sizeof(*eventRecord));
     if (eventRecord != NULL)
     {
@@ -718,6 +718,12 @@ int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessi
         eventRecord->Context = callbackContext;
         ListAdd(&eventRecord->list, Lwm2mCore_GetEventRecordList(lwm2mContext));
         Lwm2m_Debug("Added EventRecord %d: %p\n", sessionID, eventRecord);
+        result = 0;
+    }
+    else
+    {
+        Lwm2m_Error("Out of memory\n");
+        result = -1;
     }
     return result;
 }
@@ -725,7 +731,7 @@ int Lwm2m_AddRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessi
 // Note: this will free the stored callback context
 int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSessionID sessionID)
 {
-    int result = 0;
+    int result = -1;
     if (lwm2mContext != NULL)
     {
         struct ListHead * i, * n;
@@ -745,6 +751,12 @@ int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSe
                 }
             }
         }
+        result = 0;
+    }
+    else
+    {
+        Lwm2m_Error("lwm2mContext is NULL\n");
+        result = -1;
     }
     return result;
 }
