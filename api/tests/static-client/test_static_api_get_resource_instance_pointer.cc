@@ -105,24 +105,12 @@ protected:
 
         EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, data.ObjectID, "TestObject", 0, 1));
 
-        switch(data.Type)
-        {
-            case AwaResourceType_Opaque:
-            {
-                //EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResourceWithPointer(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadWrite, &opaque_, sizeof(opaque_), 0));
-                ASSERT_TRUE(false);
-                break;
-            }
-            default:
-                {
-                    StaticClientAllocedValue_ = malloc(data.ValueSize);
-                    EXPECT_TRUE(StaticClientAllocedValue_ != NULL);
-                    memset(StaticClientAllocedValue_, 0, data.ValueSize);
-                    EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadWrite));
-                    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, StaticClientAllocedValue_, data.ValueSize, 0));
-                }
-                break;
-        }
+        StaticClientAllocedValue_ = malloc(data.ValueSize);
+        EXPECT_TRUE(StaticClientAllocedValue_ != NULL);
+        memset(StaticClientAllocedValue_, 0, data.ValueSize);
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadWrite));
+        EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, StaticClientAllocedValue_, data.ValueSize, 0));
+
         EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, data.ObjectID, 0));
 
         AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);

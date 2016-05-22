@@ -70,15 +70,6 @@ extern "C" {
  *************************************************************************************************/
 
 /**
- * Creates a locally scoped Opaque struct containing an array of bytes of the given size.
- */
-#define AWA_OPAQUE(name, size)     \
-  struct name##_t {                \
-      size_t Size;                 \
-      uint8_t Data[size];          \
-  } name
-
-/**
  * Supported operations for resource and object handlers defined with ::AwaStaticClient_DefineResource.
  */
 typedef enum
