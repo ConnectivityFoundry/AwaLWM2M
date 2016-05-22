@@ -56,13 +56,6 @@ struct _AwaStaticClient
     void * ApplicationContext;
 };
 
-// must line up with AWA_OPAQUE macro
-typedef struct
-{
-    size_t Size;
-    uint8_t Data[];
-} AwaStaticOpaque;
-
 AwaStaticClient * AwaStaticClient_New()
 {
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
@@ -448,35 +441,18 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                         offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
                     }
 
-                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    if (*dataSize <= resourceDefinition->DataElementSize)
                     {
-                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
-
-                        // dataSize equals the size of the opaque data and the bytes used to store
-                        // the length, so subtract that during the comparision.
-                        if (*dataSize <= (resourceDefinition->DataElementSize - sizeof(temp->Size)))
-                        {
-                            memcpy(temp->Data, *dataPointer, *dataSize);
-                            temp->Size = *dataSize;
-                            result = AwaResult_SuccessChanged;
-                        }
-                        else
-                        {
-                            result = AwaResult_BadRequest;
-                        }
+                        memset(offset, 0, resourceDefinition->DataElementSize);
+                        // cppcheck-suppress redundantCopy
+                        memcpy(offset, *dataPointer, *dataSize);
+                        result = AwaResult_SuccessChanged;
                     }
                     else
                     {
-                        if (*dataSize <= resourceDefinition->DataElementSize)
-                        {
-                            memcpy(offset, *dataPointer, *dataSize);
-                            result = AwaResult_SuccessChanged;
-                        }
-                        else
-                        {
-                            result = AwaResult_BadRequest;
-                        }
+                        result = AwaResult_BadRequest;
                     }
+
                 }
                 else
                 {
@@ -498,20 +474,14 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                         offset = resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
                     }
 
-                    if (resourceDefinition->Type == AwaResourceType_Opaque)
+                    *dataPointer = offset;
+
+                    if (resourceDefinition->Type == AwaResourceType_String)
                     {
-                        AwaStaticOpaque * temp = (AwaStaticOpaque*)offset;
-                        *dataPointer = temp->Data;
-                        *dataSize = temp->Size;
-                    }
-                    else if (resourceDefinition->Type == AwaResourceType_String)
-                    {
-                        *dataPointer = offset;
                         *dataSize = strlen(offset);
                     }
                     else
                     {
-                        *dataPointer = offset;
                         *dataSize = resourceDefinition->DataElementSize;
                     }
                     result = AwaResult_SuccessContent;

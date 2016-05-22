@@ -45,7 +45,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_Define_Invalid)
 
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorageWithPointer_Invalid)
 {
-    AWA_OPAQUE(o, 10);
+    uint8_t o[10];
     ASSERT_EQ(AwaError_Success,             AwaStaticClient_DefineObject(client_, 7997, "TestObject", 0, 1));
     ASSERT_EQ(AwaError_Success,             AwaStaticClient_DefineResource(client_, 7997, 1, "TestResource", AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite));
     EXPECT_EQ(AwaError_StaticClientInvalid, AwaStaticClient_SetResourceStorageWithPointer(NULL,    7997,  1, &o,   sizeof(o), 0));
@@ -58,7 +58,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorage
 
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorageWithPointer_Success)
 {
-    AWA_OPAQUE(o, 10);
+    uint8_t o[10];
     ASSERT_EQ(AwaError_Success,             AwaStaticClient_DefineObject(client_, 7997, "TestObject", 0, 1));
     ASSERT_EQ(AwaError_Success,             AwaStaticClient_DefineResource(client_, 7997, 1, "TestResource", AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite));
     EXPECT_EQ(AwaError_Success,             AwaStaticClient_SetResourceStorageWithPointer(client_,  7997,  1, &o, sizeof(o), 0));
@@ -66,9 +66,9 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorage
 
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorageWithPointerArray_Invalid)
 {
-    AWA_OPAQUE(o1, 10);
-    AWA_OPAQUE(o2, 10);
-    AWA_OPAQUE(o3, 10);
+    uint8_t o1[10];
+    uint8_t o2[10];
+    uint8_t o3[10];
     void * pointers[] = {&o1, &o2, &o3, NULL};
 
     ASSERT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, 7996, "TestObject", 0, 1));
@@ -84,9 +84,9 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorage
 
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_SetResourceStorageWithPointerArray_Success)
 {
-    AWA_OPAQUE(o1, 10);
-    AWA_OPAQUE(o2, 10);
-    AWA_OPAQUE(o3, 10);
+    uint8_t o1[10];
+    uint8_t o2[10];
+    uint8_t o3[10];
     void * pointers[] = {&o1, &o2, &o3, NULL};
 
     ASSERT_EQ(AwaError_Success, AwaStaticClient_DefineObject(client_, 7996, "TestObject", 0, 1));
@@ -161,7 +161,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_CoAPtimeout)
 {
     // Static client definition
-    AWA_OPAQUE(opaque, 16) = {0};
+    uint8_t opaque[16] = {0};
     EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, 7998, "TestObject", 0, 1));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, 7998, 1, "TestResource", AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, &opaque, sizeof(opaque), 0));
@@ -205,10 +205,10 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Opaque_Resource)
 {
     // Static client definition
-    AWA_OPAQUE(opaque, 16) = {0};
+    uint8_t opaque[16] = {0};
     EXPECT_EQ(AwaError_Success,AwaStaticClient_DefineObject(client_, 7998, "TestObject", 0, 1));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, 7998, 1, "TestResource", AwaResourceType_Opaque, 1, 1, AwaResourceOperations_ReadWrite));
-    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, &opaque, sizeof(opaque), 0));
+    EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, opaque, sizeof(opaque), 0));
 
     // Server definition
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
@@ -242,8 +242,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 
     AwaServerWriteOperation_Free(&writeOperation);
 
-    ASSERT_EQ(5, static_cast<int>(opaque.Size));
-    ASSERT_EQ(0, memcmp(opaque.Data, "Hello", opaque.Size));
+    ASSERT_EQ(0, memcmp(opaque, o.Data, o.Size));
 
     AwaStaticClient_Process(client_);
     AwaStaticClient_Process(client_);
@@ -264,7 +263,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 
     AwaOpaque * value;
     ASSERT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsOpaquePointer(readResponse, "/7998/0/1", (const AwaOpaque **)&value));
-    ASSERT_EQ(5, static_cast<int>(value->Size));
+    ASSERT_EQ(sizeof(opaque), value->Size);
     ASSERT_TRUE(memcmp(value->Data, "Hello", 5) == 0);
 
     AwaServerReadOperation_Free(&readOperation);
@@ -518,7 +517,7 @@ public:
                 break;
             case AwaResourceType_Opaque:
             {
-                AwaOpaque expected = {opaque_.Data, opaque_.Size};
+                AwaOpaque expected = {opaque_, sizeof(opaque_)};
                 AwaOpaque * actual = (AwaOpaque *)value;
                 EXPECT_EQ(expected.Size, actual->Size);
                 EXPECT_EQ(0, memcmp(expected.Data, actual->Data, expected.Size));
@@ -534,7 +533,7 @@ public:
             switch(data.Type)
             {
             case AwaResourceType_Opaque:
-                memcpy(opaque_.Data, data.ExpectedValue, data.ValueSize);
+                memcpy(opaque_, data.ExpectedValue, data.ValueSize);
                 break;
             default:
                 data.Value = data.ExpectedValue;
@@ -555,7 +554,7 @@ protected:
     //void * integerResourceValue_ = 0;
     //int expectedValue_ = 12345;
     callback1 * cbHandler_;
-    AWA_OPAQUE(opaque_, 64);
+    uint8_t opaque_[64];
 };
 
 static void (ChangeCallbackRunner)(const AwaChangeSet * changeSet, void * context)
@@ -571,9 +570,9 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
 {
     TestObserveStaticResource data = GetParam();
 
-    ASSERT_TRUE(sizeof(opaque_) - sizeof(opaque_.Size) >= data.ValueSize);
-    opaque_.Size = data.ValueSize;
-    memcpy(opaque_.Data, data.Value, data.ValueSize);
+    ASSERT_TRUE(sizeof(opaque_) >= data.ValueSize);
+    memcpy(opaque_, data.Value, data.ValueSize);
+    memset(opaque_, 0, sizeof(opaque_));
 
     AwaServerObserveOperation * observeOperation = AwaServerObserveOperation_New(session_);
 
@@ -585,7 +584,7 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
         case AwaResourceType_Opaque:
         {
           EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, data.ObjectID, data.ResourceID, "Test Resource", data.Type, 1, 1, AwaResourceOperations_ReadOnly));
-            EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, &opaque_, sizeof(opaque_), 0));
+            EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, data.ObjectID, data.ResourceID, opaque_, sizeof(opaque_), 0));
             break;
         }
         default:
