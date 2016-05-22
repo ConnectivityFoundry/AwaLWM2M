@@ -139,8 +139,7 @@ AwaError AwaClientDeleteOperation_Perform(AwaClientDeleteOperation * operation, 
                 if (TreeNode_GetChildCount(objectsTree) > 0)
                 {
                     //build an IPC message and inject our content (object paths) into it
-                    IPCMessage * request = IPCMessage_New();
-                    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_DELETE);
+                    IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DELETE, OperationCommon_GetSessionID(operation->Common));
 
                     IPCMessage_AddContent(request, objectsTree);
 

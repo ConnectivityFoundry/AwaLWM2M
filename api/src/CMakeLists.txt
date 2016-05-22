@@ -22,7 +22,7 @@ set (Awa_SOURCES
   list.c
   value.c
 
-  objects_tree.c # FIXME
+  objects_tree.c
   define_common.c
 
   integer_array.c
@@ -60,7 +60,8 @@ set (Awa_SOURCES
   subscribe_observe_common.c
   write_attributes_operation.c
   execute_operation.c
-  
+  server_events.c
+
   unsupported.c
 
   ${CORE_SRC_DIR}/common/xml.c

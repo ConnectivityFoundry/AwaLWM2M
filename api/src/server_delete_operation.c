@@ -110,10 +110,7 @@ AwaError AwaServerDeleteOperation_Perform(AwaServerDeleteOperation * operation, 
                         if (TreeNode_GetChildCount(clientsTree) > 0)
                         {
                             // build an IPC message and inject our content into it
-                            IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_DELETE);
-
-                            // Add Content to message
+                            IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DELETE, ServerOperation_GetSessionID(operation->ServerOperation));
                             IPCMessage_AddContent(request, clientsTree);
 
                             // Send via IPC
@@ -206,7 +203,7 @@ AwaClientIterator * AwaServerDeleteOperation_NewClientIterator(const AwaServerDe
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
     {
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->Response);
     }
     else
     {

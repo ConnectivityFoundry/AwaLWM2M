@@ -31,10 +31,13 @@
 #include "ipc.h"
 #include "session_common.h"
 #include "map.h"
+#include "server_events.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 
 bool ServerSession_IsConnected(const AwaServerSession * session);
 
@@ -49,6 +52,9 @@ const AwaResourceDefinition * ServerSession_GetResourceDefinitionFromPath(const 
 SessionCommon * ServerSession_GetSessionCommon(const AwaServerSession * session);
 
 MapType * ServerSession_GetObservers(const AwaServerSession * session);
+
+ServerEventsCallbackInfo * ServerSession_GetServerEventsCallbackInfo(const AwaServerSession * session);
+
 
 #ifdef __cplusplus
 }

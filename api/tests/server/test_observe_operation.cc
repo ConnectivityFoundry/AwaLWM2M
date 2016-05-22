@@ -40,21 +40,7 @@ namespace Awa {
 
 class TestObserve : public TestServerBase {};
 
-class TestObserveWithConnectedSession : public TestServerWithConnectedSession
-{
-public:
-    virtual void callbackHandler(const AwaChangeSet * changeSet) {};
-};
-
-
-void (ObserveCallbackRunner)(const AwaChangeSet * changeSet, void * context)
-{
-    if (context)
-    {
-        auto * that = static_cast<TestObserveWithConnectedSession*>(context);
-        that->callbackHandler(changeSet);
-    }
-}
+class TestObserveWithConnectedSession : public TestServerWithConnectedSession {};
 
 
 void (EmptyObserveCallback)(const AwaChangeSet * changeSet, void * context)
@@ -62,6 +48,43 @@ void (EmptyObserveCallback)(const AwaChangeSet * changeSet, void * context)
 }
 
 
+struct ObserveWaitCondition : public WaitCondition
+{
+
+    AwaServerSession * session;
+    int callbackCountMax;
+    int callbackCount;
+
+
+    ObserveWaitCondition(AwaServerSession * session, int callbackCountMax = 1) :
+        session(session), callbackCountMax(callbackCountMax), callbackCount(0) {}
+
+    virtual ~ObserveWaitCondition() {}
+
+    virtual bool Check()
+    {
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(session, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(session));
+        return callbackCount >= callbackCountMax;
+    }
+
+    virtual void internalCallbackHandler(const AwaChangeSet * changeSet)
+    {
+        this->callbackCount++;
+        this->callbackHandler(changeSet);
+    };
+
+    virtual void callbackHandler(const AwaChangeSet * changeSet) = 0;
+};
+
+void ObserveCallbackRunner(const AwaChangeSet * changeSet, void * context)
+{
+    if (context)
+    {
+        auto * that = static_cast<ObserveWaitCondition*>(context);
+        that->internalCallbackHandler(changeSet);
+    }
+}
 
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_New_free_valid_inputs)
 {
@@ -173,11 +196,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -198,9 +221,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
             AwaChangeSet_GetValueAsCStringPointer(changeSet, "/3/0/15", &value);
             EXPECT_STREQ(count == 1? "Pacific/Wellington" : "123414123", value);
         }
-        void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -218,12 +240,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
-    sleep(1); // otherwise we can miss the second notify
-
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-
     cbHandler.count = 0;
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -239,11 +257,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -256,7 +274,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -279,7 +297,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
 
     cbHandler.count = 0;
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -296,11 +314,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -337,9 +355,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
 
         }
-        void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_);
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -358,10 +375,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
 
     cbHandler.count = 0;
-
-    sleep(1);
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
 
     // set via server api to trigger notifications.
     // write 0, 5 and 10. 5 should be skipped as the step size is 10.
@@ -373,9 +387,16 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
 
-        sleep(1); // otherwise we can miss the second notify
-        ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-        AwaServerSession_DispatchCallbacks(session_);
+        cbHandler.callbackCount = 0;
+        if(i != 1)
+        {
+            ASSERT_TRUE(cbHandler.Wait());
+        }
+        else
+        {
+            //This should timeout as 5 is written down - no notifications should be generated.
+            ASSERT_FALSE(cbHandler.Wait());
+        }
     }
 
     ASSERT_EQ(3, cbHandler.count);
@@ -393,11 +414,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -434,7 +455,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_);
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -451,12 +472,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
 
     cbHandler.count = 0;
-
-    sleep(1);
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
-
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(1, cbHandler.count);
+
+
     printf("Doing first write - should receive immediate notification\n");
     // write first change via server api to trigger notification.
     {
@@ -467,12 +487,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
-    sleep(1);
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     printf("Doing second write - should receive notification after pmin...\n");
+    BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
     {
@@ -481,24 +501,15 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 5));
         EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
+        pminTimer.Start();
     }
 
-    sleep(1);
-    printf("Last notification should not have arrived yet\n");
-
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
-    ASSERT_EQ(2, cbHandler.count);
-
-    printf("Last sleep for notification\n");
-
-    //pmin passed, should receive notification
-    sleep(2);
-    printf("Notification should be received in next process\n");
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
+    pminTimer.Stop();
+    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
     ASSERT_EQ(3, cbHandler.count);
-
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -513,11 +524,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -541,7 +552,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 3);
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -558,17 +569,10 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
 
+    //Should get multiple notifications due to pmax being a second
     cbHandler.count = 0;
-
-    // don't write any changes, should still get multiple notifications.
-    for (int i = 0; i < 2; i++)
-    {
-        sleep(1);
-        ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-        AwaServerSession_DispatchCallbacks(session_);
-    }
-
-    ASSERT_TRUE(cbHandler.count > 1);
+    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.count = 3);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -584,11 +588,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -625,7 +629,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_);
 
     //set pmin for the server object
     {
@@ -646,9 +650,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     cbHandler.count = 0;
 
-    sleep(1);
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
 
     ASSERT_EQ(1, cbHandler.count);
     printf("Doing first write - should receive immediate notification\n");
@@ -661,12 +664,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
-    sleep(1);
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     printf("Doing second write - should receive notification after pmin...\n");
+    BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
     {
@@ -675,24 +678,15 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 5));
         EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
+        pminTimer.Start();
     }
 
-    sleep(1);
-    printf("Last notification should not have arrived yet\n");
-
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
-    ASSERT_EQ(2, cbHandler.count);
-
-    printf("Last sleep for notification\n");
-
-    //pmin passed, should receive notification
-    sleep(2);
-    printf("Notification should be received in next process\n");
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
+    cbHandler.callbackCount = 0;
+    ASSERT_TRUE(cbHandler.Wait());
+    pminTimer.Stop();
+    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
     ASSERT_EQ(3, cbHandler.count);
-
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -707,11 +701,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
+
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -735,7 +730,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 3);
 
     //set pmax for the server object
     {
@@ -756,16 +751,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
 
     cbHandler.count = 0;
-
-    // don't write any changes, should still get multiple notifications.
-    for (int i = 0; i < 2; i++)
-    {
-        sleep(1);
-        ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-        AwaServerSession_DispatchCallbacks(session_);
-    }
-
-    ASSERT_TRUE(cbHandler.count > 1);
+    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.count = 3);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -780,19 +767,18 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
         }
-        void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -805,10 +791,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
-    sleep(1); // otherwise we can miss the second notify
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    cbHandler.count = 0;
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -825,11 +808,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -837,7 +820,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -850,10 +833,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
-    sleep(1); // otherwise we can miss the second notify
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
     cbHandler.count = 0;
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
@@ -930,11 +911,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     AwaServerDefineOperation_Free(&serverDefineOperation);
 
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -942,7 +923,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
         }
         void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(serverSession);
     ASSERT_TRUE(NULL != operation);
@@ -975,22 +956,24 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     delete horde_;
 }
 
+
+
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel_observation_stops_notifications)
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    struct CallbackHandler1 : public TestObserveWithConnectedSession
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler1() : count(0) {}
+        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
-        void callbackHandler(const AwaChangeSet * changeSet)
+        virtual void callbackHandler(const AwaChangeSet * changeSet)
         {
             ASSERT_TRUE(count == 0);
-            count ++;
+            count++;
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -1007,28 +990,23 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
             AwaChangeSet_GetValueAsCStringPointer(changeSet, "/3/0/15", &value);
             EXPECT_STREQ("Pacific/Wellington", value);
         }
-        void TestBody() {}
     };
-    CallbackHandler1 cbHandler;
+    CallbackHandler1 cbHandler(session_);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
+
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
 
-
-    // callback should fire once with initial values.
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
-    ASSERT_EQ(1, cbHandler.count);
+    ASSERT_TRUE(cbHandler.Wait());
 
     AwaServerObserveOperation * cancelObserveOperation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != cancelObserveOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddCancelObservation(cancelObserveOperation, observation));
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(cancelObserveOperation, defaults::timeout));
-
 
 
     // write via server api. Should NOT trigger a notification since we are no longer observing the resource.
@@ -1038,11 +1016,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
-    sleep(1);
-
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-    AwaServerSession_DispatchCallbacks(session_);
-    ASSERT_EQ(1, cbHandler.count);
+    cbHandler.callbackCount = 0;
+    ASSERT_FALSE(cbHandler.Wait());
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
     ASSERT_TRUE(NULL == observation);
@@ -1313,11 +1288,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
 
 TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIterator_valid_inputs)
 {
-    struct ChangeCallbackHandler2 : public TestObserveWithConnectedSession
+    struct ChangeCallbackHandler2 : public ObserveWaitCondition
     {
         int count;
 
-        ChangeCallbackHandler2() : count(0) {}
+        ChangeCallbackHandler2(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -1344,7 +1319,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
     sleep(1);
 
-    ChangeCallbackHandler2 cbHandler;
+    ChangeCallbackHandler2 cbHandler(session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1362,13 +1337,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
-    //ensure we receive both notifications
-    sleep(1);
-
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
-
     cbHandler.count = 0;
-    AwaServerSession_DispatchCallbacks(session_);
+    ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&changeObservation));
@@ -1526,12 +1496,12 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
 {
     observeDetail::TestObserveResource data = GetParam();
 
-    struct ChangeCallbackHandler3 : public TestObserveWithConnectedSession
+    struct ChangeCallbackHandler3 : public ObserveWaitCondition
     {
         int count;
         observeDetail::TestObserveResource data;
 
-        explicit ChangeCallbackHandler3(observeDetail::TestObserveResource data) : count(0), data(data) {}
+        explicit ChangeCallbackHandler3(observeDetail::TestObserveResource data, AwaServerSession * session, int max) : ObserveWaitCondition(session, max), count(0), data(data) {}
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -1623,10 +1593,9 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
                 }
             }
         }
-        void TestBody() {}
     };
 
-    ChangeCallbackHandler3 cbHandler(data);
+    ChangeCallbackHandler3 cbHandler(data, session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);

@@ -29,7 +29,7 @@ import time
 import ipc
 import overlord
 import config
-import client_low
+import api
 
 g_ConfigurationClass = None  # use default
 
@@ -56,16 +56,17 @@ def _sendRequest(ipcChannel, requestType, responseType, path, value):
 
 def waitForClient(clientID, ipcPort):
     """Block until client endpoint name appears in the list of registered clients on the server."""
-    api = client_low.API("127.0.0.1", ipcPort)
+    server_api = api.ServerAPI("127.0.0.1", ipcPort)
     found = False
     while not found:
         print "waiting"
-        clients = api.GetClientList(clientID)
+        clients = server_api.GetClientList(clientID)
         if len(clients) > 0:
             if clientID in clients:
                 found = True
         if not found:
             time.sleep(0.01)
+    del server_api
 
 class SpawnDaemonsTestCase(unittest.TestCase):
     """TestCase class that spawns LWM2M Server and Client daemons before each test, then kills them afterwards."""

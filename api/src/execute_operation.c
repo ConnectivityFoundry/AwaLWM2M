@@ -179,8 +179,7 @@ AwaError AwaServerExecuteOperation_Perform(AwaServerExecuteOperation * operation
                         if (TreeNode_GetChildCount(clientsTree) > 0)
                         {
                             // build an IPC message and inject our content into it
-                            IPCMessage * request = IPCMessage_New();
-                            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_EXECUTE);
+                            IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_EXECUTE, ServerOperation_GetSessionID(operation->ServerOperation));
 
                             // Add Content to message
                             IPCMessage_AddContent(request, clientsTree);
@@ -276,9 +275,13 @@ AwaClientIterator * AwaServerExecuteOperation_NewClientIterator(const AwaServerE
 {
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+    {
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->Response);
+    }
     else
+    {
         LogErrorWithEnum(AwaError_OperationInvalid, "operation is NULL");
+    }
     return iterator;
 }
 

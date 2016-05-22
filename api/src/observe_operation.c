@@ -50,7 +50,7 @@ struct _AwaServerObservation
 
 struct _AwaServerObserveOperation
 {
-    ServerOperation * Common;
+    ServerOperation * ServerOperation;
     MapType * Observers;
     ServerResponse * Response;
 };
@@ -99,8 +99,8 @@ AwaServerObserveOperation * AwaServerObserveOperation_New(const AwaServerSession
             if (operation != NULL)
             {
                 memset(operation, 0, sizeof(*operation));
-                operation->Common = ServerOperation_New(session);
-                if (operation->Common != NULL)
+                operation->ServerOperation = ServerOperation_New(session);
+                if (operation->ServerOperation != NULL)
                 {
                     operation->Observers = Map_New();
 
@@ -151,7 +151,7 @@ AwaError AwaServerObserveOperation_Free(AwaServerObserveOperation ** operation)
     AwaError result = AwaError_OperationInvalid;
     if ((operation != NULL) && (*operation != NULL))
     {
-        ServerOperation_Free(&(*operation)->Common);
+        ServerOperation_Free(&(*operation)->ServerOperation);
 
         Map_ForEach((*operation)->Observers, RemoveObservationLinkToOperation, *operation);
         Map_Free(&(*operation)->Observers);
@@ -266,7 +266,7 @@ AwaError AwaServerObservation_Free(AwaServerObservation ** observation)
 InternalError ServerObserve_AddObserveType(TreeNode leafNode, AwaServerObservation * subscription)
 {
     InternalError result = InternalError_Unspecified;
-    const char * messageType = subscription->Cancel? IPC_MSG_CANCEL_OBSERVATION : IPC_MSG_OBSERVE;
+    const char * messageType = subscription->Cancel? IPC_MESSAGE_TAG_CANCEL_OBSERVATION : IPC_MESSAGE_TAG_OBSERVE;
 
     if (leafNode != NULL)
     {
@@ -344,7 +344,7 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
         if (operation != NULL)
         {
             PerformAddPathCallbackContext addPathContext;
-            addPathContext.ServerOperation = operation->Common;
+            addPathContext.ServerOperation = operation->ServerOperation;
             addPathContext.Result = AwaError_Success;
             Map_ForEach(operation->Observers, ServerObserve_PerformAddPathCallback, (void *)&addPathContext);
             result = addPathContext.Result;
@@ -354,23 +354,20 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
                 goto error;
             }
 
-            const AwaServerSession * session = ServerOperation_GetSession(operation->Common);
+            const AwaServerSession * session = ServerOperation_GetSession(operation->ServerOperation);
             if (ServerSession_IsConnected(session))
             {
-                TreeNode clientsTree = ServerOperation_GetClientsTree(operation->Common);
+                TreeNode clientsTree = ServerOperation_GetClientsTree(operation->ServerOperation);
                 if (clientsTree != NULL)
                 {
                     if (TreeNode_GetChildCount(clientsTree) > 0)
                     {
                         // build an IPC message and inject our content (object paths) into it
-                        IPCMessage * observeRequest = IPCMessage_New();
-
-                        IPCMessage_SetType(observeRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_OBSERVE);
-
+                        IPCMessage * observeRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_OBSERVE, ServerOperation_GetSessionID(operation->ServerOperation));
                         IPCMessage_AddContent(observeRequest, clientsTree);
 
                         IPCMessage * observeResponse = NULL;
-                        result = IPC_SendAndReceiveOnNotifySocket(ServerSession_GetChannel(session), observeRequest, &observeResponse, timeout);
+                        result = IPC_SendAndReceive(ServerSession_GetChannel(session), observeRequest, &observeResponse, timeout);
 
                         if (result == AwaError_Success)
                         {
@@ -385,12 +382,12 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
                                 // Detach the response content and store it in the operation's ServerGetResponse
                                 TreeNode contentNode = IPCMessage_GetContentNode(observeResponse);
                                 TreeNode clientsNode = Xml_Find(contentNode, "Clients");
-                                operation->Response = ServerResponse_NewFromServerOperation(operation->Common, clientsNode);
+                                operation->Response = ServerResponse_NewFromServerOperation(operation->ServerOperation, clientsNode);
 
                                 if (operation->Response)
                                 {
                                     PerformSuccessfulCallbackContext successContext;
-                                    successContext.Session = (AwaServerSession*)ServerOperation_GetSession(operation->Common);
+                                    successContext.Session = (AwaServerSession*)ServerOperation_GetSession(operation->ServerOperation);
                                     successContext.Result = AwaError_Success;
                                     successContext.Operation = operation;
                                     Map_ForEach(operation->Observers, ServerObserve_PerformSuccessfulCallback, (void *)&successContext);
@@ -542,7 +539,7 @@ AwaError ServerObserveOperation_CallObservers(AwaServerSession * session, TreeNo
 
 ServerOperation * ServerObserveOperation_GetServerOperation(const AwaServerObserveOperation * operation)
 {
-    return (operation != NULL) ? operation->Common : NULL;
+    return (operation != NULL) ? operation->ServerOperation : NULL;
 }
 
 MapType * ServerObserveOperation_GetObservers(const AwaServerObserveOperation * operation)

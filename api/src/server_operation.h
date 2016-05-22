@@ -34,6 +34,7 @@
 #include "error.h"
 #include "server_session.h"
 #include "operation_common.h"
+#include "ipc_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,6 +57,8 @@ OperationCommon * ServerOperation_GetOperationCommon(const ServerOperation * ope
 OperationCommon * ServerOperation_GetDefaultClientOperation(const ServerOperation * operation);
 
 const char * ServerOperation_GetClientIDFromClientNode(const TreeNode clientNode);
+
+IPCSessionID ServerOperation_GetSessionID(const ServerOperation * operation);
 
 #ifdef __cplusplus
 }

@@ -301,7 +301,7 @@ AwaError ResponseCommon_BuildValues(ResponseCommon * response)
                                     {
                                         if (!Map_Contains(response->Values, path))
                                         {
-                                            LogDebug("MAP item path: %s \n", path);
+                                            LogDebug("MAP item path: %s", path);
                                             Map_Put(response->Values, path, value);
                                             result = AwaError_Success;
                                         }

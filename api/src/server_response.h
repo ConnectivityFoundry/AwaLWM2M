@@ -58,7 +58,7 @@ const ResponseCommon * ServerResponse_GetClientResponse(const ServerResponse * r
 
 AwaError ServerResponse_CheckForErrors(const ServerResponse * response);
 
-AwaClientIterator * ServerResponse_NewClientIterator(const ServerResponse * response);
+ClientIterator * ServerResponse_NewClientIterator(const ServerResponse * response);
 
 
 #ifdef __cplusplus

@@ -32,12 +32,14 @@
 #include "queue.h"
 #include "server_notification.h"
 #include "observe_operation.h"
+#include "server_events.h"
 
 struct _AwaServerSession
 {
     SessionCommon * SessionCommon;
     MapType * Observers;
     QueueType * NotificationQueue;
+    ServerEventsCallbackInfo * ServerEventsCallbackInfo;
 };
 
 AwaServerSession * AwaServerSession_New(void)
@@ -51,9 +53,34 @@ AwaServerSession * AwaServerSession_New(void)
         if (session->SessionCommon != NULL)
         {
             session->Observers = Map_New();
-            if (session->Observers)
+            if (session->Observers != NULL)
             {
                 session->NotificationQueue = Queue_New();
+                if (session->NotificationQueue != NULL)
+                {
+                    session->ServerEventsCallbackInfo = ServerEventsCallbackInfo_New();
+                    if (session->ServerEventsCallbackInfo != NULL)
+                    {
+                        LogNew("AwaServerSession", session);
+                    }
+                    else
+                    {
+                        LogErrorWithEnum(AwaError_OutOfMemory, "Could not create server events");
+                        Queue_Free(&session->NotificationQueue);
+                        Map_Free(&session->Observers);
+                        SessionCommon_Free(&session->SessionCommon);
+                        Awa_MemSafeFree(session);
+                        session = NULL;
+                    }
+                }
+                else
+                {
+                    LogErrorWithEnum(AwaError_OutOfMemory, "Could not create notification queue");
+                    Map_Free(&session->Observers);
+                    SessionCommon_Free(&session->SessionCommon);
+                    Awa_MemSafeFree(session);
+                    session = NULL;
+                }
             }
             else
             {
@@ -78,7 +105,7 @@ AwaServerSession * AwaServerSession_New(void)
     return session;
 }
 
-void RemoveObservationLinkToSession(const char * key, void * value, void * context)
+static void RemoveObservationLinkToSession(const char * key, void * value, void * context)
 {
     AwaServerObservation * observation = (AwaServerObservation *)value;
     ServerObservation_RemoveSession(observation);
@@ -95,6 +122,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
         Map_ForEach((*session)->Observers, RemoveObservationLinkToSession, NULL);
         Map_Free(&(*session)->Observers);
         Queue_Free(&((*session)->NotificationQueue));
+        ServerEventsCallbackInfo_Free(&((*session)->ServerEventsCallbackInfo));
 
         // Free the session itself
         LogFree("AwaServerSession", *session);
@@ -103,7 +131,7 @@ AwaError AwaServerSession_Free(AwaServerSession ** session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid, "Session is NULL");
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -140,7 +168,7 @@ AwaError AwaServerSession_Connect(AwaServerSession * session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
 out:
     return result;
@@ -155,7 +183,7 @@ AwaError AwaServerSession_Disconnect(AwaServerSession * session)
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -169,7 +197,7 @@ const AwaObjectDefinition * AwaServerSession_GetObjectDefinition(const AwaServer
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return objectDefinition;
 }
@@ -183,7 +211,7 @@ AwaObjectDefinitionIterator * AwaServerSession_NewObjectDefinitionIterator(const
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return iterator;
 }
@@ -197,7 +225,7 @@ bool ServerSession_IsConnected(const AwaServerSession * session)
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -211,7 +239,7 @@ IPCChannel * ServerSession_GetChannel(const AwaServerSession * session)
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return channel;
 }
@@ -225,7 +253,7 @@ DefinitionRegistry * ServerSession_GetDefinitionRegistry(const AwaServerSession 
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return definitions;
 }
@@ -239,7 +267,7 @@ AwaError AwaServerSession_PathToIDs(const AwaServerSession * session, const char
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -253,7 +281,7 @@ AwaError ServerSession_CheckResourceTypeFromPath(const AwaServerSession * sessio
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -267,7 +295,7 @@ const AwaResourceDefinition * ServerSession_GetResourceDefinitionFromPath(const 
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -281,7 +309,7 @@ bool AwaServerSession_IsObjectDefined(const AwaServerSession * session, AwaObjec
     }
     else
     {
-        LogErrorWithEnum(AwaError_SessionInvalid);
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
@@ -323,11 +351,9 @@ AwaError AwaServerSession_DispatchCallbacks(AwaServerSession * session)
     if (session != NULL)
     {
         IPCMessage * notification;
-
         while (Queue_Pop(session->NotificationQueue, (void **)&notification))
         {
             ServerNotification_Process(session, notification);
-
             IPCMessage_Free(&notification);
         }
         result = AwaError_Success;
@@ -367,3 +393,79 @@ MapType * ServerSession_GetObservers(const AwaServerSession * session)
     return list;
 }
 
+AwaError AwaServerSession_SetClientRegisterEventCallback(AwaServerSession * session, AwaServerClientRegisterEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        if (ServerEventsCallbackInfo_SetClientRegisterCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError AwaServerSession_SetClientDeregisterEventCallback(AwaServerSession * session, AwaServerClientDeregisterEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        if (ServerEventsCallbackInfo_SetClientDeregisterCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError AwaServerSession_SetClientUpdateEventCallback(AwaServerSession * session, AwaServerClientUpdateEventCallback callback, void * context)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        if (ServerEventsCallbackInfo_SetClientUpdateCallback(session->ServerEventsCallbackInfo, callback, context) == 0)
+        {
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Internal, "session->ServerEventsCallbackInfo is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+ServerEventsCallbackInfo * ServerSession_GetServerEventsCallbackInfo(const AwaServerSession * session)
+{
+    ServerEventsCallbackInfo * info = NULL;
+    if (session != NULL)
+    {
+        info = session->ServerEventsCallbackInfo;
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return info;
+}

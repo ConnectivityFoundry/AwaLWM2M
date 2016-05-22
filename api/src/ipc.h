@@ -20,7 +20,6 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-
 #ifndef IPC_H
 #define IPC_H
 
@@ -28,48 +27,11 @@
 #include "awa/error.h"
 #include "error.h"
 #include "xmltree.h"
+#include "ipc_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define IPC_DEFAULT_ADDRESS "127.0.0.1"
-#define IPC_DEFAULT_CLIENT_PORT (12345)
-#define IPC_DEFAULT_SERVER_PORT (54321)
-
-#define IPC_MSGTYPE_REQUEST  "Request"
-#define IPC_MSGTYPE_RESPONSE "Response"
-
-// Common request message types:
-#define IPC_MSGTYPE_CONNECT              "Connect"
-#define IPC_MSGTYPE_DISCONNECT           "Disconnect"
-#define IPC_MSGTYPE_DELETE               "Delete"
-
-// Client request message types:
-#define IPC_MSGTYPE_GET                  "Get"
-#define IPC_MSGTYPE_SET                  "Set"
-#define IPC_MSGTYPE_SUBSCRIBE            "Subscribe"
-#define IPC_MSGTYPE_CHANGE_NOTIFICATION  "ChangeNotification"
-#define IPC_MSGTYPE_EXECUTE_NOTIFICATION "ExecuteNotification"
-
-// Server request message types:
-#define IPC_MSGTYPE_LIST_CLIENTS         "ListClients"
-#define IPC_MSGTYPE_WRITE                "Write"
-#define IPC_MSGTYPE_READ                 "Read"
-#define IPC_MSGTYPE_OBSERVE              "Observe"
-#define IPC_MSGTYPE_EXECUTE              "Execute"
-#define IPC_MSGTYPE_WRITE_ATTRIBUTES     "WriteAttributes"
-
-// IPC message tags:
-#define IPC_MSG_CREATE                      "Create"
-#define IPC_MSG_SUBSCRIBE_TO_CHANGE         "SubscribeToChange"
-#define IPC_MSG_SUBSCRIBE_TO_EXECUTE        "SubscribeToExecute"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE  "CancelSubscribeToChange"
-#define IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
-
-#define IPC_MSG_OBSERVE "Observe"
-#define IPC_MSG_CANCEL_OBSERVATION "CancelObserve"
-
 
 typedef struct _IPCInfo IPCInfo;
 typedef struct _IPCChannel IPCChannel;
@@ -121,12 +83,16 @@ void IPCChannel_Free(IPCChannel ** channel);
 
 // IPC Messages
 IPCMessage * IPCMessage_New(void);
+IPCMessage * IPCMessage_NewPlus(const char * type, const char * subType, IPCSessionID sessionID);
 void IPCMessage_Free(IPCMessage ** message);
 
 InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const char * subType);
-InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const char ** subType);
+InternalError IPCMessage_GetType(const IPCMessage * message, const char ** type, const char ** subType);
 
-IPCResponseCode IPCMessage_GetResponseCode(IPCMessage * message);
+InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID sessionID);
+IPCSessionID IPCMessage_GetSessionID(const IPCMessage * message);
+
+IPCResponseCode IPCMessage_GetResponseCode(const IPCMessage * message);
 TreeNode IPCMessage_GetContentNode(IPCMessage * message);
 AwaError IPCMessage_AddContent(IPCMessage * message, TreeNode content);
 AwaError IPCMessage_RemoveContentNode(IPCMessage * message, TreeNode contentNode);

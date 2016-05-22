@@ -34,6 +34,7 @@
 #include "awa/server.h"
 
 #include "daemon.h"
+#include "process.h"
 
 // Convert a preprocessor definition to a string
 #define str(x) #x
@@ -109,6 +110,18 @@ protected:
       TestClientBase::SetUp();
       if (global::spawnClientDaemon)
       {
+          int count = 0;
+          while (IsUDPPortInUse(global::clientIpcPort) != false)
+          {
+              global::clientIpcPort = global::clientIpcPort < (defaults::clientIpcPort + defaults::clientIpcPortRange) ? global::clientIpcPort + 1 : defaults::clientIpcPort;
+              if (++count > 2 * defaults::clientIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          }
+
+          daemon_.SetIpcPort(global::clientIpcPort);
           ASSERT_TRUE(daemon_.Start(testDescription_));
       }
       else
@@ -196,6 +209,18 @@ protected:
       TestServerBase::SetUp();
       if (global::spawnServerDaemon)
       {
+          int count = 0;
+          while (IsUDPPortInUse(global::serverIpcPort) != false)
+          {
+              global::serverIpcPort = global::serverIpcPort < (defaults::serverIpcPort + defaults::serverIpcPortRange) ? global::serverIpcPort + 1 : defaults::serverIpcPort;
+              if (++count > 2 * defaults::serverIpcPortRange)
+              {
+                  std::cerr << "Unable to find a usable port - exiting" << std::endl;
+                  exit(-1);
+              }
+          }
+
+          daemon_.SetIpcPort(global::serverIpcPort);
           ASSERT_TRUE(daemon_.Start(testDescription_));
       }
       else

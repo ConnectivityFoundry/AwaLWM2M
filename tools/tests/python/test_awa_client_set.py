@@ -13,10 +13,10 @@
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 # SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #************************************************************************************************************************/
 
@@ -126,95 +126,95 @@ class TestSet(tools_common.AwaTest):
         expectedStdout = ""
         expectedStderr = "Resource or Resource Instance must be specified: /9001\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/9001")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-        
+
     def test_set_no_resource(self):
         # test that we cannot set a value to an instance
         expectedStdout = ""
         expectedStderr = "Resource or Resource Instance must be specified: /9001/2\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/9001/2")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-    
+
     def test_set_no_value(self):
         # test that we cannot set a resource without specifying a value
         expectedStdout = ""
         expectedStderr = "A value must be specified: /9001/2/3\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/9001/2/3")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-    
+
     def test_set_no_value_2(self):
         # test that we cannot set a resource without specifying a value
         expectedStdout = ""
         expectedStderr = "A value must be specified: /9001/2/3/4\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/9001/2/3/4")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-        
+
     def test_set_non_existent_resource(self):
         # test that we cannot set a value of a resource from a non-existent resource or object type
         expectedStdout = ""
         expectedStderr = "/9001/2/3 is not defined\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/9001/2/3=5")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
-        self.assertEqual(expectedCode,   result.code)       
-    
+        self.assertEqual(expectedCode,   result.code)
+
     def test_set_empty_value(self):
         # test that we must specify a value when doing a set
         expectedStdout = ""
         expectedStderr = "A value must be specified: /3/0/10=\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/3/0/10=")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-        
+
     def test_set_garbage_value(self):
         # test we can set MemoryFree (int) as a garbage value without crashing
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
-        
+
         result = client_set(self.config, "/3/0/10=?!?!%%%%%%%")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-        
+
     def test_set_verbose(self):
         # test that set returns correct output with the verbose flag
-        expectedStdout="Session IPC configured for UDP: address 127.0.0.1, port %d\nSession connected\nSet Integer /3/0/10 <- abc\nSet operation completed successfully.\nSession disconnected\n" % self.config.clientIpcPort 
+        expectedStdout="Session IPC configured for UDP: address 127.0.0.1, port %d\nSession connected\nSet Integer /3/0/10 <- abc\nSet operation completed successfully.\nSession disconnected\n" % self.config.clientIpcPort
         expectedStderr = ""
         expectedCode = 0
-        
+
         result = client_set(self.config, "-v /3/0/10=abc")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-       
+
     def test_set_no_preceding_slash(self):
         # test that we cannot set a resource without a preceding slash
         expectedStdout = ""
         expectedStderr = "Target 3/0/1=123 is not valid\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "3/0/1=123")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
@@ -225,7 +225,7 @@ class TestSet(tools_common.AwaTest):
         expectedStdout = ""
         expectedStderr = "Resource /3/0/4 is of type None and cannot be set\n"
         expectedCode = 0
-        
+
         result = client_set(self.config, "/3/0/4=abc")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
@@ -243,7 +243,7 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedCode, result.code)
 
     def test_set_string_multi_resource(self):
-        # test that we can set the name of an multi valued resource 
+        # test that we can set the name of an multi valued resource
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
@@ -387,7 +387,7 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
- 
+
     def test_set_string_array(self):
         expectedStdout = ""
         expectedStderr = ""
@@ -451,7 +451,7 @@ class TestSet(tools_common.AwaTest):
     def test_set_opaque_array(self):
         expectedStdout = ""
         expectedStderr = ""
-        expectedCode = 0 
+        expectedCode = 0
 
         result = client_set(self.config, "/1000/0/205/5=helloworld")
         self.assertEqual(expectedStdout, result.stdout)
@@ -464,7 +464,7 @@ class TestSet(tools_common.AwaTest):
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
-        
+
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
                     tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
@@ -479,10 +479,10 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
         # TODO: check that instance 0 is present
-    
+
     def test_create_multiple_object_instances_for_single_instance_object(self):
         # test that the set tool cannot create an object instance with a non-zero ID on a single-instance
-        
+
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
                     tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
@@ -509,13 +509,13 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-    
+
     def test_create_object_instance_with_non_zero_id(self):
         # test that the set tool can create an object instance with a specified ID
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
-        
+
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
                     tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
@@ -537,7 +537,7 @@ class TestSet(tools_common.AwaTest):
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
-        
+
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
                     tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
@@ -558,7 +558,7 @@ class TestSet(tools_common.AwaTest):
         expectedStdout = ""
         expectedStderr = ""
         expectedCode = 0
-        
+
         customObjects = (
             tools_common.CustomObject("Object1001", 1001, False, "single", (
                     tools_common.CustomResource("Resource100", 100, "string",  "single", "optional", "rw"),
@@ -572,7 +572,7 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
-        
+
         result = client_set(self.config, "--create /1001/0/100")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
@@ -582,16 +582,16 @@ class TestSet(tools_common.AwaTest):
     def test_create_object_instance_twice(self):
         # test that the set tool can create an object instance without specifying an ID,
         # and subsequent calls create increasing IDs.
-        
+
         # TODO: check that instance 0 is *not* present
-        
+
         result = client_set(self.config, "--create /2000")
         #self.assertEqual("Created /1000/0", result.stdout)
         self.assertEqual("", result.stdout)
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.code)
         # TODO: check that instance 0 is present
-        
+
         result = client_set(self.config, "--create /2000")
         #self.assertEqual("Created /1000/1", result.stdout)
         self.assertEqual("", result.stdout)
@@ -620,13 +620,13 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.code)
         # TODO: check that instance 19 is present
-    
+
         # attempt should fail:
         result = client_set(self.config, "--create /2000/19")
         self.assertEqual("", result.stdout)
         self.assertEqual("AwaClientSetOperation_Perform failed\nFailed to set on path /2000/19: AwaError_CannotCreate\n", result.stderr)
-        self.assertEqual(1, result.code)       
-   
+        self.assertEqual(1, result.code)
+
     def test_create_optional_resource(self):
         # test that the set tool can create an optional resource
         expectedStdout = ""
@@ -643,7 +643,7 @@ class TestSet(tools_common.AwaTest):
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
 
- 
+
 class TestSetBasic(tools_common.BasicTestCase):
 
     def test_set_help(self):
@@ -698,9 +698,8 @@ For example:
         expectedStdout = ""
         expectedStderr = "Specify one or more resource paths.\n"
         expectedCode = 1
- 
+
         code, stdout, stderr = client_set(self.config)
         self.assertEqual(expectedStdout, stdout)
         self.assertEqual(expectedStderr, stderr)
         self.assertEqual(expectedCode, code)
-

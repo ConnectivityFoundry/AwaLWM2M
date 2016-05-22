@@ -30,6 +30,7 @@ extern "C" {
 
 #include "awa/common.h"
 #include "operation_common.h"
+#include "xmltree.h"
 
 AwaChangeSet * ChangeSet_NewWithClientID(Session * session, SessionType sessionType, TreeNode objectsTree, const char * clientID);
 

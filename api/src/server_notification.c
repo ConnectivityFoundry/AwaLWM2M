@@ -36,11 +36,13 @@
 #include "ipc.h"
 #include "xml.h"
 #include "observe_operation.h"
+#include "server_events.h"
 
-AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * notification)
+static AwaError HandleObserveNotification(AwaServerSession * session, IPCMessage * notification)
 {
+    LogDebug("Handle Observe Notification");
     AwaError result = AwaError_Success;
-    if (notification)
+    if (notification != NULL)
     {
         TreeNode contentNode = IPCMessage_GetContentNode(notification);
         if (contentNode != NULL)
@@ -60,6 +62,179 @@ AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * not
             result = LogErrorWithEnum(AwaError_IPCError, "Content node not found");
         }
     }
+    return result;
+}
+
+static AwaError HandleClientRegisterNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        ServerEventsCallbackInfo * info = ServerSession_GetServerEventsCallbackInfo(session);
+        if (info != NULL)
+        {
+            ClientRegisterEvent * event = ClientRegisterEvent_New();
+            if (event != NULL)
+            {
+                if (ClientRegisterEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientRegisterCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
+                ClientRegisterEvent_Free(&event);
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_OutOfMemory, "Cannot create event");
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "info is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+static AwaError HandleClientDeregisterNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        ServerEventsCallbackInfo * info = ServerSession_GetServerEventsCallbackInfo(session);
+        if (info != NULL)
+        {
+            ClientDeregisterEvent * event = ClientDeregisterEvent_New();
+            if (event != NULL)
+            {
+                if (ClientDeregisterEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientDeregisterCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
+                ClientDeregisterEvent_Free(&event);
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_OutOfMemory, "Cannot create event");
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "info is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+static AwaError HandleClientUpdateNotification(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        ServerEventsCallbackInfo * info = ServerSession_GetServerEventsCallbackInfo(session);
+        if (info != NULL)
+        {
+            ClientUpdateEvent * event = ClientUpdateEvent_New();
+            if (event != NULL)
+            {
+                if (ClientUpdateEvent_AddNotification(event, notification, session) == 0)
+                {
+                    ServerEventsCallbackInfo_InvokeClientUpdateCallback(info, event);
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Cannot add notification to event");
+                }
+                ClientUpdateEvent_Free(&event);
+            }
+            else
+            {
+                result = LogErrorWithEnum(AwaError_OutOfMemory, "Cannot create event");
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "info is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError ServerNotification_Process(AwaServerSession * session, IPCMessage * notification)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        if (notification != NULL)
+        {
+            const char * type = NULL;
+            const char * subType = NULL;
+            if (IPCMessage_GetType(notification, &type, &subType) == InternalError_Success)
+            {
+                if ((type != NULL) && (subType != NULL))
+                {
+                    if (strcmp(type, IPC_MESSAGE_TYPE_NOTIFICATION) == 0)
+                    {
+                        if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_OBSERVE) == 0)
+                        {
+                            result = HandleObserveNotification(session, notification);
+                        }
+                        else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER) == 0)
+                        {
+                            result = HandleClientRegisterNotification(session, notification);
+                        }
+                        else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER) == 0)
+                        {
+                            result = HandleClientDeregisterNotification(session, notification);
+                        }
+                        else if (strcmp(subType, IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE) == 0)
+                        {
+                            result = HandleClientUpdateNotification(session, notification);
+                        }
+                        else
+                        {
+                            result = LogErrorWithEnum(AwaError_IPCError, "Unexpected notification sub-type '%s'", subType);
+                        }
+                    }
+                    else
+                    {
+                        result = LogErrorWithEnum(AwaError_IPCError, "Unexpected message type '%s'", type);
+                    }
+                }
+            }
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_IPCError, "notification is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+
     return result;
 }
 

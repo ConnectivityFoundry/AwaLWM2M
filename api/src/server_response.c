@@ -216,7 +216,7 @@ AwaError ServerResponse_CheckForErrors(const ServerResponse * response)
     return error;
 }
 
-AwaClientIterator * ServerResponse_NewClientIterator(const ServerResponse * response)
+ClientIterator * ServerResponse_NewClientIterator(const ServerResponse * response)
 {
     ClientIterator * iterator = NULL;
     if (response != NULL)
@@ -241,6 +241,6 @@ AwaClientIterator * ServerResponse_NewClientIterator(const ServerResponse * resp
         LogErrorWithEnum(AwaError_OperationInvalid, "operation response is NULL");
     }
 
-    return (AwaClientIterator *)iterator;
+    return iterator;
 }
 

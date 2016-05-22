@@ -156,9 +156,7 @@ AwaError AwaClientGetOperation_Perform(AwaClientGetOperation * operation, AwaTim
                         if (TreeNode_GetChildCount(objectsTree) > 0)
                         {
                             // build an IPC message and inject our content (object paths) into it
-                            IPCMessage * getRequest = IPCMessage_New();
-                            IPCMessage_SetType(getRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_GET);
-
+                            IPCMessage * getRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_GET, OperationCommon_GetSessionID(operation->Common));
                             IPCMessage_AddContent(getRequest, objectsTree);
 
                             IPCMessage * getResponse = NULL;

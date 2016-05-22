@@ -270,3 +270,8 @@ const char * ServerOperation_GetClientIDFromClientNode(const TreeNode clientNode
     return (const char *)xmlif_GetOpaque(clientNode, "Client/ID");
 }
 
+IPCSessionID ServerOperation_GetSessionID(const ServerOperation * operation)
+{
+    return SessionCommon_GetSessionID(ServerSession_GetSessionCommon(operation->Session));
+}
+

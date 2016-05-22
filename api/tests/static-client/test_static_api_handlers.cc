@@ -345,14 +345,6 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Delete_Oper
     AwaServerDeleteOperation_Free(&deleteOperation);
 }
 
-static void * do_execute_operation(void * attr)
-{
-    AwaServerExecuteOperation * executeOperation = (AwaServerExecuteOperation *)attr;
-    AwaError result = AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout);
-    Lwm2m_Debug("AwaServerExecuteOperation_Perform: %s\n", AwaError_ToString(result));
-    return 0;
-}
-
 TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Execute_Operation_for_Object_and_Resource)
 {
     struct callback1 : public StaticClientCallbackPollCondition

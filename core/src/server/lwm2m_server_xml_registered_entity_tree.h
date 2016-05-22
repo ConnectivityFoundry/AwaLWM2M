@@ -20,58 +20,11 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include "static_api_support.h"
+#ifndef LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H
+#define LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H
 
-namespace Awa {
+#include "lwm2m_registration.h"
 
-namespace global {
+TreeNode BuildRegisteredEntityTree(const Lwm2mClientType * client);
 
-
-} // namespace global
-
-namespace detail {
-
-} // namespace detail
-
-namespace StaticClient {
-int staticClientProcessBootstrapTimeout = 10;
-
-}
-
-AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID, void ** dataPointer, size_t * dataSize, bool * changed)
-{
-    AwaStaticClient * client = (AwaStaticClient *)context;
-    AwaResult result = AwaResult_InternalError;
-
-    if (global::logLevel == AwaLogLevel_Debug)
-        std::cout << "Handler for " << operation << std::endl;
-
-    void * callback = AwaStaticClient_GetApplicationContext(client);
-
-    if (callback)
-    {
-        auto * callbackClass = static_cast<StaticClientCallbackPollCondition*>(callback);
-        result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
-    }
-
-    if (global::logLevel == AwaLogLevel_Debug)
-        std::cout << "Handler result " << result << std::endl;
-
-    return result;
-}
-
-void * do_write_operation(void * attr)
-{
-    AwaServerWriteOperation * writeOperation = (AwaServerWriteOperation *)attr;
-    AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout);
-    return 0;
-}
-
-void * do_read_operation(void * attr)
-{
-    AwaServerReadOperation * readOperation = (AwaServerReadOperation *)attr;
-    AwaServerReadOperation_Perform(readOperation, defaults::timeout);
-    return 0;
-}
-
-} // namespace Awa
+#endif // LWM2M_SERVER_XML_REGISTERED_ENTITY_TREE_H
