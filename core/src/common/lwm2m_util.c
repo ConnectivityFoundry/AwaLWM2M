@@ -155,6 +155,7 @@ void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * add
 #endif
 }
 
+#ifndef CONTIKI
 const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
 {
     static char out[255];
@@ -180,6 +181,7 @@ const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
     }
     return out;
 }
+#endif
 
 const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
 {

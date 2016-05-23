@@ -521,7 +521,9 @@ static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode conte
         (IPCSession_New(request->SessionID) == 0) &&
         (IPCSession_AddRequestChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0))
     {
+#ifndef CONTIKI
         Lwm2m_Info("IPC connected from %s - allocated session ID %d\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr), request->SessionID);
+#endif
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
     }
@@ -540,8 +542,9 @@ static int xmlif_HandlerEstablishNotifyRequest(RequestInfoType * request, TreeNo
 {
     if (IPCSession_AddNotifyChannel(request->SessionID, request->Sockfd, &request->FromAddr, request->AddrLen) == 0)
     {
+#ifndef CONTIKI
         Lwm2m_Info("IPC Notify session %d connected from %s\n", request->SessionID, Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
-
+#endif
         TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, AwaResult_Success, request->SessionID);
         IPC_SendResponse(response, request->Sockfd, &request->FromAddr, request->AddrLen);
         Tree_Delete(response);
@@ -561,8 +564,9 @@ static int xmlif_HandlerEstablishNotifyRequest(RequestInfoType * request, TreeNo
 static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode content)
 {
     // No check for known client - proceed regardless.
+#ifndef CONTIKI
     Lwm2m_Info("IPC disconnected from %s\n", Lwm2mCore_DebugPrintSockAddr(&request->FromAddr));
-
+#endif
     //TODO: cleanup for notify channel
 
     TreeNode response = IPC_NewResponseNode(IPC_MESSAGE_SUB_TYPE_DISCONNECT, AwaResult_Success, request->SessionID);

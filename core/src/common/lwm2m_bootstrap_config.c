@@ -142,7 +142,7 @@ const BootstrapInfo * BootstrapInformation_ReadConfigFile(const char * configFil
         FILE * f = fopen(configFile, "rt");
         if (f == NULL)
         {
-            Lwm2m_Error("Configuration file not found\n");
+            Lwm2m_Error("Configuration file not found: %s\n", configFile);
             free(bootstrapInfo);
             bootstrapInfo = NULL;
         }
