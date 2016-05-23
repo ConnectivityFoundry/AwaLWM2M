@@ -238,8 +238,10 @@ void IPCSession_Dump(void)
         if (session != NULL)
         {
             printf("Session ID %d:\n", session->SessionID);
+#ifndef CONTIKI
             printf("  Request Channel: Sockfd %d, FromAddr %s, AddrLen %d\n", session->RequestChannel.Sockfd, Lwm2mCore_DebugPrintSockAddr(&session->RequestChannel.FromAddr), session->RequestChannel.AddrLen);
             printf("  Notify Channel: Sockfd %d, FromAddr %s, AddrLen %d\n", session->NotifyChannel.Sockfd, Lwm2mCore_DebugPrintSockAddr(&session->NotifyChannel.FromAddr), session->NotifyChannel.AddrLen);
+#endif
         }
     }
 }
