@@ -34,7 +34,6 @@
 #  include "lwm2m_client_xml_handlers.h"
 #endif
 
-
 #define DEVICE_MANUFACTURER          "Imagination Technologies"
 #define DEVICE_MODEL_NUMBER          "Awa Client"
 #define DEVICE_SERIAL_NUMBER         "SN12345678"
@@ -48,7 +47,7 @@ static int DEVICE_POWER_CURRENT_2 =  900;
 static int DEVICE_BATTERY_LEVEL   =  100;
 static int DEVICE_MEMORY_FREE     =  15;
 static int DEVICE_ERROR_CODE      =  0;
-static unsigned long DEVICE_TIME  =  0xA20AD72B;     // 1435019474;
+static int64_t DEVICE_TIME        =  0xA20AD72B;
 #define DEVICE_TIMEOFFSET            "+12:00"
 #define DEVICE_TIME_ZONE             "Pacific/Wellington"
 #define DEVICE_BINDING_MODE          "U"
@@ -99,19 +98,20 @@ void Lwm2m_RegisterDeviceObject(Lwm2mContextType * context)
 
     // Register Device object definition.
     Lwm2mCore_RegisterObjectType(context, "Device" , LWM2M_DEVICE_OBJECT, MultipleInstancesEnum_Single, MandatoryEnum_Mandatory, &defaultObjectOperationHandlers);
+
     Lwm2mCore_RegisterResourceType(context, "Manufacturer",             LWM2M_DEVICE_OBJECT, 0,  AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "ModelNumber",              LWM2M_DEVICE_OBJECT, 1,  AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "SerialNumber",             LWM2M_DEVICE_OBJECT, 2,  AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "FirmwareVersion",          LWM2M_DEVICE_OBJECT, 3,  AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "Reboot",                   LWM2M_DEVICE_OBJECT, 4,  AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Mandatory, AwaResourceOperations_Execute,  &rebootOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "FactoryReset",             LWM2M_DEVICE_OBJECT, 5,  AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_Execute,  &factoryResetOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "Reboot",                   LWM2M_DEVICE_OBJECT, 4,  AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Mandatory, AwaResourceOperations_Execute,   &rebootOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "FactoryReset",             LWM2M_DEVICE_OBJECT, 5,  AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_Execute,   &factoryResetOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "AvailablePowerSources",    LWM2M_DEVICE_OBJECT, 6,  AwaResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "PowerSourceVoltage",       LWM2M_DEVICE_OBJECT, 7,  AwaResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "PowerSourceCurrent",       LWM2M_DEVICE_OBJECT, 8,  AwaResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "BatteryLevel",             LWM2M_DEVICE_OBJECT, 9,  AwaResourceType_Integer, MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "MemoryFree",               LWM2M_DEVICE_OBJECT, 10, AwaResourceType_Integer, MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "ErrorCode",                LWM2M_DEVICE_OBJECT, 11, AwaResourceType_Integer, MultipleInstancesEnum_Multiple, MandatoryEnum_Mandatory, AwaResourceOperations_ReadOnly,  &defaultResourceOperationHandlers);
-    Lwm2mCore_RegisterResourceType(context, "ResetErrorCode",           LWM2M_DEVICE_OBJECT, 12, AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_Execute,  &defaultResourceOperationHandlers);
+    Lwm2mCore_RegisterResourceType(context, "ResetErrorCode",           LWM2M_DEVICE_OBJECT, 12, AwaResourceType_None,    MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_Execute,   &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "CurrentTime",              LWM2M_DEVICE_OBJECT, 13, AwaResourceType_Time,    MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "UTCOffset",                LWM2M_DEVICE_OBJECT, 14, AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &defaultResourceOperationHandlers);
     Lwm2mCore_RegisterResourceType(context, "Timezone",                 LWM2M_DEVICE_OBJECT, 15, AwaResourceType_String,  MultipleInstancesEnum_Single,   MandatoryEnum_Optional,  AwaResourceOperations_ReadWrite, &defaultResourceOperationHandlers);
