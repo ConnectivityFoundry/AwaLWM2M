@@ -218,7 +218,7 @@ static const ServerResponse * GetServerResponse(ClientEvent * event)
     {
         LogError("event is NULL");
     }
-    return event->ServerResponse;
+    return (event != NULL) ? event->ServerResponse : NULL;
 }
 
 static ClientIterator * ClientEvent_NewClientIterator(ClientEvent * event)
