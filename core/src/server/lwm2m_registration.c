@@ -746,8 +746,8 @@ int Lwm2m_DeleteRegistrationEventCallback(Lwm2mContextType * lwm2mContext, IPCSe
                     ListRemove(i);
                     free(eventRecord->Context);
                     eventRecord->Context = NULL;
-                    free(eventRecord);
                     Lwm2m_Debug("Removed EventRecord %d: %p\n", sessionID, eventRecord);
+                    free(eventRecord);
                 }
             }
         }
