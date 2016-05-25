@@ -196,7 +196,7 @@ IPCChannel * IPCChannel_New(const IPCInfo * ipcInfo)
 
 void IPCChannel_Free(IPCChannel ** channel)
 {
-    if (channel != NULL && *channel != NULL)
+    if ((channel != NULL) && (*channel != NULL))
     {
         if ((*channel)->Socket > 0)
         {
@@ -208,7 +208,7 @@ void IPCChannel_Free(IPCChannel ** channel)
             close((*channel)->NotifySocket);
             (*channel)->NotifySocket = 0;
         }
-        LogFree("IPCChannel", channel);
+        LogFree("IPCChannel", *channel);
         Awa_MemSafeFree(*channel);
         *channel = NULL;
     }
@@ -226,6 +226,25 @@ IPCMessage * IPCMessage_New(void)
     else
     {
         LogErrorWithEnum(AwaError_OutOfMemory);
+    }
+    return message;
+}
+
+IPCMessage * IPCMessage_NewPlus(const char * type, const char * subType, IPCSessionID sessionID)
+{
+    IPCMessage * message = IPCMessage_New();
+    if (message != NULL)
+    {
+        if ((IPCMessage_SetType(message, type, subType) != InternalError_Success) ||
+            (IPCMessage_SetSessionID(message, sessionID) != InternalError_Success))
+        {
+            LogError("Failed to set message headers");
+            IPCMessage_Free(&message);
+        }
+    }
+    else
+    {
+        LogError("Failed to create message");
     }
     return message;
 }
@@ -335,40 +354,43 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
     return result;
 }
 
-InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const char ** subType)
+InternalError IPCMessage_GetType(const IPCMessage * message, const char ** type_, const char ** subType_)
 {
     InternalError result = InternalError_Unspecified;
+    const char * type = NULL;
+    const char * subType = NULL;
 
-    if (message && type && subType)
+    // message must be non-null, and either type or subType must be non-null, or both.
+    if ((message != NULL) && !((type_ == NULL) && (subType_ == NULL)))
     {
-        if (message->RootNode && (*type = TreeNode_GetName(message->RootNode)) != NULL)
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
         {
             char * path = NULL;
-            if (msprintf(&path, "%s/Type", *type) > 0)
+            if (msprintf(&path, "%s/Type", type) > 0)
             {
                 TreeNode subTypeNode = TreeNode_Navigate(message->RootNode, path);
 
                 if (subTypeNode)
                 {
-                    if ((*subType = (const char *)TreeNode_GetValue(subTypeNode)) != NULL)
+                    if ((subType = (const char *)TreeNode_GetValue(subTypeNode)) != NULL)
                     {
                         result = InternalError_Success;
                     }
                     else
                     {
-                        *type = NULL;
+                        type = NULL;
                         result = InternalError_InvalidMessage;
                     }
                 }
                 else
                 {
-                    *type = NULL;
+                    type = NULL;
                     result = InternalError_InvalidMessage;
                 }
             }
             else
             {
-                *type = NULL;
+                type = NULL;
                 result = InternalError_InvalidMessage;
             }
 
@@ -387,10 +409,158 @@ InternalError IPCMessage_GetType(IPCMessage * message, const char ** type, const
         result = InternalError_ParameterInvalid;
     }
 
+    if (type_)
+    {
+        *type_ = type;
+    }
+
+    if (subType_)
+    {
+        *subType_ = subType;
+    }
+
     return result;
 }
 
-IPCResponseCode IPCMessage_GetResponseCode(IPCMessage * message)
+InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID sessionID)
+{
+    InternalError result = InternalError_Success;
+
+    // a session ID of -1 will clear any existing tag
+
+    if (message != NULL)
+    {
+        if (message->RootNode != NULL)
+        {
+            const char * rootName = TreeNode_GetName(message->RootNode);
+            if (rootName != NULL)
+            {
+                // determine length of path
+                char * path = NULL;
+                if (msprintf(&path, "%s/SessionID", TreeNode_GetName(message->RootNode)) > 0)
+                {
+                    TreeNode sessionIDNode = TreeNode_Navigate(message->RootNode, path);
+
+                    if (sessionID == -1)
+                    {
+                        // clear existing
+                        if (sessionIDNode)
+                        {
+                            Tree_DetachNode(sessionIDNode);
+                            Tree_Delete(sessionIDNode);
+                        }
+                        // else do nothing
+                    }
+                    else
+                    {
+                        // set
+                        char * value = NULL;
+                        if (msprintf(&value, "%d", sessionID) > 0)
+                        {
+                            if (sessionIDNode)
+                            {
+                                TreeNode_SetValue(sessionIDNode, (const uint8_t *)value, strlen(value));
+                                result = InternalError_Success;
+                            }
+                            else
+                            {
+                                TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", value);
+                                if (sessionIDNode != NULL)
+                                {
+                                    if (TreeNode_AddChild(message->RootNode, sessionIDNode) != false)
+                                    {
+                                        result = InternalError_Success;
+                                    }
+                                    else
+                                    {
+                                        LogError("TreeNode_AddChild failed");
+                                        result = InternalError_Tree;
+                                    }
+                                }
+                                else
+                                {
+                                    LogError("Xml_CreateNodeWithValue failed");
+                                    result = InternalError_OutOfMemory;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            LogError("msprintf failed");
+                            result = InternalError_OutOfMemory;
+                        }
+
+                        if (value != NULL)
+                        {
+                            Awa_MemSafeFree(value);
+                            value = NULL;
+                        }
+                    }
+                }
+                else
+                {
+                    LogError("msprintf failed");
+                    result = InternalError_OutOfMemory;
+                }
+
+                if (path != NULL)
+                {
+                    Awa_MemSafeFree(path);
+                    path = NULL;
+                }
+            }
+            else
+            {
+                LogError("message root name is NULL");
+                result = InternalError_InvalidMessage;
+            }
+        }
+        else
+        {
+            LogError("message root is NULL");
+            result = InternalError_InvalidMessage;
+        }
+    }
+    else
+    {
+        LogError("message is NULL");
+        result = InternalError_InvalidMessage;
+    }
+
+    return result;
+}
+
+IPCSessionID IPCMessage_GetSessionID(const IPCMessage * message)
+{
+    IPCSessionID sessionID = -1;
+
+    if (message != NULL)
+    {
+        const char * type = NULL;
+        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+        {
+            char * path = NULL;
+            if (msprintf(&path, "%s/SessionID", type) > 0)
+            {
+               TreeNode sessionIDNode = TreeNode_Navigate(message->RootNode, path);
+               const char * sessionIDStr = NULL;
+
+               if ((sessionIDStr = (const char *)TreeNode_GetValue(sessionIDNode)) != NULL)
+               {
+                   sessionID = atoi(sessionIDStr);
+               }
+            }
+            Awa_MemSafeFree(path);
+        }
+    }
+    else
+    {
+        LogError("message is NULL");
+    }
+    return sessionID;
+}
+
+IPCResponseCode IPCMessage_GetResponseCode(const IPCMessage * message)
 {
     IPCResponseCode code = IPCResponseCode_NotSet;
 
@@ -687,27 +857,34 @@ AwaError IPC_ReceiveNotification(IPCChannel * channel, IPCMessage ** notificatio
             LogDebug("IPC notify:\n%s", recvBuffer);
             *notification = IPC_DeserialiseMessageFromXML(recvBuffer, recvBufferLen);
 
-            if (*notification != NULL)
+            const char * type = NULL;
+            IPCMessage_GetType(*notification, &type, NULL);
+            if (strcmp(IPC_MESSAGE_TYPE_NOTIFICATION, type) == 0)
             {
-                //TODO: check response code
-                result = AwaError_Success;
+                if (*notification != NULL)
+                {
+                    // Notifications have no response code
+                    result = AwaError_Success;
+                }
+                else
+                {
+                    result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise message.");
+                }
             }
             else
             {
-                result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise XML.");
+                result = LogErrorWithEnum(AwaError_IPCError, "Unexpected message on notification channel.");
             }
         }
         else
         {
             if (errno == EAGAIN)
             {
-                LogPError("Timed out receiving notification on IPC UDP");
-                result = AwaError_Timeout;
+                result = LogErrorWithEnum(AwaError_Timeout, "Timed out receiving notification on IPC UDP");
             }
             else
             {
-                LogPError("Could not receive notification on IPC UDP");
-                result = AwaError_IPCError;
+                result = LogErrorWithEnum(AwaError_IPCError, "Could not receive notification on IPC UDP");
             }
         }
     }

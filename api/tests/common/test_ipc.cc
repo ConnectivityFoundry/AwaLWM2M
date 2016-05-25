@@ -82,7 +82,19 @@ TEST_F(TestIPC, IPCChannel_Free_handles_null)
     IPCChannel_Free(NULL);
 }
 
-//// INVALID: // Not able to test IPCMessage_SetType as it is hidden
+TEST_F(TestIPC, IPCMessage_NewPlus_handles_null)
+{
+    EXPECT_EQ(NULL, IPCMessage_NewPlus(NULL, NULL, 1));
+    EXPECT_EQ(NULL, IPCMessage_NewPlus("Request", NULL, 1));
+    EXPECT_EQ(NULL, IPCMessage_NewPlus(NULL, "Get", 1));
+}
+
+TEST_F(TestIPC, IPCMessage_NewPlus_handles_valid)
+{
+    IPCMessage * message = IPCMessage_NewPlus("Request", "Get", 1);
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_Free(&message);
+}
 
 TEST_F(TestIPC, IPCMessage_SetType_called_with_null_type)
 {
@@ -107,8 +119,7 @@ TEST_F(TestIPC, IPCMessage_GetType_called_with_null_type)
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(NULL, NULL, &SubType));
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(NULL, NULL, NULL));
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, NULL, &SubType));
-    EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, &Type, NULL));
+    // type or subType can be NULL, but not both:
     EXPECT_EQ(InternalError_ParameterInvalid, IPCMessage_GetType(message, NULL, NULL));
     IPCMessage_Free(&message);
 }
@@ -118,19 +129,26 @@ TEST_F(TestIPC, IPCMessage_SetType_GetType_are_equal)
     const char * expectedSubType = "ABCDEF";
     const char * expectedType = "123456";
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, expectedSubType, expectedSubType));
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, expectedType, expectedSubType));
 
     const char * returnedSubType = NULL;
     const char * returnedType = NULL;
-
     EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, &returnedType, &returnedSubType));
+    EXPECT_STREQ(expectedSubType, returnedSubType);
+    EXPECT_STREQ(expectedType, returnedType);
 
-    ASSERT_STREQ(expectedSubType, expectedSubType);
-    ASSERT_STREQ(expectedType, expectedType);
+    returnedSubType = NULL;
+    returnedType = NULL;
+    EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, &returnedType, NULL));
+    EXPECT_STREQ(expectedType, returnedType);
+
+    returnedSubType = NULL;
+    returnedType = NULL;
+    EXPECT_EQ(InternalError_Success, IPCMessage_GetType(message, NULL, &returnedSubType));
+    EXPECT_STREQ(expectedSubType, returnedSubType);
 
     IPCMessage_Free(&message);
 }
-
 
 TEST_F(TestIPC, IPCMessage_GetType_on_empty_message)
 {
@@ -143,11 +161,96 @@ TEST_F(TestIPC, IPCMessage_GetType_on_empty_message)
     IPCMessage_Free(&message);
 }
 
+TEST_F(TestIPC, IPCMessage_SetSessionID_handles_null)
+{
+    EXPECT_EQ(InternalError_InvalidMessage, IPCMessage_SetSessionID(NULL, 1));
+}
+
+TEST_F(TestIPC, IPCMessage_GetSessionID_handles_null)
+{
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(NULL));
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_without_type)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+
+    // no call to IPCMessage_SetType
+    EXPECT_EQ(InternalError_InvalidMessage, IPCMessage_SetSessionID(message, 42));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_GetSessionID_are_equal)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_SetType(message, "Request", "Get");
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 42));
+    EXPECT_EQ(42, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 99));
+    EXPECT_EQ(99, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 711123));
+    EXPECT_EQ(711123, IPCMessage_GetSessionID(message));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_GetSessionID_default)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_SetType(message, "Request", "Get");
+
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_invalid_ID_clears)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_SetType(message, "Request", "Get");
+
+    // -1 clears existing ID
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 56));
+    EXPECT_EQ(56, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, -1));
+    EXPECT_EQ(-1, IPCMessage_GetSessionID(message));
+
+    IPCMessage_Free(&message);
+}
+
+TEST_F(TestIPC, IPCMessage_SetSessionID_zero_ID)
+{
+    IPCMessage * message = IPCMessage_New();
+    ASSERT_TRUE(NULL != message);
+    IPCMessage_SetType(message, "Request", "Get");
+
+    // 0 behaves like any other valid session ID
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 0));
+    EXPECT_EQ(0, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 56));
+    EXPECT_EQ(56, IPCMessage_GetSessionID(message));
+
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetSessionID(message, 0));
+    EXPECT_EQ(0, IPCMessage_GetSessionID(message));
+
+    IPCMessage_Free(&message);
+}
+
 TEST_F(TestIPC, IPC_SerialiseMessageToXML)
 {
     const char * expectedSubType = "ABCDEF";
     IPCMessage * message = IPCMessage_New();
-    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, IPC_MSGTYPE_REQUEST, expectedSubType));
+    EXPECT_EQ(InternalError_Success, IPCMessage_SetType(message, IPC_MESSAGE_TYPE_REQUEST, expectedSubType));
     char * buffer = IPC_SerialiseMessageToXML(message);
     const size_t bufferLen = strlen(buffer);
     TreeNode root = TreeNode_ParseXML(reinterpret_cast<uint8_t *>(buffer), bufferLen, true);
@@ -197,7 +300,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_channel)
 {
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
     EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(NULL, request, &response, defaults::timeout));
     IPCMessage_Free(&request);
 }
@@ -219,7 +322,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_response)
     IPCInfo * info = IPCInfo_NewUDP(detail::NonRoutableIPv4Address, 55555);  EXPECT_TRUE(NULL != info);
     IPCChannel * channel = IPCChannel_New(info);        EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, NULL, defaults::timeout));
     IPCMessage_Free(&request);
     IPCChannel_Free(&channel);
@@ -237,7 +340,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_failed_response_is_null)
     IPCChannel * channel = IPCChannel_New(info);          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, "Request", IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_NE(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     ASSERT_EQ(NULL, response);
@@ -254,7 +357,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_is_not_null)
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     ASSERT_TRUE(NULL != response);
@@ -273,7 +376,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_and_correct_type)
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);
@@ -282,8 +385,8 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_and_correct_type)
     const char * subType = NULL;
     ASSERT_EQ(InternalError_Success, IPCMessage_GetType(response, &Type, &subType));
 
-    ASSERT_STREQ(Type, IPC_MSGTYPE_RESPONSE);
-    ASSERT_STREQ(subType, IPC_MSGTYPE_CONNECT);
+    ASSERT_STREQ(Type, IPC_MESSAGE_TYPE_RESPONSE);
+    ASSERT_STREQ(subType, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     IPCMessage_Free(&request);
     IPCMessage_Free(&response);
@@ -297,7 +400,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_content_is_not_
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);
@@ -316,7 +419,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_code_is_success
     IPCChannel * channel = IPCChannel_New(info);                          EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
-    IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_CONNECT);
+    IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
     EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
     EXPECT_TRUE(NULL != response);

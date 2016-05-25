@@ -11,6 +11,8 @@ set (awa_common_SOURCES
   lwm2m_endpoints.c
   lwm2m_result.c
   lwm2m_types.c
+  ipc_session.c
+  lwm2m_events.c
 )
 
 # currently the API and core are a little tangled so we need to define the include

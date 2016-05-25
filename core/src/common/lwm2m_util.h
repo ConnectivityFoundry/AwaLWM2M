@@ -59,7 +59,12 @@ int32_t ptrToInt32(void * ptr);
 int64_t ptrToInt64(void * ptr);
 
 void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * addr);
+
+#ifndef CONTIKI
+const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa);
+#endif
 const char * Lwm2mCore_DebugPrintAddress(AddressType * addr);
+
 int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr);
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2);
 int Lwm2mCore_ComparePorts(AddressType * addr1, AddressType * addr2);

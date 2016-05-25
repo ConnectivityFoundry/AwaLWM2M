@@ -31,9 +31,11 @@ def debug(msg):
     if g_debug:
         print(msg)
 
-def _serialize(header, msgType, content):
+def _serialize(header, msgType, sessionID, content):
     e_root = etree.Element(header)
     e_root.append(TElement("Type", str(msgType)))
+    if sessionID is not None:
+        e_root.append(TElement("SessionID", str(sessionID)))
     if content is not None:
         e_root.append(content)
     return etree.tostring(e_root, pretty_print=True)
@@ -92,7 +94,8 @@ class IpcRequest(IpcMessage):
     ContentType = IpcContent
     PathLabel = None
 
-    def __init__(self):
+    def __init__(self, session_id=None):
+        self._session_id = session_id
         self._content = type(self).ContentType()
 
     def __str__(self):
@@ -105,19 +108,24 @@ class IpcRequest(IpcMessage):
 
     def serialize(self):
         # use specified MessageType
-        return _serialize(self.Header, self.MessageType, self._content.getElement())
+        return _serialize(self.Header, self.MessageType, self._session_id, self._content.getElement())
+
+    @property
+    def session_id(self):
+        return self._session_id
 
 class IpcResponse(IpcMessage):
     """Base response class - represents a response from an IPC service to an IPC client."""
     Header = "Response"
     ContentType = IpcContent
 
-    def __init__(self, xml=None):
+    def __init__(self, xml=None, session_id=None):
         self._content = type(self).ContentType()
         if xml is not None:
             self.parseXml(xml)
         else:
             self._type = type(self).MessageType
+            self._session_id = session_id
             self._code = None
             self._content = None
 
@@ -125,7 +133,7 @@ class IpcResponse(IpcMessage):
         return super(IpcResponse, self).__str__() + " %s" % (str(self._content),)
 
     def parseXml(self, xml):
-        debug("RECEIVED XML: %s\n" % (xml, ))
+        #debug("RECEIVED XML: %s\n" % (xml, ))
         e_response = etree.fromstring(xml)
         if e_response.tag != "Response":
             raise IpcError("Invalid response")
@@ -139,6 +147,10 @@ class IpcResponse(IpcMessage):
             self._code = e_response.find("Code").text
         except AttributeError:
             raise IpcError("Missing response code")
+        try:
+            self._session_id = e_response.find("SessionID").text
+        except AttributeError:
+            debug("No session ID in response")
         self._content = type(self).ContentType(e_response)
         return e_response
 
@@ -154,13 +166,21 @@ class IpcResponse(IpcMessage):
     def content(self):
         return self._content
 
+    @property
+    def session_id(self):
+        return self._session_id
+
     def getValue(self, path):
         """Path is a tuple: (objectID, objectInstanceID, resourceID, resourceInstanceID)"""
         return self._content.getValue(path)
 
     def serialize(self):
         # use derived MessageType
-        return _serialize(self.Header, self._type, self._content.getElement())
+        try:
+            content = self._content.getElement()
+        except AttributeError:
+            content = None
+        return _serialize(self.Header, self._type, self._session_id, content)
 
     # TODO:
     #  - expose response paths

@@ -76,6 +76,8 @@ AwaError SessionCommon_SendDefineMessage(const SessionCommon * session, const Tr
 
 SessionType SessionCommon_GetSessionType(const SessionCommon * session);
 
+IPCSessionID SessionCommon_GetSessionID(const SessionCommon * session);
+
 #ifdef __cplusplus
 }
 #endif

@@ -29,13 +29,13 @@
 
 #include "xml.h"
 
-#define MAXBUFLEN (65536)
+#define IPC_MAX_BUFFER_LEN (65536)
 
 static int _TreeToString(const TreeNode node, char * buffer, size_t bufferSize, int level);
 
 void Xml_TreeToStdout(const TreeNode node, const char * tag)
 {
-    static const size_t bufferSize = MAXBUFLEN;
+    static const size_t bufferSize = IPC_MAX_BUFFER_LEN;
     char buffer[bufferSize];
     _TreeToString(node, buffer, bufferSize, 0);
     printf("%s:\n%s\n", tag == NULL ? "Xml_TreeToStdout" : tag, buffer);

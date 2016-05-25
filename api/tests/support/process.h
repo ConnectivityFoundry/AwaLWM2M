@@ -44,6 +44,14 @@ void TerminateProcess(pid_t pid);
 // Perform a CoAP operation on the specified resource, after a short delay.
 pid_t CoAPOperation(const char * coapClientPath, int port, const char * method, const char * resource, int delay /*microseconds*/);
 
+
+/**
+ * @brief Check that the specified UDP port is not already in use.
+ *        Note that this does not prevent the port allocation race condition.
+ * @return true if port is in use, false if it is not.
+ */
+bool IsUDPPortInUse(int port);
+
 // Send a request to the specified IPC port, wait for response. Return 0 on success, -1 on error or timeout
 int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_t requestLen);
 

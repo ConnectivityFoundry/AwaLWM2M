@@ -355,3 +355,8 @@ AwaError OperationCommon_AddPathWithArrayRange(OperationCommon * operation, cons
     return result;
 }
 
+IPCSessionID OperationCommon_GetSessionID(const OperationCommon * operation)
+{
+    return SessionCommon_GetSessionID(OperationCommon_GetSessionCommon(operation));
+}
+

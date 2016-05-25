@@ -275,10 +275,10 @@ InternalError ClientSubscribe_AddAwaSubscribeType(TreeNode leafNode, AwaClientSu
     switch(subscription->Type)
     {
         case AwaSubscribeType_Change:
-            messageType = subscription->Cancel? IPC_MSG_CANCEL_SUBSCRIBE_TO_CHANGE : IPC_MSG_SUBSCRIBE_TO_CHANGE;
+            messageType = subscription->Cancel? IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_CHANGE : IPC_MESSAGE_TAG_SUBSCRIBE_TO_CHANGE;
             break;
         case AwaSubscribeType_Execute:
-            messageType = subscription->Cancel? IPC_MSG_CANCEL_SUBSCRIBE_TO_EXECUTE : IPC_MSG_SUBSCRIBE_TO_EXECUTE;
+            messageType = subscription->Cancel? IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_EXECUTE : IPC_MESSAGE_TAG_SUBSCRIBE_TO_EXECUTE;
             break;
         default:
             result = LogErrorWithEnum(InternalError_Unspecified, "node is NULL");
@@ -379,11 +379,10 @@ AwaError AwaClientSubscribeOperation_Perform(AwaClientSubscribeOperation * opera
                     if (TreeNode_GetChildCount(objectsTree) > 0)
                     {
                         // build an IPC message and inject our content (object paths) into it
-                        IPCMessage * subscribeRequest = IPCMessage_New();
-                        IPCMessage_SetType(subscribeRequest, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_SUBSCRIBE);
+                        IPCMessage * subscribeRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_SUBSCRIBE, OperationCommon_GetSessionID(operation->Common));
                         IPCMessage_AddContent(subscribeRequest, objectsTree);
                         IPCMessage * subscribeResponse = NULL;
-                        result = IPC_SendAndReceiveOnNotifySocket(ClientSession_GetChannel(session), subscribeRequest, &subscribeResponse, timeout);
+                        result = IPC_SendAndReceive(ClientSession_GetChannel(session), subscribeRequest, &subscribeResponse, timeout);
 
                         if (result == AwaError_Success)
                         {

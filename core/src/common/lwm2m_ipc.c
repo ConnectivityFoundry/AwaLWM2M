@@ -26,22 +26,73 @@
 #include "lwm2m_ipc.h"
 
 #include "../../../api/src/objects_tree.h"
+#include "../../api/src/ipc_defs.h"
 #include "xml.h"
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_debug.h"
 
 #include <awa/static.h>
 
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code)
+static TreeNode IPC_NewNode(const char * type, const char * subType, IPCSessionID sessionID)
 {
-    TreeNode responseNode = Xml_CreateNode("Response");
-    TreeNode typeNode = Xml_CreateNodeWithValue("Type", "%s", type);
-    TreeNode_AddChild(responseNode, typeNode);
+    TreeNode responseNode = Xml_CreateNode(type);
+    TreeNode subTypeNode = Xml_CreateNodeWithValue("Type", "%s", subType);
+    TreeNode_AddChild(responseNode, subTypeNode);
+    if (sessionID > 0)
+    {
+        IPC_SetSessionID(responseNode, sessionID);
+    }
+    return responseNode;
+}
 
+TreeNode IPC_NewResponseNode(const char * subType, AwaResult code, IPCSessionID sessionID)
+{
+    TreeNode responseNode = IPC_NewNode("Response", subType, sessionID);
     TreeNode codeNode = Xml_CreateNodeWithValue("Code", "%d", code);
     TreeNode_AddChild(responseNode, codeNode);
-
     return responseNode;
+}
+
+TreeNode IPC_NewNotificationNode(const char * subType, IPCSessionID sessionID)
+{
+    return IPC_NewNode("Notification", subType, sessionID);
+}
+
+void IPC_SetSessionID(TreeNode message, IPCSessionID sessionID)
+{
+    // assume there is no session ID already
+    // TODO: check this assumption!
+    TreeNode sessionIDNode = Xml_CreateNodeWithValue("SessionID", "%d", sessionID);
+    TreeNode_AddChild(message, sessionIDNode);
+}
+
+IPCSessionID IPC_GetSessionID(const TreeNode content)
+{
+    IPCSessionID sessionID = -1;
+    if (content != NULL)
+    {
+        const char * type = NULL;
+        if ((type = TreeNode_GetName(content)) != NULL)
+        {
+            enum { PATH_LEN = 128 };
+            char path[PATH_LEN] = { 0 };
+            if (snprintf(path, PATH_LEN, "%s/SessionID", type) > 0)
+            {
+                TreeNode sessionIDNode = TreeNode_Navigate(content, path);
+                const char * sessionIDStr = NULL;
+
+                if ((sessionIDStr = (const char *)TreeNode_GetValue(sessionIDNode)) != NULL)
+                {
+                    sessionID = atoi(sessionIDStr);
+                }
+            }
+        }
+    }
+    else
+    {
+        Lwm2m_Error("content is NULL");
+    }
+    return sessionID;
 }
 
 TreeNode IPC_NewClientsNode()
@@ -63,11 +114,11 @@ TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID)
     return clientNode;
 }
 
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen)
+int IPC_SendResponse(TreeNode responseNode, int sockfd, const struct sockaddr * fromAddr, int addrLen)
 {
     int rc = 0;
     // Serialise response
-    char buffer[MAXBUFLEN] = { 0 };
+    char buffer[IPC_MAX_BUFFER_LEN] = { 0 };
     if (Xml_TreeToString(responseNode, buffer, sizeof(buffer)) > 0)
     {
         xmlif_SendTo(sockfd, buffer, strlen(buffer), 0, fromAddr, addrLen);

@@ -40,8 +40,8 @@ struct _AwaServerListClientsResponse
 struct _AwaServerListClientsOperation
 {
     ServerOperation * ServerOperation;
-    ServerResponse * Response;
-    MapType * ResponseMap;         // stores built-on-demand Response instances
+    ServerResponse * ServerResponse;
+    MapType * ClientResponseMap;         // stores built-on-demand Response instances
 };
 
 AwaServerListClientsOperation * AwaServerListClientsOperation_New(const AwaServerSession * session)
@@ -56,11 +56,11 @@ AwaServerListClientsOperation * AwaServerListClientsOperation_New(const AwaServe
             if (operation != NULL)
             {
                 memset(operation, 0, sizeof(*operation));
-                operation->Response = NULL;
+                operation->ServerResponse = NULL;
                 operation->ServerOperation = ServerOperation_New(session);
                 if (operation->ServerOperation != NULL)
                 {
-                    operation->ResponseMap = Map_New();
+                    operation->ClientResponseMap = Map_New();
                     LogNew("AwaServerListClientsOperation", operation);
                 }
                 else
@@ -92,11 +92,11 @@ AwaError AwaServerListClientsOperation_Free(AwaServerListClientsOperation ** ope
     AwaError result = AwaError_OperationInvalid;
     if ((operation != NULL) && (*operation != NULL))
     {
-        ServerResponse_Free(&(*operation)->Response);
+        ServerResponse_Free(&(*operation)->ServerResponse);
         ServerOperation_Free(&(*operation)->ServerOperation);
 
-        Map_FreeValues((*operation)->ResponseMap);
-        Map_Free(&((*operation)->ResponseMap));
+        Map_FreeValues((*operation)->ClientResponseMap);
+        Map_Free(&((*operation)->ClientResponseMap));
 
         LogFree("AwaServerListClientsOperation", *operation);
         Awa_MemSafeFree(*operation);
@@ -115,9 +115,7 @@ AwaError AwaServerListClientsOperation_Perform(AwaServerListClientsOperation * o
         if (operation != NULL)
         {
             // build an IPC message and inject our content (object paths) into it
-            IPCMessage * request = IPCMessage_New();
-            IPCMessage_SetType(request, IPC_MSGTYPE_REQUEST, IPC_MSGTYPE_LIST_CLIENTS);
-
+            IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS, ServerOperation_GetSessionID(operation->ServerOperation));
             IPCMessage * response = NULL;
             result = IPC_SendAndReceive(ServerSession_GetChannel(ServerOperation_GetSession(operation->ServerOperation)), request, &response, timeout > 0 ? timeout : -1);
 
@@ -127,18 +125,18 @@ AwaError AwaServerListClientsOperation_Perform(AwaServerListClientsOperation * o
                 if (responseCode == IPCResponseCode_Success)
                 {
                     // Free an old Clients record if it exists
-                    if (operation->Response != NULL)
+                    if (operation->ServerResponse != NULL)
                     {
-                        ServerResponse_Free(&operation->Response);
+                        ServerResponse_Free(&operation->ServerResponse);
                     }
 
                     // Detach the response's content and add it to the Server Response
                     TreeNode contentNode = IPCMessage_GetContentNode(response);
                     TreeNode clientsNode = Xml_Find(contentNode, "Clients");
-                    operation->Response= ServerResponse_NewFromServerOperation(operation->ServerOperation, clientsNode);
+                    operation->ServerResponse = ServerResponse_NewFromServerOperation(operation->ServerOperation, clientsNode);
 
                     // if there are any cached Responses, free them
-                    Map_FreeValues(operation->ResponseMap);
+                    Map_FreeValues(operation->ClientResponseMap);
 
                     LogDebug("Perform ListClients Operation successful");
                     result = AwaError_Success;
@@ -173,7 +171,7 @@ AwaClientIterator * AwaServerListClientsOperation_NewClientIterator(const AwaSer
     AwaClientIterator * iterator = NULL;
     if (operation != NULL)
     {
-        iterator = ServerResponse_NewClientIterator(operation->Response);
+        iterator = (AwaClientIterator *)ServerResponse_NewClientIterator(operation->ServerResponse);
     }
     else
     {
@@ -182,6 +180,7 @@ AwaClientIterator * AwaServerListClientsOperation_NewClientIterator(const AwaSer
     return iterator;
 }
 
+// TODO: is maintaining a separate ClientResponseMap unnecessary? Can the ServerResponse's own Map be used instead?
 const AwaServerListClientsResponse * AwaServerListClientsOperation_GetResponse(const AwaServerListClientsOperation * operation, const char * clientID)
 {
     AwaServerListClientsResponse * listClientsResponse = NULL;
@@ -189,15 +188,15 @@ const AwaServerListClientsResponse * AwaServerListClientsOperation_GetResponse(c
     {
         if (clientID != NULL)
         {
-            if (operation->Response != NULL)
+            if (operation->ServerResponse != NULL)
             {
                 // check that client response exists:
-                const ResponseCommon * clientResponse = ServerResponse_GetClientResponse(operation->Response, clientID);
+                const ResponseCommon * clientResponse = ServerResponse_GetClientResponse(operation->ServerResponse, clientID);
                 if (clientResponse != NULL)
                 {
                     // look up existing Response in map, return it.
                     // if it doesn't exist, create new Response and add to map, return it.
-                    Map_Get(operation->ResponseMap, clientID, (void *)&listClientsResponse);
+                    Map_Get(operation->ClientResponseMap, clientID, (void *)&listClientsResponse);
                     if (listClientsResponse == NULL)
                     {
                         LogDebug("Create new AwaServerListClientsResponse");
@@ -208,7 +207,7 @@ const AwaServerListClientsResponse * AwaServerListClientsOperation_GetResponse(c
                             listClientsResponse->Response = clientResponse;
 
                             // cache the listClientsResponse
-                            if (Map_Put(operation->ResponseMap, clientID, (void *)listClientsResponse) == false)
+                            if (Map_Put(operation->ClientResponseMap, clientID, (void *)listClientsResponse) == false)
                             {
                                 // do not return the response if we can't retain it, as it will eventually leak
                                 LogErrorWithEnum(AwaError_Internal, "Map put failed");

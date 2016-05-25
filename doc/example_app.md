@@ -14,7 +14,7 @@
 
 This example shows how to:
 
-* Compile and install Awa LightweightM2M   
+* Compile and install Awa LightweightM2M
 * Create the application *client-tutorial* which:
     * Initiates a client session
     * Defines an object
@@ -64,7 +64,7 @@ To create the makefile, copy the code below to tutorial/*Makefile*. Be sure to r
 
 ```make
 all:
-	$(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
+	$(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
 ```
 
 Now is a good time to define our objects and resources:
@@ -138,7 +138,7 @@ Note that in this case *libawa.so* isn't in the library path. We'll tell the sys
  it by setting the *LD_LIBRARY_PATH* variable.
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 ````
 
 The application will then exit, leaving the new object/resource registered within the client daemon.
@@ -208,9 +208,9 @@ static void SetInitialValues(AwaClientSession * session)
 }
 
 +static void UpdateTemperature(AwaClientSession * session, float temperature)
-+{    
++{
 +    AwaClientSetOperation * operation = AwaClientSetOperation_New(session);
-+   
++
 +    AwaClientSetOperation_AddValueAsFloat(operation, "/1000/0/104", temperature);
 +
 +    AwaClientSetOperation_Perform(operation, OPERATION_PERFORM_TIMEOUT);
@@ -228,7 +228,7 @@ int main(void)
 
 +   while (true)
 +   {
-+       float temperature; 
++       float temperature;
 +
 +       printf("enter temperature or any other key to exit:");
 +       if (scanf("%f", &temperature) == 0)
@@ -262,7 +262,7 @@ And restart the client daemon:
 Then restart the client application and set the temperature...
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 enter temperature or any other key to exit:10.0
 set temperature /1000/0/104 to 10.000000
 enter temperature or any other key to exit:q
@@ -328,8 +328,8 @@ Now update tutorial/Makefile to include *server-tutorial.c* like so:
 
 ```make
 all:
-        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa
+        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
+        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
 ```
 
 Build the new application:
@@ -350,13 +350,13 @@ Restart the client/server daemon:
 And start the server application:
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./server-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./server-tutorial
 ```
 
 Now start client client application:
 
 ```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./client-tutorial
+~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
 ```
 
 Use the server tool *awa-server-list-clients* to check that the client is registered with the server (look for object /1000/0 ):
@@ -399,6 +399,134 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
+## Example: Create a server event application using the Awa API.
+
+This example will demonstrate how to build a standalone application using the Awa Server API. This application will receive events from the LWM2M server for client registrations.
+
+The complete version of this example can be found in *examples/server-event-example.c*. This also contains event handlers for Client Deregister and Client Update events, and uses the callback *context* to pass application data to each callback.
+
+Note that this example omits error checking. This is for illustrative purposes only and application programmers should check return values for each API function call.
+
+We start by setting up our API Session with the server, and connecting with the server's IPC. Before exiting, we should also disconnect and free any allocated memory:
+
+```c
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <awa/server.h>
+
+#define OPERATION_PERFORM_TIMEOUT (1000)
+
+int main(void)
+{
+    AwaServerSession * session = AwaServerSession_New();
+    AwaServerSession_Connect(session);
+
+    AwaServerSession_Disconnect(session);
+    AwaServerSession_Free(&session);
+    return 0;
+}
+```
+
+Add a loop that will run until CTRL-C is entered. This loop will provide the API a regular opportunity to service any incoming notifications, and run any associated callback functions:
+
+```c
+...
+#include <stdio.h>
++#include <signal.h>
+#include <awa/server.h>
+...
+
++static bool stopFlag = false;
++static void stop(int ignore)
++{
++   stopFlag = true;
++}
+
+int main(void)
+{
++   signal(SIGINT, stop);
+
+    AwaServerSession * session = AwaServerSession_New();
+    AwaServerSession_Connect(session);
+
++   while (!stopFlag)
++   {
++       AwaServerSession_Process(session, OPERATION_PERFORM_TIMEOUT);
++       AwaServerSession_DispatchCallbacks(session);
++   }
+
+    AwaServerSession_Disconnect(session);
+    AwaServerSession_Free(&session);
+    return 0;
+}
+```
+
+Add a callback that will be called whenever a client registers with the server, by passing the callback's function pointer to `AwaServerSession_SetClientRegisterEventCallback()`. An optional context pointer
+may be provided which will be passed to the callback function automatically. It is not used in this example.
+
+```c
+...
+
++static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, void * context)
++{
++   printf("Client registered!\n");
++}
+
+int main(void)
+{
+    signal(SIGINT, stop);
+
+    AwaServerSession * session = AwaServerSession_New();
+    AwaServerSession_Connect(session);
+
++   AwaServerSession_SetClientRegisterEventCallback(session, clientRegisterCallback, NULL);
+
+    while (!stopFlag)
+    {
+        AwaServerSession_Process(session, OPERATION_PERFORM_TIMEOUT);
+        AwaServerSession_DispatchCallbacks(session);
+    }
+
+    AwaServerSession_Disconnect(session);
+    AwaServerSession_Free(&session);
+    return 0;
+}
+```
+
+At this point, you should be able to build this application and run it with an Awa LWM2M server daemon using the default IPC configuration. When you start an Awa LWM2M client and have it register with your server, the application should print out "Client registered!".
+
+The next step is to determine the name (ID) of the newly registered client and use this to print out the registered entities, which are the registered objects and object instances managed by the client. An event may contain information for more than one client, so multiple client names (IDs) may be available in a single event. Client names are obtained from an `AwaClientIterator`. As used elsewhere in the API, an `AwaClientIterator` can be passed to `AwaClientIterator_Next()` to obtain the next entry, and each client name is then returned by `AwaClientIterator_GetClientID()`.
+
+Once we have a client name, we can use this to obtain the list of registered LWM2M entities (objects and object instances) for this client. This is done by using an `AwaRegisteredEntityIterator`, which behaves in a similar way to `AwaClientIterator`. The entity *paths* are returned by `AwaRegisteredEntityIterator_GetPath()`. These are strings in the form of `/3` or `/3/0` where `3` is the Object ID and `0` is the Object Instance ID.
+
+```c
+...
+static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, void * context)
+{
+-   printf("Client registered!\n");
++   AwaClientIterator * clientIterator =
++          AwaServerClientRegisterEvent_NewClientIterator(event);
++
++   while (AwaClientIterator_Next(clientIterator))
++   {
++       const char * clientID =  AwaClientIterator_GetClientID(clientIterator);
++       printf("Client %s registered!\n", clientID);
++       AwaRegisteredEntityIterator * entityIterator =
++           AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
++       while (AwaRegisteredEntityIterator_Next(entityIterator))
++       {
++           printf(" %s", AwaRegisteredEntityIterator_GetPath(entityIterator));
++       }
++       printf("\n");
++   }
++   AwaRegisteredEntityIterator_Free(&entityIterator);
+}
+...
+```
+
+The application should now print the name of each registering client and the list of registered entity paths.
+
 ## Example: Create a standalone LWM2M client on a gateway device using the Awa Static API.
 
 This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
@@ -409,7 +537,7 @@ Copy the following code into static-client-tutorial/*Makefile*:
 
 ```make
 all:
-	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(AWA_INSTALL_PATH)/usr/include -L$(AWA_INSTALL_PATH)/usr/lib -lawa_static
+	$(CC) static-client-tutorial.c -o static-client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa_static
 ```
 
 Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
@@ -423,7 +551,7 @@ int main(void)
 {
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
-	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
@@ -458,7 +586,7 @@ $ ./build/install/bin/awa_serverd -d
 Run your new application:
 
 ```
-$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/usr/lib ./static-client-tutorial
+$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./static-client-tutorial
 ```
 
 Query the server for connected clients:
@@ -546,8 +674,8 @@ int main(void)
 
 ## Example: Create a standalone LWM2M client within a contiki environment.
 
-Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree 
-for a contiki environment. 
+Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree
+for a contiki environment.
 
 The following instructions act as an example of how to build a LWM2M client for contiki.
 
@@ -564,8 +692,8 @@ Clone AwaLWM2M and contiki into this directory:
 
 ```
 $ cd contiki-example
-contiki-example$ git clone https://github.com/FlowM2M/AwaLWM2M.git 
-contiki-example$ git clone https://github.com/contiki-os/contiki.git 
+contiki-example$ git clone https://github.com/FlowM2M/AwaLWM2M.git
+contiki-example$ git clone https://github.com/contiki-os/contiki.git
 
 contiki-example$ ls
 AwaLWM2M
@@ -651,7 +779,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
 
     awaClient = AwaStaticClient_New();
 
-	AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
+    AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
     AwaStaticClient_SetCoAPListenAddressPort(awaClient, "", 6000);
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");

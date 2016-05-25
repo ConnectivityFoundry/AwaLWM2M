@@ -155,31 +155,38 @@ void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * add
 #endif
 }
 
-const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
-{
 #ifndef CONTIKI
+const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
+{
     static char out[255];
     char buffer[64];
     const char* ip;
     int port;
 
-    switch (addr->Addr.Sa.sa_family)
+    switch (sa->sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET,&addr->Addr.Sin.sin_addr,buffer,sizeof(buffer));
-            port = ntohs(addr->Addr.Sin.sin_port);
+            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buffer, sizeof(buffer));
+            port = ntohs(((struct sockaddr_in *)sa)->sin_port);
             sprintf(out, "%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6,&addr->Addr.Sin6.sin6_addr,buffer,sizeof(buffer));
-            port =  ntohs(addr->Addr.Sin6.sin6_port);
+            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr, buffer, sizeof(buffer));
+            port =  ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
             sprintf(out, "[%s]:%d", ip, port);
             break;
         default:
-            Lwm2m_Error("Unsupported address family: %d\n", addr->Addr.Sa.sa_family);
+            Lwm2m_Error("Unsupported address family: %d\n", sa->sa_family);
             break;
     }
     return out;
+}
+#endif
+
+const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
+{
+#ifndef CONTIKI
+    return Lwm2mCore_DebugPrintSockAddr(&addr->Addr.Sa);
 #else
     static char ipv6addr[50] = {0};
     sprintf(ipv6addr, "[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]:%d", uip_htons(addr->Addr.u16[0]), uip_htons(addr->Addr.u16[1]), uip_htons(addr->Addr.u16[2]), uip_htons(addr->Addr.u16[3]), uip_htons(addr->Addr.u16[4]), uip_htons(addr->Addr.u16[5]), uip_htons(addr->Addr.u16[6]), uip_htons(addr->Addr.u16[7]), addr->Port);

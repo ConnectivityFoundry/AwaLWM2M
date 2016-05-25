@@ -33,7 +33,7 @@ extern "C" {
 #include "lwm2m_object_store.h"
 #include "lwm2m_util.h"
 #include "lwm2m_xml_interface.h"
-
+#include "../../api/src/ipc_defs.h"
 
 typedef struct
 {
@@ -42,6 +42,7 @@ typedef struct
     ObjectInstanceIDType ObjectInstanceID;
     ResourceIDType ResourceID;
     RequestInfoType ExecuteTarget;
+    IPCSessionID SessionID;
 } ExecuteHandlerType;
 
 

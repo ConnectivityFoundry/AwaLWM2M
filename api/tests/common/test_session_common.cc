@@ -570,4 +570,8 @@ TEST_F(TestSessionCommonWithConnectedSession, SessionCommon_IsObjectDefined_hand
     EXPECT_FALSE(SessionCommon_IsObjectDefined(session_, 444));
 }
 
+// difficult to unit test SessionCommon_GetSessionType
+
+// difficult to unit test SessionCommon_GetSessionID
+
 } // namespace Awa

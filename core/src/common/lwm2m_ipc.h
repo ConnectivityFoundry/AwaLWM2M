@@ -26,18 +26,28 @@
 
 #include "lwm2m_result.h"
 #include "xmltree.h"
+#include "../../api/src/ipc_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-TreeNode IPC_NewResponseNode(const char * type, AwaResult code);
+#define IPC_MESSAGE_TYPE_REQUEST      "Request"
+#define IPC_MESSAGE_TYPE_RESPONSE     "Response"
+#define IPC_MESSAGE_TYPE_NOTIFICATION "Notification"
+
+TreeNode IPC_NewResponseNode(const char * subType, AwaResult code, IPCSessionID sessionID);
+TreeNode IPC_NewNotificationNode(const char * subType, IPCSessionID sessionID);
+
+void IPC_SetSessionID(TreeNode message, IPCSessionID sessionID);
+IPCSessionID IPC_GetSessionID(const TreeNode content);
+
 TreeNode IPC_NewClientsNode();
 TreeNode IPC_NewContentNode();
 TreeNode IPC_AddClientNode(TreeNode clientsNode, const char * clientID);
 
 // Serialise and send the IPC response back to the originator
-int IPC_SendResponse(TreeNode responseNode, int sockfd, struct sockaddr * fromAddr, int addrLen);
+int IPC_SendResponse(TreeNode responseNode, int sockfd, const struct sockaddr * fromAddr, int addrLen);
 
 TreeNode IPC_AddResultTag(TreeNode leafNode, int error);
 TreeNode IPC_AddServerResultTag(TreeNode leafNode, int error, int serverError);
