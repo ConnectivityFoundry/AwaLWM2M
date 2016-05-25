@@ -36,6 +36,7 @@
  *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
  */
 
+#include "string.h"
 #include "../common/lwm2m_list.h"
 #include "er-coap-transactions.h"
 #include "er-coap-observe.h"
@@ -58,10 +59,15 @@ struct ListHead transactions_list = {0};
 //  transaction_handler_process = PROCESS_CURRENT();
 //}
 
+void coap_init_transactions(void)
+{
+	ListInit(&transactions_list);
+}
+
 coap_transaction_t * coap_new_transaction(uint16_t mid, coap_session * session)
 {
     coap_transaction_t * t = (coap_transaction_t *)malloc(sizeof(*t)); //memb_alloc(&transactions_memb);
-
+    memset(t, 0, sizeof(coap_transaction_t));
     if(t)
     {
         t->mid = mid;
@@ -123,7 +129,7 @@ void coap_send_transaction(coap_transaction_t *t)
             void *callback_data = t->callback_data;
 
             /* handle observers */
-            coap_remove_observer_by_client(t->session);
+            //coap_remove_observer_by_client(t->session);	// TODO - restore when observe supported
 
             coap_clear_transaction(t);
 

@@ -26,10 +26,13 @@
 #include "coap_abstraction.h"
 #include "lwm2m_debug.h"
 
-#include "contiki.h"
-#include "contiki-net.h"
+//#include "contiki.h"
+//#include "contiki-net.h"
+//#include "rest-engine.h"
+
+#include "er-resource.h"
+#include "er-session.h"
 #include "er-coap-engine.h"
-#include "rest-engine.h"
 
 typedef struct
 {
@@ -50,8 +53,12 @@ static RequestHandler requestHandler = NULL;
 
 #define MAX_COAP_TRANSACTIONS (2)
 int CurrentTransactionIndex = 0;
-TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
+//TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
+TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS];
+static coap_session coapSession;		// TODO - support N sessions
 
+
+#ifdef CONTIKI
 static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
     const char *url = NULL;
@@ -99,7 +106,7 @@ static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ voi
         switch(method)
         {
         case METHOD_GET:
-        
+
             REST.get_header_accept(request, &content);
             coapRequest.contentType = content;
 
@@ -176,6 +183,7 @@ static inline void request_handler(void *request, void *response, uint8_t *buffe
 {
     coap_HandleResource(request, response, buffer, preferred_size, offset);
 }
+#endif
 
 int convert_nibble(uint8_t char_val, uint8_t * nibble)
 {
@@ -193,6 +201,7 @@ int convert_nibble(uint8_t char_val, uint8_t * nibble)
     return -1;
 }
 
+#ifdef CONTIKI
 uip_ipaddr_t * coap_getIpFromURI(const char * uri)
 {
     char * ipStart = NULL;
@@ -201,6 +210,8 @@ uip_ipaddr_t * coap_getIpFromURI(const char * uri)
 
     memset(&ipaddr, 0, sizeof(uip_ipaddr_t));
 
+    // TODO - handle IPv6 or IPv4
+    // TODO - support DNS? (host IP lookup?)
     ipStart = strchr(uri, '[') + 1;
 
     if(ipStart != NULL)
@@ -297,14 +308,19 @@ uip_ipaddr_t * coap_getIpFromURI(const char * uri)
 
     return &ipaddr;
 }
+#endif
 
 int coap_getPortFromURI(const char * uri)
 {
     int port = -1;
-    char * portStart = strchr(uri, ']') + 2;
+
+    // TODO - support IPv4 (c.f. libCoap or libFlowCore Uri support)
+    //char * portStart = strchr(uri, ']') + 2;
+    char * portStart = strchr(uri, ']');
 
     if(portStart != NULL)
     {
+    	portStart += 2;
         char * portEnd = strchr(portStart, '/');
 
         if(portEnd != NULL)
@@ -319,16 +335,23 @@ int coap_getPortFromURI(const char * uri)
             }
         }
     }
+    else
+    {
+    	port = 15685;	// TODO - temp
+    }
 
     return port;
 }
 
 int  coap_getPathQueryFromURI(const char * uri, char * path, char * query)
 {
+    // TODO - support IPv4 (c.f. libCoap or libFlowCore Uri support)
     int result = -1;
-    char * portStart = strchr(uri, ']') + 2;
+    //char * portStart = strchr(uri, ']') + 2;
+    char * portStart = strchr(uri, ']');
     if(portStart != NULL)
     {
+    	portStart += 2;
         char * pathStart = strchr(portStart, '/') + 1;
 
         if(pathStart != NULL)
@@ -345,12 +368,23 @@ int  coap_getPathQueryFromURI(const char * uri, char * path, char * query)
             }
         }
     }
+    else
+    {
+    	// TODO - remove dummy IPv4 stub
+    	// coap://127.0.0.1:15685/bs?ep=ErbiumStaticClient1
+    	strcpy(path, "bs");
+    	strcpy(query, "ep=ErbiumStaticClient1");
+    }
 
     return result;
 }
 
 int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
+    int result = -1;
+
+    Lwm2m_Debug("resolve address from Uri: %s\n", address);		//  TODO - remove
+#ifdef CONTIKI
     uip_ipaddr_t * ipv6addr = coap_getIpFromURI(address);
     int port = coap_getPortFromURI(address);
 
@@ -358,12 +392,10 @@ int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
     {
         memcpy(&addr->Addr, ipv6addr, sizeof(*ipv6addr));
         addr->Port = port;
-        return 0;
+        result = 0;
     }
-    else
-    {
-        return -1;
-    }
+#endif
+    return result;
 }
 
 void coap_CoapRequestCallback(void *callback_data, void *response)
@@ -400,19 +432,30 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
     }
 }
 
+static coap_session * coap_GetSessionFromUri(const char * uri)
+{
+	// TODO - parse uri and map to coap session
+    Lwm2m_Debug("get session from Uri: %s\n", uri);		//  TODO - remove
+
+	coap_session * result = NULL;
+	result = &coapSession;
+	return result;
+}
+
 void coap_createCoapRequest(void * context, coap_method_t method, const char * uri, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
 {
     coap_packet_t request;
-    uip_ipaddr_t * remote_ipaddr = coap_getIpFromURI(uri);
+//    uip_ipaddr_t * remote_ipaddr = coap_getIpFromURI(uri);
     int remote_port = coap_getPortFromURI(uri);
-    coap_transaction_t *transaction;
     char path[128] = {0};
     char query[128] = {0};
+    coap_transaction_t *transaction;
+    coap_session * session = coap_GetSessionFromUri(uri);	// TODO - create new session if needed, with max limit
 
     coap_getPathQueryFromURI(uri, path, query);
 
-    Lwm2m_Debug("Coap request: %s\n", uri);
-    Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(remote_ipaddr));
+    Lwm2m_Info("Coap request: %s\n", uri);
+    //Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(remote_ipaddr));
     Lwm2m_Debug("Coap request port: %d\n", remote_port);
     Lwm2m_Debug("Coap request path: %s\n", path);
     Lwm2m_Debug("Coap request query: %s\n", query);
@@ -421,6 +464,7 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
 
     coap_set_header_uri_path(&request, path);
     coap_set_header_uri_query(&request, query);
+    // TODO - REVIEW: Erbium must copy path/query from request - else mem out of scope
 
     if (contentType != ContentType_None)
     {
@@ -434,15 +478,16 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
         coap_clear_transaction(CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
     }
 
-    if ((transaction = coap_new_transaction(request.mid, remote_ipaddr, uip_htons(remote_port))))
+    //if ((transaction = coap_new_transaction(request.mid, remote_ipaddr, uip_htons(remote_port))))
+    if ((transaction = coap_new_transaction(request.mid, session)))
     {
         transaction->callback = coap_CoapRequestCallback;
         CurrentTransaction[CurrentTransactionIndex].Callback = callback;
         CurrentTransaction[CurrentTransactionIndex].Context = context;
         CurrentTransaction[CurrentTransactionIndex].TransactionUsed = true;
         CurrentTransaction[CurrentTransactionIndex].TransactionPtr = transaction;
-        memcpy(&CurrentTransaction[CurrentTransactionIndex].Address.Addr, remote_ipaddr, sizeof(uip_ipaddr_t));
-        CurrentTransaction[CurrentTransactionIndex].Address.Port = uip_htons(remote_port);
+//        memcpy(&CurrentTransaction[CurrentTransactionIndex].Address.Addr, remote_ipaddr, sizeof(uip_ipaddr_t));
+//        CurrentTransaction[CurrentTransactionIndex].Address.Port = uip_htons(remote_port);
 
         transaction->callback_data = &CurrentTransaction[CurrentTransactionIndex];
 
@@ -460,40 +505,43 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
     }
 }
 
-int coap_Poll(void)
-{
-    return 0;
-}
-
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
-    rest_init_engine();
+	// TODO - create UDP sessions & bind to info (c.f. abstraction_libcoap)
+	memset(CurrentTransaction, sizeof(CurrentTransaction), 0);
+	memset(&coapSession, sizeof(coapSession), 0);
+	coap_init_transactions();
+    //rest_init_engine();
     return &coapInfo;
 }
 
 void coap_SetLogLevel(int logLevel)
 {
-
+	// TODO - set log level for Erbium (replace PRINTFs)
 }
 
 int coap_Destroy(void)
 {
+	// TODO - close any open sessions
+//    coap_free_context(coapContext);
+//    DestroyLists();
     return 0;
 }
 
 void coap_Process(void)
 {
-
+	// TODO - needed for Erbium?
+	// Do nothing - libCoap only
 }
 
 void coap_HandleMessage(void)
 {
-
+	// Do nothing - libCoap only
 }
 
 void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback)
 {
-
+	// Do nothing - libCoap only
 }
 
 void coap_PostRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
@@ -509,29 +557,27 @@ void coap_PutRequest(void * context, const char * path, ContentType contentType,
 // This is a dummy function - Delete requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_DeleteRequest(void * context, const char * path, TransactionCallback callback)
 {
-
 }
 
 // This is a dummy function - Observe requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback callback, NotificationFreeCallback notificationFreeCallback)
 {
-
 }
 
 // This is a dummy function - Cancel Observe Requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_CancelObserve(void * context, const char * path, ContentType contentType, TransactionCallback callback)
 {
-
 }
 
 void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType, const char * payload, int payloadLen, int sequence)
 {
     coap_packet_t notify;
     coap_transaction_t *transaction;
+    coap_session * session = coap_GetSessionFromUri(path);	// TODO - fixme
 
     Lwm2m_Debug("Coap notify: %s\n", path);
-    Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(&addr->Addr));
-    Lwm2m_Debug("Coap request port: %d\n", addr->Port);
+    //Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(&addr->Addr));
+    //Lwm2m_Debug("Coap request port: %d\n", addr->Port);
 
     coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
 
@@ -544,7 +590,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     coap_set_token(&notify, token, tokenSize);
     coap_set_header_observe(&notify, sequence);
 
-    if ((transaction = coap_new_transaction(notify.mid, &addr->Addr, uip_htons(addr->Port))))
+    if ((transaction = coap_new_transaction(notify.mid, session)))
     {
         transaction->packet_len = coap_serialize_message(&notify, transaction->packet);
 
@@ -562,28 +608,41 @@ void coap_SetRequestHandler(RequestHandler handler)
     requestHandler = handler;
 }
 
-RESOURCE(rest_resource_template,
-         "", //"title=\"Hello world: ?len=0..\";rt=\"Text\"",
-         request_handler,
-         request_handler,
-         request_handler,
-         request_handler);
+// TODO - register c/b handler per coap session
+//RESOURCE(rest_resource_template,
+//         "", //"title=\"Hello world: ?len=0..\";rt=\"Text\"",
+//         request_handler,
+//         request_handler,
+//         request_handler,
+//         request_handler);
 
 int coap_RegisterUri(const char * uri)
 {
-    resource_t * temp = malloc(sizeof(resource_t));
-    char * uriCopy = strdup(&uri[1]);
+    // TODO - register resource Uri
 
-    Lwm2m_Debug("register %s\n", uriCopy);
+//    resource_t * temp = malloc(sizeof(resource_t));
+//    char * uriCopy = strdup(&uri[1]);
+//    Lwm2m_Debug("register %s\n", uriCopy);
+//    &rest_resource_template, sizeof(resource_t));
+//    rest_activate_resource(temp, uriCopy);
 
-    memcpy(temp, &rest_resource_template, sizeof(resource_t));
-
-    rest_activate_resource(temp, uriCopy);
-
+    // TODO - create udp session
     return 0;
 }
 
 int coap_DeregisterUri(const char * path)
 {
+    // Do nothing - not supported in static Awa
     return 0;
 }
+
+// Temp session stubs
+void session_send_data(coap_session * session, size_t data_length)
+{
+    Lwm2m_Info("TODO - session_send_data\n");
+}
+void session_send_data_ptr(coap_session * session, uint8_t * data, size_t data_length)
+{
+    Lwm2m_Info("TODO - session_send_data_ptr\n");
+}
+

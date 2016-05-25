@@ -69,7 +69,12 @@ typedef uip_ipaddr_t ipaddr_t
 
 #define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
 
+#define ERBIUM_DEBUG 0
+#if ERBIUM_DEBUG
 #define PRINTF printf
+#else
+#define PRINTF(...)
+#endif
 #define MIN(n, m)   (((n) < (m)) ? (n) : (m))
 #define random_rand random
 
