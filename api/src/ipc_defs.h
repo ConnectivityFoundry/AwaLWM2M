@@ -23,6 +23,10 @@
 #ifndef IPC_DEFS_H
 #define IPC_DEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int IPCSessionID;
 
 #define IPC_MAX_BUFFER_LEN                          (65536)
@@ -75,5 +79,9 @@ typedef int IPCSessionID;
 #define IPC_MESSAGE_TAG_CANCEL_SUBSCRIBE_TO_EXECUTE "CancelSubscribeToExecute"
 #define IPC_MESSAGE_TAG_OBSERVE                     "Observe"
 #define IPC_MESSAGE_TAG_CANCEL_OBSERVATION          "CancelObserve"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // IPC_DEFS_H

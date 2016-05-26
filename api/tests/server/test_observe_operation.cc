@@ -193,7 +193,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_valid_operation_with_callback)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -254,7 +254,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_wrong_session_type)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -311,7 +311,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_step_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -411,7 +411,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_pmin_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -521,7 +521,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_pmax_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -585,7 +585,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_server_object_minimum_period)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -698,7 +698,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_server_object_maximum_period)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -764,7 +764,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_operation_freed_after_observation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -805,7 +805,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_observation_freed_after_operation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -849,7 +849,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_observation_freed_before_perform)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
@@ -880,7 +880,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honours_timeout)
 {
     // start a client
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);      // wait for the client to register with the server
 
     AwaClientSession * clientSession = AwaClientSession_New();
@@ -961,7 +961,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel_observation_stops_notifications)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     struct CallbackHandler1 : public ObserveWaitCondition
@@ -1033,7 +1033,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_executable_resource)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
@@ -1093,7 +1093,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation_add_observation_to_non_existent_resource)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
@@ -1144,7 +1144,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObservation_cancel_non_existing_observation)
 {
     // cancel should still work even if an observation doesn't exist?
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
@@ -1316,7 +1316,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
         }
         void TestBody() {}
     };
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     sleep(1);
 
     ChangeCallbackHandler2 cbHandler(session_, 2);
@@ -1404,7 +1404,7 @@ protected:
     void SetUp() {
         TestObserveWithConnectedSession::SetUp();
 
-        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION) : NULL;
+        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { global::clientEndpointName }, 61000) : NULL;
         sleep(1);      // wait for the client to register with the server
 
         clientSession_ = AwaClientSession_New(); ASSERT_TRUE(NULL != clientSession_);

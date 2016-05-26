@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "lwm2m_debug.h"
@@ -216,12 +217,16 @@ int IPCSession_GetNotifyChannel(IPCSessionID sessionID, int * sockfd, const stru
 
 IPCSessionID IPCSession_AssignSessionID(void)
 {
-    static IPCSessionID sessionID = -1;
-    if (sessionID == -1)
-    {
-        sessionID = getpid() * SUITABLY_LARGE_NUMBER;
-    }
-    return sessionID++;
+    static int seed = 1;
+
+    // generate a pseudo-random number between 10000000 and 99999999 inclusive.
+    enum { MIN_SESSION_ID = 10000000 };
+    enum { MAX_SESSION_ID = 99999999 };
+    struct timeval tv = { 0 };
+    gettimeofday(&tv, NULL);
+    unsigned long long combined = abs(seed++ * getpid() * SUITABLY_LARGE_NUMBER * tv.tv_sec * tv.tv_usec);
+    IPCSessionID sessionID = (combined % (MAX_SESSION_ID - MIN_SESSION_ID + 1)) + MIN_SESSION_ID;
+    return sessionID;
 }
 
 bool IPCSession_IsValid(IPCSessionID sessionID)

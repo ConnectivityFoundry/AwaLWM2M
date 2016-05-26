@@ -85,9 +85,9 @@ TEST_F(TestBootstrapServer, bootstrap_with_single_client)
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
     // start the bootstrap, server and client daemons
-    ASSERT_TRUE(bootstrapServerDaemon.Start(testDescription));
-    ASSERT_TRUE(serverDaemon.Start(testDescription));
-    ASSERT_TRUE(clientDaemon.Start(testDescription));
+    ASSERT_TRUE(bootstrapServerDaemon.Start());
+    ASSERT_TRUE(serverDaemon.Start());
+    ASSERT_TRUE(clientDaemon.Start());
 
     // wait for the client to register with the server
     AwaServerSession * session = AwaServerSession_New();

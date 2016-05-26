@@ -35,6 +35,23 @@
 
 #include "daemon.h"
 #include "process.h"
+#include "log.h"
+
+#include "../../api/src/ipc_defs.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// For use by tests only:
+IPCSessionID AwaClientSession_GetSessionID(const AwaClientSession * session);
+IPCSessionID AwaServerSession_GetSessionID(const AwaServerSession * session);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 // Convert a preprocessor definition to a string
 #define str(x) #x
@@ -96,19 +113,27 @@ private:
 class TestAwaBase : public virtual testing::Test
 {
 protected:
+
+    TestAwaBase() : testDescription_() {}
+
     virtual void SetUp() {
         AwaLog_SetLevel(static_cast<AwaLogLevel>(global::logLevel));
 
         const ::testing::TestInfo* const test_info =
                 ::testing::UnitTest::GetInstance()->current_test_info();
         testDescription_ = std::string(test_info->test_case_name()) + std::string(".") + std::string(test_info->name());
+        global::testLog << "SetUp " << testDescription_ << std::endl;
+    }
+
+    virtual void TearDown() {
+        global::testLog << "TearDown " << testDescription_ << std::endl << std::endl;
     }
     std::string testDescription_;
 };
 
 
 // Base class for Client tests
-class TestClientBase : public TestAwaBase
+class TestClientBase : public virtual TestAwaBase
 {
 };
 
@@ -138,11 +163,11 @@ protected:
           }
 
           daemon_.SetIpcPort(global::clientIpcPort);
-          ASSERT_TRUE(daemon_.Start(testDescription_));
+          ASSERT_TRUE(daemon_.Start());
       }
       else
       {
-          daemon_.SkipStart(testDescription_);
+          daemon_.SkipStart();
       }
   }
   virtual void TearDown() {
@@ -175,6 +200,7 @@ protected:
 
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaClientSession_Connect(session_));
+        global::testLog << "Client session " << AwaClientSession_GetSessionID(session_) << std::endl;
     }
 
     virtual void Disconnect() {
@@ -207,7 +233,7 @@ protected:
 
 
 // Base class for Server tests
-class TestServerBase : public TestAwaBase
+class TestServerBase : public virtual TestAwaBase
 {
 };
 
@@ -237,11 +263,11 @@ protected:
           }
 
           daemon_.SetIpcPort(global::serverIpcPort);
-          ASSERT_TRUE(daemon_.Start(testDescription_));
+          ASSERT_TRUE(daemon_.Start());
       }
       else
       {
-          daemon_.SkipStart(testDescription_);
+          daemon_.SkipStart();
       }
   }
   virtual void TearDown() {
@@ -274,6 +300,7 @@ protected:
 
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaServerSession_Connect(session_));
+        global::testLog << "Server session " << AwaServerSession_GetSessionID(session_) << std::endl;
     }
 
     virtual void Disconnect() {

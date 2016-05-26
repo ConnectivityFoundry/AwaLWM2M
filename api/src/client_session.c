@@ -33,6 +33,7 @@
 #include "get_response.h"
 #include "list.h"
 #include "client_subscribe.h"
+#include "ipc.h"
 
 struct _AwaClientSession
 {
@@ -326,7 +327,6 @@ AwaError AwaClientSession_DispatchCallbacks(AwaClientSession * session)
         while (Queue_Pop(session->NotificationQueue, (void **)&notification))
         {
             ClientNotification_Process(session, notification);
-
             IPCMessage_Free(&notification);
         }
         result = AwaError_Success;
@@ -336,6 +336,21 @@ AwaError AwaClientSession_DispatchCallbacks(AwaClientSession * session)
         result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
+}
+
+// For testing purposes only:
+IPCSessionID AwaClientSession_GetSessionID(const AwaClientSession * session)
+{
+    IPCSessionID sessionID = -1;
+    if (session != NULL)
+    {
+        sessionID = SessionCommon_GetSessionID(session->SessionCommon);
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return sessionID;
 }
 
 SessionCommon * ClientSession_GetSessionCommon(const AwaClientSession * session)

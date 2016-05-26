@@ -1334,7 +1334,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_New
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1357,7 +1357,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadOper
     // DISABLED because we don't support multiple ClientIDs in a single Read operation at present.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1411,7 +1411,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_Get
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_GetResponse_handles_matching_clientID)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1431,7 +1431,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_NewP
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_NewPathIterator_handles_single_path_response)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1459,7 +1459,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadResp
     // NOTE: DISABLED because we don't support multiple paths per operation, presently.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1527,7 +1527,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_non_matching_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1546,7 +1546,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_integer_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to modify a resource, so that the server's
@@ -1580,7 +1580,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_string_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to modify a resource, so that the server's
@@ -1614,7 +1614,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_boolean_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to create a boolean resource, so that the server's
@@ -1683,7 +1683,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_time_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to create a boolean resource, so that the server's
@@ -1752,7 +1752,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_float_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to create a boolean resource, so that the server's
@@ -1840,7 +1840,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetValueAsIntegerPointer_handles_valid_opaque_path)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaOpaque defaultValue = { NULL, 0 };
@@ -1925,7 +1925,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadResp
     // NOTE: DISABLED because we don't support multiple paths per operation, presently.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to modify a resource, so that the server's
@@ -1968,7 +1968,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadResp
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_handles_success)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // now try to read the mandatory resource:
@@ -1990,7 +1990,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_han
 TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_handles_error)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // use the Client API to delete an optional resource, so that the server's

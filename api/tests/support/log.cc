@@ -13,45 +13,25 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include "log.h"
 
-#ifndef CLIENT_SUBSCRIBE_H
-#define CLIENT_SUBSCRIBE_H
+#include <fstream>
 
-#include <stdbool.h>
+namespace Awa {
 
-#include "awa/client.h"
-#include "ipc.h"
-#include "map.h"
-#include "list.h"
+namespace global {
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+const std::string testLogFilename = "daemon.log";
 
-typedef struct _OperationCommon OperationCommon;
-typedef struct _AwaClientSubscription AwaClientSubscription;
+LogStream testLog(testLogFilename, std::ios::out | std::ios::app);
 
-AwaError ClientNotification_Process(AwaClientSession * session, IPCMessage * notification);
+} // namespace global
 
-AwaError ClientSubscribe_CallSubscribers(AwaClientSession * session, TreeNode contentNode);
-
-OperationCommon * ClientSubscribeOperation_GetOperationCommon(const AwaClientSubscribeOperation * operation);
-
-MapType * ClientSubscribeOperation_GetSubscribers(const AwaClientSubscribeOperation * operation);
-
-ListType * ClientSubscription_GetOperations(AwaClientSubscription * subscription);
-
-void ClientSubscription_RemoveSession(AwaClientSubscription * subscription);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // CLIENT_SUBSCRIBE_H
+} // namespace Awa

@@ -423,8 +423,8 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
     // start the bootstrap and server daemons
-    EXPECT_TRUE(bootstrapServerDaemon.Start(testDescription));
-    EXPECT_TRUE(serverDaemon.Start(testDescription));
+    EXPECT_TRUE(bootstrapServerDaemon.Start());
+    EXPECT_TRUE(serverDaemon.Start());
 
     std::string clientEndpointName = "BootstrapTestClient";
     AwaStaticClient * client = AwaStaticClient_New();
