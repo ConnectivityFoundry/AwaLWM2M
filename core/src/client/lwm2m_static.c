@@ -20,15 +20,6 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#if !defined (CONTIKI)
-  #include <signal.h>
-  #include <errno.h>
-  #include <poll.h>
-#else
-  #include "contiki.h"
-  #include "contiki-net.h"
-#endif
-
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -342,55 +333,17 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
     int result = -1;
-
     if (client != NULL)
     {
         if (!client->Running)
         {
             client->Running = true;
         }
-#if !defined (CONTIKI)
-        struct pollfd fds[1];
-        int nfds = 1;
+
         int timeout;
-
-        fds[0].fd = client->CoAPInfo->fd;
-        fds[0].events = POLLIN;
-
         timeout = Lwm2mCore_Process(client->Context);
-
-        result = poll(fds, nfds, timeout);
-        if (result < 0)
-        {
-            if (errno == EINTR)
-            {
-                result = timeout;
-            }
-            else
-            {
-                perror("poll:");
-            }
-        }
-        else if (result > 0)
-        {
-            if (fds[0].revents == POLLIN)
-            {
-                coap_HandleMessage();
-            }
-
-            result = timeout;
-        }
-
-        if (result == timeout)
-        {
-            coap_Process();
-        }
-#else
-        result = Lwm2mCore_Process(client->Context);
-#endif
-
+        result = coap_WaitMessage(timeout, client->CoAPInfo->fd);
     }
-
     return result;
 }
 

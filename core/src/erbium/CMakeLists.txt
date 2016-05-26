@@ -2,6 +2,7 @@ set (awa_erbium_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_list.c
   ${CORE_SRC_DIR}/common/lwm2m_debug.c
   ${CORE_SRC_DIR}/common/lwm2m_util.c
+  ${CORE_SRC_DIR}/common/lwm2m_util_linux.c
   ${CORE_SRC_DIR}/common/lwm2m_object_store.c
   ${CORE_SRC_DIR}/common/lwm2m_attributes.c
   ${CORE_SRC_DIR}/common/lwm2m_definition.c

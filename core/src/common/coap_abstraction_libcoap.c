@@ -37,6 +37,8 @@
 #include <errno.h>
 #include <signal.h>
 #include <inttypes.h>
+#include <poll.h>
+
 
 #include "coap_abstraction.h"
 #include "lwm2m_util.h"
@@ -98,6 +100,44 @@ void coap_SetContext(void * ctxt)
 void coap_SetRequestHandler(RequestHandler handler)
 {
     requestHandler = handler;
+}
+
+int coap_WaitMessage(int timeout, int fd)
+{
+	// TODO - review/needs fixing?: moved from lwm2m_static/AwaStaticClient_Process()
+    int result;
+    struct pollfd fds[1];
+    int nfds = 1;
+
+    fds[0].fd = fd;
+    fds[0].events = POLLIN;
+
+    result = poll(fds, nfds, timeout);
+    if (result < 0)
+    {
+        if (errno == EINTR)
+        {
+            result = timeout;
+        }
+        else
+        {
+            perror("poll:");
+        }
+    }
+    else if (result > 0)
+    {
+        if (fds[0].revents == POLLIN)
+        {
+            coap_HandleMessage();
+        }
+        result = timeout;
+    }
+
+    if (result == timeout)
+    {
+        coap_Process();
+    }
+    return result;
 }
 
 int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)

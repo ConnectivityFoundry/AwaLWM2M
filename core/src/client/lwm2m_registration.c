@@ -301,16 +301,12 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
                 break;
 
             case Lwm2mRegistrationState_Registering:
-                // Wait here until the registration completes or times out, the coap layer should
-                // call us back in this case, however this probably doesn't happen for the contiki code
-                // so i've left this here for now.
-#ifdef CONTIKI
+                // Wait here until the registration completes or times out
                 if (now - server->LastUpdate >= REGISTRATION_TIMEOUT)
                 {
                     Lwm2m_Error("Registration attempt timed out.\n");
                     server->RegistrationState = Lwm2mRegistrationState_RegisterFailedRetry;
                 }
-#endif
                 break;
 
             case Lwm2mRegistrationState_Registered:

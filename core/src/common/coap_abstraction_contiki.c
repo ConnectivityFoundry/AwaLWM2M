@@ -52,6 +52,12 @@ static RequestHandler requestHandler = NULL;
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
 
+int coap_WaitMessage(int timeout, int fd)
+{
+    // No wait in Contiki
+    return timeout;
+}
+
 static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
     const char *url = NULL;

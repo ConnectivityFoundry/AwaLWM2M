@@ -26,10 +26,6 @@
 #include "coap_abstraction.h"
 #include "lwm2m_debug.h"
 
-//#include "contiki.h"
-//#include "contiki-net.h"
-//#include "rest-engine.h"
-
 #include "er-resource.h"
 #include "er-session.h"
 #include "er-coap-engine.h"
@@ -57,6 +53,11 @@ int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS];
 static coap_session coapSession;		// TODO - support N sessions
 
+int coap_WaitMessage(int timeout, int fd)
+{
+    // No wait in Erbium (TODO - non-blocking poll for Rx message)
+    return timeout;
+}
 
 #ifdef CONTIKI
 static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)

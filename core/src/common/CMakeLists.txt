@@ -3,6 +3,7 @@ set (awa_common_SOURCES
   coap_abstraction_libcoap.c
   lwm2m_debug.c
   lwm2m_util.c
+  lwm2m_util_linux.c
   lwm2m_object_store.c
   lwm2m_attributes.c
   lwm2m_definition.c
