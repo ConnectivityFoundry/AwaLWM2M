@@ -48,18 +48,18 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 
 ----
 
-### Introduction.
+### Introduction  
 
 
 ![Awa application overview](Awa_application_overview.png)
 
 
-LWM2M is a protocol that allows client resources to be accessed by a server. In the Awa library the client and server are daemons (individual processes), each having its own respective API interface over an inter-process communication interface (IPC). The client API is for use exclusively with the client daemon, and the server API is for use exclusively with the server daemon.  
-A suite of tools is provided to exercise the main functionality of the API for both the client and server. Later sections describe the configuration of the Awa client and server daemons, along with examples of tools use.
+LWM2M is a protocol that allows resources on a client to be accessed by a server. In the Awa library both the client and the server are daemon processes, each having its own respective API interface over an inter-process communication interface (IPC). The client API is for use exclusively with the client daemon, and the server API is for use exclusively with the server daemon.  
+A suite of tools is also provided to exercise the main functionality of the API for both the client and server. Later sections describe the configuration of the Awa client and server daemons, along with examples of tools use.
 
-A bootstrap server daemon is also provided that implements the LWM2M bootstrapping protocol which instructs LWM2M clients which LWM2M server to connect to. Later sections describe the configuration of the Awa bootstrap server.
+A bootstrap server daemon is included that implements the LWM2M bootstrapping protocol to instruct LWM2M clients which LWM2M management server to connect to. Later sections describe the configuration of the Awa bootstrap server.
 
-### The LWM2M object model.
+### The LWM2M object model  
 
 ----
 
@@ -94,7 +94,7 @@ Semantic addressing allows resources to be written to directly: ````1000/0/1/2='
 ----
 
 
-### The LWM2M client.
+### The LWM2M client  
 
 The LWM2M Client runs as a daemon and provides the core LWM2M functionality for:
 
@@ -103,10 +103,10 @@ The LWM2M Client runs as a daemon and provides the core LWM2M functionality for:
 * Device management and service enablement  
 * Information reporting
 
-The client provides two interfaces: 
+The client provides two interfaces:  
 
 * A CoAP interface to talk to the LWM2M server  
-* An IPC interface which provides a mechanism for applications to talk to the daemon.
+* An IPC interface which provides a mechanism for applications to talk to the daemon  
 
 
 ![Awa LWM2M client interfaces](awa_client_interfaces.png)
@@ -116,7 +116,7 @@ The IPC interface allows the end user application to define new objects and to p
 Currently the IPC interface is implemented as a simple UDP channel, with an associated UDP port. It is recommended that only a single user application connect to the daemon's IPC interface at any time.
 
 
-### The Awa client daemon.
+### The Awa client daemon  
 
 Usage: ````awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]] ````
 
@@ -142,7 +142,7 @@ Example:
 ----
 
 
-### The LWM2M server.
+### The LWM2M server  
 
 The LWM2M server runs as a daemon which provides an interface to perform LWM2M operations on connected LWM2M clients.
 
@@ -152,7 +152,7 @@ The IPC interface allows the end user application to define new objects, list re
 Currently the IPC interface is implemented as a simple UDP channel, with an associated UDP port. It is recommended that only a single user application connect to the daemon's IPC interface at any time.
 
 
-### The Awa server daemon.
+### The Awa server daemon  
 
 Usage: ````awa_serverd [options] ````
 
@@ -179,7 +179,7 @@ For examples of how to use the LWM2M server with the LWM2M client see the *LWM2M
 ----
 
 
-### The LWM2M Bootstrap server.
+### The LWM2M Bootstrap server  
 
 The LWM2M Bootstrap server runs as a daemon which provides a mechanism to bootstrap LWM2M clients. 
 
@@ -187,7 +187,7 @@ The LWM2M Bootstrap server runs as a daemon which provides a mechanism to bootst
 ![](Awa_LWM2M_bootstrap_server-interfaces.png)
 
 
-### The Awa Bootstrap server daemon.
+### The Awa Bootstrap server daemon  
 
 **Command line options.**  
  
@@ -249,7 +249,7 @@ NotificationStoringWhenDisabledOrOffline=true
 ----
 
 
-## Using the LWM2M client.
+## Using the LWM2M client  
 
 
 ### Connecting the gateway client to the gateway LWM2M server.
@@ -259,12 +259,12 @@ $ build/core/src/server/awa_serverd --verbose
 $ build/core/src/client/awa_clientd --endPointName client1 --bootstrap coap://127.0.0.1:15685
 ````
 
-### The Awa API.
+### The Awa API  
 
 The Awa API provides a way for applications to communicate with the LWM2M client and server daemons via the IPC interface.  
 The client API header file can be found in "include/Awa/client.h".  
 The server API header file can be found in "include/Awa/server.h".
-Both server and client APIs are implemented in the *libawa* library.   Applications may be linked against the either the static library *libawa.a* or the shared library *libawa.so*.
+Both server and client APIs are implemented in the *libawa* library. Applications may be linked against the either the static library *libawa.a* or the shared library *libawa.so*.
 
 Useful examples can be found in the *api/example* folder. 
 
@@ -272,14 +272,14 @@ The tools directory contains a number of useful tools. By default these are buil
 
 [Back to the table of contents](userguide.md#contents)
 
-## Awa client API tools.
+## Awa client API tools  
 
 Several command-line tools are available for user interaction with the LWM2M daemon. These tools support simple operations, such as defining a custom object type, setting a resource value, retrieving a resource value, and waiting for a resource to change or be executed. They interact with the LWM2M daemon via the SDK and IPC channel, and are applications that interact with the daemon locally.
 
 Note that these are *not* LWM2M Protocol tools - they do not issue LWM2M operations.
 
 
-### Common options.
+### Common options  
 
 Common options include:
 
@@ -309,7 +309,7 @@ For tools that write data, values can be specified with the format: ````PATH=VAL
 [Back to the table of contents](userguide.md#contents)
 
 
-### Creating a new object definition.
+### Creating a new object definition  
 
 An *object* is a collection of individual *resources* bundled together under a single identifier, along with some extra attributes that describe the nature of the object (listed below). Numerous standard objects are pre-defined within the LWM2M model but additional custom objects may also be defined as needed. Custom objects are created by registering the new object definition with the daemon. The *awa-client-define* tool is used to perform this operation. Note that an object definition does not result in an object instance. Creation of an object instance is a separate process. Resource manipulation is only possible on object instances. 
 
@@ -348,7 +348,7 @@ Example. Define TestObject2 as ObjectID 1000, with a single mandatory instance, 
 
 [Back to the table of contents](userguide.md#contents)
 
-### Discovering a device's object and resource definitions.
+### Discovering a device's object and resource definitions  
 
 The *awa-client-explore* tool is used to discover the objects and resources that have been defined on the LWM2M server. The tool will also list the objects and object-resources that are currently defined within the client daemon.
 
@@ -356,7 +356,7 @@ Example: ````./awa-client-explore ````
 
 [Back to the table of contents](userguide.md#contents)
 
-### Setting resource values.
+### Setting resource values  
 
 The *awa-client-set* tool can be used to set the value of a resource.
 
@@ -386,7 +386,7 @@ Multiple set operations can be combined on the command line:
 
 [Back to the table of contents](userguide.md#contents)
 
-### Retrieving a resource value.
+### Retrieving a resource value  
 
 The *awa-client-get* tool is used to retrieve the value of a client object resource and display it on the console.
 
@@ -404,7 +404,7 @@ The *--quiet/-q* option can be used to suppress the display of any extra informa
 
 [Back to the table of contents](userguide.md#contents)
 
-### Subscribing to a change of resource value.
+### Subscribing to a change of resource value  
 
 In some cases it may be important for a script to block until the value of a resource changes, or for an LWM2M resource execute operation to complete. The *awa-client-subscribe* tool can be used to act as a listener.
 
@@ -432,7 +432,7 @@ Multiple paths can be combined on the command line: ````./awa-client-subscribe /
 
 [Back to the table of contents](userguide.md#contents)
 
-### Deleting a resource.
+### Deleting a resource  
 
 To delete an object or resource instance from the client, use the *awa-client-delete* tool.  
 For example, to delete all object instances of object type 1000: ````./awa-client-delete /1000 ````
@@ -446,7 +446,7 @@ Unlike the *awa-server-delete* tool, this tool can modify the client's data stru
 [Back to the table of contents](userguide.md#contents)
 
 
-## Awa Server API tools.
+## Awa Server API tools  
 
 Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
 
@@ -459,7 +459,7 @@ Server tools often require a target client ID to be specified:
 
 [Back to the table of contents](userguide.md#contents)
 
-### Listing registered clients.
+### Listing registered clients  
 
  The *awa-server-list-clients* tool can be used to list all clients currently registered with the LWM2M server daemon:
 
@@ -488,13 +488,13 @@ Returns
 [Back to the table of contents](userguide.md#contents)
 
 
-### Creating a server object definition.
+### Creating a server object definition  
 
 The *awa-server-define* tool is used to define custom objects on the server. To use a custom object, the object definition must be registered with the server daemon. The *awa-server-define* tool has identical functionality to *awa-client-define*, described earlier.
 
 [Back to the table of contents](userguide.md#contents)
 
-### Writing a value to a resource on a registered client.
+### Writing a value to a resource on a registered client  
 
 The *awa-server-write* tool is used to write the value of a resource on a registered client.
 
@@ -526,7 +526,7 @@ The ID of the newly created object instance is displayed.
 
 [Back to the table of contents](userguide.md#contents)
 
-### Reading a resource value from a registered client.
+### Reading a resource value from a registered client  
 
 The *awa-server-read* tool is used to retrieve the value of a resource and display it on the console. For example, to display the value of resource 0, within instance 0 of object 1000:
 
@@ -550,7 +550,7 @@ The *awa-server-delete* tool is used to delete an instance of an object from a c
 
 [Back to the table of contents](userguide.md#contents)
 
-### Observing a resource on a registered client.
+### Observing a resource on a registered client  
 
 In some cases a script may be required to block until the value of a resource changes on a specific client. For this purpose, the *awa-server-observe* tool is provided to display notifications whenever the target resource or object instance changes. 
 
@@ -580,7 +580,7 @@ Observe attributes that affect the way notifications are generated can be change
 
 [Back to the table of contents](userguide.md#contents)
 
-### Executing a resource on a registered client.
+### Executing a resource on a registered client  
 
 The *awa-server-execute* tool is used to initiate an *execute* operation on a resource that supports it.
 
@@ -604,7 +604,7 @@ Execute operations on an object, an object instance or a resource instance are n
 [Back to the table of contents](userguide.md#contents)
 
 
-### Write attribute values of a resource or object instance on a registered client.
+### Write attribute values of a resource or object instance on a registered client  
 
 The *awa-server-write-attributes* tool is used to change the value of attributes associated with a client's resource or object instance.
 
@@ -621,18 +621,18 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 [Back to the table of contents](userguide.md#contents)
 
 
-## Further information.
+## Further information  
 
-### Application example.
+### Application example  
 
 For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
 
 
-### Awa API reference.
+### Awa API reference  
 
 Full Awa API reference material is available [here](http://flowm2m.github.io/AwaLWM2M-docs/index.html).
 
-### Connecting to third party servers.
+### Connecting to third party servers  
 
 A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](3rdparty.md).
 
