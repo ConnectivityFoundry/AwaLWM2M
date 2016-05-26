@@ -21,7 +21,7 @@ The Awa Static API is ideally suited to devices that have a fixed configuration 
  
 ## Basic LWM2M Client functionality
 
-Device bootstrapping and server registration are performed automatically by the LWM2M Client. Object and Resource models are defined on the client side and then registered with the LWM2M Server. 
+Device bootstrapping and server registration are performed automatically by the LWM2M Client. Device Object and Resource models are defined on the client side and then registered with the LWM2M management server. 
 
 ### Device bootstrapping
 
@@ -45,38 +45,38 @@ The LWM2M Client supports the CoAP *Observe* operation. Observations are handled
 
 The majority of LWM2M operations happen 'under the hood' of the LWM2M Client. The device application code interacts with the Client via the Static API.
 
-Data are shared between the application code and the LWM2M client using pre-defined or custom Objects and Resources as described in the OMA LWM2M specification. Any server or management application that interacts with the device application must be aware of the Client's data model and have definitions for the same Objects and Resources to facilitate interoperability. It is recommended that OMA registered IDs are used that conform to registered LWM2M or IPSO objects.
+Data are shared between the application code and the LWM2M client using pre-defined or custom Objects and Resources as described in the OMA LWM2M specification. Any server or management application that interacts with the device application must be aware of the client's data model and have definitions for the same Objects and Resources to facilitate interoperability. It is recommended that OMA registered IDs are used that conform to registered LWM2M or IPSO objects.
 
 Since an Object is a container for a set of related Resources, an Object must be defined prior to the Resources associated with it.
 
 Objects and Resources are defined in one of two ways:
 
 * **Pointer Mode** - Objects and Resources are defined in application memory and accessed via pointers which are registered with the LWM2M Client via the Static API.  
-* **Handler Mode** - Objects and Resources are defined by a handler function. Object and Resource memory is not directly accessible to the application code. Resource value operations are passed to the Resource handler for execution and any response values are returned by the handler to the application code.  
+* **Handler Mode** - Objects and Resources are defined by a handler function. Object and Resource memory cannot be directly accessed by the application code. Resource value operations are passed to the Resource handler for execution and response values are returned by the handler to the application code.  
 
-While either of the above modes may be used to manage Objects and Resources, the mode may not be changed once an Object has been defined. For example, Object Resources defined via handler mode cannot then be accessed or modified using pointer mode operations.
+While either of the above modes may be used to manage Objects and Resources, the mode may not be changed once an Object has been defined. For example, Resources which are defined using handler mode cannot then be accessed or modified using pointer mode operations.
 
 #### Summary points for pointer and handler modes: 
  
 **Pointer Mode**
 
-* Objects are defined as a simple container for resources.  
-* Allows integration of existing C data structures with the LWM2M service.  
-* Application memory is shared and exposed to the Client through pointers registered using the API.  
-* Data access is automatic - LWM2M will read and write memory as required.  
-* Allows for concrete data structures that are laid out in application memory in a static manner.  
-* Works best for existing data structures.  
-* Easier to use than handler mode, but less flexible because data has to be laid out in a static way.  
+* Objects are defined as a simple container for resources    
+* Allows integration of existing C data structures with the LWM2M service    
+* Application memory is shared and exposed to the Client through pointers registered using the API    
+* Data access is automatic - LWM2M will read and write memory as required    
+* Allows for concrete data structures that are laid out in application memory in a static manner    
+* Works best for existing data structures    
+* Easier to use than handler mode, but less flexible because data has to be laid out in a static way    
 
 **Handler Mode**
 
-* Objects and associated Resources are defined with a handler function.
-* All Resources defined within a handled object must also be defined with handlers.
-* Uses callbacks to notify the application of a pending LWM2M operation. Callbacks are responsible for constructing a response.
-* Memory is not shared. Data access is handled by the application - LWM2M will request operations and the application responds.
-* Allows for virtual data structures, and data structures that are logically constructed in real time, such as calculating velocity from change in position over time, and exposing the result as a resource calculated on request.
-* Works best for resources that require logic or calculations to access.
-* More involved to use than pointer mode, (more code required), but more flexible because it provides the application with the opportunity to modify values on the fly, effectively offering virtual Resources.
+* Objects and associated Resources are defined with a handler function  
+* All Resources defined within a handled object must also be defined with handlers  
+* Uses callbacks to notify the application of a pending LWM2M operation. Callbacks are responsible for constructing a response  
+* Memory is not shared. Data access is handled by the application - LWM2M will request operations and the application responds  
+* Allows for virtual data structures, and data structures that are logically constructed in real time, such as calculating velocity  from change in position over time, and exposing the result as a resource calculated on request  
+* Works best for resources that require logic or calculations to access  
+* More involved to use than pointer mode, (more code required), but more flexible because it provides the application with the opportunity to modify values on the fly, effectively offering virtual Resources  
  
 ### Detailed functionality
 
@@ -108,11 +108,12 @@ It's important to remember that Object and Resource definitions are *not instanc
 This is CoAP initialisation, which allows CoAP endpoints to be created.
 
 ##### The process loop
-This is where the client-side operations take place such as:
+This is where the client-side operations take place such as:  
+* Bootstrapping and registration  
 * Creation, deletion, and/or update of Resource values  
 * Generation of notifications  
 * LWM2M operations handling  
-* Bootstrapping and registration  
+  
 
 Example code for implementing all of the above functionality can be found [here](http://flowm2m.github.io/AwaLWM2M-docs/examples.html).  
 
@@ -172,7 +173,7 @@ This results in fixed length resource instances being distributed continuously i
 ![](pointer_mode_uniform_resource_distribution.png)
 
 The parameters of the above function used to provide information about the location of each value in memory as shown in the diagram above are:
-   
+ 
 * **dataPointer** - the value of the start point (dataPointer[0] in the diagram)  
 * **dataElementSize** - the size of an individual value in bytes  
 * **dataStepSize** - the number of bytes between values  
