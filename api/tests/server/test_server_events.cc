@@ -1371,10 +1371,10 @@ TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
         void callbackHandler(const void * event)
         {
             count ++;
-            AwaServerClientDeregisterEvent * deregisterEvent = (AwaServerClientDeregisterEvent *)event;
-            EXPECT_TRUE(deregisterEvent != NULL);
+            AwaServerClientUpdateEvent * updateEvent = (AwaServerClientUpdateEvent *)event;
+            EXPECT_TRUE(updateEvent != NULL);
 
-            AwaClientIterator * clientIterator = AwaServerClientDeregisterEvent_NewClientIterator(deregisterEvent);
+            AwaClientIterator * clientIterator = AwaServerClientUpdateEvent_NewClientIterator(updateEvent);
             EXPECT_TRUE(clientIterator != NULL);
 
             EXPECT_TRUE(AwaClientIterator_Next(clientIterator));
