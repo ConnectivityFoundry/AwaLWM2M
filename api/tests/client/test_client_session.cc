@@ -128,7 +128,7 @@ TEST_F(TestClientSession, AwaClientSession_Connect_with_default_IPC)
     // Start a client daemon on the expected default IPC port
     AwaClientDaemon daemon_;
     daemon_.SetIpcPort(IPC_DEFAULT_CLIENT_PORT);
-    ASSERT_TRUE(daemon_.Start(""));
+    ASSERT_TRUE(daemon_.Start());
 
     // A session default IPC setup:
     AwaClientSession * session = AwaClientSession_New();

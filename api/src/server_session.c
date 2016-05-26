@@ -365,6 +365,21 @@ AwaError AwaServerSession_DispatchCallbacks(AwaServerSession * session)
     return result;
 }
 
+// For testing purposes only:
+IPCSessionID AwaServerSession_GetSessionID(const AwaServerSession * session)
+{
+    IPCSessionID sessionID = -1;
+    if (session != NULL)
+    {
+        sessionID = SessionCommon_GetSessionID(session->SessionCommon);
+    }
+    else
+    {
+        LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return sessionID;
+}
+
 SessionCommon * ServerSession_GetSessionCommon(const AwaServerSession * session)
 {
     SessionCommon * common = NULL;

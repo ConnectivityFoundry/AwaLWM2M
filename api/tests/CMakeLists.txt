@@ -7,6 +7,7 @@ set (test_api_runner_SOURCES
   support/process.cc
   support/daemon.cc
   support/static_api_support.cc
+  support/log.cc
 
   common/test_log.cc
   common/test_error.cc
@@ -70,7 +71,8 @@ set (test_static_api_runner_SOURCES
   support/process.cc
   support/daemon.cc
   support/static_api_support.cc
-  
+  support/log.cc
+
   static-client/test_static_api.cc
   static-client/test_static_api_with_pointer.cc
   static-client/test_static_api_handlers.cc

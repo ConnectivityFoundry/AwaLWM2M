@@ -846,3 +846,4 @@ IPCSessionID SessionCommon_GetSessionID(const SessionCommon * session)
     }
     return sessionID;
 }
+

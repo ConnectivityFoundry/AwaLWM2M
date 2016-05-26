@@ -24,6 +24,7 @@
 #define IPC_H
 
 #include <stdint.h>
+
 #include "awa/error.h"
 #include "error.h"
 #include "xmltree.h"

@@ -592,7 +592,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
 
     const char * clientID = "TestClient1";
 
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001);
     sleep(1);      // wait for the client to register with the server
 
     AwaClientSession * session = AwaClientSession_New();

@@ -26,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <string>
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -35,6 +36,7 @@
 #include <string.h>
 
 #include "process.h"
+#include "log.h"
 
 namespace Awa {
 
@@ -93,7 +95,7 @@ extern const char * bootstrapServerLogFile;
 class Daemon
 {
 public:
-    explicit Daemon(const char * filename="daemon.log") : pid_(0), log_(filename, std::ios::out | std::ios::app ) {}
+    explicit Daemon() : pid_(0) {}
     virtual ~Daemon()
     {
         if (pid_ > 0)
@@ -103,12 +105,12 @@ public:
             pid_ = 0;
         }
     }
-    virtual bool Start(const std::string & logMessage) = 0;
+    virtual bool Start() = 0;
     virtual void Stop() = 0;
 
 protected:
+
     pid_t pid_;
-    std::ofstream log_;
 };
 
 class AwaClientDaemon : public Daemon
@@ -156,23 +158,22 @@ public:
         bootstrapURI_ = bootstrapURI;
     }
 
-    virtual bool Start(const std::string & logMessage)
+    virtual bool Start()
     {
         pid_ = StartAwaClient(global::clientDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str(), global::bootstrapServerConfig, bootstrapURI_.c_str());
         std::string bootstrapModeDescription = "Bootstrap " + std::string(bootstrapURI_.empty() ? ("config " + std::string(global::bootstrapServerConfig)) : ("URI " + std::string(bootstrapURI_)));
-        log_ << "Spawned Awa Client: "
+        global::testLog << "Spawned Awa Client: "
              << "pid " << pid_
              << ", ID " << endpointName_
              << ", Local CoAP port " << coapPort_
              << ", IPC port " << ipcPort_
              << ", " << bootstrapModeDescription
-             << ", logging to " << logFile_
-             << ", " << logMessage << std::endl;
+             << ", logging to " << logFile_ << std::endl;
         return pid_ >= 0;
     }
-    virtual void SkipStart(const std::string & logMessage)
+    virtual void SkipStart()
     {
-        log_ << "Not spawning LWM2M Client: "
+        global::testLog << "Not spawning LWM2M Client: "
              << "CoAP port " << coapPort_
              << ", IPC port " << ipcPort_ << std::endl;
         pid_ = 0;
@@ -182,7 +183,7 @@ public:
         if (pid_ > 0)
         {
             // use SIGTERM so that valgrind can terminate correctly and write log
-            log_ << "Terminating Awa Client: pid " << pid_ << std::endl;
+            global::testLog << "Terminating Awa Client: pid " << pid_ << std::endl;
             TerminateProcess(pid_);
             pid_ = 0;
         }
@@ -225,20 +226,19 @@ public:
         logFile_ = logFile;
     }
 
-    virtual bool Start(const std::string & logMessage)
+    virtual bool Start()
     {
         pid_ = StartAwaServer(global::serverDaemonPath, coapPort_, ipcPort_, logFile_.c_str());
-        log_ << "Spawned Awa Server: "
+        global::testLog << "Spawned Awa Server: "
              << "pid " << pid_
              << ", CoAP port " << coapPort_
              << ", IPC port " << ipcPort_
-             << ", logging to " << logFile_
-             << ", " << logMessage << std::endl;
+             << ", logging to " << logFile_ << std::endl;
         return pid_ >= 0;
     }
-    virtual void SkipStart(const std::string & logMessage)
+    virtual void SkipStart()
     {
-        log_ << "Not spawning Awa Server: "
+        global::testLog << "Not spawning Awa Server: "
              << "CoAP port " << coapPort_
              << ", IPC port " << ipcPort_ << std::endl;
         pid_ = 0;
@@ -248,7 +248,7 @@ public:
         if (pid_ > 0)
         {
             // use SIGTERM so that valgrind can terminate correctly and write log
-            log_ << "Terminating Awa Server: pid " << pid_ << std::endl;
+            global::testLog << "Terminating Awa Server: pid " << pid_ << std::endl;
             TerminateProcess(pid_);
             pid_ = 0;
         }
@@ -288,15 +288,14 @@ public:
         logFile_ = logFile;
     }
 
-    virtual bool Start(const std::string & logMessage)
+    virtual bool Start()
     {
         pid_ = StartAwaBootstrapServer(global::bootstrapServerDaemonPath, coapPort_, configFile_.c_str(), logFile_.c_str());
-        log_ << "Spawned Awa Bootstrap Server: "
+        global::testLog << "Spawned Awa Bootstrap Server: "
              << "pid " << pid_
              << ", CoAP port " << coapPort_
              << ", config file " << configFile_
-             << ", logging to " << logFile_
-             << ", " << logMessage << std::endl;
+             << ", logging to " << logFile_ << std::endl;
         return pid_ >= 0;
     }
     virtual void Stop()
@@ -304,7 +303,7 @@ public:
         if (pid_ > 0)
         {
             // use SIGTERM so that valgrind can terminate correctly and write log
-            log_ << "Terminating Awa Server: pid " << pid_ << std::endl;
+            global::testLog << "Terminating Awa Server: pid " << pid_ << std::endl;
             TerminateProcess(pid_);
             pid_ = 0;
         }
@@ -357,16 +356,17 @@ private:
 class AwaClientDaemonHorde
 {
 public:
-    AwaClientDaemonHorde(std::vector<std::string> clientIDs,
-                         int startIpcPort, std::string testDescription) :
+    AwaClientDaemonHorde(std::vector<std::string> clientIDs, int startIpcPort) :
         clients_(), clientIDs_(clientIDs), startPort_(startIpcPort)
     {
+        global::testLog << "Client Horde:" << std::endl;
         for (auto it = clientIDs_.begin(); it != clientIDs_.end(); ++it)
         {
             DaemonPtr p(new AwaClientDaemon);
             p->SetIpcPort(startIpcPort++);
             p->SetEndpointName(*it);
-            p->Start(std::string(*it) + std::string(" : ") + testDescription);
+            global::testLog << "  - spawn " << *it << std::endl;
+            p->Start();
             clients_.push_back(std::move(p));
         }
     }

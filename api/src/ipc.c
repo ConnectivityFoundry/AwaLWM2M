@@ -563,25 +563,41 @@ IPCSessionID IPCMessage_GetSessionID(const IPCMessage * message)
 IPCResponseCode IPCMessage_GetResponseCode(const IPCMessage * message)
 {
     IPCResponseCode code = IPCResponseCode_NotSet;
-
     if (message != NULL)
     {
-        const char * type = NULL;
-        if (message->RootNode && (type = TreeNode_GetName(message->RootNode)) != NULL)
+        if (message->RootNode)
         {
-            char * path = NULL;
-            if (msprintf(&path, "%s/Code", type) > 0)
+            const char * type = TreeNode_GetName(message->RootNode);
+            if (type != NULL)
             {
-               TreeNode codeNode = TreeNode_Navigate(message->RootNode, path);
-               const char * codeStr = NULL;
-
-               if ((codeStr = (const char *)TreeNode_GetValue(codeNode)) != NULL)
-               {
-                   code = atoi(codeStr);
-               }
+                char * path = NULL;
+                if (msprintf(&path, "%s/Code", type) > 0)
+                {
+                   TreeNode codeNode = TreeNode_Navigate(message->RootNode, path);
+                   const char * codeStr = (const char *)TreeNode_GetValue(codeNode);
+                   if (codeStr != NULL)
+                   {
+                       code = atoi(codeStr);
+                   }
+                   else
+                   {
+                       LogError("codeStr is NULL");
+                   }
+                }
+                else
+                {
+                    LogError("msprintf failed");
+                }
+                Awa_MemSafeFree(path);
             }
-
-            Awa_MemSafeFree(path);
+            else
+            {
+                LogError("message->RootNode name is NULL");
+            }
+        }
+        else
+        {
+            LogError("message->RootNode is NULL");
         }
     }
     else

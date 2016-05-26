@@ -205,7 +205,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde horde( { clientID }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { clientID }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
@@ -219,7 +219,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde horde( { clientID }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { clientID }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     const char * path = "/3/0/9";
@@ -660,7 +660,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde horde( { clientID }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { clientID }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // Test behaviour when we add multiple paths to write
@@ -677,7 +677,7 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde horde( { clientID }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { clientID }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // Test behaviour when we add multiple paths to write
@@ -721,7 +721,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerSession * session = AwaServerSession_New();
@@ -763,7 +763,7 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObjectInstance_handles_valid_operation_object_instance_id_specified)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
@@ -776,7 +776,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObjectInstance_handles_valid_operation_object_instance_id_unspecified)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
 
@@ -840,7 +840,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObjectInstance_object_instance_id_specified_handles_writing_resource_values)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaInteger expected = 13232;
@@ -870,7 +870,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_CreateObjectInstance_object_instance_id_unspecified_handles_writing_resource_values)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaInteger expected = 13232;
@@ -926,7 +926,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObjectInstance_handles_existing_instance)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -948,7 +948,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObjectInstance_handles_maximum_instances)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     // Test we cannot create more object instances than the object definition allows
@@ -975,7 +975,7 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
 {
     // start a client
     const char * clientID = "TestClient1";
-    AwaClientDaemonHorde horde( { clientID }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { clientID }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     //Create client session
@@ -1176,7 +1176,7 @@ protected:
         writeDetail::TestWriteResource data = GetParam();
         // start a client
         // TO RUN with debug, don't create the client, and specify the clientIpcPort, serverIpcPort, bootstrapConfig
-        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { writeDetail::clientID }, 61000, CURRENT_TEST_DESCRIPTION) : NULL;
+        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { writeDetail::clientID }, 61000) : NULL;
         sleep(1);      // wait for the client to register with the server
 
         // set up a valid, connected session:
@@ -1841,7 +1841,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_n
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -1862,7 +1862,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_o
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_LWM2M_error)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -1887,7 +1887,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteResponse_NewPathIte
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteResponse_NewPathIterator_handles_valid_response)
 {
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -1909,7 +1909,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteResponse_NewPathIte
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_multiple_errors)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -1968,7 +1968,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_m
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_multiple_successes)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     sleep(1);      // wait for the client to register with the server
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
