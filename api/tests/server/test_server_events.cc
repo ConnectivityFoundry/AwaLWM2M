@@ -20,10 +20,11 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <gtest/gtest.h>
 #include <vector>
 #include <string>
 #include <algorithm>
+
+#include <gtest/gtest.h>
 
 #include "support/support.h"
 #include "support/static_api_support.h"

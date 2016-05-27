@@ -96,7 +96,14 @@ public:
     TempFilename() : filename_(nullptr) {
         filename_ = strdup("/tmp/tmpfileXXXXXX");
         int fd = mkstemp(filename_);
-        close(fd);  // close immediately
+        if (fd != -1)
+        {
+            close(fd);  // close immediately
+        }
+        else
+        {
+            perror("mkstemp");
+        }
     }
     ~TempFilename() { free(filename_); filename_ = nullptr; }
     std::string GetFilename() const { return std::string(filename_); }
