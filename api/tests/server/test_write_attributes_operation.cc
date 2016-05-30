@@ -148,7 +148,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -163,7 +163,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -179,7 +179,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -195,7 +195,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -211,7 +211,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -251,7 +251,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerSession * session = AwaServerSession_New();
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", global::serverIpcPort));
@@ -267,7 +267,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
 
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Free(&writeAttributesOperation));
     AwaServerSession_Free(&session);
@@ -304,7 +304,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -337,7 +337,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     //Test we can call AwaServerWriteAttributesOperation_GetResponse twice and reuse the same operation
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
@@ -372,7 +372,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -388,7 +388,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -404,7 +404,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -425,7 +425,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
@@ -523,7 +523,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, AwaServerWriteA
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, global::clientEndpointName, "/3/0/13", "gt", 10));
@@ -546,7 +546,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, DISABLED_AwaSer
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient1", "/3/0/13", "gt", 10));

@@ -267,25 +267,11 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Free(&getOperation));
 }
 
-// FIXME: FLOWDM-360
-TEST_F(TestGetOperationWithConnectedSession, DISABLED_AwaClientGetOperation_Perform_handles_zero_timeout)
-{
-    // how?
-}
-
-// FIXME: FLOWDM-360
-TEST_F(TestGetOperationWithConnectedSession, DISABLED_AwaClientGetOperation_Perform_handles_short_timeout)
-{
-    // how?
-}
-
 TEST_F(TestGetOperation, AwaClientGetOperation_Perform_honours_timeout)
 {
     // start a client
     const char * clientID = "TestClient1";
-
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { clientID }, 61001);
 
     AwaClientSession * session = AwaClientSession_New();
     EXPECT_EQ(AwaError_Success, AwaClientSession_SetIPCAsUDP(session, "0.0.0.0", 61001));
@@ -295,14 +281,14 @@ TEST_F(TestGetOperation, AwaClientGetOperation_Perform_honours_timeout)
     ASSERT_TRUE(NULL != getOperation);
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/0"));
 
-    // Tear down client process
-    delete horde_;
-
+    // make client unresponsive
+    horde.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
 
     AwaClientGetOperation_Free(&getOperation);
     AwaClientSession_Free(&session);

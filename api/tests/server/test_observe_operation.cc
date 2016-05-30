@@ -194,7 +194,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -255,7 +255,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -312,7 +312,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -412,7 +412,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -522,7 +522,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -586,7 +586,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -699,7 +699,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -765,7 +765,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -806,7 +806,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -850,7 +850,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -880,8 +880,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honours_timeout)
 {
     // start a client
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaClientSession * clientSession = AwaClientSession_New();
     ASSERT_TRUE(NULL != clientSession);
@@ -939,7 +939,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerObserveOperation_Perform(operation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
 
     AwaServerObservation_Free(&observation);
     AwaServerObserveOperation_Free(&operation);
@@ -952,17 +952,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
 
     AwaServerSession_Free(&serverSession);
     AwaClientSession_Free(&clientSession);
-
-    delete horde_;
 }
-
-
 
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel_observation_stops_notifications)
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -1034,7 +1030,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1094,7 +1090,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1145,7 +1141,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObser
 {
     // cancel should still work even if an observation doesn't exist?
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1317,7 +1313,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
         void TestBody() {}
     };
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     ChangeCallbackHandler2 cbHandler(session_, 2);
 
@@ -1405,7 +1401,7 @@ protected:
         TestObserveWithConnectedSession::SetUp();
 
         horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { global::clientEndpointName }, 61000) : NULL;
-        sleep(1);      // wait for the client to register with the server
+        ASSERT_TRUE(WaitForRegistration(session_, horde_->GetClientIDs(), 1000));
 
         clientSession_ = AwaClientSession_New(); ASSERT_TRUE(NULL != clientSession_);
         ASSERT_EQ(AwaError_Success, AwaClientSession_SetIPCAsUDP(clientSession_, "127.0.0.1", global::spawnClientDaemon? 61000 : global::clientIpcPort));
@@ -1474,8 +1470,6 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation, "/10000/0/7", observeDetail::initialObjectLink1));
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
-
-
     }
 
     void TearDown()
@@ -1638,8 +1632,7 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
-    // ensure we receive both notifications
-    sleep(1);
+    sleep(1);  // ensure we receive both notifications
 
     ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
 

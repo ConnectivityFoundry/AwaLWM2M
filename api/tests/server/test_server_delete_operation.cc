@@ -424,7 +424,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
@@ -447,7 +447,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
@@ -501,7 +501,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
@@ -521,7 +521,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteRes
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -549,7 +549,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -584,7 +584,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -606,7 +606,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
@@ -629,7 +629,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);

@@ -29,7 +29,7 @@
 
 struct _ArrayItem
 {
-    struct ListHead List; /* prev/next pointers */
+    struct ListHead List; // prev/next pointers
     void * Value;
     size_t Length;
     AwaArrayIndex Index;
@@ -86,7 +86,6 @@ void * AwaArray_GetContext(AwaArray * array)
     return result;
 }
 
-
 void Array_FreeItemValue(ArrayItem * valueItem)
 {
     LogFree("AwaArray.Item.Value",  valueItem->Value);
@@ -129,7 +128,7 @@ void AwaArray_Free(AwaArray ** array, AwaResourceType resourceType)
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 }
 
@@ -152,7 +151,7 @@ ArrayItem * Array_GetArrayItem(const AwaArray * array, AwaArrayIndex index)
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 
     return item;
@@ -180,7 +179,7 @@ ArrayItem * Array_NewItemValue(AwaArray * array, AwaArrayIndex index)
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 
     return item;
@@ -242,7 +241,7 @@ ArrayItem * Array_SetValue(AwaArray * array, AwaArrayIndex index, void * value, 
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 
     return item;
@@ -276,12 +275,12 @@ void * Array_GetValue(const AwaArray * array, AwaArrayIndex index)
         }
         else
         {
-            LogError("Item with index %llu not found", (unsigned long long)index);
+            LogWarning("Item with index %llu not found", (unsigned long long)index);
         }
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 
     return value;
@@ -307,12 +306,12 @@ int Array_GetValueLength(const AwaArray * array, AwaArrayIndex index)
         }
         else
         {
-            LogError("Item with index %llu not found", (unsigned long long)index);
+            LogWarning("Item with index %llu not found", (unsigned long long)index);
         }
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 
     return valueLength;
@@ -331,12 +330,12 @@ void Array_DeleteItem(AwaArray * array, AwaArrayIndex index, AwaResourceType res
         }
         else
         {
-            LogError("Item with index %llu not found", (unsigned long long)index);
+            LogWarning("Item with index %llu not found", (unsigned long long)index);
         }
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
 }
 
@@ -429,7 +428,7 @@ AwaArrayIterator * ArrayIterator_New(const AwaArray * array)
     }
     else
     {
-        LogError("AwaArray is NULL");
+        LogError("array is NULL");
     }
     return iterator;
 }
@@ -456,7 +455,7 @@ bool ArrayIterator_Next(AwaArrayIterator * iterator)
     }
     else
     {
-        LogError("AwaArrayIterator is NULL");
+        LogError("iterator is NULL");
     }
 
     return result;
@@ -475,7 +474,7 @@ ArrayItem * ArrayIterator_GetItem(const AwaArrayIterator * iterator)
     }
     else
     {
-        LogError("AwaArrayIterator is NULL");
+        LogError("iterator is NULL");
     }
     return arrayItem;
 }
