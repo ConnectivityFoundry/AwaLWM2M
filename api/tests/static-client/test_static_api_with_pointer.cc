@@ -190,7 +190,10 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/7998/0"));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation, "/7998/0/1", o));
 
-    AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, 60 * 1000);
+    // This will intentionally time out because we are not servicing the client.
+
+    // The timeout needs to be longer than the expected CoAP retry timeout:
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, 60 * 1000));
 
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, "TestIMG1");
     EXPECT_TRUE(NULL != response);
@@ -454,8 +457,6 @@ public:
                                                                                               session_(session){};
         virtual bool Check()
         {
-            if (global::logLevel == AwaLogLevel_Debug)
-                std::cout << "Check..." << std::endl;
             if (!observeThreadAlive_)
             {
                 // only process the server session after we have successfully performed the observe operation.

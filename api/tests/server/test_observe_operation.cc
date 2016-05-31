@@ -57,6 +57,7 @@ struct ObserveWaitCondition : public WaitCondition
 
 
     ObserveWaitCondition(AwaServerSession * session, int callbackCountMax = 1) :
+        WaitCondition(),
         session(session), callbackCountMax(callbackCountMax), callbackCount(0) {}
 
     virtual ~ObserveWaitCondition() {}
@@ -323,7 +324,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -388,7 +388,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation_Free(&writeOperation);
 
         cbHandler.callbackCount = 0;
-        if(i != 1)
+        if (i != 1)
         {
             ASSERT_TRUE(cbHandler.Wait());
         }
@@ -423,7 +423,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -476,8 +475,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(1, cbHandler.count);
 
-
-    printf("Doing first write - should receive immediate notification\n");
     // write first change via server api to trigger notification.
     {
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -491,7 +488,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
-    printf("Doing second write - should receive notification after pmin...\n");
     BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
@@ -505,10 +501,9 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     }
 
     cbHandler.callbackCount = 0;
-    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.Wait(2e6));
     pminTimer.Stop();
-    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds()) << "Time elapsed " << pminTimer.TimeElapsed_Milliseconds() << "ms";
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -533,7 +528,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -597,7 +591,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -654,7 +647,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
 
     ASSERT_EQ(1, cbHandler.count);
-    printf("Doing first write - should receive immediate notification\n");
+
     // write first change via server api to trigger notification.
     {
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -668,7 +661,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
-    printf("Doing second write - should receive notification after pmin...\n");
     BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
@@ -682,10 +674,9 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     }
 
     cbHandler.callbackCount = 0;
-    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.Wait(2e6));
     pminTimer.Stop();
-    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds()) << "Time elapsed " << pminTimer.TimeElapsed_Milliseconds() << "ms";
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -711,7 +702,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));

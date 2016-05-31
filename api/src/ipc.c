@@ -718,7 +718,7 @@ static AwaError IPC_SendAndReceiveUsingSocket(int socket, struct sockaddr_storag
 
                 if (rc < 0)
                 {
-                      LogPError("Could not receive response on IPC UDP");
+                      LogPError("Could not receive response on IPC");
                       result = AwaError_IPCError;
                 }
                 else if (rc > 0)
@@ -742,12 +742,12 @@ static AwaError IPC_SendAndReceiveUsingSocket(int socket, struct sockaddr_storag
                             }
                             else
                             {
-                                result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise XML.");
+                                result = LogErrorWithEnum(AwaError_IPCError, "Failed to deserialise XML");
                             }
                         }
                         else
                         {
-                            LogPError("Could not receive response on IPC UDP");
+                            LogPError("Could not receive response on IPC");
                             result = AwaError_IPCError;
                         }
                     }
@@ -761,7 +761,7 @@ static AwaError IPC_SendAndReceiveUsingSocket(int socket, struct sockaddr_storag
                     ftime(&end);
                     int diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
 
-                    LogError("Timed out receiving response on IPC UDP (timeout = %d, wait time in ms: %d)", timeout, diff);
+                    LogError("Timed out receiving response on IPC (timeout %d ms, wait time %d ms)", timeout, diff);
                     result = AwaError_Timeout;
                 }
             }
@@ -773,7 +773,7 @@ static AwaError IPC_SendAndReceiveUsingSocket(int socket, struct sockaddr_storag
         }
         else
         {
-            LogPError("Could not send request on IPC UDP");
+            LogPError("Could not send request on IPC");
             result = AwaError_IPCError;
         }
     }
@@ -896,11 +896,11 @@ AwaError IPC_ReceiveNotification(IPCChannel * channel, IPCMessage ** notificatio
         {
             if (errno == EAGAIN)
             {
-                result = LogErrorWithEnum(AwaError_Timeout, "Timed out receiving notification on IPC UDP");
+                result = LogErrorWithEnum(AwaError_Timeout, "Timed out receiving notification on IPC");
             }
             else
             {
-                result = LogErrorWithEnum(AwaError_IPCError, "Could not receive notification on IPC UDP");
+                result = LogErrorWithEnum(AwaError_IPCError, "Could not receive notification on IPC");
             }
         }
     }

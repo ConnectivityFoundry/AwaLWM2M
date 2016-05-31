@@ -235,18 +235,6 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Free(&writeAttributesOperation));
 }
 
-//// FIXME: FLOWDM-360
-//TEST_F(TestWriteAttributesOperationWithConnectedSession, DISABLED_AwaServerWriteAttributesOperation_Perform_handles_zero_timeout)
-//{
-//    // how?
-//}
-//
-//// FIXME: FLOWDM-360
-//TEST_F(TestWriteAttributesOperationWithConnectedSession, DISABLED_AwaServerWriteAttributesOperation_Perform_handles_short_timeout)
-//{
-//    // how?
-//}
-//
 TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttributesOperation_Perform_honours_timeout)
 {
     // start a client
