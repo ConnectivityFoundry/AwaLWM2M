@@ -772,24 +772,32 @@ bool ElapsedTimeExceeds(double time_ms, double time_target_ms);
 class WaitCondition
 {
 public:
-    WaitCondition(useconds_t checkPeriod=1e6,
-                  useconds_t timeoutDuration=1e7) :
+    WaitCondition(useconds_t checkPeriod=1e5,
+                  useconds_t timeoutDuration=1e6) :
         checkPeriod_(checkPeriod), timeoutDuration_(timeoutDuration) {}
     virtual ~WaitCondition() {}
     virtual bool Wait()
     {
-        const int maxCount = timeoutDuration_ / checkPeriod_;
+        return Wait(checkPeriod_, timeoutDuration_);
+    }
+    virtual bool Wait(useconds_t timeoutDuration)
+    {
+        return Wait(checkPeriod_, timeoutDuration);
+    }
+    virtual bool Wait(useconds_t checkPeriod, useconds_t timeoutDuration)
+    {
+        const int maxCount = timeoutDuration / checkPeriod;
         int count = 0;
         while (!Check())
         {
             if (++count > maxCount)
                 break;
             //std::cout << "Wait " << count * checkPeriod_ / 1000 << "ms" << std::endl;
-            usleep(checkPeriod_);
+            usleep(checkPeriod);
         }
         if (count > maxCount)
         {
-            std::cerr << "Wait Condition timed out after " << timeoutDuration_ / 1000000.0 << " seconds." << std::endl;
+            //std::cerr << "Wait Condition timed out after " << timeoutDuration_ / 1000000.0 << " seconds." << std::endl;
         }
         return count <= maxCount;
     }

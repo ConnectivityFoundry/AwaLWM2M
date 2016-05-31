@@ -62,33 +62,45 @@ struct CallbackRecord {
 };
 
 static void RegisterEventCallback(const AwaServerClientRegisterEvent * event, void * context) {
-    std::cout << "RegisterEventCallback: event " << event << ", context " << context << std::endl;
     EXPECT_TRUE(NULL != context);
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->RegisterCallbackCounter++;
     record->LastEvent = event;
 
-    AwaClientIterator * clientIterator = AwaServerClientRegisterEvent_NewClientIterator(event);
-    EXPECT_TRUE(NULL != clientIterator);
-
-    while (AwaClientIterator_Next(clientIterator))
-    {
-        const char * clientID = AwaClientIterator_GetClientID(clientIterator);
-        std::cout << "Client ID: " << clientID << std::endl;
-
-        AwaRegisteredEntityIterator * entityIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
-        while (AwaRegisteredEntityIterator_Next(entityIterator))
-        {
-            const char * path = AwaRegisteredEntityIterator_GetPath(entityIterator);
-            std::cout << "  " << path << std::endl;
-        }
-        AwaRegisteredEntityIterator_Free(&entityIterator);
-    }
-
-    AwaClientIterator_Free(&clientIterator);
+//    AwaClientIterator * clientIterator = AwaServerClientRegisterEvent_NewClientIterator(event);
+//    EXPECT_TRUE(NULL != clientIterator);
+//
+//    while (AwaClientIterator_Next(clientIterator))
+//    {
+//        const char * clientID = AwaClientIterator_GetClientID(clientIterator);
+//        std::cout << "Client ID: " << clientID << std::endl;
+//
+//        AwaRegisteredEntityIterator * entityIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, clientID);
+//        while (AwaRegisteredEntityIterator_Next(entityIterator))
+//        {
+//            const char * path = AwaRegisteredEntityIterator_GetPath(entityIterator);
+//            std::cout << "  " << path << std::endl;
+//        }
+//        AwaRegisteredEntityIterator_Free(&entityIterator);
+//    }
+//    AwaClientIterator_Free(&clientIterator);
 }
 
+static void UpdateEventCallback(const AwaServerClientUpdateEvent * event, void * context) {
+    EXPECT_TRUE(NULL != context);
+    CallbackRecord * record = static_cast<CallbackRecord *>(context);
+    record->UpdateCallbackCounter++;
+    record->LastEvent = event;
 }
+
+static void DeregisterEventCallback(const AwaServerClientDeregisterEvent * event, void * context) {
+    EXPECT_TRUE(NULL != context);
+    CallbackRecord * record = static_cast<CallbackRecord *>(context);
+    record->DeregisterCallbackCounter++;
+    record->LastEvent = event;
+}
+
+} // namespace detail
 
 TEST_F(TestServerNotification, ServerNotification_Process_handles_client_register_notification)
 {
@@ -103,48 +115,6 @@ TEST_F(TestServerNotification, ServerNotification_Process_handles_client_registe
             "          <ID>0</ID>"
             "        </ObjectInstance>"
             "      </Object>"
-            "      <Object>"
-            "        <ID>2</ID>"
-            "        <ObjectInstance>"
-            "          <ID>0</ID>"
-            "        </ObjectInstance>"
-            "        <ObjectInstance>"
-            "          <ID>1</ID>"
-            "        </ObjectInstance>"
-            "        <ObjectInstance>"
-            "          <ID>2</ID>"
-            "        </ObjectInstance>"
-            "        <ObjectInstance>"
-            "          <ID>3</ID>"
-            "        </ObjectInstance>"
-            "      </Object>"
-            "      <Object>"
-            "        <ID>3</ID>"
-            "        <ObjectInstance>"
-            "          <ID>0</ID>"
-            "        </ObjectInstance>"
-            "      </Object>"
-            "      <Object>"
-            "        <ID>4</ID>"
-            "        <ObjectInstance>"
-            "          <ID>0</ID>"
-            "        </ObjectInstance>"
-            "      </Object>"
-            "      <Object>"
-            "        <ID>7</ID>"
-            "      </Object>"
-            "      <Object>"
-            "        <ID>5</ID>"
-            "        <ObjectInstance>"
-            "          <ID>0</ID>"
-            "        </ObjectInstance>"
-            "      </Object>"
-            "      <Object>"
-            "        <ID>6</ID>"
-            "        <ObjectInstance>"
-            "          <ID>0</ID>"
-            "        </ObjectInstance>"
-            "      </Object>"
             "    </Objects>"
             "  </Client>"
             "</Clients>";
@@ -154,10 +124,6 @@ TEST_F(TestServerNotification, ServerNotification_Process_handles_client_registe
     IPCMessage * notification = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_NOTIFICATION, IPC_MESSAGE_SUB_TYPE_CLIENT_REGISTER, 1234567);
     ASSERT_TRUE(NULL != notification);
     IPCMessage_AddContent(notification, contentNode);
-
-//    char * serialised = IPC_SerialiseMessageToXML(notification);
-//    std::cout << serialised << std::endl;
-//    Awa_MemSafeFree(serialised);
 
     detail::CallbackRecord record;
     AwaServerSession_SetClientRegisterEventCallback(session_, detail::RegisterEventCallback, &record);
@@ -171,7 +137,78 @@ TEST_F(TestServerNotification, ServerNotification_Process_handles_client_registe
     // check Event
     auto event = static_cast<const ClientRegisterEvent *>(record.LastEvent);
     ASSERT_TRUE(NULL != event);
-    //IPCMessage * eventNotification = ClientRegisterEvent_GetNotification(event);
+
+    IPCMessage_Free(&notification);
+    Tree_Delete(contentNode);
+}
+
+TEST_F(TestServerNotification, ServerNotification_Process_handles_client_update_notification)
+{
+    const char * xml =
+            "<Clients>"
+            "  <Client>"
+            "    <ID>imagination1</ID>"
+            "    <Objects>"
+            "      <Object>"
+            "        <ID>1</ID>"
+            "        <ObjectInstance>"
+            "          <ID>0</ID>"
+            "        </ObjectInstance>"
+            "      </Object>"
+            "    </Objects>"
+            "  </Client>"
+            "</Clients>";
+
+    TreeNode contentNode = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
+    ASSERT_TRUE(NULL != contentNode);
+    IPCMessage * notification = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_NOTIFICATION, IPC_MESSAGE_SUB_TYPE_CLIENT_UPDATE, 1234568);
+    ASSERT_TRUE(NULL != notification);
+    IPCMessage_AddContent(notification, contentNode);
+
+    detail::CallbackRecord record;
+    AwaServerSession_SetClientUpdateEventCallback(session_, detail::UpdateEventCallback, &record);
+    EXPECT_EQ(AwaError_Success, ServerNotification_Process(session_, notification));
+
+    // check correct callback fired
+    EXPECT_EQ(0, record.RegisterCallbackCounter);
+    EXPECT_EQ(0, record.DeregisterCallbackCounter);
+    EXPECT_EQ(1, record.UpdateCallbackCounter);
+
+    // check Event
+    auto event = static_cast<const ClientUpdateEvent *>(record.LastEvent);
+    ASSERT_TRUE(NULL != event);
+
+    IPCMessage_Free(&notification);
+    Tree_Delete(contentNode);
+}
+
+TEST_F(TestServerNotification, ServerNotification_Process_handles_client_deregister_notification)
+{
+    const char * xml =
+            "<Clients>"
+            "  <Client>"
+            "    <ID>imagination1</ID>"
+            "  </Client>"
+            "</Clients>";
+
+    TreeNode contentNode = TreeNode_ParseXML((uint8_t*)xml, strlen(xml), true);
+    ASSERT_TRUE(NULL != contentNode);
+    IPCMessage * notification = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_NOTIFICATION, IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER, 1234569);
+    ASSERT_TRUE(NULL != notification);
+    IPCMessage_AddContent(notification, contentNode);
+
+    detail::CallbackRecord record;
+    AwaServerSession_SetClientDeregisterEventCallback(session_, detail::DeregisterEventCallback, &record);
+    EXPECT_EQ(AwaError_Success, ServerNotification_Process(session_, notification));
+
+    // check correct callback fired
+    EXPECT_EQ(0, record.RegisterCallbackCounter);
+    EXPECT_EQ(1, record.DeregisterCallbackCounter);
+    EXPECT_EQ(0, record.UpdateCallbackCounter);
+
+    // check Event
+    auto event = static_cast<const ClientDeregisterEvent *>(record.LastEvent);
+    ASSERT_TRUE(NULL != event);
 
     IPCMessage_Free(&notification);
     Tree_Delete(contentNode);

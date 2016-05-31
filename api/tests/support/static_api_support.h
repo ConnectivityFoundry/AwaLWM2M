@@ -161,7 +161,6 @@ public:
     bool complete;
     virtual bool Check()
     {
-        std::cout << "Check..." << std::endl;
         AwaStaticClient_Process(StaticClient);
         return complete;
     }
