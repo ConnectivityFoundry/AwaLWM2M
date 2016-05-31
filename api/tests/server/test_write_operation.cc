@@ -732,14 +732,14 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     AwaTime value = 123456789;
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", value));
 
-    // Tear down server
-    TestWriteOperationWithConnectedSession::TearDown();
-
+    // Make the server unresponsive
+    daemon_.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
     timer.Stop();
     EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    daemon_.Unpause();
 
     AwaServerWriteOperation_Free(&writeOperation);
     AwaServerSession_Free(&session);

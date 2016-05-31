@@ -136,6 +136,7 @@ TEST_F(TestSessionCommon, SessionCommon_ConnectSession_handles_unresponsive_UDP_
 {
     // Connect to daemon - if this test fails, ensure nothing is actually running on 127.0.0.2:clientIpcPort!
     SessionCommon * session = SessionCommon_New(SessionType_Client);
+    SessionCommon_SetDefaultTimeout(session, 1000);
     SessionCommon_SetIPCAsUDP(session, detail::NonRoutableIPv4Address, global::clientIpcPort);
     EXPECT_EQ(AwaError_Timeout, SessionCommon_ConnectSession(session));
     SessionCommon_Free(&session);
@@ -242,6 +243,7 @@ TEST_F(TestSessionCommonWithDaemon, SessionCommon_DisconnectSession_handles_unre
     }
 
     SessionCommon * session = SessionCommon_New(SessionType_Client);
+    SessionCommon_SetDefaultTimeout(session, 1000);
     SessionCommon_SetIPCAsUDP(session, "127.0.0.1", global::clientIpcPort);
     EXPECT_EQ(AwaError_Success, SessionCommon_ConnectSession(session));
 

@@ -41,7 +41,7 @@ typedef enum
 
     AwaError_Success = 0,                /**< Indicates an operation was successful */
     AwaError_Unspecified,                /**< Used as a default error value */
-    AwaError_Unsupported,                /**< Indicates an API function is not supported */
+    AwaError_Unsupported,                /**< Indicates an API function or value is not supported */
     AwaError_Internal,                   /**< Indicates an internal error has occurred */
     AwaError_OutOfMemory,                /**< Indicates an operation failed to allocate memory */
 

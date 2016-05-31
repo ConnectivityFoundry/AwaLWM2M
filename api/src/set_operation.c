@@ -457,7 +457,7 @@ AwaError AwaClientSetOperation_Perform(AwaClientSetOperation * operation, AwaTim
 
                             // Send via IPC
                             IPCMessage * setResponse = NULL;
-                            result = IPC_SendAndReceive(ClientSession_GetChannel(session), setRequest, &setResponse, timeout > 0 ? timeout : -1);
+                            result = IPC_SendAndReceive(ClientSession_GetChannel(session), setRequest, &setResponse, timeout);
 
                             // Process the response
                             if (result == AwaError_Success)
