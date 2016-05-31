@@ -147,7 +147,7 @@ AwaError AwaServerReadOperation_Perform(AwaServerReadOperation * operation, AwaT
 
                             // Send via IPC
                             IPCMessage * response = NULL;
-                            result = IPC_SendAndReceive(ServerSession_GetChannel(session), request, &response, (timeout > 0) ? timeout : -1);
+                            result = IPC_SendAndReceive(ServerSession_GetChannel(session), request, &response, timeout);
 
                             // Process the response
                             if (result == AwaError_Success)

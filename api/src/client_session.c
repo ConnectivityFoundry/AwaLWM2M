@@ -120,6 +120,28 @@ AwaError AwaClientSession_SetIPCAsUDP(AwaClientSession * session, const char * a
     return result;
 }
 
+AwaError AwaClientSession_SetDefaultTimeout(AwaClientSession * session, AwaTimeout timeout)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        SessionCommon * sessionCommon = ClientSession_GetSessionCommon(session);
+        if (sessionCommon != NULL)
+        {
+            result = SessionCommon_SetDefaultTimeout(sessionCommon, timeout);
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_SessionInvalid, "sessionCommon is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
 AwaError AwaClientSession_Connect(AwaClientSession * session)
 {
     AwaError result = AwaError_Unspecified;

@@ -37,8 +37,6 @@
 #include "xmltree.h"
 #include "lwm2m_xml_serdes.h"
 
-#define SESSION_CONNECT_TIMEOUT (10 * 1000)  // 10 second timeout
-
 /* Notes:
  *  - a Session is considered 'connected' if it has a non-NULL IPCChannel.
  */
@@ -50,6 +48,7 @@ struct _SessionCommon
     DefinitionRegistry * DefinitionRegistry;
     SessionType SessionType;
     IPCSessionID SessionID;
+    AwaTimeout DefaultTimeout;
 };
 
 static bool SessionType_IsValid(SessionType type)
@@ -69,6 +68,7 @@ SessionCommon * SessionCommon_New(SessionType sessionType)
 
             session->SessionType = sessionType;
             session->SessionID = 0;
+            session->DefaultTimeout = SESSION_DEFAULT_TIMEOUT;
             session->DefinitionRegistry = DefinitionRegistry_Create();
             if (session->DefinitionRegistry != NULL)
             {
@@ -367,103 +367,117 @@ error:
 
 static AwaError ConnectChannel(SessionCommon * session)
 {
-    // no SessionID to be specified
-    IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT, -1);
-    IPCMessage * connectResponse = NULL;
-    AwaError result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
-
-    if (result == AwaError_Success)
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
     {
-        IPCResponseCode code = IPCMessage_GetResponseCode(connectResponse);
-        if (code == IPCResponseCode_Success)
+        // no SessionID to be specified
+        IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT, -1);
+        IPCMessage * connectResponse = NULL;
+        result = IPC_SendAndReceive(session->IPCChannel, connectRequest, &connectResponse, session->DefaultTimeout);
+
+        if (result == AwaError_Success)
         {
-            session->SessionID = IPCMessage_GetSessionID(connectResponse);
-            if (session->SessionID > 0)
+            IPCResponseCode code = IPCMessage_GetResponseCode(connectResponse);
+            if (code == IPCResponseCode_Success)
             {
-                // populate object definition registry
-                TreeNode content = IPCMessage_GetContentNode(connectResponse);
-
-                if (content)
+                session->SessionID = IPCMessage_GetSessionID(connectResponse);
+                if (session->SessionID > 0)
                 {
-                    TreeNode objectDefinitions = TreeNode_Navigate(content, "Content/ObjectDefinitions");
-                    TreeNode objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, 0) : TreeNode_Navigate(content, "Content/ObjectDefinition");
-                    int objectDefinitionIndex = 1;
-                    int successCount = 0;
-                    while (objectDefinition)
+                    // populate object definition registry
+                    TreeNode content = IPCMessage_GetContentNode(connectResponse);
+
+                    if (content)
                     {
-                        SessionCommon_RegisterObjectFromXML(session->DefinitionRegistry, objectDefinition);
-
-                        successCount++;
-
-                        TreeNode objectIDNode = TreeNode_Navigate(objectDefinition, "ObjectMetadata/ObjectID");
-                        if (objectIDNode != NULL)
+                        TreeNode objectDefinitions = TreeNode_Navigate(content, "Content/ObjectDefinitions");
+                        TreeNode objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, 0) : TreeNode_Navigate(content, "Content/ObjectDefinition");
+                        int objectDefinitionIndex = 1;
+                        int successCount = 0;
+                        while (objectDefinition)
                         {
-                            LogDebug("Defined object with ID %s", TreeNode_GetValue(objectIDNode));
+                            SessionCommon_RegisterObjectFromXML(session->DefinitionRegistry, objectDefinition);
+
+                            successCount++;
+
+                            TreeNode objectIDNode = TreeNode_Navigate(objectDefinition, "ObjectMetadata/ObjectID");
+                            if (objectIDNode != NULL)
+                            {
+                                LogDebug("Defined object with ID %s", TreeNode_GetValue(objectIDNode));
+                            }
+
+                            objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, objectDefinitionIndex++) : NULL;
                         }
 
-                        objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, objectDefinitionIndex++) : NULL;
-                    }
-
-                    if (successCount + 1 == objectDefinitionIndex)
-                    {
-                        result = AwaError_Success;
-                        LogDebug("%d object definitions received", successCount);
+                        if (successCount + 1 == objectDefinitionIndex)
+                        {
+                            result = AwaError_Success;
+                            LogDebug("%d object definitions received", successCount);
+                        }
+                        else
+                        {
+                            result = LogErrorWithEnum(AwaError_IPCError, "Definitions in connect message incorrect");
+                        }
                     }
                     else
                     {
-                        result = LogErrorWithEnum(AwaError_IPCError, "Definitions in connect message incorrect");
+                        result = LogErrorWithEnum(AwaError_IPCError, "No connect response content");
                     }
                 }
                 else
                 {
-                    result = LogErrorWithEnum(AwaError_IPCError, "No connect response content");
+                    result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with invalid session ID %d", session->SessionID);
                 }
             }
             else
             {
-                result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with invalid session ID %d", session->SessionID);
+                result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with code %d", code);
             }
+            IPCMessage_Free(&connectResponse);
         }
-        else
-        {
-            result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with code %d", code);
-        }
-        IPCMessage_Free(&connectResponse);
+        IPCMessage_Free(&connectRequest);
     }
-
-    IPCMessage_Free(&connectRequest);
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "Session is NULL");
+    }
     return result;
 }
 
-static AwaError EstablishNotifyChannel(IPCChannel * ipcChannel, IPCSessionID sessionID)
+static AwaError EstablishNotifyChannel(SessionCommon * session)
 {
     AwaError result = AwaError_Unspecified;
-    if (ipcChannel != NULL)
+    if (session != NULL)
     {
-        IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, sessionID);
-        if (connectRequest != NULL)
+        if (session->IPCChannel != NULL)
         {
-            IPCMessage * connectResponse = NULL;
-            result = IPC_SendAndReceiveOnNotifySocket(ipcChannel, connectRequest, &connectResponse, SESSION_CONNECT_TIMEOUT);
-            if (result == AwaError_Success)
+            IPCMessage * connectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_ESTABLISH_NOTIFY, session->SessionID);
+            if (connectRequest != NULL)
             {
-                IPCResponseCode code = IPCMessage_GetResponseCode(connectResponse);
-                if (code == IPCResponseCode_Success)
+                IPCMessage * connectResponse = NULL;
+                result = IPC_SendAndReceiveOnNotifySocket(session->IPCChannel, connectRequest, &connectResponse, session->DefaultTimeout);
+                if (result == AwaError_Success)
                 {
-                    result = AwaError_Success;
+                    IPCResponseCode code = IPCMessage_GetResponseCode(connectResponse);
+                    if (code == IPCResponseCode_Success)
+                    {
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with code %d", code);
+                    }
+                    IPCMessage_Free(&connectResponse);
                 }
-                else
-                {
-                    result = LogErrorWithEnum(AwaError_IPCError, "Connect failed with code %d", code);
-                }
-                IPCMessage_Free(&connectResponse);
+                IPCMessage_Free(&connectRequest);
             }
-            IPCMessage_Free(&connectRequest);
+            else
+            {
+                result = LogErrorWithEnum(AwaError_IPCError, "Failed to create message");
+            }
         }
-        else
-        {
-            result = LogErrorWithEnum(AwaError_IPCError, "Failed to create message");
-        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "Session is NULL");
     }
     return result;
 }
@@ -484,7 +498,7 @@ AwaError SessionCommon_ConnectSession(SessionCommon * session)
                     result = ConnectChannel(session);
                     if (result == AwaError_Success)
                     {
-                        result = EstablishNotifyChannel(session->IPCChannel, session->SessionID);
+                        result = EstablishNotifyChannel(session);
                         if (result == AwaError_Success)
                         {
                             LogVerbose("Session connected");
@@ -518,41 +532,48 @@ AwaError SessionCommon_ConnectSession(SessionCommon * session)
     return result;
 }
 
-static AwaError DisconnectChannel(IPCChannel * ipcChannel, IPCSessionID sessionID)
+static AwaError DisconnectChannel(SessionCommon * session)
 {
     AwaError result = AwaError_Unspecified;
-    if (ipcChannel != NULL)
+    if (session != NULL)
     {
-        IPCMessage * disconnectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DISCONNECT, sessionID);
-        if (disconnectRequest != NULL)
+        if (session->IPCChannel != NULL)
         {
-            IPCMessage * disconnectResponse = NULL;
-            result = IPC_SendAndReceive(ipcChannel, disconnectRequest, &disconnectResponse, SESSION_CONNECT_TIMEOUT);
-
-            if (result == AwaError_Success)
+            IPCMessage * disconnectRequest = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_DISCONNECT, session->SessionID);
+            if (disconnectRequest != NULL)
             {
-                IPCResponseCode code = IPCMessage_GetResponseCode(disconnectResponse);
-                if (code == IPCResponseCode_Success)
+                IPCMessage * disconnectResponse = NULL;
+                result = IPC_SendAndReceive(session->IPCChannel, disconnectRequest, &disconnectResponse, session->DefaultTimeout);
+
+                if (result == AwaError_Success)
                 {
-                    LogDebug("Disconnect OK");
-                    result = AwaError_Success;
+                    IPCResponseCode code = IPCMessage_GetResponseCode(disconnectResponse);
+                    if (code == IPCResponseCode_Success)
+                    {
+                        LogDebug("Disconnect OK");
+                        result = AwaError_Success;
+                    }
+                    else
+                    {
+                        LogErrorWithEnum(AwaError_IPCError, "Disconnect failed with code %d", code);
+                    }
+                    IPCMessage_Free(&disconnectResponse);
                 }
-                else
-                {
-                    LogErrorWithEnum(AwaError_IPCError, "Disconnect failed with code %d", code);
-                }
-                IPCMessage_Free(&disconnectResponse);
+                IPCMessage_Free(&disconnectRequest);
             }
-            IPCMessage_Free(&disconnectRequest);
+            else
+            {
+                result = LogErrorWithEnum(AwaError_IPCError, "Failed to create message");
+            }
         }
         else
         {
-            result = LogErrorWithEnum(AwaError_IPCError, "Failed to create message");
+            result = LogErrorWithEnum(AwaError_IPCError, "ipcChannel is NULL");
         }
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_IPCError, "ipcChannel is NULL");
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "Session is NULL");
     }
     return result;
 }
@@ -568,7 +589,7 @@ AwaError SessionCommon_DisconnectSession(SessionCommon * session)
             if (SessionCommon_IsConnected(session) != false)
             {
                 // orderly disconnect from IPC server
-                result = DisconnectChannel(session->IPCChannel, session->SessionID);
+                result = DisconnectChannel(session);
                 if (result == AwaError_Success)
                 {
                     LogVerbose("Session disconnected");
@@ -789,7 +810,7 @@ AwaError SessionCommon_SendDefineMessage(const SessionCommon * session, const Tr
             if ((result = IPCMessage_AddContent(registerRequest, objectDefinitionsNode)) == AwaError_Success)
             {
                 IPCMessage * registerResponse = NULL;
-                result = IPC_SendAndReceive(SessionCommon_GetChannel(session), registerRequest, &registerResponse, (timeout > 0) ? timeout : -1);
+                result = IPC_SendAndReceive(SessionCommon_GetChannel(session), registerRequest, &registerResponse, timeout);
 
                 if (registerResponse != NULL)
                 {
@@ -846,4 +867,27 @@ IPCSessionID SessionCommon_GetSessionID(const SessionCommon * session)
     }
     return sessionID;
 }
+
+AwaError SessionCommon_SetDefaultTimeout(SessionCommon * session, AwaTimeout timeout)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        if (timeout > 0)
+        {
+            session->DefaultTimeout = timeout;
+            result = AwaError_Success;
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_Unsupported, "timeout must be greater than zero");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
 

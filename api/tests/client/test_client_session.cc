@@ -149,6 +149,7 @@ TEST_F(TestClientSession, AwaClientSession_Connect_handles_unresponsive_UDP_serv
 {
     // Connect to daemon - if this test fails, ensure nothing is actually running on 127.0.0.2:clientIpcPort!
     AwaClientSession * session = AwaClientSession_New();
+    AwaClientSession_SetDefaultTimeout(session, 1000);
     AwaClientSession_SetIPCAsUDP(session, detail::NonRoutableIPv4Address, global::clientIpcPort);
     EXPECT_EQ(AwaError_Timeout, AwaClientSession_Connect(session));
     AwaClientSession_Free(&session);
@@ -256,6 +257,7 @@ TEST_F(TestClientSessionWithDaemon, AwaClientSession_Disconnect_handles_unrespon
     }
 
     AwaClientSession * session = AwaClientSession_New();
+    AwaClientSession_SetDefaultTimeout(session, 1000);
     AwaClientSession_SetIPCAsUDP(session, "127.0.0.1", global::clientIpcPort);
     EXPECT_EQ(AwaError_Success, AwaClientSession_Connect(session));
 
@@ -332,6 +334,14 @@ TEST_F(TestClientSession, AwaClientSession_NewObjectDefinitionIterator_invalid_i
     AwaObjectDefinitionIterator * iterator = AwaClientSession_NewObjectDefinitionIterator(NULL);
     ASSERT_TRUE(NULL == iterator);
     AwaObjectDefinitionIterator_Free(NULL);
+}
+
+TEST_F(TestClientSession, AwaClientSession_SetDefaultTimeout_handles_invalid_timeout)
+{
+    AwaClientSession * session = AwaClientSession_New();
+    EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, 0));
+    EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, -1));
+    EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, -100));
 }
 
 class TestClientSessionPathInvalidWithParam : public TestClientSession, public ::testing::WithParamInterface<const char *>
