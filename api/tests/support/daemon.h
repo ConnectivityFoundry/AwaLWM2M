@@ -108,6 +108,15 @@ public:
     virtual bool Start() = 0;
     virtual void Stop() = 0;
 
+    virtual void Pause()
+    {
+        PauseProcess(pid_);
+    }
+    virtual void Unpause()
+    {
+        UnpauseProcess(pid_);
+    }
+
 protected:
 
     pid_t pid_;
@@ -381,6 +390,22 @@ public:
     {
         return clientIDs_;
     }
+
+    void Pause()
+    {
+        for (auto it = clients_.begin(); it != clients_.end(); ++it)
+        {
+            (*it)->Pause();
+        }
+    }
+    void Unpause()
+    {
+        for (auto it = clients_.begin(); it != clients_.end(); ++it)
+        {
+            (*it)->Unpause();
+        }
+    }
+
 
 private:
     typedef std::unique_ptr<AwaClientDaemon> DaemonPtr;

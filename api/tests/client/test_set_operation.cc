@@ -528,8 +528,7 @@ TEST_F(TestSetOperation, AwaClientSetOperation_Perform_honours_timeout)
     // start a client
     const char * clientID = "TestClient1";
 
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { clientID }, 61001);
 
     AwaClientSession * session = AwaClientSession_New();
     EXPECT_EQ(AwaError_Success, AwaClientSession_SetIPCAsUDP(session, "0.0.0.0", 61001));
@@ -540,14 +539,14 @@ TEST_F(TestSetOperation, AwaClientSetOperation_Perform_honours_timeout)
     AwaInteger value = 123456789;
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(setOperation, "/3/0/9", value));
 
-    // Tear down client process
-    delete horde_;
-
+    // make client unresponsive
+    horde.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
 
     AwaClientSetOperation_Free(&setOperation);
     AwaClientSession_Free(&session);

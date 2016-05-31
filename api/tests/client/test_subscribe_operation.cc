@@ -592,8 +592,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
 
     const char * clientID = "TestClient1";
 
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { clientID }, 61001);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { clientID }, 61001);
 
     AwaClientSession * session = AwaClientSession_New();
     EXPECT_EQ(AwaError_Success, AwaClientSession_SetIPCAsUDP(session, "0.0.0.0", 61001));
@@ -604,14 +603,14 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/16", ChangeCallbackRunner, &cbHandler);
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    // Tear down client process
-    delete horde_;
-
+    // make client unresponsive
+    horde.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
 
     EXPECT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
     EXPECT_TRUE(NULL == changeSubscription);
@@ -1802,8 +1801,7 @@ TEST_F(TestSubscribeToExecuteWithConnectedSession, AwaClientSubscribeOperation_P
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 
-    //wait for execute command to be sent to client
-    sleep(1);
+    sleep(1);  // wait for execute command to be sent to client
 
     EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, defaults::timeout));
 
@@ -1857,8 +1855,7 @@ TEST_F(TestSubscribeToExecuteWithConnectedSession, AwaClientSubscribeOperation_P
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 
-    //wait for execute command to be sent to client
-    sleep(1);
+    sleep(1);  // wait for execute command to be sent to client
 
     EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, defaults::timeout));
 

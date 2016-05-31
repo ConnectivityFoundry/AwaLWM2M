@@ -235,7 +235,7 @@ TEST_F(TestReadOperationWithConnectedSession, AwaServerReadOperation_Perform_hon
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
 
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Free(&readOperation));
     AwaServerSession_Free(&session);
@@ -1335,7 +1335,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_han
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(operation, "TestClient1", "/3/0/15"));
@@ -1358,7 +1358,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadOper
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(operation, "TestClient1", "/3/0/0"));
@@ -1412,7 +1412,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_Get
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(operation, "TestClient1", "/3/0/9"));
@@ -1432,7 +1432,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_NewP
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1460,7 +1460,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadResp
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1528,7 +1528,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1547,7 +1547,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to modify a resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1581,7 +1581,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to modify a resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1615,7 +1615,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to create a boolean resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1684,7 +1684,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to create a boolean resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1753,7 +1753,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to create a boolean resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1841,7 +1841,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadResponse_GetV
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaOpaque defaultValue = { NULL, 0 };
 
@@ -1926,7 +1926,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, DISABLED_AwaServerReadResp
 
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to modify a resource, so that the server's
     // attempt to read the resource will encounter an expected value.
@@ -1969,7 +1969,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_han
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to read the mandatory resource:
     AwaServerReadOperation * operation = AwaServerReadOperation_New(session_);
@@ -1991,7 +1991,7 @@ TEST_F(TestReadOperationWithConnectedSessionNoClient, AwaServerReadOperation_han
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);      // wait for the client to register with the server
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // use the Client API to delete an optional resource, so that the server's
     // attempt to read the resource will fail.

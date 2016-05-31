@@ -41,6 +41,12 @@ void KillProcess(pid_t pid);
 // Terminate an existing process, with SIGTERM.
 void TerminateProcess(pid_t pid);
 
+// Pause an existing process, with SIGSTOP.
+void PauseProcess(pid_t pid);
+
+// Unpause an existing process, with SIGCONT.
+void UnpauseProcess(pid_t pid);
+
 // Perform a CoAP operation on the specified resource, after a short delay.
 pid_t CoAPOperation(const char * coapClientPath, int port, const char * method, const char * resource, int delay /*microseconds*/);
 

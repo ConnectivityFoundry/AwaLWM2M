@@ -61,8 +61,8 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int timeout = 2500;          // milliseconds
-    const int timeoutTolerance = 250;  // milliseconds
+    const int timeout = 200;           // milliseconds
+    const int timeoutTolerance = 100;  // milliseconds
 
 } // namespace defaults
 
@@ -111,6 +111,7 @@ private:
     char * filename_;
 };
 
+bool WaitForRegistration(AwaServerSession * serverSession, const std::vector<std::string> & clientIDs, int timeoutMs);
 
 /*********************************************************************
  *** Test Base Classes
@@ -288,7 +289,6 @@ protected:
       TestServerBase::TearDown();
   }
 
-private:
   AwaServerDaemon daemon_;
 };
 
@@ -415,8 +415,7 @@ protected:
         char objectPath[32];
         sprintf(objectPath, "/%d", objectID);
 
-        printf("Waiting for %s\n", objectPath);
-
+        // Waiting for client to register object with server
         while (!found && maxOperations-- > 0)
         {
             AwaServerListClientsOperation * listClientsOperation = AwaServerListClientsOperation_New(server_session_);
@@ -427,18 +426,15 @@ protected:
 
             while (AwaRegisteredEntityIterator_Next(iterator))
             {
-                //Lwm2m_Debug("Waiting for server to know client knows about object 1000...");
                 const char * path = AwaRegisteredEntityIterator_GetPath(iterator);
 
                 if (strstr(path, objectPath) != NULL) {
-                    // contains
-                    printf("FOUND %s\n", path);
                     found = true;
                 }
             }
             AwaRegisteredEntityIterator_Free(&iterator);
             AwaServerListClientsOperation_Free(&listClientsOperation);
-            sleep(1);
+            usleep(1000);
         }
         ASSERT_TRUE(found);
     }
@@ -766,8 +762,11 @@ protected:
     bool running;
 };
 
+// Returns true iff time_ms is within time_target_ms +/- tolerance_ms
 bool ElapsedTimeWithinTolerance(double time_ms, double time_target_ms, double tolerance_ms);
 
+// Returns true iff time_ms is greater than or equal to time_target_ms
+bool ElapsedTimeExceeds(double time_ms, double time_target_ms);
 
 // Poll an overridden Check function until it returns true, or the timeout is reached.
 class WaitCondition
