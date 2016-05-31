@@ -17,6 +17,7 @@ RUN apt-get update -yq && apt-get install -yq \
 	libxml2-dev \
 	libxslt-dev \
 	doxygen \
+	graphviz \
 	cmake
 #	libsqlite3-dev \
 #	libncurses5-dev \
