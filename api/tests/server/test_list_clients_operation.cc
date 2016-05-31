@@ -139,7 +139,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 {
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
@@ -160,8 +160,8 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_Perform_honours_timeout)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { "TestClient1" }, 61000);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerSession * session = AwaServerSession_New();
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", 61000));
@@ -169,14 +169,14 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
 
-    // Tear down client
-    delete horde_;
-
+    // make client unresponsive
+    horde.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
 
     AwaServerListClientsOperation_Free(&operation);
     AwaServerSession_Free(&session);
@@ -186,7 +186,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 {
     // start a client horde and wait for them to register with the server
     AwaClientDaemonHorde horde( { "IMG123", "TestClient1", "TestClient2", "Imagination0" }, 61000);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
@@ -242,7 +242,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 {
     // start a client horde and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
@@ -254,7 +254,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 {
     // start a client horde and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
@@ -285,7 +285,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsRespons
 {
     // start a client horde and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
-    sleep(1);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));

@@ -73,7 +73,7 @@ pid_t SpawnProcess(const std::vector<const char *> &commandVector, bool wait_, b
         execvp(argv[0], argv.data());
 
         // only get here if exec failed
-        perror("execve failed");
+        perror("execve");
         std::cerr << argv[0] << std::endl;
         if (fd != NULL)
         {
@@ -98,7 +98,7 @@ pid_t SpawnProcess(const std::vector<const char *> &commandVector, bool wait_, b
     }
     else
     {
-        perror("fork failed");
+        perror("fork");
         c_pid = -1;
     }
 
@@ -113,7 +113,7 @@ void KillProcess(pid_t pid)
     {
         if (kill(pid, SIGKILL))
         {
-            perror("kill failed");
+            perror("kill");
         }
         pid = 0;
     }
@@ -126,12 +126,35 @@ void TerminateProcess(pid_t pid)
     {
         if (kill(pid, SIGTERM))
         {
-            perror("kill failed");
+            perror("kill");
         }
 
         waitpid(pid, NULL, 0);
         pid = 0;
     }
+}
+
+void PauseProcess(pid_t pid)
+{
+    if (pid > 0)
+    {
+        if (kill(pid, SIGSTOP))
+        {
+            perror("kill");
+        }
+    }
+}
+
+void UnpauseProcess(pid_t pid)
+{
+    if (pid > 0)
+    {
+        if (kill(pid, SIGCONT))
+        {
+            perror("kill");
+        }
+    }
+
 }
 
 pid_t CoAPOperation(const char * coapClientPath, int port, const char * method, const char * resource, int delay /*microseconds*/)
