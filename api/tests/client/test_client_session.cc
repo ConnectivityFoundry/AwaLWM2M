@@ -342,6 +342,7 @@ TEST_F(TestClientSession, AwaClientSession_SetDefaultTimeout_handles_invalid_tim
     EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, 0));
     EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, -1));
     EXPECT_EQ(AwaError_Unsupported, AwaClientSession_SetDefaultTimeout(session, -100));
+    AwaClientSession_Free(&session);
 }
 
 class TestClientSessionPathInvalidWithParam : public TestClientSession, public ::testing::WithParamInterface<const char *>
