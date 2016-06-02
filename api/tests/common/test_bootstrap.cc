@@ -46,7 +46,7 @@ struct SingleClientWaitCondition : public WaitCondition
     {
         AwaClientIterator * iterator = NULL;
         bool result =
-                (AwaError_Success == AwaServerListClientsOperation_Perform(Operation, defaults::timeout)) &&
+                (AwaError_Success == AwaServerListClientsOperation_Perform(Operation, global::timeout)) &&
                 ((iterator = AwaServerListClientsOperation_NewClientIterator(Operation)) != NULL) &&
                 (AwaClientIterator_Next(iterator)) &&
                 (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0);

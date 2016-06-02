@@ -96,7 +96,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 
 TEST_F(TestListClientsOperation, AwaServerListClientsOperation_Perform_handles_null_operation)
 {
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerListClientsOperation_Perform(NULL, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerListClientsOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_Perform_handles_negative_timeout)
@@ -127,7 +127,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_no_clients)
 {
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
     EXPECT_FALSE(AwaClientIterator_Next(iterator));
@@ -142,7 +142,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
 
@@ -173,9 +173,9 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     horde.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaServerListClientsOperation_Perform(operation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
     horde.Unpause();
 
     AwaServerListClientsOperation_Free(&operation);
@@ -189,7 +189,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
 
@@ -223,7 +223,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(NULL, NULL));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
 
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(operation, NULL));
 
@@ -233,7 +233,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_non_matching_clientID)
 {
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(operation, "ThisIDDoesNotExist"));
     AwaServerListClientsOperation_Free(&operation);
 }
@@ -245,7 +245,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     EXPECT_TRUE(NULL != AwaServerListClientsOperation_GetResponse(operation, "TestClient1"));
     AwaServerListClientsOperation_Free(&operation);
 }
@@ -257,7 +257,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     // each call should return the same address
     const AwaServerListClientsResponse * response1 = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
     const AwaServerListClientsResponse * response2 = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
@@ -288,7 +288,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsRespons
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
     EXPECT_TRUE(NULL != response);
 

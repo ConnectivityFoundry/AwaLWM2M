@@ -211,7 +211,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaTime value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -226,7 +226,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, value));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
 
     // check response - should be method not allowed.
 
@@ -255,13 +255,13 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaTime value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/1000/0/0", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -281,7 +281,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
 
@@ -289,7 +289,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -310,14 +310,14 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -338,13 +338,13 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/1000/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -365,14 +365,14 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/1000/0"));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
 
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(client_session_);
     EXPECT_TRUE(getOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     EXPECT_TRUE(getResponse != NULL);
@@ -399,14 +399,14 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -426,7 +426,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, value));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     // check response - should be AwaLWM2MError_BadRequest
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
@@ -453,7 +453,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, value));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     // check response - should be AwaLWM2MError_BadRequest
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
@@ -481,14 +481,14 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     const char * path = "/1000/0/0";
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, value));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     // check response - should fail
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
@@ -514,14 +514,14 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
     EXPECT_TRUE(setOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     const char * path = "/1000/0/0";
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaInteger value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -543,7 +543,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(clientSet, "/1000/0/0"));
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(clientSet, "/1000/0/0", 0, 12345));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
     AwaClientSetOperation_Free(&clientSet);
     AwaInteger expectedValue = 123456789;
 
@@ -553,7 +553,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
         AwaIntegerArray * array = AwaIntegerArray_New();
         AwaIntegerArray_SetValue(array, 1, expectedValue);
         EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsIntegerArray(writeOperation, "/1000/0/0", array));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaIntegerArray_Free(&array);
         AwaServerWriteOperation_Free(&writeOperation);
     }
@@ -564,7 +564,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_TRUE(getOperation != NULL);
 
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     EXPECT_TRUE(getResponse != NULL);
@@ -602,7 +602,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/1000/0"));
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(clientSet, "/1000/0/0"));
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(clientSet, "/1000/0/0", 0, 12345));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
     AwaClientSetOperation_Free(&clientSet);
 
     {
@@ -611,7 +611,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
         AwaIntegerArray * array = AwaIntegerArray_New();
         AwaIntegerArray_SetValue(array, 1, 67890);
         EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsIntegerArray(writeOperation, "/1000/0/0", array));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
         AwaIntegerArray_Free(&array);
     }
@@ -622,7 +622,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_TRUE(getOperation != NULL);
 
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     EXPECT_TRUE(getResponse != NULL);
@@ -643,7 +643,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     // Test behaviour when operation has no content
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(writeOperation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(writeOperation, "TestClient1", global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -669,7 +669,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     const char * stringValue = "hello";
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", timeValue));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/14", stringValue));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -685,13 +685,13 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
     AwaTime value = 123456789;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", value));
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/1/13", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_handles_null_operation)
 {
-    ASSERT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(NULL, "TestClient1", defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(NULL, "TestClient1", global::timeout));
 }
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_handles_negative_timeout)
@@ -703,7 +703,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
 {
     const char * clientID = "TestClient1";
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -736,9 +736,9 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_h
     daemon_.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
     daemon_.Unpause();
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -754,7 +754,7 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
 
     AwaServerSession_Disconnect(session_);
 
-    EXPECT_EQ(AwaError_SessionNotConnected, AwaServerWriteOperation_Perform(writeOperation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_SessionNotConnected, AwaServerWriteOperation_Perform(writeOperation, "TestClient1", global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -768,7 +768,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/2/10");
 
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
@@ -786,7 +786,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
         ASSERT_TRUE(NULL != readOperation);
 
         ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/2"));
-        ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
 
         const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
         ASSERT_TRUE(NULL != readResponse);
@@ -808,7 +808,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/2");
 
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     const AwaServerWriteResponse * writeResponse = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != writeResponse);
@@ -846,14 +846,14 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/2/10");
     AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/2/10/3", expected);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, 2 * defaults::timeout));  // double timeout for valgrind test
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
     EXPECT_TRUE(NULL != readOperation);
 
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/2/10/3"));
-    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     EXPECT_TRUE(NULL != readResponse);
@@ -876,14 +876,14 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/2");
     AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/2", expected);  // FIXME: Have to allow writing values to /O in this case
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
     EXPECT_TRUE(NULL != readOperation);
 
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/2/10/3"));
-    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     EXPECT_TRUE(NULL != readResponse);
@@ -932,7 +932,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     ASSERT_TRUE(NULL != writeOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/3/0"));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
@@ -956,7 +956,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/3"));
 
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(writeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
@@ -996,7 +996,7 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
         EXPECT_TRUE(defineOperation != NULL);
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObject));
-        EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaClientDefineOperation_Free(&defineOperation);
     }
@@ -1007,7 +1007,7 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
         EXPECT_TRUE(defineOperation != NULL);
 
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, customObject));
-        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaServerDefineOperation_Free(&defineOperation);
     }
@@ -1018,7 +1018,7 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
     AwaClientSetOperation * clientSet = AwaClientSetOperation_New(clientSession);
     EXPECT_TRUE(clientSet != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/9999/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
     AwaClientSetOperation_Free(&clientSet);
 
     //First write and get
@@ -1030,8 +1030,8 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
     AwaBoolean value = false;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation, "/9999/0/1", value));
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/9999/0/1"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     EXPECT_TRUE(getResponse != NULL);
@@ -1050,10 +1050,10 @@ TEST_F(TestWriteOperationWithConnectedSession, Consecutive_Writes_to_Custom_Obje
     //Change the /9999/0/1 respource to true;
     value = true;
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsBoolean(writeOperation, "/9999/0/1", value));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
 
     //We can perform the get twice without creating a new operation...
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     getResponse = AwaClientGetOperation_GetResponse(getOperation);
     EXPECT_TRUE(getResponse != NULL);
     EXPECT_EQ(AwaError_Success, AwaClientGetResponse_GetValueAsBooleanPointer(getResponse, "/9999/0/1", &valueResult));
@@ -1230,8 +1230,8 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition));
-        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
-        EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaClientDefineOperation_Free(&clientDefineOperation);
@@ -1272,7 +1272,7 @@ protected:
             }
         }
 
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
         AwaClientSetOperation_Free(&setOperation);
     }
 
@@ -1424,7 +1424,7 @@ TEST_P(TestWriteValueArray, TestWriteValueArray)
 
     if (data.ExpectedAddResult == AwaError_Success)
     {
-        EXPECT_EQ(data.ExpectedProcessResult, AwaServerWriteOperation_Perform(writeOperation, writeDetail::clientID, defaults::timeout));
+        EXPECT_EQ(data.ExpectedProcessResult, AwaServerWriteOperation_Perform(writeOperation, writeDetail::clientID, global::timeout));
     }
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -1436,7 +1436,7 @@ TEST_P(TestWriteValueArray, TestWriteValueArray)
         AwaClientGetOperation * getOperation = AwaClientGetOperation_New(clientSession_);
         ASSERT_TRUE(NULL != getOperation);
         ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, path));
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
         const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
         ASSERT_TRUE(NULL != getResponse);
 
@@ -1647,7 +1647,7 @@ TEST_P(TestWriteValueSingle, TestWriteValueSingle)
             break;
     }
 
-    ASSERT_EQ(data.ExpectedProcessResult, AwaServerWriteOperation_Perform(writeOperation, writeDetail::clientID, defaults::timeout));
+    ASSERT_EQ(data.ExpectedProcessResult, AwaServerWriteOperation_Perform(writeOperation, writeDetail::clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     if (data.ExpectedProcessResult == AwaError_Success)
@@ -1656,7 +1656,7 @@ TEST_P(TestWriteValueSingle, TestWriteValueSingle)
         AwaClientGetOperation * getOperation = AwaClientGetOperation_New(clientSession_);
         ASSERT_TRUE(NULL != getOperation);
         ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, path));
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
         const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
         ASSERT_TRUE(NULL != getResponse);
 
@@ -1825,7 +1825,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_n
     const char * clientID = "TestClient123";
     const char * path = "/3/0/9";
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(operation, path, 42));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, clientID, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, clientID, global::timeout));
 
     // expect the client ID to be in the response, but with an error on the specified path
     AwaClientIterator * iterator = AwaServerWriteOperation_NewClientIterator(operation);
@@ -1853,7 +1853,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_o
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(operation, "/3/0/15", "Europe/London"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", global::timeout));
 
     AwaClientIterator * iterator = AwaServerWriteOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
@@ -1874,7 +1874,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_L
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(operation, "/3/0/9", 53));
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, "TestClient1", global::timeout));
 
     // resource is read-only, should see a LWM2M error (MethodNotAllowed):
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(operation, "TestClient1");
@@ -1899,7 +1899,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteResponse_NewPathIte
 
     AwaServerWriteOperation * operation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(operation, "/3/0/15", "Europe/London"));  // expect Success
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", global::timeout));
     const AwaServerWriteResponse * response = AwaServerWriteOperation_GetResponse(operation, "TestClient1");
     EXPECT_TRUE(NULL != response);
     AwaPathIterator * pathIterator =  AwaServerWriteResponse_NewPathIterator(response);
@@ -1929,7 +1929,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_m
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(operation, "/3/0/15", "Europe/London"));  // expect LWM2M error
 
     // at least one error occurred:
-    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerWriteOperation_Perform(operation, "TestClient1", global::timeout));
 
     // only one client:
     AwaClientIterator * clientIterator = AwaServerWriteOperation_NewClientIterator(operation);
@@ -1988,7 +1988,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_handles_m
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(operation, "/3/0/15", "Europe/London"));
 
     // no errors expected
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(operation, "TestClient1", global::timeout));
 
     // only one client:
     AwaClientIterator * clientIterator = AwaServerWriteOperation_NewClientIterator(operation);

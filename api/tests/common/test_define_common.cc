@@ -731,7 +731,7 @@ TEST_P(TestDefineCommonResource_ProcessDefineOperation, TestDefineCommonResource
 
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaClientDefineOperation_Free(&defineOperation);
 }
@@ -832,7 +832,7 @@ TEST_P(TestDefineCommonResource_Definition_persists_in_daemon_after_disconnect_c
 
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
-    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaClientDefineOperation_Free(&defineOperation);
 

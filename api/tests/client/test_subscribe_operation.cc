@@ -259,16 +259,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -309,16 +309,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Ch
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -369,16 +369,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 0, 1234));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -413,16 +413,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/16", ChangeCallbackRunner, &cbHandler);
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(subscribeOperation, changeSubscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -461,16 +461,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/16", ChangeCallbackRunner, &cbHandler);
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(subscribeOperation, changeSubscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -499,7 +499,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     EXPECT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription2));
     EXPECT_TRUE(NULL == changeSubscription2);
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, global::timeout));
 
     const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(subscribeOperation);
     ASSERT_TRUE(response != NULL);
@@ -537,13 +537,13 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_su
     AwaClientSubscribeOperation * subscribeOperation = AwaClientSubscribeOperation_New(session_);
     ASSERT_TRUE(NULL != subscribeOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(subscribeOperation, changeSubscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(subscribeOperation, global::timeout));
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
     EXPECT_EQ(1, cbHandler.count);
@@ -554,7 +554,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_su
     AwaClientSubscribeOperation * cancelSubscribeOperation = AwaClientSubscribeOperation_New(session_);
     ASSERT_TRUE(NULL != cancelSubscribeOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddCancelChangeSubscription(cancelSubscribeOperation, changeSubscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(cancelSubscribeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(cancelSubscribeOperation, global::timeout));
     AwaClientSession_DispatchCallbacks(session_);
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Free(&cancelSubscribeOperation));
     EXPECT_TRUE(NULL == cancelSubscribeOperation);
@@ -607,9 +607,9 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     horde.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaClientSubscribeOperation_Perform(operation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
     horde.Unpause();
 
     EXPECT_EQ(AwaError_Success, AwaClientChangeSubscription_Free(&changeSubscription));
@@ -635,7 +635,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Pe
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription2));
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddExecuteSubscription(operation, executeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     EXPECT_EQ(3u, Map_Length(ClientSession_GetSubscribers(session_)));
 
@@ -662,7 +662,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Ad
 
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Response, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
     ASSERT_TRUE(NULL != response);
@@ -693,7 +693,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Ad
         else
             ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddCancelChangeSubscription(operation, changeSubscription));
 
-        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
         const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
         ASSERT_TRUE(NULL != response);
         const AwaPathResult * result = AwaClientSubscribeResponse_GetPathResult(response, "/3/0/1");
@@ -714,7 +714,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Ad
         ASSERT_TRUE(NULL != operation);
         AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/1", EmptyChangeCallback, NULL);
         ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
-        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
         const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
         ASSERT_TRUE(NULL != response);
         const AwaPathResult * result = AwaClientSubscribeResponse_GetPathResult(response, "/3/0/1");
@@ -734,7 +734,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Ad
     AwaClientChangeSubscription * changeSubscription = AwaClientChangeSubscription_New("/3/0/1", EmptyChangeCallback, NULL);
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddCancelChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
     const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
     ASSERT_TRUE(NULL != response);
     const AwaPathResult * result = AwaClientSubscribeResponse_GetPathResult(response, "/3/0/1");
@@ -765,7 +765,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeResponse_New
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription2));
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddExecuteSubscription(operation, executeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
     ASSERT_TRUE(NULL != response);
@@ -842,7 +842,7 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaChangeSubscription_GetPath_
 
 TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSession_Process_nothing_pending)
 {
-    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 }
 
 TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSession_DispatchCallbacks_nothing_in_queue)
@@ -912,16 +912,16 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSession_AwaChangeSet_
 
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/16", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -973,17 +973,17 @@ TEST_F(TestSubscribeToChangeWithConnectedSession, AwaClientSubscribeOperation_Su
 
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, changeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
     ASSERT_TRUE(NULL != setOperation);
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 0, 12345));
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 1, 54321));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -1082,7 +1082,7 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition2));
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaObjectDefinition_Free(&customObjectDefinition2);
@@ -1102,7 +1102,7 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsTime(setOperation, "/10000/0/6", changeSetDetail::initialTime1));
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsObjectLink(setOperation, "/10000/0/7", changeSetDetail::initialObjectLink1));
 
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
         AwaClientSetOperation_Free(&setOperation);
     }
 
@@ -1221,7 +1221,7 @@ TEST_P(TestAwaChangeSet, TestAwaChangeSetInstantiation)
     ASSERT_TRUE(NULL != operation);
     AwaClientChangeSubscription * subscription = AwaClientChangeSubscription_New(data.path, ChangeCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, subscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
@@ -1255,11 +1255,11 @@ TEST_P(TestAwaChangeSet, TestAwaChangeSetInstantiation)
             break;
     }
 
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
 
-    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -1395,7 +1395,7 @@ protected:
 
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaClientDefineOperation_Free(&defineOperation);
@@ -1422,7 +1422,7 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsTimeArray(setOperation, "/10000/0/6", initialTimeArray_));
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsObjectLinkArray(setOperation, "/10000/0/7", initialObjectLinkArray_));
 
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
         AwaClientSetOperation_Free(&setOperation);
     }
 
@@ -1571,7 +1571,7 @@ TEST_P(TestAwaChangeSetArray, TestAwaChangeSetArrayInstantiation)
     ASSERT_TRUE(NULL != operation);
     AwaClientChangeSubscription * subscription = AwaClientChangeSubscription_New(data.path, ChangeCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddChangeSubscription(operation, subscription));
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     // set via client api to trigger notification.
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);
@@ -1605,10 +1605,10 @@ TEST_P(TestAwaChangeSetArray, TestAwaChangeSetArrayInstantiation)
             break;
     }
 
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(session_);
@@ -1752,7 +1752,7 @@ TEST_F(TestSubscribeToExecuteWithConnectedSession, AwaClientSubscribeOperation_A
         else
             ASSERT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddExecuteSubscription(operation, executeSubscription));
 
-        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
         const AwaClientSubscribeResponse * response = AwaClientSubscribeOperation_GetResponse(operation);
         ASSERT_TRUE(NULL != response);
         const AwaPathResult * result = AwaClientSubscribeResponse_GetPathResult(response, "/3/0/4");
@@ -1791,19 +1791,19 @@ TEST_F(TestSubscribeToExecuteWithConnectedSession, AwaClientSubscribeOperation_P
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddExecuteSubscription(operation, executeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     //execute via server api to trigger notification
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(server_session_);
 
     AwaExecuteArguments * arguments = NULL;
     AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", arguments);
-    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 
     sleep(1);  // wait for execute command to be sent to client
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(client_session_);
@@ -1845,19 +1845,19 @@ TEST_F(TestSubscribeToExecuteWithConnectedSession, AwaClientSubscribeOperation_P
 
     EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_AddExecuteSubscription(operation, executeSubscription));
 
-    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSubscribeOperation_Perform(operation, global::timeout));
 
     //execute via server api to trigger notification.
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(server_session_);
 
     AwaExecuteArguments arguments {(void *)dummyExecuteData, sizeof(dummyExecuteData)};
     AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", &arguments);
-    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 
     sleep(1);  // wait for execute command to be sent to client
 
-    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSession_Process(client_session_, global::timeout));
 
     cbHandler.count = 0;
     AwaClientSession_DispatchCallbacks(client_session_);

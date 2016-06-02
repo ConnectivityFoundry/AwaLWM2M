@@ -104,7 +104,7 @@ TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Reso
     EXPECT_TRUE(NULL != defineOperation);
 
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);

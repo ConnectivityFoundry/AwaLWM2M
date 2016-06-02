@@ -54,8 +54,8 @@ TEST_F(TestServer, AwaServer_read_default_value_from_created_custom_object_insta
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(customObjectDefinition, 0, "Test Resource", true, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
-    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
@@ -67,13 +67,13 @@ TEST_F(TestServer, AwaServer_read_default_value_from_created_custom_object_insta
     ASSERT_TRUE(NULL != setOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/10000/0/0"));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != readResponse);
     const AwaInteger * value = NULL;
@@ -102,8 +102,8 @@ TEST_F(TestServer, AwaServer_read_default_value_from_created_custom_object_insta
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsIntegerArray(customObjectDefinition, 0, "Test Resource", 2, 10, AwaResourceOperations_ReadWrite, expected));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
-    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
@@ -115,13 +115,13 @@ TEST_F(TestServer, AwaServer_read_default_value_from_created_custom_object_insta
     ASSERT_TRUE(NULL != setOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/10000/0/0"));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != readResponse);
     const AwaIntegerArray * value = NULL;
@@ -198,7 +198,7 @@ TEST_P(TestWriteReadValueSingle, TestWriteReadValueSingle)
             break;
     }
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
     AwaServerWriteOperation_Free(&writeOperation);
     EXPECT_TRUE(NULL == writeOperation);
@@ -208,7 +208,7 @@ TEST_P(TestWriteReadValueSingle, TestWriteReadValueSingle)
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, data.path));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != readResponse);
 
@@ -301,14 +301,14 @@ TEST_F(TestServer, AwaServer_read_delete_read)
         AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
         ASSERT_TRUE(NULL != readOperation);
         ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/4"));
-        ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
 
         AwaServerReadOperation_Free(&readOperation);
     }
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     AwaServerDeleteOperation_Free(&operation);
 
@@ -316,7 +316,7 @@ TEST_F(TestServer, AwaServer_read_delete_read)
         AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
         ASSERT_TRUE(NULL != readOperation);
         ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/4"));
-        ASSERT_EQ(AwaError_Response, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Response, AwaServerReadOperation_Perform(readOperation, global::timeout));
         const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
         ASSERT_TRUE(NULL != readResponse);
         const AwaPathResult * result = AwaServerReadResponse_GetPathResult(readResponse, "/4");
