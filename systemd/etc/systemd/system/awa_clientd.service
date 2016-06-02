@@ -1,0 +1,8 @@
+[Unit]
+Description=Awa Client Daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/awa_clientd --daemonize --logFile /var/log/awa_clientd.log --bootstrap coap://127.0.0.1:15685
+

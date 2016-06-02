@@ -1,0 +1,8 @@
+[Unit]
+Description=Awa Server Daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/awa_serverd --daemonize --logFile /var/log/awa_serverd.log --port 5683
+

@@ -1,0 +1,7 @@
+[Unit]
+Description=Awa Bootstrap Server Daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/awa_bootstrapd --daemonize --logFile=/var/log/awa_bootstrapd.log --config /etc/awa/bootstrap.config --port 15685
