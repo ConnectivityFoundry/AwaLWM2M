@@ -564,12 +564,12 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
 {
     readDetail::TestReadResource data = GetParam();
     const AwaServerReadResponse * readResponse = data.UseResponse ? this->readResponse_ : NULL;
-    void * value = NULL;
+    void * value = (void *)1;  // not null
 
     AwaObjectLink receivedObjectLink = {0, 0};
     AwaOpaque receivedOpaque = {NULL, 0};
 
-    switch(data.type)
+    switch (data.type)
     {
     case AwaResourceType_String:
         ASSERT_EQ(data.expectedResult, AwaServerReadResponse_GetValueAsCStringPointer(readResponse, data.path, (const char **)&value));
@@ -645,6 +645,10 @@ TEST_P(TestReadValue, TestReadValueInstantiation)
                 break;
         }
     }
+    else
+    {
+        ASSERT_EQ(NULL, value);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -707,10 +711,11 @@ TEST_F(TestReadOperationWithConnectedSession, AwaServerReadResponse_GetValueAsIn
     ASSERT_EQ(AwaError_OperationInvalid, AwaServerReadResponse_GetValueAsIntegerPointer(NULL, "/3/0/9", &value));
 }
 
-TEST_F(TestReadOperationWithConnectedSession, AwaServerReadResponse_GetValueAsIntegerPointer_handles_null_response)
+TEST_F(TestReadOperationWithConnectedSession, AwaServerReadResponse_GetValueAsIntegerPointer_sets_pointer_to_null_on_error)
 {
-    const AwaInteger * value = NULL;
+    const AwaInteger * value = (const AwaInteger *)1;
     ASSERT_EQ(AwaError_OperationInvalid, AwaServerReadResponse_GetValueAsIntegerPointer(NULL, "/3/0/9", &value));
+    EXPECT_EQ(NULL, value);
 }
 
 TEST_F(TestReadOperationWithConnectedSession, AwaServerReadResponse_HasValue_handles_null_response)

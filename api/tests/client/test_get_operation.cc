@@ -668,6 +668,10 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
                 ASSERT_TRUE(false);
         }
     }
+    else
+    {
+        ASSERT_EQ(NULL, value);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(

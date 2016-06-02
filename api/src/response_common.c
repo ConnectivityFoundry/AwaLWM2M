@@ -541,13 +541,14 @@ static const Value * ResponseCommon_GetValue(const ResponseCommon * response, co
 AwaError GetValuePointer(const ResponseCommon * response, const char * path, const void ** value, size_t * valueSize, AwaResourceType resourceType, int resourceSize, bool withNull)
 {
     AwaError result = AwaError_Unspecified;
-    if (path != NULL)
+    if (value != NULL)
     {
-        if (Path_IsValidForResource(path))
+        *value = NULL;
+        if (path != NULL)
         {
-            if (response != NULL)
+            if (Path_IsValidForResource(path))
             {
-                if (value != NULL)
+                if (response != NULL)
                 {
                     const Value * storedValue = ResponseCommon_GetValue(response, path);
                     if (storedValue != NULL)
@@ -612,22 +613,22 @@ AwaError GetValuePointer(const ResponseCommon * response, const char * path, con
                 }
                 else
                 {
-                    result = LogErrorWithEnum(AwaError_OperationInvalid, "Value is null");
+                    result = LogErrorWithEnum(AwaError_OperationInvalid, "Invalid Get Response");
                 }
             }
             else
             {
-                result = LogErrorWithEnum(AwaError_OperationInvalid, "Invalid Get Response");
+                result = LogErrorWithEnum(AwaError_PathInvalid, "%s is not a resource path", path);
             }
         }
         else
         {
-            result = LogErrorWithEnum(AwaError_PathInvalid, "%s is not a resource path", path);
+            result = LogErrorWithEnum(AwaError_PathInvalid, "No path specified");
         }
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_PathInvalid, "No path specified");
+        result = LogErrorWithEnum(AwaError_OperationInvalid, "Value is null");
     }
     return result;
 }

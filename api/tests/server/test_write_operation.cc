@@ -846,7 +846,7 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     AwaServerWriteOperation_CreateObjectInstance(writeOperation, "/2/10");
     AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/2/10/3", expected);
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, 2 * defaults::timeout));  // double timeout for valgrind test
     AwaServerWriteOperation_Free(&writeOperation);
 
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
@@ -858,9 +858,9 @@ TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_CreateObj
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     EXPECT_TRUE(NULL != readResponse);
 
-    const AwaInteger * value;
+    const AwaInteger * value = NULL;
     EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, "/2/10/3", &value));
-
+    ASSERT_TRUE(NULL != value);
     EXPECT_EQ(expected, *value);
 
     AwaServerReadOperation_Free(&readOperation);
