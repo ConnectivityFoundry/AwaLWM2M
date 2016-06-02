@@ -714,6 +714,8 @@ static AwaError IPC_SendAndReceiveUsingSocket(int socket, struct sockaddr_storag
                         .events = POLLIN,
                 };
 
+                // an API timeout of zero means infinite wait
+                timeout = timeout > 0 ? timeout : -1;
                 int rc = poll(&fd, 1, timeout);
 
                 if (rc < 0)

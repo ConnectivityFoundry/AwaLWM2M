@@ -922,14 +922,14 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     ASSERT_TRUE(NULL != observation);
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    // Tear down client process
-    TestObserveWithConnectedSession::TearDown();
-
+    // Make the server unresponsive
+    daemon_.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerObserveOperation_Perform(operation, defaults::timeout));
     timer.Stop();
     EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    daemon_.Unpause();
 
     AwaServerObservation_Free(&observation);
     AwaServerObserveOperation_Free(&operation);

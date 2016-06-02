@@ -35,6 +35,8 @@ extern "C" {
 
 typedef struct _SessionCommon SessionCommon;
 
+#define SESSION_DEFAULT_TIMEOUT    (10 * 1000)  // 10 second timeout by default
+
 typedef enum
 {
     SessionType_Invalid = -1,
@@ -77,6 +79,9 @@ AwaError SessionCommon_SendDefineMessage(const SessionCommon * session, const Tr
 SessionType SessionCommon_GetSessionType(const SessionCommon * session);
 
 IPCSessionID SessionCommon_GetSessionID(const SessionCommon * session);
+
+AwaError SessionCommon_SetDefaultTimeout(SessionCommon * session, AwaTimeout timeout);
+
 
 #ifdef __cplusplus
 }

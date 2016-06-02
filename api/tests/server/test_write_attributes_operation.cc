@@ -248,14 +248,14 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     ASSERT_TRUE(NULL != writeAttributesOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
 
-    // Tear down server and connected client
-    TestWriteAttributesOperationWithConnectedSession::TearDown();
-
+    // Make the server unresponsive
+    daemon_.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, defaults::timeout));
     timer.Stop();
     EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    daemon_.Unpause();
 
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Free(&writeAttributesOperation));
     AwaServerSession_Free(&session);

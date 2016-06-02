@@ -164,6 +164,17 @@ AwaError AwaClientSession_SetIPCAsUDP(AwaClientSession * session, const char * a
 //AwaError AwaClientSession_SetIPCAsNanoMsg(AwaClientSession * session /* ... */);
 
 /**
+ * @brief Set IPC connect timeout.
+ *        Used internally by ::AwaClientSession_Connect and ::AwaClientSession_Disconnect.
+ * @param[in] session Pointer to a valid client session.
+ * @param[in] timeout The time within which an IPC session Connect must complete to avoid timeout.
+ *                    It must be greater than 0.
+ * @return AwaError_Success on success.
+ * @return Various errors on failure.
+ */
+AwaError AwaClientSession_SetDefaultTimeout(AwaClientSession * session, AwaTimeout timeout);
+
+/**
  * @brief Connect a session (configured with an IPC mechanism) to the Core.
  *        A session must be connected before operations can be processed.
  * @param[in] session Pointer to an IPC-configured session.

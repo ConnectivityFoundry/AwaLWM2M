@@ -228,14 +228,14 @@ TEST_F(TestReadOperationWithConnectedSession, AwaServerReadOperation_Perform_hon
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/3/0/1"));
 
-    // Tear down server and connected client
-    TestReadOperationWithConnectedSession::TearDown();
-
+    // Make the server unresponsive
+    TestServerWithDaemonBase::daemon_.Pause();
     BasicTimer timer;
     timer.Start();
     EXPECT_EQ(AwaError_Timeout, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
     timer.Stop();
     EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    TestServerWithDaemonBase::daemon_.Unpause();
 
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_Free(&readOperation));
     AwaServerSession_Free(&session);

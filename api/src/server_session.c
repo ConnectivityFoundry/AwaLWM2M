@@ -48,7 +48,6 @@ AwaServerSession * AwaServerSession_New(void)
     if (session != NULL)
     {
         memset(session, 0, sizeof(*session));
-
         session->SessionCommon = SessionCommon_New(SessionType_Server);
         if (session->SessionCommon != NULL)
         {
@@ -145,7 +144,29 @@ AwaError AwaServerSession_SetIPCAsUDP(AwaServerSession * session, const char * a
     }
     else
     {
-        result = LogErrorWithEnum(AwaError_SessionInvalid);
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
+    }
+    return result;
+}
+
+AwaError AwaServerSession_SetDefaultTimeout(AwaServerSession * session, AwaTimeout timeout)
+{
+    AwaError result = AwaError_Unspecified;
+    if (session != NULL)
+    {
+        SessionCommon * sessionCommon = ServerSession_GetSessionCommon(session);
+        if (sessionCommon != NULL)
+        {
+            result = SessionCommon_SetDefaultTimeout(sessionCommon, timeout);
+        }
+        else
+        {
+            result = LogErrorWithEnum(AwaError_SessionInvalid, "sessionCommon is NULL");
+        }
+    }
+    else
+    {
+        result = LogErrorWithEnum(AwaError_SessionInvalid, "session is NULL");
     }
     return result;
 }
