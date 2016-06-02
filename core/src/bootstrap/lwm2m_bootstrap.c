@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -129,9 +129,9 @@ static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char
         case COAP_POST_REQUEST:
         {
             Lwm2m_Debug("%s to /bs, query %s\n", (type == COAP_POST_REQUEST) ? "POST" : "PUT", query);
- 
+
             Lwm2mBootstrapClient client;
-         
+
             memcpy(&client.Addr, addr, sizeof(client.Addr));
             client.ObjectID = LWM2M_SECURITY_OBJECT;
             client.ObjectInstanceID = -1;
@@ -139,7 +139,7 @@ static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char
             client.EndPointName = GetEndPointNameFromQuery(query);
 
             Lwm2mBootstrap_AddClientToQueue(&client);
-    
+
             *responseCode = AwaResult_SuccessChanged;
             break;
         }
@@ -219,7 +219,7 @@ static void BootstrapTransactionCallback(void * context, AddressType * addr, con
 
 void Lwm2mBootstrap_BootStrapUpdate(Lwm2mContextType * context)
 {
-    // Loop through bootstrap request queue and send responses for each client 
+    // Loop through bootstrap request queue and send responses for each client
     int i;
     for (i = 0 ; i < MAX_CLIENTS; i++)
     {

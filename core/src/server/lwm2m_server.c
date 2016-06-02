@@ -301,7 +301,7 @@ static void PrintOptions(const Options * options)
     printf("  CoapPort       (--port)           : %d\n", options->CoapPort);
     printf("  IpcPort        (--ipcPort)        : %d\n", options->IpcPort);
     printf("  ContentType    (--content)        : %d\n", options->ContentType);
-    printf("  Daemonise      (--daemonise)      : %d\n", options->Daemonise);
+    printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
     printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
     printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
 }
@@ -321,7 +321,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"ipcPort",       required_argument, 0, 'i'},
             {"contentType",   required_argument, 0, 'm'},
             {"verbose",       no_argument,       0, 'v'},
-            {"daemonise",     no_argument,       0, 'd'},
+            {"daemonize",     no_argument,       0, 'd'},
             {"logFile",       required_argument, 0, 'l'},
             {"version",       no_argument,       0, 'V'},
             {"help",          no_argument,       0, 'h'},

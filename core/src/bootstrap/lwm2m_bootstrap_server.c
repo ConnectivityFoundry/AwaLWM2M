@@ -289,7 +289,7 @@ static void PrintOptions(const Options * options)
     {
         printf("  Config         (--config)         : %s\n", options->Config[i]);
     }
-    printf("  Daemonise      (--daemonise)      : %d\n", options->Daemonise);
+    printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
     printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
     printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
 }
@@ -308,7 +308,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"port",          required_argument,      0, 'p'},
             {"config",        required_argument,      0, 'c'},
             {"verbose",       no_argument,            0, 'v'},
-            {"daemonise",     no_argument,            0, 'd'},
+            {"daemonize",     no_argument,            0, 'd'},
             {"logFile",       required_argument,      0, 'l'},
             {"version",       no_argument,            0, 'V'},
             {"help",          no_argument,            0, 'h'},
