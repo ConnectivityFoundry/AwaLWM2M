@@ -164,3 +164,7 @@ clean: api-clean
 	rm -f *.log
 	rm -f *_out.xml
 	rm -f cppcheck-result.xml
+
+docker:
+	docker build -t flowm2m/awalwm2m -f ci/Dockerfile .
+
