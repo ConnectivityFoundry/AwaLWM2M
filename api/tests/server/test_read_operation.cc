@@ -475,6 +475,10 @@ class TestReadValue : public TestReadOperationWithConnectedSession, public ::tes
 {
 protected:
 
+    TestReadValue() :
+        readOperation_(nullptr),
+        readResponse_(nullptr) {}
+
     void SetUp() {
         TestReadOperationWithConnectedSession::SetUp();
 
@@ -966,6 +970,17 @@ AwaObjectLink expectedObjectLink1 = { 3, 0 };*/
 class TestReadValueArray : public TestReadOperationWithConnectedSession, public ::testing::WithParamInterface< readDetail::TestReadResourceArray>
 {
 protected:
+
+    TestReadValueArray() :
+        readOperation_(nullptr),
+        readResponse_(nullptr),
+        expectedStringArray_(nullptr),
+        expectedIntegerArray_(nullptr),
+        expectedFloatArray_(nullptr),
+        expectedBooleanArray_(nullptr),
+        expectedOpaqueArray_(nullptr),
+        expectedTimeArray_(nullptr),
+        expectedObjectLinkArray_(nullptr) {}
 
     void SetUp() {
         TestReadOperationWithConnectedSession::SetUp();

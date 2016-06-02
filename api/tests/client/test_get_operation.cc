@@ -504,6 +504,10 @@ class TestGetValue : public TestGetOperationWithConnectedSession, public ::testi
 {
 protected:
 
+    TestGetValue() :
+        getOperation_(nullptr),
+        getResponse_(nullptr) {}
+
     void SetUp() {
         TestGetOperationWithConnectedSession::SetUp();
 
@@ -986,6 +990,17 @@ AwaObjectLink expectedObjectLink1 = { 3, 0 };*/
 class TestGetValueArray : public TestGetOperationWithConnectedSession, public ::testing::WithParamInterface< detail::TestGetResourceArray>
 {
 protected:
+
+    TestGetValueArray() :
+        getOperation_(nullptr),
+        getResponse_(nullptr),
+        expectedStringArray_(nullptr),
+        expectedIntegerArray_(nullptr),
+        expectedFloatArray_(nullptr),
+        expectedBooleanArray_(nullptr),
+        expectedOpaqueArray_(nullptr),
+        expectedTimeArray_(nullptr),
+        expectedObjectLinkArray_(nullptr) {}
 
     void SetUp() {
         TestGetOperationWithConnectedSession::SetUp();
