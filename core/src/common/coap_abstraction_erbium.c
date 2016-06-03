@@ -50,7 +50,6 @@ static RequestHandler requestHandler = NULL;
 
 #define MAX_COAP_TRANSACTIONS (2)
 int CurrentTransactionIndex = 0;
-//TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS];
 
 static NetworkSocket * networkSocket = NULL;
@@ -60,15 +59,13 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
 
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
-    // TODO - create UDP sessions & bind to info (c.f. abstraction_libcoap)
-    Lwm2m_Info("Bind port: %d\n", port);     //  TODO - remove
+    Lwm2m_Info("Bind port: %d\n", port);
     memset(CurrentTransaction, sizeof(CurrentTransaction), 0);
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
     if (networkSocket)
         NetworkSocket_StartListening(networkSocket);
-    //rest_init_engine();
     return &coapInfo;
 }
 
@@ -206,60 +203,8 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
     return result;
 }
 
-
-int convert_nibble(uint8_t char_val, uint8_t * nibble)
-{
-    if ((char_val >= 0x30) && (char_val <= 0x39))
-    {
-        return (*nibble = (char_val & 0x0F));
-    }
-
-    if ( ((char_val >= 0x61) && (char_val <= 0x66)) ||
-         ((char_val >= 0x41) && (char_val <= 0x46)))
-    {
-        return (*nibble = ((char_val & 0x0F) + 9));
-    }
-
-    return -1;
-}
-
-
-int coap_getPortFromURI(const char * uri)
-{
-    int port = -1;
-
-    // TODO - support IPv4 (c.f. libCoap or libFlowCore Uri support)
-    //char * portStart = strchr(uri, ']') + 2;
-    char * portStart = strchr(uri, ']');
-
-    if(portStart != NULL)
-    {
-    	portStart += 2;
-        char * portEnd = strchr(portStart, '/');
-
-        if(portEnd != NULL)
-        {
-            char portStr[10] = {0};
-
-            if((portEnd - portStart) < (sizeof(portStr) - 1))
-            {
-                memcpy(&portStr, portStart, portEnd - portStart);
-
-                port = atoi(portStr);
-            }
-        }
-    }
-    else
-    {
-    	port = 15685;	// TODO - temp
-    }
-
-    return port;
-}
-
 bool coap_getPathQueryFromURI(const char * uri, char * path, char * query)
 {
-    // TODO - support IPv4 (c.f. libCoap or libFlowCore Uri support)
     bool result = false;
     char * pathStart = strchr(uri, '/');
     if (pathStart && pathStart[1] == '/')
@@ -292,7 +237,7 @@ int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
     int result = -1;
 
-    Lwm2m_Debug("resolve address from Uri: %s\n", address);		//  TODO - remove
+    Lwm2m_Debug("resolve address from Uri: %s\n", address);
     NetworkAddress * networkAddress = NetworkAddress_New(address, strlen(address));
     if (networkAddress)
     {
@@ -348,8 +293,7 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
     coap_getPathQueryFromURI(uri, path, query);
 
     Lwm2m_Info("Coap request: %s\n", uri);
-    //Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(remote_ipaddr));
-//    Lwm2m_Debug("Coap request path: %s\n", path);
+    //Lwm2m_Debug("Coap request path: %s\n", path);
     //Lwm2m_Debug("Coap request query: %s\n", query);
 
     coap_init_message(&request, COAP_TYPE_CON, method, coap_get_mid());
@@ -409,7 +353,7 @@ int coap_Destroy(void)
 
 void coap_Process(void)
 {
-	// TODO - needed for Erbium?
+	// TODO - needed for Erbium? (e.g. for transaction failed timeout)?
 	// Do nothing - libCoap only
 }
 
@@ -487,31 +431,15 @@ void coap_SetRequestHandler(RequestHandler handler)
     requestHandler = handler;
 }
 
-// TODO - register c/b handler per coap session
-//RESOURCE(rest_resource_template,
-//         "", //"title=\"Hello world: ?len=0..\";rt=\"Text\"",
-//         request_handler,
-//         request_handler,
-//         request_handler,
-//         request_handler);
-
 int coap_RegisterUri(const char * uri)
 {
-    // TODO - register resource Uri
-
-//    resource_t * temp = malloc(sizeof(resource_t));
-//    char * uriCopy = strdup(&uri[1]);
-//    Lwm2m_Debug("register %s\n", uriCopy);
-//    &rest_resource_template, sizeof(resource_t));
-//    rest_activate_resource(temp, uriCopy);
-
-    // TODO - create udp session
+    // Do nothing
     return 0;
 }
 
 int coap_DeregisterUri(const char * path)
 {
-    // Do nothing - not supported in static Awa
+    // Do nothing
     return 0;
 }
 
