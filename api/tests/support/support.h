@@ -419,7 +419,7 @@ protected:
         while (!found && maxOperations-- > 0)
         {
             AwaServerListClientsOperation * listClientsOperation = AwaServerListClientsOperation_New(server_session_);
-            AwaServerListClientsOperation_Perform(listClientsOperation, defaults::timeout);
+            AwaServerListClientsOperation_Perform(listClientsOperation, global::timeout);
             const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(listClientsOperation, global::clientEndpointName);
 
             AwaRegisteredEntityIterator * iterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(response);
@@ -484,15 +484,15 @@ protected:
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, objectDefinition));
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, objectDefinition));
 
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
-        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
         //FIXME: FLOWDM-498: this creates the object instance for the dummy object on the client as the server api does not support object/resource creation yet
         //comment this code to find tests that aren't LWM2M compliant
         AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
         EXPECT_TRUE(clientSet != NULL);
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/10000/0"));
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
         AwaClientSetOperation_Free(&clientSet);
 
         AwaObjectDefinition_Free(&objectDefinition);

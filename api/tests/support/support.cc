@@ -37,6 +37,7 @@ namespace global {
     void SetGlobalDefaults(void)
     {
         global::logLevel = defaults::logLevel;
+        global::timeout = defaults::timeout;
         SetDaemonGlobalDefaults();
     }
 
@@ -105,7 +106,7 @@ bool WaitForRegistration(AwaServerSession * serverSession, const std::vector<std
         // short sleep to avoid spinning the IPC too fast
         usleep(1000);
 
-        AwaServerSession_Process(serverSession, defaults::timeout);
+        AwaServerSession_Process(serverSession, global::timeout);
         AwaServerSession_DispatchCallbacks(serverSession);
         allRegistered = (chk.registeredIDs.size() == clientIDs.size()) && std::is_permutation(chk.registeredIDs.begin(), chk.registeredIDs.end(), clientIDs.begin());
 

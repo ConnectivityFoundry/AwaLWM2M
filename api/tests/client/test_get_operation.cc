@@ -154,7 +154,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_AddPath_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_); ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/0"));
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
 
     EXPECT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0/0"));
@@ -249,13 +249,13 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
     ASSERT_TRUE(NULL != getOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     AwaClientGetOperation_Free(&getOperation);
 }
 
 TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handles_null_operation)
 {
-    ASSERT_EQ(AwaError_OperationInvalid, AwaClientGetOperation_Perform(NULL, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaClientGetOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handles_negative_timeout)
@@ -285,9 +285,9 @@ TEST_F(TestGetOperation, AwaClientGetOperation_Perform_honours_timeout)
     horde.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaClientGetOperation_Perform(getOperation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
     horde.Unpause();
 
     AwaClientGetOperation_Free(&getOperation);
@@ -300,7 +300,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
 
-    ASSERT_EQ(AwaError_OperationInvalid, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaClientGetOperation_Perform(getOperation, global::timeout));
     AwaClientGetOperation_Free(&getOperation);
 }
 
@@ -313,7 +313,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
 
     AwaClientSession_Disconnect(session_);
 
-    ASSERT_EQ(AwaError_SessionNotConnected, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionNotConnected, AwaClientGetOperation_Perform(getOperation, global::timeout));
     AwaClientGetOperation_Free(&getOperation);
 }
 
@@ -330,7 +330,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_GetResponse_h
     ASSERT_TRUE(NULL != getOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
@@ -344,7 +344,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
     ASSERT_TRUE(NULL != getOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
@@ -358,7 +358,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_Perform_handl
     ASSERT_TRUE(NULL != getOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
@@ -394,7 +394,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_GetResponse_h
     ASSERT_TRUE(NULL != getOperation);
 
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
 
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
@@ -409,7 +409,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetOperation_handles_singl
 {
     AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPathWithArrayRange(operation, "/3/0/6", 0, 1));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, global::timeout));
     const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation); ASSERT_TRUE(NULL != response);
     ASSERT_TRUE(NULL != response);
     // check that /3/0/6 is in the response
@@ -504,6 +504,10 @@ class TestGetValue : public TestGetOperationWithConnectedSession, public ::testi
 {
 protected:
 
+    TestGetValue() :
+        getOperation_(nullptr),
+        getResponse_(nullptr) {}
+
     void SetUp() {
         TestGetOperationWithConnectedSession::SetUp();
 
@@ -539,7 +543,7 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition2));
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaObjectDefinition_Free(&customObjectDefinition2);
@@ -559,7 +563,7 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsTime(setOperation, "/10000/0/6", detail::expectedTime1));
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsObjectLink(setOperation, "/10000/0/7", detail::expectedObjectLink1));
 
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
         AwaClientSetOperation_Free(&setOperation);
 
 
@@ -668,6 +672,10 @@ TEST_P(TestGetValue, TestGetValueInstantiation)
                 ASSERT_TRUE(false);
         }
     }
+    else
+    {
+        ASSERT_EQ(NULL, value);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -746,7 +754,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_HasValue_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_FALSE(AwaClientGetResponse_HasValue(getResponse, NULL));
@@ -758,7 +766,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_HasValue_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_FALSE(AwaClientGetResponse_HasValue(getResponse, "/3/0/9"));
@@ -770,7 +778,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_HasValue_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_FALSE(AwaClientGetResponse_HasValue(getResponse, "/3/0"));
@@ -782,7 +790,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_HasValue_handl
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_HasValue(getResponse, "/3/0/1"));
@@ -799,7 +807,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_FALSE(AwaClientGetResponse_ContainsPath(getResponse, NULL));
@@ -811,7 +819,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0/1"));
@@ -823,7 +831,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0/1"));
@@ -835,7 +843,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0"));
@@ -847,7 +855,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3"));
@@ -859,7 +867,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_ContainsPath_h
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     ASSERT_FALSE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0/2"));
@@ -876,7 +884,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_NewPathIterato
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/9"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
@@ -902,7 +910,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_NewPathIterato
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/0"));
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/9"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
 
     AwaPathIterator * iterator = AwaClientGetResponse_NewPathIterator(getResponse);
@@ -930,7 +938,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_NewPathIterato
 {
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_); ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
 
 
@@ -983,6 +991,17 @@ class TestGetValueArray : public TestGetOperationWithConnectedSession, public ::
 {
 protected:
 
+    TestGetValueArray() :
+        getOperation_(nullptr),
+        getResponse_(nullptr),
+        expectedStringArray_(nullptr),
+        expectedIntegerArray_(nullptr),
+        expectedFloatArray_(nullptr),
+        expectedBooleanArray_(nullptr),
+        expectedOpaqueArray_(nullptr),
+        expectedTimeArray_(nullptr),
+        expectedObjectLinkArray_(nullptr) {}
+
     void SetUp() {
         TestGetOperationWithConnectedSession::SetUp();
 
@@ -1034,7 +1053,7 @@ protected:
 
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaClientDefineOperation_Free(&defineOperation);
@@ -1061,7 +1080,7 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsTimeArray(setOperation, "/10000/0/6", expectedTimeArray_));
         ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsObjectLinkArray(setOperation, "/10000/0/7", expectedObjectLinkArray_));
 
-        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
         AwaClientSetOperation_Free(&setOperation);
 
         getOperation_ = AwaClientGetOperation_New(session_);
@@ -1070,7 +1089,7 @@ protected:
         // list of paths to objects we require
         ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation_, "/10000"));
 
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation_, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation_, global::timeout));
         getResponse_ = AwaClientGetOperation_GetResponse(getOperation_);
         ASSERT_TRUE(NULL != getResponse_);
     }
@@ -1243,7 +1262,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_GetValuesAsInt
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/6"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
@@ -1258,7 +1277,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_GetValuesAsInt
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/6"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
@@ -1272,7 +1291,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_GetValuesAsInt
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
@@ -1287,7 +1306,7 @@ TEST_F(TestGetOperationWithConnectedSession, AwaClientGetResponse_GetValuesAsInt
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/6"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
