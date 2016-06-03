@@ -318,7 +318,7 @@ static void PrintUsage(void)
     printf("  --bootstrap, -b URI      : Use bootstrap server URI\n");
     printf("  --factoryBootstrap, -f FILE\n"
            "                           : Load factory bootstrap information from FILE\n");
-    printf("  --daemonise, -d          : Detach process from terminal and run in the background\n");
+    printf("  --daemonize, -d          : Detach process from terminal and run in the background\n");
     printf("  --verbose, -v            : Generate verbose output\n");
     printf("  --logFile, -l FILE       : Log output to FILE\n");
     printf("  --version, -V            : Print version and exit\n");
@@ -334,7 +334,7 @@ static void PrintOptions(const Options * options)
     printf("  CoapPort             (--port)             : %d\n", options->CoapPort);
     printf("  IpcPort              (--ipcPort)          : %d\n", options->IpcPort);
     printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
-    printf("  Daemonise            (--daemonise)        : %d\n", options->Daemonise);
+    printf("  Daemonize            (--daemonize)        : %d\n", options->Daemonise);
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName);
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap);
     printf("  LogFile              (--logFile)          : %s\n", options->LogFile);
@@ -357,7 +357,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"factoryBootstrap", required_argument, 0, 'f'},
             {"endPointName",     required_argument, 0, 'e'},
             {"verbose",          no_argument,       0, 'v'},
-            {"daemonise",        no_argument,       0, 'd'},
+            {"daemonize",        no_argument,       0, 'd'},
             {"logFile",          required_argument, 0, 'l'},
             {"version",          no_argument,       0, 'V'},
             {"help",             no_argument,       0, 'h'},
