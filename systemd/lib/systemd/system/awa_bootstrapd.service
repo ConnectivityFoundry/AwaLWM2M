@@ -14,5 +14,5 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=network-online.target
+WantedBy=multi-user.target
 
