@@ -64,7 +64,7 @@ void coap_init_transactions(void)
 	ListInit(&transactions_list);
 }
 
-coap_transaction_t * coap_new_transaction(uint16_t mid, coap_session * session)
+coap_transaction_t * coap_new_transaction(NetworkSocket * networkSocket, uint16_t mid, NetworkAddress * remoteAddress)
 {
     coap_transaction_t * t = (coap_transaction_t *)malloc(sizeof(*t)); //memb_alloc(&transactions_memb);
     memset(t, 0, sizeof(coap_transaction_t));
@@ -72,8 +72,8 @@ coap_transaction_t * coap_new_transaction(uint16_t mid, coap_session * session)
     {
         t->mid = mid;
         t->retrans_counter = 0;
-
-        t->session = session;
+        t->networkSocket = networkSocket;
+        t->remoteAddress = remoteAddress;
 
         ListAdd(&t->list, &transactions_list); /* list itself makes sure same element is not added twice */
     }
@@ -86,8 +86,7 @@ void coap_send_transaction(coap_transaction_t *t)
     PRINTF("Sending transaction %u\n", t->mid);
 
 
-    session_send_data_ptr(t->session, t->packet, t->packet_len);
-
+    NetworkSocket_Send(t->networkSocket, t->remoteAddress, t->packet, t->packet_len);
     //coap_send_message(&t->addr, t->port, t->packet, t->packet_len);
 
     if(COAP_TYPE_CON ==

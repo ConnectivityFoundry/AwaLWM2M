@@ -288,4 +288,8 @@ int coap_set_header_size1(void *packet, uint32_t size);
 int coap_get_payload(void *packet, const uint8_t **payload);
 int coap_set_payload(void *packet, const void *payload, size_t length);
 
+#define COAP_BUFFER_LENGTH   1024
+extern uint8_t CoapBuffer[COAP_BUFFER_LENGTH];
+
+
 #endif /* ER_COAP_H_ */
