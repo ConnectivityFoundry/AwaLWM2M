@@ -3,6 +3,14 @@ Description=Awa Client Daemon
 After=network.target
 
 [Service]
-Type=forking
-ExecStart=/usr/local/bin/awa_clientd --daemonize --logFile /var/log/awa_clientd.log --bootstrap coap://127.0.0.1:15685
+User=nobody
+Group=nogroup
+Type=simple
+ExecStart=/usr/bin/awa_clientd \
+    --logFile /var/log/awa/awa_clientd.log \
+	--bootstrap coap://127.0.0.1:15685
+StandardOutput=journal
+StandardError=journal
 
+[Install]
+WantedBy=network-online.target

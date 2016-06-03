@@ -3,6 +3,15 @@ Description=Awa Server Daemon
 After=network.target
 
 [Service]
-Type=forking
-ExecStart=/usr/local/bin/awa_serverd --daemonize --logFile /var/log/awa_serverd.log --port 5683
+User=nobody
+Group=nogroup
+Type=simple
+ExecStart=/usr/bin/awa_serverd \
+    --logFile /var/log/awa/awa_serverd.log \
+	--port 5683
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=network-online.target
 
