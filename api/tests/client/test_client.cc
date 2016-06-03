@@ -43,13 +43,13 @@ TEST_F(TestClientWithDaemon, AwaClient_set_get_valid_integer_resource)
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_); ASSERT_TRUE(NULL != setOperation);
     AwaInteger expected = 123456789;
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(setOperation, "/3/0/9", expected));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/9"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     const AwaInteger * value = NULL;
@@ -64,13 +64,13 @@ TEST_F(TestClientWithDaemon, AwaClient_set_get_valid_string_resource)
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_); ASSERT_TRUE(NULL != setOperation);
     const char * expected = "abcdefgh";
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/1", expected));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     const char * value = NULL;
@@ -87,14 +87,14 @@ TEST_F(TestClientWithDaemon, AwaClient_get_set_multiple_valid_resources)
     const char * expectedString = "abcdefgh";
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(setOperation, "/3/0/9", expectedInteger));
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/1", expectedString));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/9"));
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0/1"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     const AwaInteger * integerValue = NULL;
@@ -123,7 +123,7 @@ TEST_F(TestClientWithDaemon, AwaClient_get_resource_value_from_created_custom_ob
 
     ASSERT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(customObjectDefinition, 0, "Test Resource", false, AwaResourceOperations_ReadWrite, 0));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&defineOperation);
@@ -135,14 +135,14 @@ TEST_F(TestClientWithDaemon, AwaClient_get_resource_value_from_created_custom_ob
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/10000/0"));
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/10000/0/0"));
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(setOperation, "/10000/0/0", expected));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
 
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/10000/0/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     const AwaInteger * value = NULL;
@@ -171,7 +171,7 @@ TEST_F(TestClientWithDaemon, get_on_undefined_object_should_return_path_not_foun
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_TRUE(NULL != getOperation);
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000"));
-    EXPECT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
     const AwaPathResult * result = AwaClientGetResponse_GetPathResult(getResponse, "/1000");
@@ -193,7 +193,7 @@ TEST_F(TestClientWithDaemon, get_on_defined_and_undefined_objects_should_return_
     ASSERT_TRUE(NULL != getOperation);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3"));
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000"));
-    ASSERT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
     ASSERT_TRUE(NULL != getResponse);
 
@@ -223,7 +223,7 @@ TEST_F(TestClientWithDaemon, get_on_empty_object_instance_has_correct_paths_in_r
         AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
         ASSERT_TRUE(NULL != getOperation);
         EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000"));
-        EXPECT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, global::timeout));
         const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
         ASSERT_TRUE(NULL != getResponse);
         const AwaPathResult * result = AwaClientGetResponse_GetPathResult(getResponse, "/1000");
@@ -237,14 +237,14 @@ TEST_F(TestClientWithDaemon, get_on_empty_object_instance_has_correct_paths_in_r
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(1000, "Test Object 0", 0, 1);  ASSERT_TRUE(customObjectDefinition != NULL);
     result = AwaObjectDefinition_AddResourceDefinitionAsInteger(customObjectDefinition, 0, "Resource0", false, AwaResourceOperations_ReadWrite, 0L); ASSERT_EQ(AwaError_Success, result);
     result = AwaClientDefineOperation_Add(defineOperation, customObjectDefinition);                           ASSERT_EQ(AwaError_Success, result);
-    result = AwaClientDefineOperation_Perform(defineOperation, defaults::timeout);                            ASSERT_EQ(AwaError_Success, result);
+    result = AwaClientDefineOperation_Perform(defineOperation, global::timeout);                            ASSERT_EQ(AwaError_Success, result);
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&defineOperation);
 
     // create instance 0
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_);                           ASSERT_TRUE(NULL != setOperation);
     result = AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0");                             ASSERT_EQ(AwaError_Success, result);
-    result = AwaClientSetOperation_Perform(setOperation, defaults::timeout);                                  ASSERT_EQ(AwaError_Success, result);
+    result = AwaClientSetOperation_Perform(setOperation, global::timeout);                                  ASSERT_EQ(AwaError_Success, result);
     AwaClientSetOperation_Free(&setOperation);
 
 
@@ -254,7 +254,7 @@ TEST_F(TestClientWithDaemon, get_on_empty_object_instance_has_correct_paths_in_r
         AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
         ASSERT_TRUE(NULL != getOperation);
         EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000"));
-        EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
         const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);
         ASSERT_TRUE(NULL != getResponse);
         ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/1000"));
@@ -276,7 +276,7 @@ TEST_F(TestClientWithDaemon, get_on_defined_and_undefined_resources_should_retur
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);                           ASSERT_TRUE(NULL != getOperation);
     result = AwaClientGetOperation_AddPath(getOperation, "/3/0/1");                                           ASSERT_EQ(AwaError_Success, result);
     result = AwaClientGetOperation_AddPath(getOperation, "/2/0/1000");                                        ASSERT_EQ(AwaError_Success, result);
-    result = AwaClientGetOperation_Perform(getOperation, defaults::timeout);                                  ASSERT_EQ(AwaError_Response, result);
+    result = AwaClientGetOperation_Perform(getOperation, global::timeout);                                  ASSERT_EQ(AwaError_Response, result);
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation);           ASSERT_TRUE(NULL != getResponse);
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3"));
     ASSERT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/3/0"));
@@ -303,20 +303,20 @@ TEST_F(TestClientWithDaemon, object_with_single_optional_resource_can_be_created
     AwaObjectDefinition * customObjectDefinition = AwaObjectDefinition_New(1000, "Test Object 0", 0, 1);  ASSERT_TRUE(customObjectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(customObjectDefinition, 0, "Resource0", false, AwaResourceOperations_ReadWrite, 42L));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, customObjectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
     AwaObjectDefinition_Free(&customObjectDefinition);
     AwaClientDefineOperation_Free(&defineOperation);
 
     // create an instance of this object
     AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session_); ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     // a get should succeed but have no resource paths (optional resource not created)
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_); ASSERT_TRUE(NULL != getOperation);
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
 
     // /1000 and /1000/0 should be in the response, but /1000/0/0 should not be
@@ -329,13 +329,13 @@ TEST_F(TestClientWithDaemon, object_with_single_optional_resource_can_be_created
     // create the optional resource
     setOperation = AwaClientSetOperation_New(session_); ASSERT_TRUE(NULL != setOperation);
     EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/1000/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
     AwaClientSetOperation_Free(&setOperation);
 
     // /1000/0/0 should be in the response, with a (default) value
     getOperation = AwaClientGetOperation_New(session_); ASSERT_TRUE(NULL != getOperation);
     EXPECT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/1000/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientGetOperation_Perform(getOperation, global::timeout));
     getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
     EXPECT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/1000"));
     EXPECT_TRUE(AwaClientGetResponse_ContainsPath(getResponse, "/1000/0"));

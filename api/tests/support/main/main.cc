@@ -65,6 +65,8 @@ GTEST_API_ int main(int argc, char **argv) {
     Awa::global::bootstrapServerDaemonPath = ai.bootstrapDaemonPath_arg;
     Awa::global::bootstrapServerConfig = ai.bootstrapConfig_arg;
 
+    Awa::global::timeout = ai.defaultTimeout_given ? ai.defaultTimeout_arg : Awa::defaults::timeout;
+
     auto result = RUN_ALL_TESTS();
     cmdline_parser_free(&ai);
     return result;

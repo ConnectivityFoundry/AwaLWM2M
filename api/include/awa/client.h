@@ -493,7 +493,7 @@ bool AwaClientGetResponse_HasValue(const AwaClientGetResponse * response, const 
  *        pointer returned is immediately invalid and should not be used or dereferenced.
  * @param[in] response The current Get Response to retrieve the value from.
  * @param[in] path The path of the resource requested for retrieval.
- * @param[in,out] value A pointer to a const pointer that will be modified to point to the requested value.
+ * @param[in,out] value A pointer to a const pointer that will be modified to point to the requested value. Set to null on error.
  * @return AwaError_Success on success.
  * @return AwaError_TypeMismatch if the resource type corresponding to the specified path is not of the correct type.
  * @return AwaError_PathNotFound if the specified resource path is not covered by the Get Response.
@@ -551,7 +551,7 @@ AwaError AwaClientGetResponse_GetValueAsObjectLink(const AwaClientGetResponse * 
  *        pointer returned is immediately invalid and should not be used or dereferenced.
  * @param[in] response The current Get Response to retrieve the value from.
  * @param[in] path The path of the multiple-instance resource requested for retrieval.
- * @param[in,out] valueArray A pointer to a const pointer that will be modified to point to the requested value.
+ * @param[in,out] valueArray A pointer to a const pointer that will be modified to point to the requested value. Set to null on error.
  * @return AwaError_Success on success.
  * @return AwaError_TypeMismatch if the resource type corresponding to the specified path is not of the correct type.
  * @return AwaError_PathNotFound if the specified resource path is not covered by the Get Response.

@@ -1261,7 +1261,7 @@ struct EventWaitCondition : public WaitCondition
 
     virtual bool Check()
     {
-        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, global::timeout));
         EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
         if (StaticClient != NULL)
         {

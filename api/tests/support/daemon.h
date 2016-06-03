@@ -89,6 +89,7 @@ extern const char * clientEndpointName;
 extern const char * clientLogFile;
 extern const char * serverLogFile;
 extern const char * bootstrapServerLogFile;
+extern int timeout;
 
 } // namespace global
 
