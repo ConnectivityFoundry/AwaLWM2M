@@ -79,7 +79,7 @@ typedef void (*notification_callback_t)(coap_observee_t *subject,
 
 struct coap_observee_s {
   coap_observee_t *next;        /* for LIST */
-  coap_session * session;
+  NetworkAddress * remoteAddress;
   uint16_t port;
   const char *url;
   uint8_t token_len;
@@ -90,7 +90,7 @@ struct coap_observee_s {
 };
 
 /*----------------------------------------------------------------------------*/
-coap_observee_t *coap_obs_add_observee(coap_session * session,
+coap_observee_t *coap_obs_add_observee(NetworkAddress * remoteAddress,
                                        const uint8_t *token, size_t token_len,
                                        const char *url,
                                        notification_callback_t
@@ -101,16 +101,16 @@ void coap_obs_remove_observee(coap_observee_t *o);
 coap_observee_t *coap_obs_get_observee_by_token(const uint8_t *token,
                                                 size_t token_len);
 
-int coap_obs_remove_observee_by_token(coap_session * session,
+int coap_obs_remove_observee_by_token(NetworkAddress * remoteAddress,
                                       uint8_t *token, size_t token_len);
 
-int coap_obs_remove_observee_by_url(coap_session * session,
+int coap_obs_remove_observee_by_url(NetworkAddress * remoteAddress,
                                     const char *url);
 
-void coap_handle_notification(coap_session * session,
+void coap_handle_notification(NetworkAddress * remoteAddress,
                               coap_packet_t *notification);
 
-coap_observee_t *coap_obs_request_registration(coap_session * session,
+coap_observee_t *coap_obs_request_registration(NetworkAddress * remoteAddress,
                                                char *uri,
                                                notification_callback_t
                                                notification_callback,

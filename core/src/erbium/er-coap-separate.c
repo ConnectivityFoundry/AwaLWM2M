@@ -41,6 +41,7 @@
 #include "er-coap-separate.h"
 #include "er-coap-transactions.h"
 
+
 /*---------------------------------------------------------------------------*/
 /*- Separate Response API ---------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -87,11 +88,13 @@ coap_separate_accept(void *request, coap_separate_t *separate_store)
       /* ACK with empty code (0) */
       coap_init_message(ack, COAP_TYPE_ACK, 0, coap_req->mid);
       /* serializing into IPBUF: Only overwrites header parts that are already parsed into the request struct */
-      session_send_data(t->session , coap_serialize_message(ack, t->session->packet_buffer));
+
+      size_t sendPacketLength = coap_serialize_message(ack, CoapBuffer);
+      NetworkSocket_Send(t->networkSocket, t->remoteAddress, CoapBuffer, sendPacketLength);
     }
 
     /* store remote address */
-    separate_store->session = t->session;
+    separate_store->remoteAddress = t->remoteAddress;
 
     /* store correct response type */
     separate_store->type =

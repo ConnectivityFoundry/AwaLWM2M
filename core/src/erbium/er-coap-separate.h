@@ -40,12 +40,12 @@
 #define COAP_SEPARATE_H_
 
 #include "er-coap.h"
-#include "er-session.h"
 #include "er-resource.h"
+#include "network_abstraction.h"
 
 typedef struct coap_separate
 {
-  coap_session * session;
+    NetworkAddress * remoteAddress;
 
   coap_message_type_t type;
   uint16_t mid;

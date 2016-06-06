@@ -29,6 +29,7 @@ set (awa_erbium_SOURCES
   ${CORE_SRC_DIR}/common/lwm2m_observers.c
 
   ${CORE_SRC_DIR}/common/coap_abstraction_erbium.c
+  ${CORE_SRC_DIR}/common/network_abstraction_linux.c
   er-coap.c
   er-coap-engine.c
   er-coap-transactions.c

@@ -45,6 +45,7 @@
 #include "er-coap-observe.h"
 #include "er-coap-separate.h"
 #include "er-coap-observe-client.h"
+#include "network_abstraction.h"
 
 #ifdef CONTIKI
 #include "pt.h"
@@ -57,6 +58,10 @@ typedef coap_packet_t rest_request_t;
 typedef coap_packet_t rest_response_t;
 
 void coap_init_engine(void);
+
+typedef int (*service_callback_t)(void *request, void *response,
+                                  uint8_t *buffer, uint16_t preferred_size,
+                                  int32_t *offset);
 
 /*---------------------------------------------------------------------------*/
 /*- Client Part -------------------------------------------------------------*/
@@ -88,6 +93,7 @@ PT_THREAD(coap_blocking_request
   }
 ---------------------------------------------------------------------------*/
 
-int coap_receive(void);
+void coap_set_service_callback(service_callback_t callback);
+int coap_receive(NetworkSocket * networkSocket);
 
 #endif /* ER_COAP_ENGINE_H_ */

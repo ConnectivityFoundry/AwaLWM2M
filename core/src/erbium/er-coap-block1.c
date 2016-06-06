@@ -69,7 +69,7 @@ int
 coap_block1_handler(void *request, void *response, uint8_t *target, size_t *len, size_t max_len)
 {
   const uint8_t *payload = 0;
-  int pay_len = 0;//REST.get_request_payload(request, &payload);
+  int pay_len = coap_get_payload(request, &payload);
 
   if(!pay_len || !payload) {
     erbium_status_code =  BAD_REQUEST_4_00;

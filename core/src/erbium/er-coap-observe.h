@@ -41,8 +41,8 @@
 
 #include "er-coap.h"
 #include "er-coap-transactions.h"
-#include "er-session.h"
 #include "er-resource.h"
+#include "network_abstraction.h"
 
 #ifdef CONTIKI
 
@@ -64,7 +64,7 @@ typedef struct coap_observer {
   struct coap_observer *next;   /* for LIST */
 
   char url[COAP_OBSERVER_URL_LEN];
-  coap_session * session;
+  NetworkAddress * remoteAddress;
   uint16_t port;
   uint8_t token_len;
   uint8_t token[COAP_TOKEN_LEN];
@@ -78,12 +78,12 @@ typedef struct coap_observer {
 
 //list_t coap_get_observers(void);
 void coap_remove_observer(coap_observer_t *o);
-int coap_remove_observer_by_client(coap_session * session);
-int coap_remove_observer_by_token(coap_session * session,
+int coap_remove_observer_by_client(NetworkAddress * remoteAddress);
+int coap_remove_observer_by_token(NetworkAddress * remoteAddress,
                                   uint8_t *token, size_t token_len);
-int coap_remove_observer_by_uri(coap_session * session,
+int coap_remove_observer_by_uri(NetworkAddress * remoteAddress,
                                 const char *uri);
-int coap_remove_observer_by_mid(coap_session * session,
+int coap_remove_observer_by_mid(NetworkAddress * remoteAddress,
                                 uint16_t mid);
 
 void coap_notify_observers(resource_t *resource);

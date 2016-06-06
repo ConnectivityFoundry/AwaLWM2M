@@ -41,8 +41,8 @@
 
 #include "../common/lwm2m_list.h"
 #include "er-coap.h"
-#include "er-session.h"
 #include "er-resource.h"
+#include "network_abstraction.h"
 
 /*
  * Modulo mask (thus +1) for a random number to get the tick number for the random
@@ -61,7 +61,8 @@ typedef struct coap_transaction
     uint32_t retrans_timer;
     uint8_t retrans_counter;
 
-    coap_session * session;
+    NetworkSocket * networkSocket;
+    NetworkAddress * remoteAddress;
 
     restful_response_handler callback;
     void *callback_data;
@@ -74,7 +75,7 @@ typedef struct coap_transaction
 void coap_register_as_transaction_handler(void);
 
 void coap_init_transactions(void);
-coap_transaction_t * coap_new_transaction(uint16_t mid, coap_session * session);
+coap_transaction_t * coap_new_transaction(NetworkSocket * networkSocket, uint16_t mid, NetworkAddress * remoteAddress);
 void coap_send_transaction(coap_transaction_t *t);
 void coap_clear_transaction(coap_transaction_t *t);
 coap_transaction_t *coap_get_transaction_by_mid(uint16_t mid);
