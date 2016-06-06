@@ -92,9 +92,11 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             case sizeof(float):
                 sprintf(buf, "%f", *(float*)value);
                 break;
+#ifndef MICROCHIP_PIC32         // TODO - FIXME       
             case sizeof(double):
                 sprintf(buf, "%f", *(double*)value);
                 break;
+#endif
             default:
                 Lwm2m_Error("ERROR: invalid length for float\n");
                 break;

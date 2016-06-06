@@ -29,16 +29,20 @@
 #include <float.h>
 
 #ifndef CONTIKI
-  #include <arpa/inet.h> // htons
-  #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
-  #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
+#ifdef MICROCHIP_PIC32
+    //#include <tcpip/tcpip_helpers.h>
+    #define htonl(x) (((x & 0x000000ff) << 24) | ((x & 0x0000ff00) << 8) | ((x & 0x00ff0000) >> 8) | ((x & 0xff000000) >> 24))
+    #define ntohl(x) htonl(x)
+#else
+    #include <arpa/inet.h> // htons
+#endif
 #else
   #include "net/ip/uip.h"  
-  #define htonll(x) ((1==uip_htonl(1)) ? (x) : ((uint64_t)uip_htonl((x) & 0xFFFFFFFF) << 32) | uip_htonl((x) >> 32))
-  #define ntohll(x) ((1==uip_ntohl(1)) ? (x) : ((uint64_t)uip_ntohl((x) & 0xFFFFFFFF) << 32) | uip_ntohl((x) >> 32))
   #define htonl(x) uip_htonl(x)
   #define ntohl(x) uip_ntohl(x)
 #endif
+#define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
+#define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 #include "lwm2m_tlv.h"
 #include "lwm2m_serdes.h"
@@ -707,9 +711,11 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
                 case sizeof(float):
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(float*)value);
                     break;
+#ifndef MICROCHIP_PIC32                    
                 case sizeof(double):
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(double*)value);
                     break;
+#endif                    
                 default:
                     Lwm2m_Error("Invalid length for float: %d\n", size);
                     break;

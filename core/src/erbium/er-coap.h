@@ -80,6 +80,25 @@ typedef uip_ipaddr_t ipaddr_t
 
 #endif
 
+#ifdef MICROCHIP_PIC32      // TODO - fixme
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
+
+#define ERBIUM_DEBUG 0
+#if ERBIUM_DEBUG
+#define PRINTF printf
+#else
+#define PRINTF(...)
+#endif
+#define MIN(n, m)   (((n) < (m)) ? (n) : (m))
+#define random_rand random
+
+#endif
+
         /* REST_MAX_CHUNK_SIZE can be different from 2^x so we need to get next lower 2^x for COAP_MAX_BLOCK_SIZE */
 #ifndef COAP_MAX_BLOCK_SIZE
 #define COAP_MAX_BLOCK_SIZE           (REST_MAX_CHUNK_SIZE < 32 ? 16 : \
@@ -103,8 +122,8 @@ typedef uip_ipaddr_t ipaddr_t
 
 #endif
 
-        /* bitmap for set options */
-        enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
+/* bitmap for set options */
+enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
 
 #define SET_OPTION(packet, opt) ((packet)->options[opt / OPTION_MAP_SIZE] |= 1 << (opt % OPTION_MAP_SIZE))
 #define IS_OPTION(packet, opt) ((packet)->options[opt / OPTION_MAP_SIZE] & (1 << (opt % OPTION_MAP_SIZE)))
