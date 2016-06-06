@@ -36,6 +36,8 @@ typedef int SOCKET;
 #include <linux/tcp.h>
 #include <linux/version.h>
 
+#include "lwm2m_debug.h"
+#include "lwm2m_util.h"
 #include "network_abstraction.h"
 
 
@@ -49,6 +51,7 @@ struct _NetworkAddress
         struct sockaddr_in6 Sin6;
     } Address;
     bool Secure;
+    int useCount;
 };
 
 struct _NetworkSocket
@@ -60,16 +63,30 @@ struct _NetworkSocket
     NetworkSocketError LastError;
 };
 
+typedef struct
+{
+    char * uri;
+    NetworkAddress * address;
+} NetworkAddressCache;
 
 typedef enum
 {
     UriParseState_Scheme,
     UriParseState_Hostname,
     UriParseState_Port,
-}UriParseState;
-
+} UriParseState;
 
 #define MAX_URI_LENGTH  (256)
+
+#ifndef MAX_NETWORK_ADDRESS_CACHE
+    #define MAX_NETWORK_ADDRESS_CACHE  (5)
+#endif
+
+static NetworkAddressCache networkAddressCache[MAX_NETWORK_ADDRESS_CACHE] = {{0}};
+
+static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength);
+static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength);
+static int getUriHostLength(const char * uri, int uriLength);
 
 
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
@@ -77,121 +94,161 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
     NetworkAddress * result = NULL;
     if (uri && uriLength > 0)
     {
-         bool secure = false;
-        int index = 0;
-        int startIndex = 0;
-        int port = 5683;
-        char hostname[MAX_URI_LENGTH];
-        int hostnameLength = 0;
-        UriParseState state = UriParseState_Scheme;
-        while (index < uriLength)
+        int uriHostLength = getUriHostLength(uri, uriLength);
+        if (uriHostLength > 0)
+            result = getCachedAddressByUri(uri, uriHostLength);
+        if (!result)
         {
-            if (state == UriParseState_Scheme)
+            bool secure = false;
+            int index = 0;
+            int startIndex = 0;
+            int port = 5683;
+            char hostname[MAX_URI_LENGTH];
+            int hostnameLength = 0;
+            UriParseState state = UriParseState_Scheme;
+            while (index < uriLength)
             {
-                if ((uri[index] == ':') && ((index + 2) <  uriLength) && (uri[index+1] == '/') &&  (uri[index+2] == '/'))
+                if (state == UriParseState_Scheme)
                 {
-                    int length = index - startIndex;
-                    if ((length == 4) && (strncmp(&uri[startIndex],"coap", length) == 0))
+                    if ((uri[index] == ':') && ((index + 2) <  uriLength) && (uri[index+1] == '/') &&  (uri[index+2] == '/'))
                     {
+                        int length = index - startIndex;
+                        if ((length == 4) && (strncmp(&uri[startIndex],"coap", length) == 0))
+                        {
 
-                    }
-                    else if ((length == 5) && (strncmp(&uri[startIndex],"coaps", length) == 0))
-                    {
-                        port = 5684;
-                        secure = true;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                    state = UriParseState_Hostname;
-                    index += 2;
-                    startIndex = index + 1;
-                }
-                index++;
-            }
-            else if (state == UriParseState_Hostname)
-            {
-                if ((uri[index] == '[') )
-                {
-                    index++;
-                    while (index < uriLength)
-                    {
-                        if (uri[index] == ']')
+                        }
+                        else if ((length == 5) && (strncmp(&uri[startIndex],"coaps", length) == 0))
+                        {
+                            port = 5684;
+                            secure = true;
+                        }
+                        else
                         {
                             break;
                         }
+                        state = UriParseState_Hostname;
+                        index += 2;
+                        startIndex = index + 1;
+                    }
+                    index++;
+                }
+                else if (state == UriParseState_Hostname)
+                {
+                    if ((uri[index] == '[') )
+                    {
                         index++;
+                        while (index < uriLength)
+                        {
+                            if (uri[index] == ']')
+                            {
+                                break;
+                            }
+                            index++;
+                        }
                     }
+                    else if ((uri[index] == ':') || (uri[index] == '/') )
+                    {
+                        hostnameLength = index - startIndex;
+                        memcpy(&hostname, &uri[startIndex], hostnameLength);
+                        hostname[hostnameLength] = 0;
+                        if  (uri[index] == '/')
+                            break;
+                        state = UriParseState_Port;
+                        port = 0;
+                        startIndex = index + 1;
+                    }
+                    index++;
                 }
-                else if ((uri[index] == ':') || (uri[index] == '/') )
+                else if (state == UriParseState_Port)
                 {
-                    hostnameLength = index - startIndex;
-                    memcpy(&hostname, &uri[startIndex], hostnameLength);
-                    hostname[hostnameLength] = 0;
-                    if  (uri[index] == '/')
+                    if (uri[index] == '/')
+                    {
                         break;
-                    state = UriParseState_Port;
-                    port = 0;
-                    startIndex = index + 1;
+                    }
+                    else if isdigit(uri[index])
+                    {
+                        port = (port * 10) + (uri[index] - '0');
+                    }
+                    index++;
                 }
-                index++;
             }
-            else if (state == UriParseState_Port)
+            if (state == UriParseState_Hostname)
             {
-                if (uri[index] == '/')
+                hostnameLength = uriLength - startIndex;
+                memcpy(hostname, &uri[startIndex], hostnameLength);
+                hostname[hostnameLength] = 0;
+            }
+            if (hostnameLength > 0 && port > 0)
+            {
+                struct hostent *resolvedAddress = gethostbyname(hostname);
+                if (resolvedAddress)
                 {
-                    break;
+                    size_t size = sizeof(struct _NetworkAddress);
+                    result = (NetworkAddress *)malloc(size);
+                    if (result)
+                    {
+                        memset(result, size, 0);
+                        result->Secure = secure;
+                        if (resolvedAddress->h_addrtype == AF_INET)
+                        {
+                            result->Address.Sin.sin_family = AF_INET;
+                            memcpy(&result->Address.Sin.sin_addr,*(resolvedAddress->h_addr_list),sizeof(struct in_addr));
+                            result->Address.Sin.sin_port = htons(port);
+                        }
+                        else if (resolvedAddress->h_addrtype == AF_INET6)
+                        {
+                            result->Address.Sin6.sin6_family = AF_INET6;
+                            memcpy(&result->Address.Sin6.sin6_addr,*(resolvedAddress->h_addr_list),sizeof(struct in6_addr));
+                            result->Address.Sin6.sin6_port = htons(port);
+                        }
+                        else
+                        {
+                            free(result);
+                            result = NULL;
+                        }
+                    }
                 }
-                else if isdigit(uri[index])
-                {
-                    port = (port * 10) + (uri[index] - '0');
-                }
-                index++;
             }
         }
-        if (state == UriParseState_Hostname)
+
+        if (result)
         {
-            hostnameLength = uriLength - startIndex;
-            memcpy(hostname, &uri[startIndex], hostnameLength);
-            hostname[hostnameLength] = 0;
-        }
-        if (hostnameLength > 0 && port > 0)
-        {
-            struct hostent *resolvedAddress = gethostbyname(hostname);
-            if (resolvedAddress)
+            if (result->useCount == 0)
             {
-                size_t size = sizeof(struct _NetworkAddress);
-                result = (NetworkAddress *)malloc(size);
-                if (result)
-                {
-                    memset(result, size, 0);
-                    result->Secure = secure;
-                    if (resolvedAddress->h_addrtype == AF_INET)
-                    {
-                        result->Address.Sin.sin_family = AF_INET;
-                        memcpy(&result->Address.Sin.sin_addr,*(resolvedAddress->h_addr_list),sizeof(struct in_addr));
-                        result->Address.Sin.sin_port = htons(port);
-                    }
-                    else if (resolvedAddress->h_addrtype == AF_INET6)
-                    {
-                        result->Address.Sin6.sin6_family = AF_INET6;
-                        memcpy(&result->Address.Sin6.sin6_addr,*(resolvedAddress->h_addr_list),sizeof(struct in6_addr));
-                        result->Address.Sin6.sin6_port = htons(port);
-                    }
-                    else
-                    {
-                        free(result);
-                        result = NULL;
-                    }
-                }
+                addCachedAddress(result, uri, uriHostLength);
             }
+            result->useCount++;
         }
     }
     return result;
 }
 
-//int NetworkAddress_Compare(NetworkAddress * addressX, NetworkAddress * addressY);
+int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
+{
+    int result = -1;
+
+    // Compare address and port (ignore uri)
+    if (address1 && address2 && address1->Address.Sa.sa_family == address2->Address.Sa.sa_family)
+    {
+        if (address1->Address.Sa.sa_family == AF_INET)
+        {
+            result = memcmp(&address1->Address.Sin.sin_addr.s_addr, &address2->Address.Sin.sin_addr.s_addr, sizeof(address2->Address.Sin.sin_addr.s_addr));
+            if (result == 0)
+            {
+                result = address1->Address.Sin.sin_port - address2->Address.Sin.sin_port;
+            }
+        }
+        else if (address1->Address.Sa.sa_family == AF_INET6)
+        {
+            result = memcmp(&address1->Address.Sin6.sin6_addr, &address2->Address.Sin6.sin6_addr, sizeof(address2->Address.Sin6.sin6_addr));
+            if (result == 0)
+            {
+                result = address1->Address.Sin6.sin6_port - address2->Address.Sin6.sin6_port;
+            }
+        }
+    }
+    return result;
+}
 
 void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addressType)
 {
@@ -208,12 +265,137 @@ void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addre
 
 void NetworkAddress_Free(NetworkAddress ** address)
 {
+    // TODO - review when addresses are freed (e.g. after client bootstrap, or connection lost ?)
     if (address && *address)
     {
-        free(*address);
+        (*address)->useCount--;
+        if ((*address)->useCount == 0)
+        {
+            int index;
+            for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
+            {
+                if (networkAddressCache[index].address == *address)
+                {
+                    if (networkAddressCache[index].uri)
+                    {
+                        Lwm2m_Debug("Address free: %s\n", networkAddressCache[index].uri);
+                        free(networkAddressCache[index].uri);
+                        networkAddressCache[index].uri = NULL;
+                    }
+                    else
+                    {
+                        Lwm2m_Debug("Address free\n");
+                    }
+                    networkAddressCache[index].address = NULL;
+                    break;
+                }
+            }
+            free(*address);
+        }
         *address = NULL;
     }
 }
+
+static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength)
+{
+    if (address && uri && uriLength > 0)
+    {
+        int index;
+        for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
+        {
+            if (networkAddressCache[index].address == NULL)
+            {
+                if (uriLength > 0)
+                {
+                    networkAddressCache[index].uri = (char *)malloc(uriLength + 1);
+                    if (networkAddressCache[index].uri)
+                    {
+                        memcpy(networkAddressCache[index].uri, uri, uriLength);
+                        networkAddressCache[index].uri[uriLength] = 0;
+                        networkAddressCache[index].address = address;
+                        Lwm2m_Debug("Address add: %s\n", networkAddressCache[index].uri);
+                    }
+                }
+                else
+                {
+                    networkAddressCache[index].address = address;
+                    networkAddressCache[index].uri = NULL;
+                    Lwm2m_Debug("Address add (received)\n");    // TODO - print remote address
+                }
+                break;
+            }
+        }
+    }
+}
+
+
+
+static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength)
+{
+    NetworkAddress * result = NULL;
+    int index;
+    for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
+    {
+        if (networkAddressCache[index].uri && (memcmp(networkAddressCache[index].uri, uri, uriLength) == 0))
+        {
+            Lwm2m_Debug("Address uri matched: %s\n", networkAddressCache[index].uri);
+            result = networkAddressCache[index].address;
+            break;
+        }
+    }
+    return result;
+}
+
+static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress)
+{
+    NetworkAddress * result = NULL;
+    int index;
+    for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
+    {
+        NetworkAddress * address = networkAddressCache[index].address;
+        if (address)
+        {
+            if (NetworkAddress_Compare(matchAddress, address) == 0)
+            {
+                if (networkAddressCache[index].uri)
+                {
+                    Lwm2m_Debug("Rx address matched: %s\n", networkAddressCache[index].uri);
+                }
+                else
+                {
+                    Lwm2m_Debug("Rx address matched\n");
+                }
+                result = address;
+            }
+        }
+    }
+    if (!result)
+        Lwm2m_Debug("No Rx address match\n");
+    return result;
+}
+
+static int getUriHostLength(const char * uri, int uriLength)
+{
+    // Search for end of host + optional port
+    int result = uriLength;
+    int lengthRemaining;
+    char * pathStart = memchr(uri, '/', uriLength);
+    if (pathStart && pathStart[1] == '/' )
+    {
+        pathStart += 2;
+        lengthRemaining = uriLength - (pathStart - uri);
+        if (lengthRemaining > 0)
+        {
+            pathStart = memchr(pathStart, '/', lengthRemaining);
+            if (pathStart)
+            {
+                result = pathStart - uri;
+            }
+        }
+    }
+    return result;
+}
+
 
 NetworkSocket * NetworkSocket_New(NetworkSocketType socketType, uint16_t port)
 {
@@ -330,7 +512,7 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
     if (*readLength == SOCKET_ERROR)
     {
         *readLength = 0;
-        if ((lastError == EWOULDBLOCK) || (lastError == EAGAIN) )
+        if ((lastError == EWOULDBLOCK) || (lastError == EAGAIN))
         {
             result = true;
         }
@@ -341,20 +523,29 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
     }
     else
     {
-        if (*sourceAddress == NULL)
+        NetworkAddress * networkAddress = NULL;
+        NetworkAddress matchAddress;
+        size_t size = sizeof(struct _NetworkAddress);
+        memset(&matchAddress, size, 0);
+        memcpy(&matchAddress.Address.Sa, &sourceSocket, sourceSocketLength);
+        networkAddress = getCachedAddress(&matchAddress);
+
+        if (networkAddress == NULL)
         {
-            size_t size = sizeof(struct _NetworkAddress);
-            *sourceAddress = (NetworkAddress *)malloc(size);
-            if (*sourceAddress)
+            networkAddress = (NetworkAddress *)malloc(size);
+            if (networkAddress)
             {
-                memset(*sourceAddress, size, 0);
+                // Add new address to cache (note: uri and secure is unknown)
+                memcpy(networkAddress, &matchAddress, size);
+                addCachedAddress(networkAddress, NULL, 0);
+                networkAddress->useCount++;         // TODO - ensure addresses are freed? (after t/o or transaction or DTLS session closed)
             }
         }
-        if (*sourceAddress)
+        if (networkAddress)
         {
-            memcpy(&(*sourceAddress)->Address, &sourceSocket, sourceSocketLength);
+            *sourceAddress = networkAddress;
+            result = true;
         }
-        result = true;
     }
     return result;
 }
