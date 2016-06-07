@@ -1,0 +1,17 @@
+[Unit]
+Description=Awa Client Daemon
+After=network.target
+
+[Service]
+User=nobody
+Group=nogroup
+Type=simple
+ExecStart=/usr/bin/awa_clientd \
+    --logFile /var/log/awa/awa_clientd.log \
+	--bootstrap coap://127.0.0.1:15685
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
