@@ -203,7 +203,7 @@ AwaError DoDefine(Session session, const ObjectDescription & objectDescription)
             result = interface.DefineOperation_Add(defineOperation, objectDefinition);
             if (result == AwaError_Success)
             {
-                result = interface.DefineOperation_Perform(defineOperation, defaults::timeout);
+                result = interface.DefineOperation_Perform(defineOperation, global::timeout);
                 if (result == AwaError_Success)
                 {
                     result = AwaError_Success;

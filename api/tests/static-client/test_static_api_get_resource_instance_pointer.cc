@@ -155,7 +155,7 @@ protected:
         }
 
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&objectDefinition);
         AwaServerDefineOperation_Free(&defineOperation);

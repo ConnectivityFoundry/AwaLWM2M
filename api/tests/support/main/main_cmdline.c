@@ -46,6 +46,7 @@ const char *gengetopt_args_info_help[] = {
   "      --serverDaemonPath=STRING Path to LWM2M server daemon\n                                  (default=`core/src/server/awa_serverd')",
   "      --bootstrapDaemonPath=STRING\n                                Path to LWM2M bootstrap daemon\n                                  (default=`core/src/bootstrap/awa_bootstrapd')",
   "      --bootstrapConfig=STRING  Path to bootstrap config file\n                                  (default=`../api/tests/bootstrap-gtest.config')",
+  "      --defaultTimeout=TIMEOUT  Set default timeout in milliseconds for IPC\n                                  operations",
     0
 };
 
@@ -83,6 +84,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->serverDaemonPath_given = 0 ;
   args_info->bootstrapDaemonPath_given = 0 ;
   args_info->bootstrapConfig_given = 0 ;
+  args_info->defaultTimeout_given = 0 ;
 }
 
 static
@@ -105,6 +107,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->bootstrapDaemonPath_orig = NULL;
   args_info->bootstrapConfig_arg = gengetopt_strdup ("../api/tests/bootstrap-gtest.config");
   args_info->bootstrapConfig_orig = NULL;
+  args_info->defaultTimeout_orig = NULL;
   
 }
 
@@ -126,6 +129,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->serverDaemonPath_help = gengetopt_args_info_help[10] ;
   args_info->bootstrapDaemonPath_help = gengetopt_args_info_help[11] ;
   args_info->bootstrapConfig_help = gengetopt_args_info_help[12] ;
+  args_info->defaultTimeout_help = gengetopt_args_info_help[13] ;
   
 }
 
@@ -225,6 +229,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->bootstrapDaemonPath_orig));
   free_string_field (&(args_info->bootstrapConfig_arg));
   free_string_field (&(args_info->bootstrapConfig_orig));
+  free_string_field (&(args_info->defaultTimeout_orig));
   
   
 
@@ -281,6 +286,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bootstrapDaemonPath", args_info->bootstrapDaemonPath_orig, 0);
   if (args_info->bootstrapConfig_given)
     write_into_file(outfile, "bootstrapConfig", args_info->bootstrapConfig_orig, 0);
+  if (args_info->defaultTimeout_given)
+    write_into_file(outfile, "defaultTimeout", args_info->defaultTimeout_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -1141,6 +1148,7 @@ cmdline_parser_internal (
         { "serverDaemonPath",	1, NULL, 0 },
         { "bootstrapDaemonPath",	1, NULL, 0 },
         { "bootstrapConfig",	1, NULL, 0 },
+        { "defaultTimeout",	1, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1318,6 +1326,20 @@ cmdline_parser_internal (
                 &(local_args_info.bootstrapConfig_given), optarg, 0, "../api/tests/bootstrap-gtest.config", ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "bootstrapConfig", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Set default timeout in milliseconds for IPC operations.  */
+          else if (strcmp (long_options[option_index].name, "defaultTimeout") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->defaultTimeout_arg), 
+                 &(args_info->defaultTimeout_orig), &(args_info->defaultTimeout_given),
+                &(local_args_info.defaultTimeout_given), optarg, 0, 0, ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "defaultTimeout", '-',
                 additional_error))
               goto failure;
           
