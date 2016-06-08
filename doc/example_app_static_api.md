@@ -10,6 +10,7 @@
 
 ### Application overview.
 
+TODO: same image but with static API...
 ![](Awa_client_tutorial_application_positioning.png)
 
 This example shows how to:
@@ -18,8 +19,8 @@ This example shows how to:
     * Defines an object
     * Defines a resource within the object
     * Instantiates the defined object within the client
-* Create the above application *client-static-tutorial* in a Contiki environment.
-* Create a server side application which uses the same object model in order to read/write resources in the *client-static-tutorial* application.
+* Create the above application *client-static-tutorial* in a Contiki simulated environment.
+* Use the Server daemon tools to create the same object model and read/write resources in the *client-static-tutorial* application.
 
 The *client-static-tutorial* application makes use of the Awa Static API to define objects and resources and to expose them via LwM2M:
 
@@ -52,7 +53,11 @@ This example will assume that you have installed it to `~/AwaLWM2M/build/install
 
 This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
 
-Create a new directory *static-client-tutorial*.
+Create a new directory *static-client-tutorial*:
+
+```
+$ mkdir static-client-tutorial
+```
 
 Copy the following code into static-client-tutorial/*Makefile*:
 
@@ -70,14 +75,29 @@ Copy the following code into static-client-tutorial/*static-client-tutorial.c*:
 
 int main(void)
 {
+    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
     AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
-    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
-    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "::", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "");
 
     AwaStaticClient_Init(awaClient);
+    
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[::1]:5683");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 60;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+    
+    AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
     while (1)
     {
@@ -90,24 +110,22 @@ int main(void)
 }
 ```
 
-Run "make" and specify the install path to Awa LWM2M:
+Run "make" and specify the path to the static-client-tutorial and install path to Awa LWM2M:
 
 ```
-$ cd static-client-tutorial
-static-client-tutorial $ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
+$ make -C static-client-tutorial AWA_INSTALL_PATH=../build/install
 ```
 
-Start the bootstrap and server daemons:
+Start the server:
 
 ```
-$ ./build/install/bin/awa_bootstrapd -d --config core/bootstrap-localhost.config
-$ ./build/install/bin/awa_serverd -d
+$ ./build/install/bin/awa_serverd --interface lo --addressFamily 6 --ip ::1 --port 5683 &
 ```
 
 Run your new application:
 
 ```
-$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./static-client-tutorial
+$ LD_LIBRARY_PATH=./build/install/lib static-client-tutorial/static-client-tutorial &
 ```
 
 Query the server for connected clients:
@@ -124,7 +142,7 @@ Client: AwaStaticClient1
 
 ### Add a custom object using the Awa static API.
 
-The following code expands on the previous example, by demonstrating how to add a custom object
+The following code expands on the previous example, by demonstrating how to add a custom object - the "heater" object
 
 ```c
 #include <string.h>
@@ -166,14 +184,29 @@ The following code expands on the previous example, by demonstrating how to add 
 
 int main(void)
 {
+    AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
     AwaStaticClient * awaClient = AwaStaticClient_New();
 
     AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
-    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "0.0.0.0", 6000);
-    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[127.0.0.1]:15685");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "::", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "");
 
     AwaStaticClient_Init(awaClient);
+    
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[::1]:5683");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 60;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+    
+    AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
 +   DefineHeaterObject(awaClient);
 +   SetInitialValues(awaClient);
@@ -191,6 +224,60 @@ int main(void)
     return 0;
 }
 
+```
+
+So far our object definitions have remained local to the client. The next section compliments our client application by extending our object definitions to the server.
+
+----
+
+## Using the Awa Server Daemon tools to request information from the Static client example application
+
+Use the server define tool to define the object model for the "heater" object in the static client example application
+
+```
+$ build/install/bin/awa-server-define --objectID=1000 --objectName=Heater \
+--resourceID=101 --resourceName=Manufacturer --resourceType=string --resourceOperations=r --resourceRequired=o --resourceInstances=single \
+--resourceID=104 --resourceName=Temperature --resourceType=float --resourceOperations=r --resourceRequired=o --resourceInstances=single
+```
+
+Use the server tool *awa-server-list-clients* to check that the client is registered with the server (look for object /1000/0 ):
+
+```
+$ build/install/bin/awa-server-list-clients --objects
+Client: client1
+  /1/0     LWM2MServer
+  /2/0     LWM2MAccessControl
+  /2/1     LWM2MAccessControl
+  /2/2     LWM2MAccessControl
+  /2/3     LWM2MAccessControl
+  /3/0     Device
+  /4/0     ConnectivityMonitoring
+  /7       ConnectivityStatistics
+  /5/0     FirmwareUpdate
+  /6/0     Location
+  /1000/0  Heater
+```
+
+Read from the new resource using the server tool *awa-server-read*:
+
+```
+$ build/install/bin/awa-server-read -c AwaStaticClient1 /1000/0/104
+Heater[/1000/0]:
+    Temperature[/1000/0/104]: 0
+```
+
+Alternatively you can read entire objects or object instances:
+
+```
+$ build/install/bin/awa-server-read -c AwaStaticClient1 /1000
+Heater[/1000/0]:
+    Manufacturer[/1000/0/101]: HotAir Systems Inc
+    Temperature[/1000/0/104]: 10
+
+$ build/install/bin/awa-server-read -c AwaStaticClient1 /1000/0
+Heater[/1000/0]:
+    Manufacturer[/1000/0/101]: HotAir Systems Inc
+    Temperature[/1000/0/104]: 10
 ```
 
 ## Example: Create a standalone LWM2M client within a contiki environment.
@@ -219,6 +306,12 @@ contiki-example$ git clone https://github.com/contiki-os/contiki.git
 contiki-example$ ls
 AwaLWM2M
 contiki
+```
+
+Build Awa (the linux awa server will be needed later)
+
+```
+contiki-example$ (cd AwaLWM2M/; make install DESTDIR=install)
 ```
 
 Copy the following code into contiki-example/*Makefile*:
@@ -252,6 +345,7 @@ include $(CONTIKI)/Makefile.include
 Copy the following code to contiki-example/*static-client-tutorial.c*:
 
 ```c
+#include <string.h>
 #include <stdio.h>
 #include "contiki.h"
 #include "awa/static.h"
@@ -295,17 +389,32 @@ AUTOSTART_PROCESSES(&lwm2m_client);
 PROCESS_THREAD(lwm2m_client, ev, data)
 {
     PROCESS_BEGIN();
-
+    
+    static AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
     static AwaStaticClient * awaClient;
-
+    
     awaClient = AwaStaticClient_New();
 
     AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
     AwaStaticClient_SetEndPointName(awaClient, "AwaStaticClient1");
-    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "", 6000);
-    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[fe80::1]:15683");
+    AwaStaticClient_SetCoAPListenAddressPort(awaClient, "::", 6000);
+    AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[2001::1]:15683");
 
     AwaStaticClient_Init(awaClient);
+    
+    sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[2001::1]:5683");
+    bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
+    sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
+    sprintf(bootstrapinfo.SecurityInfo.SecretKey, "[SecretKey]");
+
+    bootstrapinfo.ServerInfo.Lifetime = 60;
+    bootstrapinfo.ServerInfo.DefaultMinPeriod = 1;
+    bootstrapinfo.ServerInfo.DefaultMaxPeriod = -1;
+    bootstrapinfo.ServerInfo.DisableTimeout = 86400;
+    bootstrapinfo.ServerInfo.Notification = false;
+    sprintf(bootstrapinfo.ServerInfo.Binding, "U");
+    
+    AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
     DefineHeaterObject(awaClient);
     SetInitialValues(awaClient);
@@ -337,124 +446,11 @@ Build your contiki application:
 contiki-example$ make TARGET=minimal-net
 ```
 
-So far our object definitions have remained local to the client. The next section compliments our client application by extending our object definitions to the server.
+Run the contiki minimal-net application:
+
+```
+contiki-example$ sudo ./static-client-tutorial.minimal-net
+```
 
 ----
-
-## Creating a server application using the Awa API.
-
-Let's create a server side application that makes use of our new object.
-
-![](server-tutorial.png)
-
-The following code registers our object definition with the LWM2M server daemon, allowing it to communicate with any LWM2M clients that support the same object.
-
-Create the file tutorial/*server-tutorial.c* which contains the following code:
-
-```c
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <awa/common.h>
-#include <awa/server.h>
-
-#define OPERATION_PERFORM_TIMEOUT 1000
-
-int main(void)
-{
-    AwaServerSession * session = AwaServerSession_New();
-
-    AwaServerSession_Connect(session);
-
-    AwaObjectDefinition * objectDefinition = AwaObjectDefinition_New(1000, "Heater", 0, 1);
-
-    AwaObjectDefinition_AddResourceDefinitionAsString(objectDefinition, 101, "Manufacturer", false, AwaResourceOperations_ReadWrite, NULL);
-    AwaObjectDefinition_AddResourceDefinitionAsFloat(objectDefinition,  104, "Temperature",  false, AwaResourceOperations_ReadWrite, 0.0);
-
-    AwaServerDefineOperation * operation = AwaServerDefineOperation_New(session);
-    AwaServerDefineOperation_Add(operation, objectDefinition);
-    AwaServerDefineOperation_Perform(operation, OPERATION_PERFORM_TIMEOUT);
-    AwaServerDefineOperation_Free(&operation);
-
-    AwaServerSession_Disconnect(session);
-    AwaServerSession_Free(&session);
-    return 0;
-}
-```
-
-Now update tutorial/Makefile to include *server-tutorial.c* like so:
-
-```make
-all:
-        $(CC) client-tutorial.c -o client-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
-        $(CC) server-tutorial.c -o server-tutorial -I$(AWA_INSTALL_PATH)/include -L$(AWA_INSTALL_PATH)/lib -lawa
-```
-
-Build the new application:
-
-```
-~/tutorial$ make AWA_INSTALL_PATH=~/AwaLWM2M/build/install
-```
-
-Restart the client/server daemon:
-
-```
-~/AwaLWM2M$ killall awa_serverd
-~/AwaLWM2M$ killall awa_clientd
-~/AwaLWM2M$ build/core/src/server/awa_serverd --verbose --daemonise --logFile /tmp/awa_serverd.log
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./core/bootstrap-localhost.config --daemonise --logFile /tmp/awa_clientd.log
-```
-
-And start the server application:
-
-```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./server-tutorial
-```
-
-Now start client client application:
-
-```
-~/tutorial$ LD_LIBRARY_PATH=~/AwaLWM2M/build/install/lib ./client-tutorial
-```
-
-Use the server tool *awa-server-list-clients* to check that the client is registered with the server (look for object /1000/0 ):
-
-```
-./awa-server-list-clients --objects
-Client: client1
-  /1/0     LWM2MServer
-  /2/0     LWM2MAccessControl
-  /2/1     LWM2MAccessControl
-  /2/2     LWM2MAccessControl
-  /2/3     LWM2MAccessControl
-  /3/0     Device
-  /4/0     ConnectivityMonitoring
-  /7       ConnectivityStatistics
-  /5/0     FirmwareUpdate
-  /6/0     Location
-  /1000/0  Heater
-```
-
-Read from the new resource using the server tool *awa-server-read*:
-
-```
-~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000/0/104
-Heater[/1000/0]:
-    Temperature[/1000/0/104]: 10
-```
-
-Alternatively you can read entire objects or object instances:
-
-```
-~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000
-Heater[/1000/0]:
-    Manufacturer[/1000/0/101]: HotAir Systems Inc
-    Temperature[/1000/0/104]: 10
-
-~/AwaLWM2M/build/install/bin$ ./awa-server-read -c client1 /1000/0
-Heater[/1000/0]:
-    Manufacturer[/1000/0/101]: HotAir Systems Inc
-    Temperature[/1000/0/104]: 10
-```
-
 ----
