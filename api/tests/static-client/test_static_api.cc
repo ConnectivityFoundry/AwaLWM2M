@@ -419,15 +419,12 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     serverDaemon.SetCoapPort(serverCoapPort);
     serverDaemon.SetIpcPort(serverIpcPort);
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    std::string bootstrapConfigFilename = tmpnam(NULL);
-#pragma GCC diagnostic pop
-    BootstrapConfigFile bootstrapConfigFile (bootstrapConfigFilename, serverAddress, serverCoapPort);
+    BootstrapConfigFile bootstrapConfigFile(TempFilename().GetFilename(), serverAddress, serverCoapPort);
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
     // start the bootstrap and server daemons
-    EXPECT_TRUE(bootstrapServerDaemon.Start(testDescription));
-    EXPECT_TRUE(serverDaemon.Start(testDescription));
+    EXPECT_TRUE(bootstrapServerDaemon.Start());
+    EXPECT_TRUE(serverDaemon.Start());
 
     std::string clientEndpointName = "BootstrapTestClient";
     AwaStaticClient * client = AwaStaticClient_New();

@@ -192,22 +192,22 @@ TEST_F(TestExecuteOperationWithConnectedSession, DISABLED_AwaServerExecuteOperat
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_valid_operation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 }
 
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_valid_operation_with_payload)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
@@ -215,13 +215,13 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perfo
     const char data[] = {'a','\0', 'b', 'c'};
     AwaExecuteArguments arguments = {(void*)data, sizeof(data)};
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", &arguments));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 }
 
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_null_operation)
 {
-    ASSERT_EQ(AwaError_OperationInvalid, AwaServerExecuteOperation_Perform(NULL, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaServerExecuteOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_handles_negative_timeout)
@@ -245,11 +245,65 @@ TEST_F(TestExecuteOperationWithConnectedSession, DISABLED_AwaServerExecuteOperat
     // how?
 }
 
-TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_honours_timeout)
+TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_honours_server_timeout)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerSession * session = AwaServerSession_New();
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", global::serverIpcPort));
+    EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
+    AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session);
+    ASSERT_TRUE(NULL != executeOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
+
+    // Make server unresponsive
+    daemon_.Pause();
+
+    BasicTimer timer;
+    timer.Start();
+    EXPECT_EQ(AwaError_Timeout, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
+    timer.Stop();
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    daemon_.Unpause();
+
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Free(&executeOperation));
+    AwaServerSession_Free(&session);
+}
+
+TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perform_honours_client_timeout)
+{
+    // start a client
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerSession * session = AwaServerSession_New();
+    EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", global::serverIpcPort));
+    EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
+    AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session);
+    ASSERT_TRUE(NULL != executeOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
+
+    // Make client unresponsive
+    horde.Pause();
+
+    BasicTimer timer;
+    timer.Start();
+    EXPECT_EQ(AwaError_Timeout, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
+    timer.Stop();
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
+
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Free(&executeOperation));
+    AwaServerSession_Free(&session);
+}
+
+TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_on_nonexecutable_resource)
+{
+    // start a client
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerSession * session = AwaServerSession_New();
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", global::serverIpcPort));
@@ -258,14 +312,13 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perfo
     ASSERT_TRUE(NULL != executeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/1", NULL));
 
-    // Tear down server and connected client
-    TestExecuteOperationWithConnectedSession::TearDown();
-
-    BasicTimer timer;
-    timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
-    timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_EQ(AwaError_Response, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
+    const AwaServerExecuteResponse * response = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
+    ASSERT_TRUE(NULL != response);
+    const AwaPathResult * result = AwaServerExecuteResponse_GetPathResult(response, "/3/0/1");
+    ASSERT_TRUE(NULL != result);
+    EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(result));
+    EXPECT_EQ(AwaLWM2MError_BadRequest, AwaPathResult_GetLWM2MError(result));
 
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Free(&executeOperation));
     AwaServerSession_Free(&session);
@@ -277,7 +330,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perfo
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
 
-    ASSERT_EQ(AwaError_OperationInvalid, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 }
 
@@ -290,7 +343,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_Perfo
 
     AwaServerSession_Disconnect(session_);
 
-    ASSERT_EQ(AwaError_SessionNotConnected, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionNotConnected, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     AwaServerExecuteOperation_Free(&executeOperation);
 }
 
@@ -311,14 +364,14 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetRe
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetResponse_handles_null_clientID)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
 
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
 
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, NULL);
     EXPECT_TRUE(NULL == executeResponse);
@@ -344,15 +397,15 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetRe
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteOperation_GetResponse_handles_reusing_operation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     //Test we can call AwaServerExecuteOperation_GetResponse twice and reuse the same operation
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
 
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != executeResponse);
@@ -379,13 +432,13 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_null_path)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != executeResponse);
     ASSERT_FALSE(AwaServerExecuteResponse_ContainsPath(executeResponse, NULL));
@@ -395,13 +448,13 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_valid_resource_path)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != executeResponse);
     ASSERT_TRUE(AwaServerExecuteResponse_ContainsPath(executeResponse, "/3/0/4"));
@@ -411,13 +464,13 @@ TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_Contai
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_ContainsPath_handles_missing_resource_path)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != executeResponse);
     ASSERT_FALSE(AwaServerExecuteResponse_ContainsPath(executeResponse, "/3/0/2"));
@@ -432,13 +485,13 @@ TEST_F(TestExecuteOperation, AwaServerExecuteResponse_NewPathIterator_handles_nu
 TEST_F(TestExecuteOperationWithConnectedSession, AwaServerExecuteResponse_NewPathIterator_handles_valid_response)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * executeOperation = AwaServerExecuteOperation_New(session_);
     ASSERT_TRUE(NULL != executeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/4", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != executeResponse);
 
@@ -465,7 +518,7 @@ TEST_F(TestExecuteOperationWithConnectedSession, DISABLED_AwaServerExecuteRespon
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/0", NULL));
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/1", NULL));
     ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(executeOperation, global::clientEndpointName, "/3/0/9", NULL));
-    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(executeOperation, global::timeout));
     const AwaServerExecuteResponse * executeResponse = AwaServerExecuteOperation_GetResponse(executeOperation, global::clientEndpointName); ASSERT_TRUE(NULL != executeResponse);
 
     AwaPathIterator * iterator = AwaServerExecuteResponse_NewPathIterator(executeResponse);
@@ -511,7 +564,7 @@ TEST_F(TestExecuteOperationWithConnectedSessionNoClient, AwaServerExecuteOperati
     const char * clientID = "TestClient123";
     const char * path = "/3/0/4";
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(operation, clientID, path, NULL));
-    EXPECT_EQ(AwaError_Response, AwaServerExecuteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerExecuteOperation_Perform(operation, global::timeout));
 
     // expect the client ID to be in the response, but with an error on the specified path
     AwaClientIterator * iterator = AwaServerExecuteOperation_NewClientIterator(operation);
@@ -534,12 +587,12 @@ TEST_F(TestExecuteOperationWithConnectedSessionNoClient, AwaServerExecuteOperati
 TEST_F(TestExecuteOperationWithConnectedSessionNoClient, AwaServerExecuteOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * operation = AwaServerExecuteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(operation, "TestClient1", "/3/0/4", NULL));
-    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(operation, global::timeout));
 
     AwaClientIterator * iterator = AwaServerExecuteOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
@@ -557,14 +610,14 @@ TEST_F(TestExecuteOperationWithConnectedSessionNoClient, DISABLED_AwaServerExecu
     // DISABLED because we don't support multiple ClientIDs in a single Execute operation at present.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerExecuteOperation * operation = AwaServerExecuteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(operation, "TestClient1", "/3/0/0", NULL));
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(operation, "TestClient2", "/3/0/0", NULL));
     EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_AddPath(operation, "TestClient3", "/3/0/0", NULL));
-    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerExecuteOperation_Perform(operation, global::timeout));
 
     AwaClientIterator * iterator = AwaServerExecuteOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);

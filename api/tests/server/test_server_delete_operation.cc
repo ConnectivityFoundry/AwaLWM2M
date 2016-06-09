@@ -141,13 +141,13 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_A
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_); ASSERT_TRUE(NULL != operation);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0/0"));
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0"));
-    ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 
     // check the result - expect no content for /4/0
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/4/0"));
-    ASSERT_EQ(AwaError_Response, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Response, AwaServerReadOperation_Perform(readOperation, global::timeout));
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != readResponse);
@@ -160,14 +160,14 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_A
 
 TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_Perform_handles_null_operation)
 {
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerDeleteOperation_Perform(NULL, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerDeleteOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_Perform_handles_empty_operation)
 {
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     // no paths added
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 }
 
@@ -176,7 +176,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_P
     // server cannot delete objects or resources, only entire object instances.
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/3/0/15"));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     const AwaServerDeleteResponse * deleteResponse = AwaServerDeleteOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != deleteResponse);
@@ -191,7 +191,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_P
     const char * clientID = "NonExistingClientID";
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, clientID, "/4/0"));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     const AwaServerDeleteResponse * deleteResponse = AwaServerDeleteOperation_GetResponse(operation, clientID);
     ASSERT_TRUE(NULL != deleteResponse);
@@ -205,7 +205,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_P
 {
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 }
 
@@ -214,7 +214,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_P
     // server cannot delete objects or resources, only entire object instances.
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4"));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     const AwaServerDeleteResponse * deleteResponse = AwaServerDeleteOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != deleteResponse);
@@ -229,9 +229,9 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
 {
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     const AwaServerDeleteResponse * deleteResponse = AwaServerDeleteOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != deleteResponse);
@@ -254,7 +254,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -262,7 +262,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         operation = AwaServerDeleteOperation_New(server_session_);
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
-        EXPECT_EQ(AwaError_CannotDelete, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_CannotDelete, AwaServerDeleteOperation_Perform(operation, global::timeout));
         AwaServerDeleteOperation_Free(&operation);
     }
 }
@@ -282,7 +282,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -290,7 +290,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         operation = AwaServerDeleteOperation_New(server_session_);
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
-        EXPECT_EQ(AwaError_CannotDelete, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_CannotDelete, AwaServerDeleteOperation_Perform(operation, global::timeout));
         AwaServerDeleteOperation_Free(&operation);
     }
 }
@@ -306,7 +306,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -314,7 +314,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, DISABLED_AwaServerDeleteOp
     {
         operation = AwaServerDeleteOperation_New(server_session_);
         ASSERT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, *it));
-        EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
         const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, global::clientEndpointName);
         EXPECT_TRUE(NULL != response);
@@ -347,14 +347,14 @@ TEST_F(TestServerDeleteOperationWithConnectedSession, AwaServerDeleteOperation_A
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(server_session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, global::clientEndpointName, "/4/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     AwaServerDeleteOperation_Free(&operation);
 
     // check that the correct resources were deleted
     {
         AwaServerReadOperation * operation = AwaServerReadOperation_New(server_session_);
         AwaServerReadOperation_AddPath(operation, global::clientEndpointName, "/4/0");
-        EXPECT_EQ(AwaError_Response, AwaServerReadOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Response, AwaServerReadOperation_Perform(operation, global::timeout));
         const AwaServerReadResponse * response = AwaServerReadOperation_GetResponse(operation, global::clientEndpointName);
         EXPECT_TRUE(NULL != response);
 
@@ -400,7 +400,7 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
     const char * clientID = "TestClient123";
     const char * path = "/4/0";
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, clientID, path));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     // expect the client ID to be in the response, but with an error on the specified path
     AwaClientIterator * iterator = AwaServerDeleteOperation_NewClientIterator(operation);
@@ -423,12 +423,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_one_client)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     AwaClientIterator * iterator = AwaServerDeleteOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
@@ -446,14 +446,14 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // DISABLED because we don't support multiple ClientIDs in a single Delete operation at present.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient2", "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient3", "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     AwaClientIterator * iterator = AwaServerDeleteOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
@@ -500,12 +500,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_GetResponse_handles_matching_clientID)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     EXPECT_TRUE(NULL != operation);
     EXPECT_TRUE(NULL != AwaServerDeleteOperation_GetResponse(operation, "TestClient1"));
@@ -520,13 +520,13 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteRes
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteResponse_NewPathIterator_handles_single_path_response)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, "TestClient1");
     ASSERT_TRUE(NULL != response);
 
@@ -548,15 +548,15 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // NOTE: DISABLED because we don't support multiple paths per operation, presently.
 
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/1"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/2"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
     const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, "TestClient1");
     ASSERT_TRUE(NULL != response);
 
@@ -583,13 +583,13 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_success)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     // check response on /3/0/11
     const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, "TestClient1");
@@ -605,13 +605,13 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_mandatory_instance)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/3/0"));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     // check response on /3/0/11
     const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, "TestClient1");
@@ -628,13 +628,13 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
 TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOperation_handles_resource)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/3/0/1"));
-    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerDeleteOperation_Perform(operation, global::timeout));
 
     // check response on /3/0/11
     const AwaServerDeleteResponse * response = AwaServerDeleteOperation_GetResponse(operation, "TestClient1");

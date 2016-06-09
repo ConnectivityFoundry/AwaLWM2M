@@ -57,13 +57,14 @@ struct ObserveWaitCondition : public WaitCondition
 
 
     ObserveWaitCondition(AwaServerSession * session, int callbackCountMax = 1) :
+        WaitCondition(),
         session(session), callbackCountMax(callbackCountMax), callbackCount(0) {}
 
     virtual ~ObserveWaitCondition() {}
 
     virtual bool Check()
     {
-        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(session, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(session, global::timeout));
         EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(session));
         return callbackCount >= callbackCountMax;
     }
@@ -193,8 +194,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_valid_operation_with_callback)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -231,13 +232,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     cbHandler.count = 0;
@@ -254,8 +255,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_wrong_session_type)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -283,18 +284,18 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     sleep(1); // otherwise we can miss the second notify
 
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     ASSERT_TRUE(cbHandler.Wait());
@@ -311,8 +312,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_step_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -323,7 +324,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -361,7 +361,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "stp", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
 
 
@@ -372,7 +372,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     cbHandler.count = 0;
     ASSERT_TRUE(cbHandler.Wait());
@@ -384,11 +384,11 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", i*5));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
 
         cbHandler.callbackCount = 0;
-        if(i != 1)
+        if (i != 1)
         {
             ASSERT_TRUE(cbHandler.Wait());
         }
@@ -411,8 +411,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_pmin_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -423,7 +423,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -460,7 +459,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmin", 5));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
 
 
@@ -469,21 +468,19 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/13", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     cbHandler.count = 0;
     cbHandler.callbackCount = 0;
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(1, cbHandler.count);
 
-
-    printf("Doing first write - should receive immediate notification\n");
     // write first change via server api to trigger notification.
     {
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 0));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
@@ -491,7 +488,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
-    printf("Doing second write - should receive notification after pmin...\n");
     BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
@@ -499,16 +495,15 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 5));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
         pminTimer.Start();
     }
 
     cbHandler.callbackCount = 0;
-    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.Wait(2e6));
     pminTimer.Stop();
-    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds()) << "Time elapsed " << pminTimer.TimeElapsed_Milliseconds() << "ms";
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -521,8 +516,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_pmax_attribute)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -533,7 +528,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -557,7 +551,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmax", 1));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
 
 
@@ -567,7 +561,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/13", ObserveCallbackRunner, &cbHandler);
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     //Should get multiple notifications due to pmax being a second
     cbHandler.count = 0;
@@ -585,8 +579,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_server_object_minimum_period)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -597,7 +591,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -636,7 +629,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1/0/2", 5));
-        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
@@ -646,7 +639,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/13", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     cbHandler.count = 0;
 
@@ -654,13 +647,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
 
     ASSERT_EQ(1, cbHandler.count);
-    printf("Doing first write - should receive immediate notification\n");
+
     // write first change via server api to trigger notification.
     {
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 0));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
@@ -668,7 +661,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
 
-    printf("Doing second write - should receive notification after pmin...\n");
     BasicTimer pminTimer;
     // write second change via server api to trigger notification.
     // change notification should not come immediately due to pmin.
@@ -676,16 +668,15 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/3/0/13", 5));
-        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
         pminTimer.Start();
     }
 
     cbHandler.callbackCount = 0;
-    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_TRUE(cbHandler.Wait(2e6));
     pminTimer.Stop();
-    printf("Time elapsed %f ms\n", pminTimer.TimeElapsed_Milliseconds());
-    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds());
+    ASSERT_LE(5, pminTimer.TimeElapsed_Seconds()) << "Time elapsed " << pminTimer.TimeElapsed_Milliseconds() << "ms";
     ASSERT_EQ(3, cbHandler.count);
 
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
@@ -698,8 +689,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_server_object_maximum_period)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -711,7 +702,6 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         void callbackHandler(const AwaChangeSet * changeSet)
         {
             count ++;
-            printf("Received notification %d\n", count);
 
             ASSERT_TRUE(NULL != changeSet);
             EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
@@ -737,7 +727,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
         AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
         ASSERT_TRUE(NULL != writeOperation);
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1/0/3", 1));
-        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
     }
 
@@ -748,7 +738,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/13", ObserveCallbackRunner, &cbHandler);
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     cbHandler.count = 0;
     ASSERT_TRUE(cbHandler.Wait());
@@ -764,8 +754,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_operation_freed_after_observation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -784,12 +774,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(NULL != operation);
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
     ASSERT_TRUE(cbHandler.Wait());
     ASSERT_EQ(2, cbHandler.count);
@@ -805,8 +795,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_observation_freed_after_operation)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -826,12 +816,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(NULL != operation);
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
     cbHandler.count = 0;
     ASSERT_TRUE(cbHandler.Wait());
@@ -849,8 +839,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_observation_freed_before_perform)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -862,7 +852,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation2));
     ASSERT_TRUE(NULL == observation2);
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(response != NULL);
@@ -880,8 +870,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honours_timeout)
 {
     // start a client
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);      // wait for the client to register with the server
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaClientSession * clientSession = AwaClientSession_New();
     ASSERT_TRUE(NULL != clientSession);
@@ -903,8 +893,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 0, "Test Mandatory Integer Resource", true, AwaResourceOperations_ReadWrite, 12345));
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, objectDefinition));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, objectDefinition));
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
-    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&objectDefinition);
     AwaClientDefineOperation_Free(&clientDefineOperation);
@@ -932,14 +922,14 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     ASSERT_TRUE(NULL != observation);
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    // Tear down client process
-    TestObserveWithConnectedSession::TearDown();
-
+    // Make the server unresponsive
+    daemon_.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaServerObserveOperation_Perform(operation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    daemon_.Unpause();
 
     AwaServerObservation_Free(&observation);
     AwaServerObserveOperation_Free(&operation);
@@ -952,17 +942,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
 
     AwaServerSession_Free(&serverSession);
     AwaClientSession_Free(&clientSession);
-
-    delete horde_;
 }
-
-
 
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel_observation_stops_notifications)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -998,7 +984,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
 
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     ASSERT_TRUE(cbHandler.Wait());
 
@@ -1006,14 +992,14 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     ASSERT_TRUE(NULL != cancelObserveOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddCancelObservation(cancelObserveOperation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(cancelObserveOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(cancelObserveOperation, global::timeout));
 
 
     // write via server api. Should NOT trigger a notification since we are no longer observing the resource.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     cbHandler.callbackCount = 0;
@@ -1033,8 +1019,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_executable_resource)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1043,7 +1029,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    EXPECT_EQ(AwaError_Response, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
@@ -1073,7 +1059,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 //    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, changeObservation2));
 //    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddExecuteObservation(operation, executeObservation));
 //
-//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 //
 //    EXPECT_EQ(3, Map_Length(ServerSession_GetObservers(session_)));
 //
@@ -1093,8 +1079,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation_add_observation_to_non_existent_resource)
 {
     // start a client
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1103,7 +1089,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
 
-    EXPECT_EQ(AwaError_Response, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
@@ -1128,7 +1114,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation
 //        ASSERT_TRUE(NULL != operation);
 //        AwaServerObservation * changeObservation = AwaServerObservation_New("/3/0/1", EmptyObserveCallback, NULL);
 //        ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, changeObservation));
-//        EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+//        EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 //        const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation);
 //        ASSERT_TRUE(NULL != response);
 //        const AwaPathResult * result;
@@ -1144,8 +1130,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddObservation
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObservation_cancel_non_existing_observation)
 {
     // cancel should still work even if an observation doesn't exist?
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -1153,7 +1139,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObser
     AwaServerObservation * changeObservation = AwaServerObservation_New(global::clientEndpointName, "/3/0/1", EmptyObserveCallback, NULL);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddCancelObservation(operation, changeObservation));
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
     const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
     const AwaPathResult * result = AwaServerObserveResponse_GetPathResult(response, "/3/0/1");
@@ -1185,7 +1171,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObser
 //    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, changeObservation2));
 //    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddExecuteObservation(operation, executeObservation));
 //
-//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 //
 //    const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation);
 //    ASSERT_TRUE(NULL != response);
@@ -1255,7 +1241,7 @@ TEST_F(TestObserveWithConnectedSession, AwaObservation_New_free_invalid)
 
 TEST_F(TestObserveWithConnectedSession, AwaServerSession_Process_nothing_pending)
 {
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, global::timeout));
 }
 
 TEST_F(TestObserveWithConnectedSession, AwaServerSession_DispatchCallbacks_nothing_in_queue)
@@ -1316,8 +1302,8 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
         }
         void TestBody() {}
     };
-    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     ChangeCallbackHandler2 cbHandler(session_, 2);
 
@@ -1328,13 +1314,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
 
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, changeObservation));
 
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
     ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     cbHandler.count = 0;
@@ -1404,8 +1390,8 @@ protected:
     void SetUp() {
         TestObserveWithConnectedSession::SetUp();
 
-        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { global::clientEndpointName }, 61000, CURRENT_TEST_DESCRIPTION) : NULL;
-        sleep(1);      // wait for the client to register with the server
+        horde_ = global::spawnClientDaemon ? new AwaClientDaemonHorde( { global::clientEndpointName }, 61000) : NULL;
+        ASSERT_TRUE(WaitForRegistration(session_, horde_->GetClientIDs(), 1000));
 
         clientSession_ = AwaClientSession_New(); ASSERT_TRUE(NULL != clientSession_);
         ASSERT_EQ(AwaError_Success, AwaClientSession_SetIPCAsUDP(clientSession_, "127.0.0.1", global::spawnClientDaemon? 61000 : global::clientIpcPort));
@@ -1443,11 +1429,11 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, customObjectDefinition2));
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
 
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition2));
-        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaObjectDefinition_Free(&customObjectDefinition2);
@@ -1458,7 +1444,7 @@ protected:
         AwaClientSetOperation * clientSet = AwaClientSetOperation_New(clientSession_);
         EXPECT_TRUE(clientSet != NULL);
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/10000/0"));
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
         AwaClientSetOperation_Free(&clientSet);
 
         //Create a basic set operation to create our custom objects - TODO remove once we can set default values
@@ -1472,10 +1458,8 @@ protected:
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsOpaque(writeOperation, "/10000/0/5", observeDetail::initialOpaque1));
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeOperation, "/10000/0/6", observeDetail::initialTime1));
         ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsObjectLink(writeOperation, "/10000/0/7", observeDetail::initialObjectLink1));
-        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
         AwaServerWriteOperation_Free(&writeOperation);
-
-
     }
 
     void TearDown()
@@ -1601,7 +1585,7 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
     ASSERT_TRUE(NULL != operation);
     AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, data.path, ObserveCallbackRunner, &cbHandler);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 
     // set via server api to trigger notification.
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
@@ -1635,13 +1619,12 @@ TEST_P(TestAwaObserveChangeSet, TestAwaObserveChangeSetInstantiation)
             break;
     }
 
-    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
-    // ensure we receive both notifications
-    sleep(1);
+    sleep(1);  // ensure we receive both notifications
 
-    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, global::timeout));
 
     cbHandler.count = 0;
     AwaServerSession_DispatchCallbacks(session_);
@@ -1777,7 +1760,7 @@ INSTANTIATE_TEST_CASE_P(
 //
 //
 //        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, customObjectDefinition));
-//        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+//        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
 //
 //        AwaObjectDefinition_Free(&customObjectDefinition);
 //        AwaServerDefineOperation_Free(&defineOperation);
@@ -1804,7 +1787,7 @@ INSTANTIATE_TEST_CASE_P(
 //        ASSERT_EQ(AwaError_Success, AwaServerSetOperation_AddValueAsTimeArray(setOperation, "/10000/0/6", initialTimeArray_));
 //        ASSERT_EQ(AwaError_Success, AwaServerSetOperation_AddValueAsObjectLinkArray(setOperation, "/10000/0/7", initialObjectLinkArray_));
 //
-//        ASSERT_EQ(AwaError_Success, AwaServerSetOperation_Perform(setOperation, defaults::timeout));
+//        ASSERT_EQ(AwaError_Success, AwaServerSetOperation_Perform(setOperation, global::timeout));
 //        AwaServerSetOperation_Free(&setOperation);
 //    }
 //
@@ -1955,7 +1938,7 @@ INSTANTIATE_TEST_CASE_P(
 //    ASSERT_TRUE(NULL != operation);
 //    AwaServerObservation * observation = AwaServerObservation_New(data.path, ChangeCallbackRunner, &cbHandler);
 //    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
-//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, defaults::timeout));
+//    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
 //
 //    // set via server api to trigger notification.
 //    AwaServerSetOperation * setOperation = AwaServerSetOperation_New(session_);
@@ -1989,10 +1972,10 @@ INSTANTIATE_TEST_CASE_P(
 //            break;
 //    }
 //
-//    EXPECT_EQ(AwaError_Success, AwaServerSetOperation_Perform(setOperation, defaults::timeout));
+//    EXPECT_EQ(AwaError_Success, AwaServerSetOperation_Perform(setOperation, global::timeout));
 //    AwaServerSetOperation_Free(&setOperation);
 //
-//    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, defaults::timeout));
+//    ASSERT_EQ(AwaError_Success, AwaServerSession_Process(session_, global::timeout));
 //
 //    cbHandler.count = 0;
 //    AwaServerSession_DispatchCallbacks(session_);

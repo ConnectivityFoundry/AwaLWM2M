@@ -199,6 +199,17 @@ AwaError AwaServerSession_SetIPCAsUDP(AwaServerSession * session, const char * a
 //AwaError AwaServerSession_SetIPCAsREST(AwaServerSession * session /* ... */);
 
 /**
+ * @brief Set IPC connect timeout.
+ *        Used internally by ::AwaServerSession_Connect and ::AwaServerSession_Disconnect.
+ * @param[in] session Pointer to a valid server session.
+ * @param[in] timeout The time within which an IPC session Connect must complete to avoid timeout.
+ *                    It must be greater than 0.
+ * @return AwaError_Success on success.
+ * @return Various errors on failure.
+ */
+AwaError AwaServerSession_SetDefaultTimeout(AwaServerSession * session, AwaTimeout timeout);
+
+/**
  * @brief Connect a session (configured with an IPC mechanism) to the Core.
  *        A session must be connected before operations can be processed.
  * @param[in] session Pointer to an IPC-configured session.
@@ -681,7 +692,7 @@ bool AwaServerReadResponse_HasValue(const AwaServerReadResponse * response, cons
  *        pointer returned is immediately invalid and should not be used or dereferenced.
  * @param[in] response The current Read Response to retrieve the value from.
  * @param[in] path The path of the resource requested for retrieval.
- * @param[in,out] value A pointer to a const pointer that will be modified to point to the requested value.
+ * @param[in,out] value A pointer to a const pointer that will be modified to point to the requested value. Set to null on error.
  * @return AwaError_Success on success.
  * @return AwaError_TypeMismatch if the resource type corresponding to the specified path is not of the correct type.
  * @return AwaError_PathNotFound if the specified resource path is not covered by the Read Response.
@@ -739,7 +750,7 @@ AwaError AwaServerReadResponse_GetValueAsObjectLink(const AwaServerReadResponse 
  *        pointer returned is immediately invalid and should not be used or dereferenced.
  * @param[in] response The current Read Response to retrieve the value from.
  * @param[in] path The path of the multiple-instance resource requested for retrieval.
- * @param[in,out] valueArray A pointer to a const pointer that will be modified to point to the requested value.
+ * @param[in,out] valueArray A pointer to a const pointer that will be modified to point to the requested value. Set to null on error.
  * @return AwaError_Success on success.
  * @return AwaError_TypeMismatch if the resource type corresponding to the specified path is not of the correct type.
  * @return AwaError_PathNotFound if the specified resource path is not covered by the Read Response.

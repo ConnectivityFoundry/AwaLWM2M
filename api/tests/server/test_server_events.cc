@@ -20,10 +20,11 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <gtest/gtest.h>
 #include <vector>
 #include <string>
 #include <algorithm>
+
+#include <gtest/gtest.h>
 
 #include "support/support.h"
 #include "support/static_api_support.h"
@@ -54,21 +55,18 @@ struct CallbackRecord {
 };
 
 static void ClientRegisterEventCallback(const AwaServerClientRegisterEvent * event, void * context) {
-    std::cout << "RegisterEventCallback: event " << event << ", context " << context << std::endl;
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->RegisterCallbackCounter++;
     record->LastEvent = event;
 }
 
 static void ClientDeregisterEventCallback(const AwaServerClientDeregisterEvent * event, void * context) {
-    std::cout << "DeregisterEventCallback: event " << event << ", context " << context << std::endl;
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->DeregisterCallbackCounter++;
     record->LastEvent = event;
 }
 
 static void ClientUpdateEventCallback(const AwaServerClientUpdateEvent * event, void * context) {
-    std::cout << "UpdateEventCallback: event " << event << ", context " << context << std::endl;
     CallbackRecord * record = static_cast<CallbackRecord *>(context);
     record->UpdateCallbackCounter++;
     record->LastEvent = event;
@@ -375,14 +373,6 @@ TEST_F(TestServerEventsWithSession, ClientRegisterEvent_handles_registered_entit
         const char * path = RegisteredEntityIterator_GetPath(entityIterator);
         actualPaths.push_back(path);
     }
-
-//    std::cout << "Expected:" << std::endl;
-//    for (auto i : expectedPaths)
-//        std::cout << i << std::endl;
-//
-//    std::cout << "Actual:" << std::endl;
-//    for (auto i : actualPaths)
-//        std::cout << i << std::endl;
 
     EXPECT_EQ(expectedPaths.size(), actualPaths.size());
     if (expectedPaths.size() == actualPaths.size())
@@ -1271,12 +1261,10 @@ struct EventWaitCondition : public WaitCondition
 
     virtual bool Check()
     {
-        std::cout << "Check" << std::endl;
-        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, global::timeout));
         EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
         if (StaticClient != NULL)
         {
-            std::cout << "Check:StaticClient Process" << std::endl;
             AwaStaticClient_Process(StaticClient);
         }
         return CallbackCount >= CallbackCountMax;
@@ -1292,7 +1280,6 @@ struct EventWaitCondition : public WaitCondition
 
     virtual void Deregister()
     {
-        std::cout << "Deregister" << std::endl;
         AwaStaticClient_Free(&StaticClient);
     }
 };
@@ -1300,7 +1287,6 @@ struct EventWaitCondition : public WaitCondition
 
 void ClientEventCallback(const void * event, void * context)
 {
-    printf("internal callback handler %p %p\n", event, context);
     if (context)
     {
         auto * that = static_cast<EventWaitCondition*>(context);
@@ -1371,10 +1357,10 @@ TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
         void callbackHandler(const void * event)
         {
             count ++;
-            AwaServerClientDeregisterEvent * deregisterEvent = (AwaServerClientDeregisterEvent *)event;
-            EXPECT_TRUE(deregisterEvent != NULL);
+            AwaServerClientUpdateEvent * updateEvent = (AwaServerClientUpdateEvent *)event;
+            EXPECT_TRUE(updateEvent != NULL);
 
-            AwaClientIterator * clientIterator = AwaServerClientDeregisterEvent_NewClientIterator(deregisterEvent);
+            AwaClientIterator * clientIterator = AwaServerClientUpdateEvent_NewClientIterator(updateEvent);
             EXPECT_TRUE(clientIterator != NULL);
 
             EXPECT_TRUE(AwaClientIterator_Next(clientIterator));

@@ -96,7 +96,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 
 TEST_F(TestListClientsOperation, AwaServerListClientsOperation_Perform_handles_null_operation)
 {
-    EXPECT_EQ(AwaError_OperationInvalid, AwaServerListClientsOperation_Perform(NULL, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaServerListClientsOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_Perform_handles_negative_timeout)
@@ -127,7 +127,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_no_clients)
 {
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
     EXPECT_FALSE(AwaClientIterator_Next(iterator));
@@ -138,11 +138,11 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_one_client)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
 
@@ -160,8 +160,8 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_Perform_honours_timeout)
 {
     // start a client and wait for them to register with the server
-    AwaClientDaemonHorde * horde_ = new AwaClientDaemonHorde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerSession * session = AwaServerSession_New();
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, "0.0.0.0", 61000));
@@ -169,14 +169,14 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
 
-    // Tear down client
-    delete horde_;
-
+    // make client unresponsive
+    horde.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, AwaServerListClientsOperation_Perform(operation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeWithinTolerance(timer.TimeElapsed_Milliseconds(), defaults::timeout, defaults::timeoutTolerance)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    horde.Unpause();
 
     AwaServerListClientsOperation_Free(&operation);
     AwaServerSession_Free(&session);
@@ -185,11 +185,11 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_NewClientIterator_with_multiple_clients)
 {
     // start a client horde and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "IMG123", "TestClient1", "TestClient2", "Imagination0" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "IMG123", "TestClient1", "TestClient2", "Imagination0" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(operation);
     EXPECT_TRUE(NULL != iterator);
 
@@ -223,7 +223,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(NULL, NULL));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
 
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(operation, NULL));
 
@@ -233,7 +233,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_non_matching_clientID)
 {
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     EXPECT_EQ(NULL, AwaServerListClientsOperation_GetResponse(operation, "ThisIDDoesNotExist"));
     AwaServerListClientsOperation_Free(&operation);
 }
@@ -241,11 +241,11 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_matching_clientID)
 {
     // start a client horde and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     EXPECT_TRUE(NULL != AwaServerListClientsOperation_GetResponse(operation, "TestClient1"));
     AwaServerListClientsOperation_Free(&operation);
 }
@@ -253,11 +253,11 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperati
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsOperation_GetResponse_handles_matching_clientID_multiple_times)
 {
     // start a client horde and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     // each call should return the same address
     const AwaServerListClientsResponse * response1 = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
     const AwaServerListClientsResponse * response2 = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
@@ -284,11 +284,11 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsRespons
 TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsResponse_NewRegisteredEntityIterator_handles_valid_response)
 {
     // start a client horde and wait for them to register with the server
-    AwaClientDaemonHorde horde( { "TestClient1" }, 61000, CURRENT_TEST_DESCRIPTION);
-    sleep(1);
+    AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
     AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(operation, global::timeout));
     const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(operation, "TestClient1");
     EXPECT_TRUE(NULL != response);
 

@@ -42,13 +42,13 @@ TEST_F(TestClientServerInteraction, write_get_valid_integer_resource)
     // Do Server WRITE
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, expectedValue));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, defaults::clientEndpointName, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, defaults::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     // Do Client GET, ensure value has been written.
     AwaClientGetOperation * readOperation = AwaClientGetOperation_New(client_session_);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(readOperation, path));
-    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(readOperation, global::timeout));
     const AwaClientGetResponse * readResponse = AwaClientGetOperation_GetResponse(readOperation); ASSERT_TRUE(NULL != readResponse);
     ASSERT_TRUE(AwaClientGetResponse_HasValue(readResponse, path));
     const AwaInteger * getResponseValue = NULL;
@@ -65,13 +65,13 @@ TEST_F(TestClientServerInteraction, DISABLED_set_read_valid_integer_resource)
     // Do Client SET
     AwaClientSetOperation * writeOperation = AwaClientSetOperation_New(client_session_); ASSERT_TRUE(NULL != writeOperation);
     ASSERT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(writeOperation, path, expectedValue));
-    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(writeOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientSetOperation_Perform(writeOperation, global::timeout));
     AwaClientSetOperation_Free(&writeOperation);
 
     // Do Server READ, ensure value has been written.
     /*AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, defaults::clientEndpointName, path));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_ReadResponse(readOperation); ASSERT_TRUE(NULL != readResponse);
     ASSERT_TRUE(AwaServerReadResponse_HasValue(readResponse, path));
     const AwaInteger * getResponseValue = NULL;
@@ -93,7 +93,7 @@ TEST_F(TestClientServerInteraction, DISABLED_client_delete_server_read)
     AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Update); ASSERT_TRUE(NULL != writeOperation);
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, path, expected));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 
     // Read it to ensure it is actually readable
@@ -101,7 +101,7 @@ TEST_F(TestClientServerInteraction, DISABLED_client_delete_server_read)
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, path));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     /*const AwaServerReadResponse * readResponse = AwaServerReadOperation_ReadResponse(readOperation);
     ASSERT_TRUE(NULL != readResponse);
     const AwaInteger * value = NULL;
@@ -115,7 +115,7 @@ TEST_F(TestClientServerInteraction, DISABLED_client_delete_server_read)
     // Delete the resource
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(client_session_); ASSERT_TRUE(NULL != operation);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, path));
-    ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
 
@@ -124,7 +124,7 @@ TEST_F(TestClientServerInteraction, DISABLED_client_delete_server_read)
     readOperation = AwaServerReadOperation_New(server_session_);
     ASSERT_TRUE(NULL != readOperation);
     ASSERT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, path));
-    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaServerReadOperation_Perform(readOperation, global::timeout));
     /*const AwaServerReadResponse * readResponse = AwaServerReadOperation_ReadResponse(readOperation);
     ASSERT_TRUE(NULL != readResponse);
 

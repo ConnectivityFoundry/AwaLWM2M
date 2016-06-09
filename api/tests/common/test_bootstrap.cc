@@ -46,7 +46,7 @@ struct SingleClientWaitCondition : public WaitCondition
     {
         AwaClientIterator * iterator = NULL;
         bool result =
-                (AwaError_Success == AwaServerListClientsOperation_Perform(Operation, defaults::timeout)) &&
+                (AwaError_Success == AwaServerListClientsOperation_Perform(Operation, global::timeout)) &&
                 ((iterator = AwaServerListClientsOperation_NewClientIterator(Operation)) != NULL) &&
                 (AwaClientIterator_Next(iterator)) &&
                 (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0);
@@ -81,16 +81,13 @@ TEST_F(TestBootstrapServer, bootstrap_with_single_client)
     clientDaemon.SetEndpointName(clientEndpointName);
     clientDaemon.SetBootstrapURI(bootstrapURI);
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    std::string bootstrapConfigFilename = tmpnam(NULL);
-#pragma GCC diagnostic pop
-    BootstrapConfigFile bootstrapConfigFile (bootstrapConfigFilename, serverAddress, serverCoapPort);
+    BootstrapConfigFile bootstrapConfigFile(TempFilename().GetFilename(), serverAddress, serverCoapPort);
     bootstrapServerDaemon.SetConfigFile(bootstrapConfigFile.GetFilename());
 
     // start the bootstrap, server and client daemons
-    ASSERT_TRUE(bootstrapServerDaemon.Start(testDescription));
-    ASSERT_TRUE(serverDaemon.Start(testDescription));
-    ASSERT_TRUE(clientDaemon.Start(testDescription));
+    ASSERT_TRUE(bootstrapServerDaemon.Start());
+    ASSERT_TRUE(serverDaemon.Start());
+    ASSERT_TRUE(clientDaemon.Start());
 
     // wait for the client to register with the server
     AwaServerSession * session = AwaServerSession_New();

@@ -117,7 +117,9 @@ AwaError AwaServerListClientsOperation_Perform(AwaServerListClientsOperation * o
             // build an IPC message and inject our content (object paths) into it
             IPCMessage * request = IPCMessage_NewPlus(IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_LIST_CLIENTS, ServerOperation_GetSessionID(operation->ServerOperation));
             IPCMessage * response = NULL;
-            result = IPC_SendAndReceive(ServerSession_GetChannel(ServerOperation_GetSession(operation->ServerOperation)), request, &response, timeout > 0 ? timeout : -1);
+
+            // a timeout of 0 means an infinite timeout
+            result = IPC_SendAndReceive(ServerSession_GetChannel(ServerOperation_GetSession(operation->ServerOperation)), request, &response, timeout);
 
             if (result == AwaError_Success)
             {

@@ -35,6 +35,23 @@
 
 #include "daemon.h"
 #include "process.h"
+#include "log.h"
+
+#include "../../api/src/ipc_defs.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// For use by tests only:
+IPCSessionID AwaClientSession_GetSessionID(const AwaClientSession * session);
+IPCSessionID AwaServerSession_GetSessionID(const AwaServerSession * session);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 // Convert a preprocessor definition to a string
 #define str(x) #x
@@ -44,8 +61,8 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int timeout = 2500;          // milliseconds
-    const int timeoutTolerance = 250;  // milliseconds
+    const int timeout = 200;           // milliseconds
+    const int timeoutTolerance = 100;  // milliseconds
 
 } // namespace defaults
 
@@ -71,6 +88,30 @@ namespace detail {
 #define CURRENT_TEST_DESCRIPTION \
 ( std::string(CURRENT_TEST_CASE_NAME) + std::string(".") + std::string(CURRENT_TEST_NAME) )
 
+/**
+ * @brief Class to determine a unique temporarily filename.
+ */
+class TempFilename {
+public:
+    TempFilename() : filename_(nullptr) {
+        filename_ = strdup("/tmp/tmpfileXXXXXX");
+        int fd = mkstemp(filename_);
+        if (fd != -1)
+        {
+            close(fd);  // close immediately
+        }
+        else
+        {
+            perror("mkstemp");
+        }
+    }
+    ~TempFilename() { free(filename_); filename_ = nullptr; }
+    std::string GetFilename() const { return std::string(filename_); }
+private:
+    char * filename_;
+};
+
+bool WaitForRegistration(AwaServerSession * serverSession, const std::vector<std::string> & clientIDs, int timeoutMs);
 
 /*********************************************************************
  *** Test Base Classes
@@ -80,19 +121,27 @@ namespace detail {
 class TestAwaBase : public virtual testing::Test
 {
 protected:
+
+    TestAwaBase() : testDescription_() {}
+
     virtual void SetUp() {
         AwaLog_SetLevel(static_cast<AwaLogLevel>(global::logLevel));
 
         const ::testing::TestInfo* const test_info =
                 ::testing::UnitTest::GetInstance()->current_test_info();
         testDescription_ = std::string(test_info->test_case_name()) + std::string(".") + std::string(test_info->name());
+        global::testLog << "SetUp " << testDescription_ << std::endl;
+    }
+
+    virtual void TearDown() {
+        global::testLog << "TearDown " << testDescription_ << std::endl << std::endl;
     }
     std::string testDescription_;
 };
 
 
 // Base class for Client tests
-class TestClientBase : public TestAwaBase
+class TestClientBase : public virtual TestAwaBase
 {
 };
 
@@ -122,11 +171,11 @@ protected:
           }
 
           daemon_.SetIpcPort(global::clientIpcPort);
-          ASSERT_TRUE(daemon_.Start(testDescription_));
+          ASSERT_TRUE(daemon_.Start());
       }
       else
       {
-          daemon_.SkipStart(testDescription_);
+          daemon_.SkipStart();
       }
   }
   virtual void TearDown() {
@@ -159,6 +208,7 @@ protected:
 
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaClientSession_Connect(session_));
+        global::testLog << "Client session " << AwaClientSession_GetSessionID(session_) << std::endl;
     }
 
     virtual void Disconnect() {
@@ -191,7 +241,7 @@ protected:
 
 
 // Base class for Server tests
-class TestServerBase : public TestAwaBase
+class TestServerBase : public virtual TestAwaBase
 {
 };
 
@@ -221,11 +271,11 @@ protected:
           }
 
           daemon_.SetIpcPort(global::serverIpcPort);
-          ASSERT_TRUE(daemon_.Start(testDescription_));
+          ASSERT_TRUE(daemon_.Start());
       }
       else
       {
-          daemon_.SkipStart(testDescription_);
+          daemon_.SkipStart();
       }
   }
   virtual void TearDown() {
@@ -239,7 +289,6 @@ protected:
       TestServerBase::TearDown();
   }
 
-private:
   AwaServerDaemon daemon_;
 };
 
@@ -258,6 +307,7 @@ protected:
 
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaServerSession_Connect(session_));
+        global::testLog << "Server session " << AwaServerSession_GetSessionID(session_) << std::endl;
     }
 
     virtual void Disconnect() {
@@ -365,30 +415,26 @@ protected:
         char objectPath[32];
         sprintf(objectPath, "/%d", objectID);
 
-        printf("Waiting for %s\n", objectPath);
-
+        // Waiting for client to register object with server
         while (!found && maxOperations-- > 0)
         {
             AwaServerListClientsOperation * listClientsOperation = AwaServerListClientsOperation_New(server_session_);
-            AwaServerListClientsOperation_Perform(listClientsOperation, defaults::timeout);
+            AwaServerListClientsOperation_Perform(listClientsOperation, global::timeout);
             const AwaServerListClientsResponse * response = AwaServerListClientsOperation_GetResponse(listClientsOperation, global::clientEndpointName);
 
             AwaRegisteredEntityIterator * iterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(response);
 
             while (AwaRegisteredEntityIterator_Next(iterator))
             {
-                //Lwm2m_Debug("Waiting for server to know client knows about object 1000...");
                 const char * path = AwaRegisteredEntityIterator_GetPath(iterator);
 
                 if (strstr(path, objectPath) != NULL) {
-                    // contains
-                    printf("FOUND %s\n", path);
                     found = true;
                 }
             }
             AwaRegisteredEntityIterator_Free(&iterator);
             AwaServerListClientsOperation_Free(&listClientsOperation);
-            sleep(1);
+            usleep(1000);
         }
         ASSERT_TRUE(found);
     }
@@ -438,15 +484,15 @@ protected:
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(clientDefineOperation, objectDefinition));
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, objectDefinition));
 
-        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, defaults::timeout));
-        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(clientDefineOperation, global::timeout));
+        ASSERT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
         //FIXME: FLOWDM-498: this creates the object instance for the dummy object on the client as the server api does not support object/resource creation yet
         //comment this code to find tests that aren't LWM2M compliant
         AwaClientSetOperation * clientSet = AwaClientSetOperation_New(client_session_);
         EXPECT_TRUE(clientSet != NULL);
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(clientSet, "/10000/0"));
-        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(clientSet, global::timeout));
         AwaClientSetOperation_Free(&clientSet);
 
         AwaObjectDefinition_Free(&objectDefinition);
@@ -716,31 +762,42 @@ protected:
     bool running;
 };
 
+// Returns true iff time_ms is within time_target_ms +/- tolerance_ms
 bool ElapsedTimeWithinTolerance(double time_ms, double time_target_ms, double tolerance_ms);
 
+// Returns true iff time_ms is greater than or equal to time_target_ms
+bool ElapsedTimeExceeds(double time_ms, double time_target_ms);
 
 // Poll an overridden Check function until it returns true, or the timeout is reached.
 class WaitCondition
 {
 public:
-    WaitCondition(useconds_t checkPeriod=1e6,
-                  useconds_t timeoutDuration=1e7) :
+    WaitCondition(useconds_t checkPeriod=1e5,
+                  useconds_t timeoutDuration=1e6) :
         checkPeriod_(checkPeriod), timeoutDuration_(timeoutDuration) {}
     virtual ~WaitCondition() {}
     virtual bool Wait()
     {
-        const int maxCount = timeoutDuration_ / checkPeriod_;
+        return Wait(checkPeriod_, timeoutDuration_);
+    }
+    virtual bool Wait(useconds_t timeoutDuration)
+    {
+        return Wait(checkPeriod_, timeoutDuration);
+    }
+    virtual bool Wait(useconds_t checkPeriod, useconds_t timeoutDuration)
+    {
+        const int maxCount = timeoutDuration / checkPeriod;
         int count = 0;
         while (!Check())
         {
             if (++count > maxCount)
                 break;
             //std::cout << "Wait " << count * checkPeriod_ / 1000 << "ms" << std::endl;
-            usleep(checkPeriod_);
+            usleep(checkPeriod);
         }
         if (count > maxCount)
         {
-            std::cerr << "Wait Condition timed out after " << timeoutDuration_ / 1000000.0 << " seconds." << std::endl;
+            //std::cerr << "Wait Condition timed out after " << timeoutDuration_ / 1000000.0 << " seconds." << std::endl;
         }
         return count <= maxCount;
     }

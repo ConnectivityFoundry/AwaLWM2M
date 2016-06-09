@@ -46,6 +46,7 @@ const char * clientEndpointName = nullptr;
 const char * clientLogFile = nullptr;
 const char * serverLogFile = nullptr;
 const char * bootstrapServerLogFile = nullptr;
+int timeout = 0;
 
 // initialise globals with a function to avoid Static Initialization Order Fiasco
 void SetDaemonGlobalDefaults(void)

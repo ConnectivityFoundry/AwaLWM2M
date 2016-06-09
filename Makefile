@@ -130,7 +130,7 @@ VALGRIND_OPTIONS:=--error-exitcode=1 --leak-check=full --show-leak-kinds=all --t
 .PHONY: valgrind_tests
 valgrind_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
 	valgrind $(VALGRIND_OPTIONS) $(TEST_SRC_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS) --defaultTimeout=1000
 	valgrind $(VALGRIND_OPTIONS) $(TEST_STATIC_API_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
 	valgrind $(VALGRIND_OPTIONS) $(TEST_TOOLS_BIN)      $(GTEST_OPTIONS) $(TEST_PATHS)
 
@@ -141,7 +141,7 @@ VALGRIND_LOG_OPTIONS:=--xml=yes --xml-file=$(VALGRIND_LOG_DIR)/valgrind.%p.xml -
 valgrind_comprehensive: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
 	mkdir -p $(VALGRIND_LOG_DIR)
 	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_SRC_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
-	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS)
+	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_API_BIN)        $(GTEST_OPTIONS) $(TEST_PATHS) --defaultTimeout=1000
 	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_STATIC_API_BIN) $(GTEST_OPTIONS) $(TEST_PATHS)
 	valgrind $(VALGRIND_OPTIONS) --trace-children=yes $(VALGRIND_LOG_OPTIONS) $(TEST_TOOLS_BIN)      $(GTEST_OPTIONS) $(TEST_PATHS)
 
@@ -164,3 +164,7 @@ clean: api-clean
 	rm -f *.log
 	rm -f *_out.xml
 	rm -f cppcheck-result.xml
+
+docker:
+	docker build -t flowm2m/awalwm2m -f ci/Dockerfile .
+

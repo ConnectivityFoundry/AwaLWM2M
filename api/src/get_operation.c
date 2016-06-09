@@ -160,7 +160,7 @@ AwaError AwaClientGetOperation_Perform(AwaClientGetOperation * operation, AwaTim
                             IPCMessage_AddContent(getRequest, objectsTree);
 
                             IPCMessage * getResponse = NULL;
-                            result = IPC_SendAndReceive(ClientSession_GetChannel(session), getRequest, &getResponse, timeout > 0 ? timeout : -1);
+                            result = IPC_SendAndReceive(ClientSession_GetChannel(session), getRequest, &getResponse, timeout);
 
                             // Process the response
                             if (result == AwaError_Success)

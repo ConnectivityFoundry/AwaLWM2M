@@ -133,13 +133,13 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_A
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_); ASSERT_TRUE(NULL != operation);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0/0"));
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0"));
-    ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
     // check the result - expect not found for /3/0
     AwaClientGetOperation * getOperation = AwaClientGetOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientGetOperation_AddPath(getOperation, "/3/0"));
-    ASSERT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Response, AwaClientGetOperation_Perform(getOperation, global::timeout));
     const AwaClientGetResponse * getResponse = AwaClientGetOperation_GetResponse(getOperation); ASSERT_TRUE(NULL != getResponse);
     AwaPathIterator * iterator = AwaClientGetResponse_NewPathIterator(getResponse);
     ASSERT_TRUE(NULL != iterator);
@@ -229,14 +229,14 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_AwaClientDeleteOp
 
 TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_Perform_handles_null_operation)
 {
-    EXPECT_EQ(AwaError_OperationInvalid, AwaClientDeleteOperation_Perform(NULL, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaClientDeleteOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_Perform_handles_empty_operation)
 {
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     // no paths added
-    EXPECT_EQ(AwaError_OperationInvalid, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_OperationInvalid, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -244,7 +244,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
 {
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -252,8 +252,8 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
 {
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
-    EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
+    EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, global::timeout));
     const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
     const AwaPathResult * pathResult = AwaClientDeleteResponse_GetPathResult(response, "/3/0/0");
     EXPECT_EQ(AwaError_PathNotFound, AwaPathResult_GetError(pathResult));
@@ -271,7 +271,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     {
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -279,7 +279,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     {
         operation = AwaClientDeleteOperation_New(session_);
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
-        EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, global::timeout));
 
         const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
         const AwaPathResult * pathResult = AwaClientDeleteResponse_GetPathResult(response, *it);
@@ -304,7 +304,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_AwaClientDeleteOp
     {
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -312,7 +312,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_AwaClientDeleteOp
     {
         operation = AwaClientDeleteOperation_New(session_);
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
-        EXPECT_EQ(AwaError_CannotDelete, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_CannotDelete, AwaClientDeleteOperation_Perform(operation, global::timeout));
         AwaClientDeleteOperation_Free(&operation);
     }
 }
@@ -328,7 +328,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     {
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
     }
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
     // try to delete them again, one at a time, to check for expected failure
@@ -336,7 +336,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     {
         operation = AwaClientDeleteOperation_New(session_);
         ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, *it));
-        EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, global::timeout));
 
         const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
         const AwaPathResult * pathResult = AwaClientDeleteResponse_GetPathResult(response, *it);
@@ -350,7 +350,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
 {
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/6", 0, 2));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -359,7 +359,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/6", 0, 2));
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/6", 10, 2));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -368,7 +368,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_AwaClientDeleteOp
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/6", 0, 2));
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/1/6", 0, 2));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -377,7 +377,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/1", 0, 2));
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/2", 0, 2));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -386,7 +386,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_P
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/3/0/1", 0, 2));
     ASSERT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPathWithArrayRange(operation, "/4/0/1", 0, 2));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 }
 
@@ -409,14 +409,14 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_DA_AwaClientDelet
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0"));
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     AwaClientDeleteOperation_Free(&operation);
 
     // check that the correct resources were deleted
     {
         AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
         AwaClientGetOperation_AddPath(operation, "/3/0");
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, global::timeout));
         const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation);
         AwaPathIterator * iterator = AwaClientGetResponse_NewPathIterator(response);
 
@@ -456,7 +456,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_DA_AwaClientDelet
     {
         AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
         AwaClientGetOperation_AddPath(operation, "/888");
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, global::timeout));
         const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation);
         AwaPathIterator * iterator = AwaClientGetResponse_NewPathIterator(response);
 
@@ -515,7 +515,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, DISABLED_DA_AwaClientDelet
         AwaClientGetOperation * operation = AwaClientGetOperation_New(session_);
         AwaClientGetOperation_AddPath(operation, "/888");
         AwaClientGetOperation_AddPath(operation, "/889");
-        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, defaults::timeout));
+        ASSERT_EQ(AwaError_Success, AwaClientGetOperation_Perform(operation, global::timeout));
         const AwaClientGetResponse * response = AwaClientGetOperation_GetResponse(operation);
         AwaPathIterator * iterator = AwaClientGetResponse_NewPathIterator(response);
 
@@ -548,7 +548,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteOperation_G
 {
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
 
     EXPECT_TRUE(NULL != operation);
     EXPECT_TRUE(NULL != AwaClientDeleteOperation_GetResponse(operation));
@@ -565,7 +565,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteResponse_Ne
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
     ASSERT_TRUE(NULL != response);
 
@@ -589,7 +589,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteResponse_Ne
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3/0"));
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/5/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
     const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
     ASSERT_TRUE(NULL != response);
 
@@ -618,7 +618,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteResponse_Ge
     // now try to Delete the mandatory resource:
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/4/0"));
-    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_Perform(operation, global::timeout));
 
     // check response on /3/0/11
     const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
@@ -636,7 +636,7 @@ TEST_F(TestClientDeleteOperationWithConnectedSession, AwaClientDeleteResponse_Ge
     // now try to Delete the mandatory resource:
     AwaClientDeleteOperation * operation = AwaClientDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaClientDeleteOperation_AddPath(operation, "/3132/0"));
-    EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Response, AwaClientDeleteOperation_Perform(operation, global::timeout));
 
     // check response on /3/0/11
     const AwaClientDeleteResponse * response = AwaClientDeleteOperation_GetResponse(operation);
