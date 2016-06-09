@@ -86,8 +86,8 @@ typedef struct
 #ifdef MICROCHIP_PIC32
 typedef struct
 {
-    uint16_t Port;      // TODO - FIXME
-    uint32_t Addr;
+    uint16_t Port;
+    uint32_t Address;
 } AddressType;
 #endif
 

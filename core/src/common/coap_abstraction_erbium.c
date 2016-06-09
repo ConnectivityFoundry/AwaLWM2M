@@ -60,7 +60,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
     Lwm2m_Info("Bind port: %d\n", port);
-    memset(CurrentTransaction, sizeof(CurrentTransaction), 0);
+    memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
