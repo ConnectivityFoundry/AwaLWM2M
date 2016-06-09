@@ -1,0 +1,17 @@
+[Unit]
+Description=Awa Server Daemon
+After=network.target
+
+[Service]
+User=nobody
+Group=nogroup
+Type=simple
+ExecStart=/usr/bin/awa_serverd \
+    --logFile /var/log/awa/awa_serverd.log \
+	--port 5683
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
