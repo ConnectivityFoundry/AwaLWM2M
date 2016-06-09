@@ -95,7 +95,7 @@ static int getUriHostLength(const char * uri, int uriLength);
 
 uint8_t encryptBuffer[ENCRYPT_BUFFER_LENGTH];
 
-static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, uint8_t * buffer, int bufferLength, void *context);
+static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, const uint8_t * buffer, int bufferLength, void *context);
 
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
 {
@@ -623,7 +623,7 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
     return result;
 }
 
-bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, uint8_t * buffer, int bufferLength)
+bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const uint8_t * buffer, int bufferLength)
 {
     bool result = false;
     int socketHandle = networkSocket->Socket;
@@ -722,7 +722,7 @@ void NetworkSocket_Free(NetworkSocket ** networkSocket)
 }
 
 
-static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, uint8_t * buffer, int bufferLength, void *context)
+static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, const uint8_t * buffer, int bufferLength, void *context)
 {
     NetworkTransmissionError result = NetworkTransmissionError_None;
     NetworkSocket * networkSocket = (NetworkSocket *)context;

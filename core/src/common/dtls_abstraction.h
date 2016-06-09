@@ -45,7 +45,7 @@ typedef enum
 } NetworkTransmissionError;
 
 
-typedef NetworkTransmissionError (*DTLS_NetworkSendCallback)(NetworkAddress * destAddress, uint8_t * buffer, int bufferLength, void *context);
+typedef NetworkTransmissionError (*DTLS_NetworkSendCallback)(NetworkAddress * destAddress,const uint8_t * buffer, int bufferLength, void *context);
 
 void DTLS_Init(void);
 
