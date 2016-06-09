@@ -1,5 +1,6 @@
 set (awa_common_SOURCES
   lwm2m_list.c
+  network_abstraction_linux.c
   coap_abstraction_libcoap.c
   lwm2m_debug.c
   lwm2m_util.c

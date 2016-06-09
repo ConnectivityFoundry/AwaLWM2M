@@ -332,7 +332,7 @@ coap_obs_request_registration(uip_ipaddr_t *addr, uint16_t port, char *uri,
       coap_send_transaction(t);
     } else {
       PRINTF("Could not allocate obs_subject resource buffer");
-      coap_clear_transaction(t);
+      coap_clear_transaction(&t);
     }
   } else {
     PRINTF("Could not allocate transaction buffer");

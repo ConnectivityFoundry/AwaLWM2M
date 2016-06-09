@@ -39,6 +39,7 @@ typedef int SOCKET;
 #include "lwm2m_debug.h"
 #include "lwm2m_util.h"
 #include "network_abstraction.h"
+#include "dtls_abstraction.h"
 
 
 struct _NetworkAddress
@@ -88,6 +89,13 @@ static void addCachedAddress(NetworkAddress * address, const char * uri, int uri
 static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength);
 static int getUriHostLength(const char * uri, int uriLength);
 
+#ifndef ENCRYPT_BUFFER_LENGTH
+#define ENCRYPT_BUFFER_LENGTH 1024
+#endif
+
+uint8_t encryptBuffer[ENCRYPT_BUFFER_LENGTH];
+
+static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, uint8_t * buffer, int bufferLength, void *context);
 
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
 {
@@ -187,7 +195,7 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                     result = (NetworkAddress *)malloc(size);
                     if (result)
                     {
-                        memset(result, size, 0);
+                        memset(result, 0, size);
                         result->Secure = secure;
                         if (resolvedAddress->h_addrtype == AF_INET)
                         {
@@ -357,15 +365,8 @@ static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress)
         {
             if (NetworkAddress_Compare(matchAddress, address) == 0)
             {
-                if (networkAddressCache[index].uri)
-                {
-                    Lwm2m_Debug("Rx address matched: %s\n", networkAddressCache[index].uri);
-                }
-                else
-                {
-                    Lwm2m_Debug("Rx address matched\n");
-                }
                 result = address;
+                break;
             }
         }
     }
@@ -403,9 +404,10 @@ NetworkSocket * NetworkSocket_New(NetworkSocketType socketType, uint16_t port)
     NetworkSocket * result = (NetworkSocket *)malloc(size);
     if (result)
     {
-        memset(result, size, 0);
+        memset(result, 0, size);
         result->SocketType = socketType;
         result->Port = port;
+        DTLS_SetNetworkSendCallback(SendDTLS);
     }
     return result;
 }
@@ -423,12 +425,13 @@ NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket)
 
 void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, uint8_t * cert, int certLength, CertificateFormat format)
 {
-
+    DTLS_SetCertificate(cert, certLength, format);
 }
 
 void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, uint8_t * key, int keyLength)
 {
 
+    DTLS_SetPSK(identity, key, keyLength);
 }
 
 
@@ -526,7 +529,7 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
         NetworkAddress * networkAddress = NULL;
         NetworkAddress matchAddress;
         size_t size = sizeof(struct _NetworkAddress);
-        memset(&matchAddress, size, 0);
+        memset(&matchAddress, 0, size);
         memcpy(&matchAddress.Address.Sa, &sourceSocket, sourceSocketLength);
         networkAddress = getCachedAddress(&matchAddress);
 
@@ -563,12 +566,26 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
             {
                 if (sourceAddress)
                 {
-                   if (readUDP(networkSocket, networkSocket->Socket, buffer, bufferLength, sourceAddress, readLength))
+                   if ((networkSocket->Socket != SOCKET_ERROR) && readUDP(networkSocket, networkSocket->Socket, buffer, bufferLength, sourceAddress, readLength))
                    {
                        result = true;
                        if (*readLength == 0)
                        {
                            readUDP(networkSocket, networkSocket->SocketIPv4, buffer, bufferLength, sourceAddress, readLength);
+                       }
+                   }
+                   else if ((networkSocket->SocketIPv4 != SOCKET_ERROR) && readUDP(networkSocket, networkSocket->SocketIPv4, buffer, bufferLength, sourceAddress, readLength))
+                   {
+                       result = true;
+                   }
+                   if ((*readLength > 0) && *sourceAddress && (*sourceAddress)->Secure)
+                   {
+                       if (DTLS_Decrypt(*sourceAddress, buffer, *readLength, encryptBuffer, ENCRYPT_BUFFER_LENGTH, readLength))
+                       {
+                           if (*readLength > 0)
+                           {
+                               memcpy(buffer, encryptBuffer, *readLength);
+                           }
                        }
                    }
                 }
@@ -606,6 +623,47 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
     return result;
 }
 
+bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, uint8_t * buffer, int bufferLength)
+{
+    bool result = false;
+    int socketHandle = networkSocket->Socket;
+    if (destAddress->Address.Sa.sa_family == AF_INET)
+        socketHandle = networkSocket->SocketIPv4;
+    size_t addressLength = sizeof(struct sockaddr);
+    while (bufferLength > 0)
+    {
+        errno = 0;
+        int sentBytes = sendto(socketHandle, buffer, bufferLength, 0, &destAddress->Address.Sa, addressLength);
+        int lastError = errno;
+        if (sentBytes == SOCKET_ERROR)
+        {
+            if (lastError == EWOULDBLOCK)
+            {
+                sentBytes = 0;
+            }
+            else if (lastError == ENOTCONN)
+            {
+                networkSocket->LastError = NetworkSocketError_SendError;
+                break;
+            }
+            else if (lastError == ECONNRESET)
+            {
+                networkSocket->LastError = NetworkSocketError_SendError;
+                break;
+            }
+            else if (lastError == EBADF)
+            {
+                networkSocket->LastError = NetworkSocketError_SendError;
+                break;
+            }
+        }
+        buffer += sentBytes;
+        bufferLength -= sentBytes;
+    }
+    result = (bufferLength == 0);
+    return result;
+}
+
 bool NetworkSocket_Send(NetworkSocket * networkSocket, NetworkAddress * destAddress, uint8_t * buffer, int bufferLength)
 {
     bool result = false;
@@ -618,41 +676,23 @@ bool NetworkSocket_Send(NetworkSocket * networkSocket, NetworkAddress * destAddr
             {
                 if (destAddress)
                 {
-                    int socketHandle = networkSocket->Socket;
-                    if (destAddress->Address.Sa.sa_family == AF_INET)
-                        socketHandle = networkSocket->SocketIPv4;
-                    size_t addressLength = sizeof(struct sockaddr);
-                    while (bufferLength > 0)
+                    if (destAddress->Secure)
                     {
-                        errno = 0;
-                        int sentBytes = sendto(socketHandle, buffer, bufferLength, 0, &destAddress->Address.Sa, addressLength);
-                        int lastError = errno;
-                        if (sentBytes == SOCKET_ERROR)
+                        int encryptedBytes;
+                        if (DTLS_Encrypt(destAddress, buffer, bufferLength, encryptBuffer, ENCRYPT_BUFFER_LENGTH, &encryptedBytes, networkSocket))
                         {
-                            if (lastError == EWOULDBLOCK)
-                            {
-                                sentBytes = 0;
-                            }
-                            else if (lastError == ENOTCONN)
-                            {
-                                networkSocket->LastError = NetworkSocketError_SendError;
-                                break;
-                            }
-                            else if (lastError == ECONNRESET)
-                            {
-                                networkSocket->LastError = NetworkSocketError_SendError;
-                                break;
-                            }
-                            else if (lastError == EBADF)
-                            {
-                                networkSocket->LastError = NetworkSocketError_SendError;
-                                break;
-                            }
+                            buffer = encryptBuffer;
+                            bufferLength = encryptedBytes;
                         }
-                        buffer += sentBytes;
-                        bufferLength -= sentBytes;
+                        else
+                        {
+                            bufferLength = 0;
+                        }
                     }
-                    result = (bufferLength == 0);
+                    if (bufferLength > 0)
+                    {
+                        result = sendUDP(networkSocket, destAddress, buffer, bufferLength);
+                    }
                 }
                 else
                 {
@@ -679,4 +719,19 @@ void NetworkSocket_Free(NetworkSocket ** networkSocket)
         free(*networkSocket);
         *networkSocket = NULL;
     }
+}
+
+
+static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, uint8_t * buffer, int bufferLength, void *context)
+{
+    NetworkTransmissionError result = NetworkTransmissionError_None;
+    NetworkSocket * networkSocket = (NetworkSocket *)context;
+    if (networkSocket)
+    {
+        if (!sendUDP(networkSocket, destAddress, buffer, bufferLength))
+        {
+            result = NetworkTransmissionError_TransmitBufferFull;
+        }
+    }
+    return result;
 }

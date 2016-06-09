@@ -86,8 +86,8 @@ int coap_receive(NetworkSocket * networkSocket)
     /* static declaration reduces stack peaks and program code size */
     static coap_packet_t message[1]; /* this way the packet can be treated as pointer as usual */
     static coap_packet_t response[1];
-    static coap_transaction_t *transaction = NULL;
-
+    static coap_transaction_t *transaction;
+    transaction = NULL;
     int readLength;
     if (NetworkSocket_Read(networkSocket, CoapBuffer, COAP_BUFFER_LENGTH, &sourceAddress, &readLength) && (readLength > 0))
     {
@@ -265,7 +265,8 @@ int coap_receive(NetworkSocket * networkSocket)
                     restful_response_handler callback = transaction->callback;
                     void *callback_data = transaction->callback_data;
 
-                    coap_clear_transaction(transaction);
+                    coap_clear_transaction(&transaction);
+                    transaction = NULL;
 
                     /* check if someone registered for the response */
                     if (callback)
@@ -300,14 +301,14 @@ int coap_receive(NetworkSocket * networkSocket)
         else if (erbium_status_code == MANUAL_RESPONSE)
         {
             PRINTF("Clearing transaction for manual response");
-            coap_clear_transaction(transaction);
+            coap_clear_transaction(&transaction);
         }
         else
         {
             coap_message_type_t reply_type = COAP_TYPE_ACK;
 
             PRINTF("ERROR %u: %s\n", erbium_status_code, coap_error_message);
-            coap_clear_transaction(transaction);
+            coap_clear_transaction(&transaction);
 
             if (erbium_status_code == PING_RESPONSE)
             {

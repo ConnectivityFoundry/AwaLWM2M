@@ -26,6 +26,7 @@
 #include "coap_abstraction.h"
 #include "lwm2m_debug.h"
 #include "network_abstraction.h"
+#include "dtls_abstraction.h"
 
 #include "er-resource.h"
 #include "er-coap-engine.h"
@@ -60,9 +61,10 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
     Lwm2m_Info("Bind port: %d\n", port);
-    memset(CurrentTransaction, sizeof(CurrentTransaction), 0);
+    memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
+    DTLS_Init();
     networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
     if (networkSocket)
         NetworkSocket_StartListening(networkSocket);
@@ -78,6 +80,7 @@ void coap_SetLogLevel(int logLevel)
 int coap_WaitMessage(int timeout, int fd)
 {
     coap_receive(networkSocket);
+    coap_check_transactions();
     return timeout;
 }
 
@@ -311,7 +314,7 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
     if (CurrentTransaction[CurrentTransactionIndex].TransactionUsed && CurrentTransaction[CurrentTransactionIndex].TransactionPtr)
     {
         Lwm2m_Warning("Canceled previous transaction [%d]: %p\n", CurrentTransactionIndex, CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
-        coap_clear_transaction(CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
+        coap_clear_transaction(&CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
     }
 
     //if ((transaction = coap_new_transaction(request.mid, remote_ipaddr, uip_htons(remote_port))))
@@ -394,6 +397,7 @@ void coap_CancelObserve(void * context, const char * path, ContentType contentTy
 
 void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType, const char * payload, int payloadLen, int sequence)
 {
+    // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
     coap_packet_t notify;
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(path, strlen(path));

@@ -86,71 +86,78 @@ void coap_send_transaction(coap_transaction_t *t)
     PRINTF("Sending transaction %u\n", t->mid);
 
 
-    NetworkSocket_Send(t->networkSocket, t->remoteAddress, t->packet, t->packet_len);
     //coap_send_message(&t->addr, t->port, t->packet, t->packet_len);
-
-    if(COAP_TYPE_CON ==
-            ((COAP_HEADER_TYPE_MASK & t->packet[0]) >> COAP_HEADER_TYPE_POSITION))
+    if (NetworkSocket_Send(t->networkSocket, t->remoteAddress, t->packet, t->packet_len))
     {
-        if(t->retrans_counter < COAP_MAX_RETRANSMIT)
+        t->sent = true;
+        if(COAP_TYPE_CON ==
+                ((COAP_HEADER_TYPE_MASK & t->packet[0]) >> COAP_HEADER_TYPE_POSITION))
         {
-            /* not timed out yet */
-            PRINTF("Keeping transaction %u\n", t->mid);
-
-            if(t->retrans_counter == 0)
+            if(t->retrans_counter < COAP_MAX_RETRANSMIT)
             {
-//                t->retrans_timer.timer.interval =
-//                        COAP_RESPONSE_TIMEOUT_TICKS + (random_rand()
-//                                %
-//                                (clock_time_t)
-//                                COAP_RESPONSE_TIMEOUT_BACKOFF_MASK);
-//                PRINTF("Initial interval %f\n",
-//                        (float)t->retrans_timer.timer.interval / CLOCK_SECOND);
+                /* not timed out yet */
+                PRINTF("Keeping transaction %u\n", t->mid);
+
+                if(t->retrans_counter == 0)
+                {
+    //                t->retrans_timer.timer.interval =
+    //                        COAP_RESPONSE_TIMEOUT_TICKS + (random_rand()
+    //                                %
+    //                                (clock_time_t)
+    //                                COAP_RESPONSE_TIMEOUT_BACKOFF_MASK);
+    //                PRINTF("Initial interval %f\n",
+    //                        (float)t->retrans_timer.timer.interval / CLOCK_SECOND);
+                }
+                else
+                {
+    //                t->retrans_timer.timer.interval <<= 1;  /* double */
+    //                PRINTF("Doubled (%u) interval %f\n", t->retrans_counter,
+    //                        (float)t->retrans_timer.timer.interval / CLOCK_SECOND);
+                }
+
+    //            PROCESS_CONTEXT_BEGIN(transaction_handler_process);
+    //            etimer_restart(&t->retrans_timer);        /* interval updated above */
+    //            PROCESS_CONTEXT_END(transaction_handler_process);
+
+                t = NULL;
             }
             else
             {
-//                t->retrans_timer.timer.interval <<= 1;  /* double */
-//                PRINTF("Doubled (%u) interval %f\n", t->retrans_counter,
-//                        (float)t->retrans_timer.timer.interval / CLOCK_SECOND);
+                /* timed out */
+                PRINTF("Timeout\n");
+                restful_response_handler callback = t->callback;
+                void *callback_data = t->callback_data;
+
+                /* handle observers */
+                //coap_remove_observer_by_client(t->session);	// TODO - restore when observe supported
+
+                coap_clear_transaction(&t);
+
+                if(callback)
+                {
+                    callback(callback_data, NULL);
+                }
             }
-
-//            PROCESS_CONTEXT_BEGIN(transaction_handler_process);
-//            etimer_restart(&t->retrans_timer);        /* interval updated above */
-//            PROCESS_CONTEXT_END(transaction_handler_process);
-
-            t = NULL;
+        } else {
+            coap_clear_transaction(&t);
         }
-        else
-        {
-            /* timed out */
-            PRINTF("Timeout\n");
-            restful_response_handler callback = t->callback;
-            void *callback_data = t->callback_data;
-
-            /* handle observers */
-            //coap_remove_observer_by_client(t->session);	// TODO - restore when observe supported
-
-            coap_clear_transaction(t);
-
-            if(callback)
-            {
-                callback(callback_data, NULL);
-            }
-        }
-    } else {
-        coap_clear_transaction(t);
+    }
+    else
+    {
+        t->sent = false;
     }
 }
 /*---------------------------------------------------------------------------*/
-void coap_clear_transaction(coap_transaction_t *t)
+void coap_clear_transaction(coap_transaction_t **t)
 {
-    if(t)
+    if(t && *t)
     {
-        PRINTF("Freeing transaction %u: %p\n", t->mid, t);
+        PRINTF("Freeing transaction %u: %p\n", (*t)->mid, (*t));
 
         //etimer_stop(&t->retrans_timer);
-        ListRemove(&t->list);
-        free(t);
+        ListRemove(&(*t)->list);
+        free(*t);
+        *t = NULL;
     }
 }
 
@@ -172,17 +179,19 @@ coap_transaction_t * coap_get_transaction_by_mid(uint16_t mid)
 /*---------------------------------------------------------------------------*/
 void coap_check_transactions()
 {
-    struct ListHead * i = NULL;
+    struct ListHead * current = NULL;
+    struct ListHead * next = NULL;
 
-    ListForEach(i, &transactions_list)
+    ListForEachSafe(current ,next, &transactions_list)
     {
 
-        coap_transaction_t *t = ListEntry(i, struct coap_transaction, list);
+        coap_transaction_t *t = ListEntry(current, struct coap_transaction, list);
 
-        if(t->retrans_timer == 0)
+        //if(t->retrans_timer == 0)
+        if (!t->sent)
         {
-            ++(t->retrans_counter);
-            PRINTF("Retransmitting %u (%u)\n", t->mid, t->retrans_counter);
+            //++(t->retrans_counter);
+            //PRINTF("Retransmitting %u (%u)\n", t->mid, t->retrans_counter);
             coap_send_transaction(t);
         }
     }
