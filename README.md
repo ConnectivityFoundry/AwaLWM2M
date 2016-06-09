@@ -63,7 +63,9 @@ Note that for our purposes the terms *user* and *developer* have the following d
 
 	* For build instructions, see the [Quick start guide](doc/starters_guide.md).
 	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
-	* A sample application tutorial can be found [here](doc/example_app.md).
+	* A sample application tutorial using the Awa API can be found [here](doc/example_app_api.md).
+	* A list of Awa API examples can be found [here](doc/example_api_list.md).
+	* A sample application tutorial using the Awa Static API can be found [here](doc/example_app_static_api.md).
 
 * For contributors:
 
