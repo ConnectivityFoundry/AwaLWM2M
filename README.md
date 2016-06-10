@@ -3,7 +3,7 @@
 
 ----
 
-## Awa LightweightM2M  
+## Awa LightweightM2M
 
 [![Build Status](https://travis-ci.org/FlowM2M/AwaLWM2M.svg?branch=master)](https://travis-ci.org/FlowM2M/AwaLWM2M)
 [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg?style=flat-square)](http://opensource.org/licenses/BSD-3-Clause)
@@ -27,9 +27,11 @@ Awa LightweightM2M is a development suite that provides a number of components a
 
 ----
 
-###  Getting started  
+###  Getting started
 
-The easiest way to get started with Awa LightweightM2M is on a Linux PC.  The following instructions are based on the Ubuntu Linux distribution and assume that the user is familiar with the GNU compiler toolchain, and with the process of installing packages using the package manager.
+The easiest way to get started with Awa LightweightM2M is to use our [docker container](doc/docker.md).
+
+Alternatively, you can build Awa on a Linux PC.  The following instructions are based on the Ubuntu Linux distribution and assume that the user is familiar with the GNU compiler toolchain, and with the process of installing packages using the package manager.
 
 Firstly, to obtain a copy of the Awa LightweightM2M source code:
 
@@ -45,7 +47,7 @@ Further information can be found in the [Quick start guide](doc/starters_guide.m
 
 ----
 
-### Documentation  
+### Documentation
 
 This project assumes a basic knowledge of The Open Mobile Alliance's (OMA) LWM2M, its functionality and services. For more detail, see our [introductory LWM2M overview](doc/lwm2m_overview.md).
 
@@ -57,7 +59,7 @@ Note that for our purposes the terms *user* and *developer* have the following d
 * *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project.
 
 
-#### General documentation  
+#### General documentation
 
 * For project users:
 
@@ -70,7 +72,7 @@ Note that for our purposes the terms *user* and *developer* have the following d
 	* An overview of the system can be found in the [Contributing developer guide](doc/developer_guide.md).
 	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.
 
-#### API guide  
+#### API guide
 
 The Awa API documentation is available as a Doxygen presentation which is generated via the following process.
 
@@ -84,13 +86,13 @@ For convenience you can also find the latest version of this documentation [here
 
 ----
 
-### Contributing  
+### Contributing
 
 We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality to improving documentation and bug reporting - it's all good.
 
 Find out more in the [contributor guide](CONTRIBUTING.md).
 
-### Credits  
+### Credits
 
 We would like to thank all of our current [contributors](CONTRIBUTORS).
 
@@ -101,14 +103,14 @@ We would also like to acknowledge and thank the authors of the following project
 * jsmn : https://github.com/zserge/jsmn
 
 
-### Development tasks  
+### Development tasks
 
 A list of ongoing development tasks can be seen [here](https://github.com/FlowM2M/AwaLWM2M/wiki/Development-task-list).
 
 
 ----
 
-### License information  
+### License information
 
 * All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE).
 * LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license.
