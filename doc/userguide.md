@@ -137,6 +137,8 @@ Example:
 
 ```` awa_clientd --port 6000 --endPointName client1 --bootstrap coap://0.0.0.0:2134 ````
 
+The factory bootstrap information file contains the server information that would be written by a bootstrap server during the bootstrap process. The bootstrap server uses the same file format. 
+
 [Back to the table of contents](userguide.md#contents)
 
 ----
@@ -212,6 +214,8 @@ Example: ````awa_bootstrapd --port 15685 --config bootstrap.conf ````
 
 
 **The configuration file.**  
+
+The format of this file is same as the factory bootstrap file that can be supplied to the client daemon. The contents describe the LwM2M Security and Server objects that the bootstrap server will write to a client that connects. 
 
 The configuration file must have the following format:
 ````

@@ -301,7 +301,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_channel)
     IPCMessage * request = IPCMessage_New();
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
-    EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(NULL, request, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(NULL, request, &response, global::timeout));
     IPCMessage_Free(&request);
 }
 
@@ -310,7 +310,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_request)
     IPCInfo * info = IPCInfo_NewUDP(detail::NonRoutableIPv4Address, 55555);  EXPECT_TRUE(NULL != info);
     IPCChannel * channel = IPCChannel_New(info);        EXPECT_TRUE(NULL != channel);
     IPCMessage * response = NULL;
-    EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(channel, NULL, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_IPCError, IPC_SendAndReceive(channel, NULL, &response, global::timeout));
     IPCChannel_Free(&channel);
     IPCInfo_Free(&info);
 }
@@ -323,7 +323,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_handles_null_response)
     IPCChannel * channel = IPCChannel_New(info);        EXPECT_TRUE(NULL != channel);
     IPCMessage * request = IPCMessage_New();
     IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
-    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, NULL, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, NULL, global::timeout));
     IPCMessage_Free(&request);
     IPCChannel_Free(&channel);
     IPCInfo_Free(&info);
@@ -342,7 +342,7 @@ TEST_F(TestIPC, IPC_SendAndReceive_failed_response_is_null)
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, "Request", IPC_MESSAGE_SUB_TYPE_CONNECT);
 
-    EXPECT_NE(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
+    EXPECT_NE(AwaError_Success, IPC_SendAndReceive(channel, request, &response, global::timeout));
     ASSERT_EQ(NULL, response);
 
     IPCMessage_Free(&request);
@@ -359,7 +359,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_is_not_null)
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
-    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, global::timeout));
     ASSERT_TRUE(NULL != response);
 
     IPCMessage_Free(&request);
@@ -378,7 +378,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_and_correct_type)
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
-    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, global::timeout));
     EXPECT_TRUE(NULL != response);
 
     const char * Type = NULL;
@@ -402,7 +402,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_content_is_not_
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
-    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, global::timeout));
     EXPECT_TRUE(NULL != response);
 
     ASSERT_TRUE(NULL != IPCMessage_GetContentNode(response));
@@ -421,7 +421,7 @@ TEST_F(TestIPCWithDaemon, IPC_SendAndReceive_successful_response_code_is_success
     IPCMessage * response = NULL;
     IPCMessage_SetType(request, IPC_MESSAGE_TYPE_REQUEST, IPC_MESSAGE_SUB_TYPE_CONNECT);
 
-    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, IPC_SendAndReceive(channel, request, &response, global::timeout));
     EXPECT_TRUE(NULL != response);
 
     ASSERT_EQ(IPCResponseCode_Success, IPCMessage_GetResponseCode(response));

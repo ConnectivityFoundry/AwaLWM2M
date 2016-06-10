@@ -1,0 +1,18 @@
+[Unit]
+Description=Awa Bootstrap Server Daemon
+After=network.target
+
+[Service]
+User=nobody
+Group=nogroup
+Type=simple
+ExecStart=/usr/bin/awa_bootstrapd \
+    --logFile /var/log/awa/awa_bootstrapd.log \
+	--config /etc/awa/bootstrap.config \
+	--port 15685
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

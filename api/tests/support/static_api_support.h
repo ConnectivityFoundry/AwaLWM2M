@@ -54,7 +54,7 @@ struct SingleStaticClientPollCondition : public PollCondition
     {
         bool found = false;
 
-        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, global::timeout));
         AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(Operation);
         EXPECT_TRUE(iterator != NULL);
         if (AwaClientIterator_Next(iterator))
@@ -86,7 +86,7 @@ struct SingleStaticClientObjectPollCondition : public PollCondition
     {
         bool found = inverse;
 
-        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, global::timeout));
         const AwaServerListClientsResponse * clientListResponse = AwaServerListClientsOperation_GetResponse(Operation, ClientEndpointName.c_str());
         EXPECT_TRUE(clientListResponse != NULL);
         AwaRegisteredEntityIterator * objectIterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(clientListResponse);

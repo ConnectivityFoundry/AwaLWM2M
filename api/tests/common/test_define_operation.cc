@@ -77,7 +77,7 @@ TEST_F(TestDefineOperationWithConnectedSession, AwaClientDefineOperation_Process
 
     EXPECT_EQ(AwaError_Success, DefineOperation_Add(operation, definition));
 
-    ASSERT_EQ(AwaError_Success, DefineOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, DefineOperation_Perform(operation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     DefineOperation_Free(&operation);
@@ -144,9 +144,9 @@ TEST_F(TestDefineOperationWithConnectedSession, AwaClientDefineOperation_Process
     horde.Pause();
     BasicTimer timer;
     timer.Start();
-    EXPECT_EQ(AwaError_Timeout, DefineOperation_Perform(operation, defaults::timeout));
+    EXPECT_EQ(AwaError_Timeout, DefineOperation_Perform(operation, global::timeout));
     timer.Stop();
-    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), defaults::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
+    EXPECT_TRUE(ElapsedTimeExceeds(timer.TimeElapsed_Milliseconds(), global::timeout)) << "Time elapsed: " << timer.TimeElapsed_Milliseconds() << "ms";
     horde.Unpause();
 
     AwaObjectDefinition_Free(&definition);
@@ -171,7 +171,7 @@ TEST_F(TestDefineOperationWithConnectedSession, AwaObjectDefinitionIterator_Can_
     EXPECT_TRUE(NULL != definition3);
     EXPECT_EQ(AwaError_Success, DefineOperation_Add(operation, definition3));
 
-    ASSERT_EQ(AwaError_Success, DefineOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, DefineOperation_Perform(operation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     AwaObjectDefinition_Free(&definition2);
@@ -241,7 +241,7 @@ TEST_F(TestDefineOperationWithConnectedSession, DISABLED_AwaClientDefineOperatio
 
     EXPECT_EQ(AwaError_Success, AwaClientSession_Free(&session_));
 
-    ASSERT_EQ(AwaError_SessionInvalid, DefineOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionInvalid, DefineOperation_Perform(operation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     DefineOperation_Free(&operation);
@@ -249,7 +249,7 @@ TEST_F(TestDefineOperationWithConnectedSession, DISABLED_AwaClientDefineOperatio
 
 TEST_F(TestDefineOperationWithConnectedSession, AwaClientDefineOperation_Process_handles_null_operation)
 {
-    ASSERT_EQ(AwaError_OperationInvalid, DefineOperation_Perform(NULL, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, DefineOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestDefineOperationWithConnectedSession, AwaClientDefineOperation_Process_handles_disconnected_session)
@@ -263,7 +263,7 @@ TEST_F(TestDefineOperationWithConnectedSession, AwaClientDefineOperation_Process
     // disconnect the session
     EXPECT_EQ(AwaError_Success, AwaClientSession_Disconnect(session_));
 
-    ASSERT_EQ(AwaError_SessionNotConnected, DefineOperation_Perform(operation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionNotConnected, DefineOperation_Perform(operation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     DefineOperation_Free(&operation);
@@ -278,8 +278,8 @@ TEST_F(TestDefineOperationWithConnectedSession, redefining_existing_standard_obj
     EXPECT_EQ(AwaError_Success, DefineOperation_Add(operation, definition));
 
     // TODO: this should eventually return AlreadyDefined, but for now will return IPCError
-    //ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Process(operation, defaults::timeout));
-    EXPECT_EQ(AwaError_AlreadyDefined, DefineOperation_Perform(operation, defaults::timeout));
+    //ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Process(operation, global::timeout));
+    EXPECT_EQ(AwaError_AlreadyDefined, DefineOperation_Perform(operation, global::timeout));
 
     // check that the session's object definition has not changed:
     {
@@ -333,8 +333,8 @@ TEST_P(TestDefineOperationRedefinition, redefine_existing_standard_object_with_n
         EXPECT_EQ(AwaError_Success, DefineOperation_Add(operation, definition3));
     }
     // TODO: other error code may be more appropriate
-    //EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Process(operation, defaults::timeout));
-    EXPECT_EQ(AwaError_AlreadyDefined, DefineOperation_Perform(operation, defaults::timeout));
+    //EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Process(operation, global::timeout));
+    EXPECT_EQ(AwaError_AlreadyDefined, DefineOperation_Perform(operation, global::timeout));
 
     // check that the session's object definition has not changed for object 3:
     {
