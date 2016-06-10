@@ -136,7 +136,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_TRUE(objectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 1, "TestResource", true, AwaResourceOperations_ReadWrite, 0));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 
@@ -179,7 +179,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_TRUE(objectDefintion != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque(objectDefintion, 1, "TestResource", true, AwaResourceOperations_ReadWrite, AwaOpaque {0}));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOpertaion, objectDefintion));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, global::timeout));
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
@@ -226,7 +226,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_TRUE(objectDefintion != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsOpaque(objectDefintion, 1, "TestResource", true, AwaResourceOperations_ReadWrite, AwaOpaque {0}));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOpertaion, objectDefintion));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, global::timeout));
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
@@ -293,7 +293,7 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_TRUE(objectDefintion != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsString(objectDefintion, 1, "TestResource", true, AwaResourceOperations_ReadWrite, ""));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOpertaion, objectDefintion));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOpertaion, global::timeout));
     AwaServerDefineOperation_Free(&defineOpertaion);
     AwaObjectDefinition_Free(&objectDefintion);
 
@@ -406,7 +406,7 @@ typedef struct
 static void * do_observe_operation(void * attr)
 {
     ServerObserveThreadContext * context = (ServerObserveThreadContext *)attr;
-    AwaError result = AwaServerObserveOperation_Perform(context->ObserveOperation, defaults::timeout);
+    AwaError result = AwaServerObserveOperation_Perform(context->ObserveOperation, global::timeout);
     Lwm2m_Debug("AwaServerObserveOperation_Perform: %s\n", AwaError_ToString(result));
     *(context)->ObserveThreadAlive = false;
     return 0;
@@ -460,7 +460,7 @@ public:
             if (!observeThreadAlive_)
             {
                 // only process the server session after we have successfully performed the observe operation.
-                AwaServerSession_Process(session_, defaults::timeout);
+                AwaServerSession_Process(session_, global::timeout);
                 AwaServerSession_DispatchCallbacks(session_);
             }
             AwaStaticClient_Process(StaticClient);
@@ -636,7 +636,7 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
             ASSERT_TRUE(false);
     }
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 

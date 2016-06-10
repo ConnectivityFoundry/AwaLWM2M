@@ -63,21 +63,21 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
 void * do_write_operation(void * attr)
 {
     AwaServerWriteOperation * writeOperation = (AwaServerWriteOperation *)attr;
-    AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, defaults::timeout);
+    AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout);
     return 0;
 }
 
 void * do_read_operation(void * attr)
 {
     AwaServerReadOperation * readOperation = (AwaServerReadOperation *)attr;
-    AwaServerReadOperation_Perform(readOperation, defaults::timeout);
+    AwaServerReadOperation_Perform(readOperation, global::timeout);
     return 0;
 }
 
 void * do_execute_operation(void * attr)
 {
     AwaServerExecuteOperation * executeOperation = (AwaServerExecuteOperation *)attr;
-    AwaServerExecuteOperation_Perform(executeOperation, defaults::timeout);
+    AwaServerExecuteOperation_Perform(executeOperation, global::timeout);
     return 0;
 }
 

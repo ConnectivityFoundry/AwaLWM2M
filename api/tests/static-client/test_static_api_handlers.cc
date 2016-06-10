@@ -140,7 +140,7 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Write_Opera
     EXPECT_TRUE(objectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 1, "TestResource", true, AwaResourceOperations_ReadWrite, 0));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 
@@ -229,7 +229,7 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Read_Operat
     EXPECT_TRUE(objectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 1, "TestResource", true, AwaResourceOperations_ReadWrite, 0));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 
@@ -248,7 +248,7 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Read_Operat
 static void * do_delete_operation(void * attr)
 {
     AwaServerDeleteOperation * deleteOperation = (AwaServerDeleteOperation *)attr;
-    AwaServerDeleteOperation_Perform(deleteOperation, defaults::timeout);
+    AwaServerDeleteOperation_Perform(deleteOperation, global::timeout);
     return 0;
 }
 
@@ -329,7 +329,7 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Delete_Oper
     EXPECT_TRUE(objectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsInteger(objectDefinition, 1, "TestResource", false, AwaResourceOperations_ReadWrite, 0));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 
@@ -415,7 +415,7 @@ TEST_F(TestStaticClientHandlerWithServer, AwaStaticClient_Create_and_Execute_Ope
     EXPECT_TRUE(objectDefinition != NULL);
     EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsNoType(objectDefinition, 1, "TestExecutableResource", true, AwaResourceOperations_Execute));
     EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(defineOperation, objectDefinition));
-    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(defineOperation, global::timeout));
     AwaServerDefineOperation_Free(&defineOperation);
     AwaObjectDefinition_Free(&objectDefinition);
 
@@ -660,7 +660,7 @@ protected:
         EXPECT_EQ(AwaError_Success, AwaObjectDefinition_AddResourceDefinitionAsObjectLinkArray(customObjectDefinition, writeDetail::TEST_RESOURCE_OBJECTLINK, "Test Object Link Array Resource", 0,5, AwaResourceOperations_ReadWrite, NULL));
 
         EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Add(serverDefineOperation, customObjectDefinition));
-        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, defaults::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerDefineOperation_Perform(serverDefineOperation, global::timeout));
 
         AwaObjectDefinition_Free(&customObjectDefinition);
         AwaServerDefineOperation_Free(&serverDefineOperation);
