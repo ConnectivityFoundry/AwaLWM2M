@@ -144,7 +144,7 @@ AwaError AwaClientDeleteOperation_Perform(AwaClientDeleteOperation * operation, 
                     IPCMessage_AddContent(request, objectsTree);
 
                     IPCMessage * response = NULL;
-                    result = IPC_SendAndReceive(ClientSession_GetChannel(OperationCommon_GetSession(operation->Common, NULL)), request, &response, timeout > 0 ? timeout : -1);
+                    result = IPC_SendAndReceive(ClientSession_GetChannel(OperationCommon_GetSession(operation->Common, NULL)), request, &response, timeout);
 
                     if (result == AwaError_Success)
                     {

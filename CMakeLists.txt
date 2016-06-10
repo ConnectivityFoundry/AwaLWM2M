@@ -48,3 +48,9 @@ add_subdirectory (lib)
 add_subdirectory (core)
 add_subdirectory (api)
 add_subdirectory (tools)
+
+# install systemd files
+install (
+  DIRECTORY systemd/
+  DESTINATION /
+)

@@ -731,7 +731,7 @@ TEST_P(TestDefineCommonResource_ProcessDefineOperation, TestDefineCommonResource
 
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaClientDefineOperation_Free(&defineOperation);
 }
@@ -832,7 +832,7 @@ TEST_P(TestDefineCommonResource_Definition_persists_in_daemon_after_disconnect_c
 
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
-    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaClientDefineOperation_Free(&defineOperation);
 
@@ -864,8 +864,9 @@ TEST_P(TestDefineCommonResource_Definition_persists_in_daemon_after_disconnect_c
 
         uint16_t valueLength = 0;
         const uint8_t * value = Lwm2mTreeNode_GetValue(child, &valueLength);
+        ASSERT_TRUE(NULL != value);
 
-        switch(data.type)
+        switch (data.type)
         {
         case AwaResourceType_String:
             ASSERT_EQ(0, memcmp((const char*)data.DefaultValue, (const char *)value, strlen((const char*)data.DefaultValue)));

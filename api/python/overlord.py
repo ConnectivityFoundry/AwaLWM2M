@@ -71,7 +71,6 @@ def getContentTypeID(contentType):
 
 def waitForIPC(ipcPort, timeout, request):
     """Timeout is in seconds."""
-    #time.sleep(2)
 
     # assume 127.0.0.1 for now
     address = "127.0.0.1"

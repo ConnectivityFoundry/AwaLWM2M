@@ -86,7 +86,7 @@ LWM2M provides four interfaces, each designed for specific purpose as shown belo
 * **Information reporting** -  used by the LWM2M Server to observe any changes in a resource on a LWM2M client and to receive notifications from the client when an observed value changes.  
 
 
-## The Object/Instance/Resource (O/I/R) model.
+## The Object/Instance/Resource (O/I/R) model  
 
 A Resource is a single, typed, item of data which is exposed by a LWM2M client for consumption by a control or management application. As an example, a remote temperature sensing device could expose several items of data such as:
 
@@ -103,11 +103,11 @@ Each of the above would be defined as an individual *Resource* associated with t
 Resources are defined in terms of:
 
 * **data type** - the data type of the value of the resource (integer, string, float, array ...)  
-* **access control** - depending on allowed operations  
-* **multiplicity** - whether the resource may have more than one concurrent instance (boolean), and whether or not the resource is mandatory (boolean)  
+* **multiplicity** - whether the resource may have more than one concurrent instance and whether or not the resource is mandatory    
 * **operation** - the types of operation that may be performed on the resource (read, write, readWrite, execute)  
+* **access control** - depending on allowed operations  
  
-The collection which contains and associates a group of *Resource definitions* is called an *Object*, and an instance of such an Object is called an *Object Instance* (or  just an Instance). It follows that an *Object Instance* contains **actual Resource values**, whereas an Object contains only the definition of Resources.  
+The collection which contains and associates a group of *Resource definitions* is called an *Object*, and an instance of such an Object is called an *Object Instance* (or just an Instance). It follows that an *Object Instance* contains **actual Resource values**, whereas an Object contains only the definition of Resources.  
 An Object then, is a named collection of individual Resource definitions which can be mapped directly to a device or to a software component for the purpose of data sharing.  
 In the case of a device which is complex enough to have several discrete functions, multiple Objects could be defined on the same device.  
 It is also possible to host multiple Instances of the same Object on a device should the need arise. Since the same principle applies to Resources, the means to address a Resource follows a semantic approach such that:

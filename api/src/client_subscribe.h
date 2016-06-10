@@ -27,7 +27,6 @@
 #include <stdbool.h>
 
 #include "awa/client.h"
-//#include "client/lwm2m_core.h"
 #include "ipc.h"
 #include "map.h"
 #include "list.h"

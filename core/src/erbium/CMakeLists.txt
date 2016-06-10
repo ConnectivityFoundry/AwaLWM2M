@@ -30,6 +30,8 @@ set (awa_erbium_SOURCES
 
   ${CORE_SRC_DIR}/common/coap_abstraction_erbium.c
   ${CORE_SRC_DIR}/common/network_abstraction_linux.c
+#  ${CORE_SRC_DIR}/common/dtls_abstraction_gnutls.c
+  ${CORE_SRC_DIR}/common/dtls_abstraction_dummy.c
   er-coap.c
   er-coap-engine.c
   er-coap-transactions.c

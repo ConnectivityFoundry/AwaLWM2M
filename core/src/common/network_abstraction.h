@@ -63,7 +63,7 @@ typedef struct _NetworkSocket NetworkSocket;
 
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength);
 
-//int NetworkAddress_Compare(NetworkAddress * addressX, NetworkAddress * addressY);
+int NetworkAddress_Compare(NetworkAddress * addressX, NetworkAddress * addressY);
 
 void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addressType);
 

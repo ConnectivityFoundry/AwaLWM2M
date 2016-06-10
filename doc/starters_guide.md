@@ -4,19 +4,19 @@
 ----
 
 
-# Awa LightweightM2M.
+# Awa LightweightM2M  
 
 
 
 ----
 
-## Quick start guide.
+## Quick start guide  
 
 
-### Building the code.
+### Building the code  
 
 
-#### Building under Linux.
+#### Building under Linux  
 
 Install the dependencies:
 
@@ -41,7 +41,7 @@ This will produce the following executable files:
  
 For usage information see the [User guide](userguide.md)
 
-##### Additional commands
+##### Additional commands  
 
 The variable `INSTALL_PREFIX` can be specified to modify the path where the build results will be installed *at configuration time*. For example:
 
@@ -67,7 +67,7 @@ If you want to install Awa into /usr/local/bin, the following commands are sugge
     $ make install DESTDIR=/usr/local
 ```
 
-#### The cmake build.
+#### The cmake build  
 
 
 The build can be created out-of-source, such that all build artefacts are placed in a dedicated directory.

@@ -6,7 +6,7 @@ doc docs: doc-html
 export VERSION:=$(shell cat ../VERSION)
 
 doc-html:
-	cd doc && doxygen 2>&1 >/dev/null | ( ! grep . )
+	cd doc && doxygen 2>&1 >/dev/null | ./doxygen-err-filter.sh | ( ! grep . )
 
 doc-pdf:
 	$(MAKE) -C doc/latex

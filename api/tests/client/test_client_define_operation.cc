@@ -150,7 +150,7 @@ TEST_F(TestClientDefineOperationWithConnectedSession, AwaClientDefineOperation_P
 
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     AwaClientDefineOperation_Free(&defineOperation);
@@ -213,7 +213,7 @@ TEST_F(TestClientDefineOperationWithConnectedSession, AwaObjectDefinitionIterato
     EXPECT_TRUE(NULL != definition3);
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition3));
 
-    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     AwaObjectDefinition_Free(&definition2);
@@ -283,7 +283,7 @@ TEST_F(TestClientDefineOperationWithConnectedSession, DISABLED_AwaClientDefineOp
 
     EXPECT_EQ(AwaError_Success, AwaClientSession_Free(&session_));
 
-    ASSERT_EQ(AwaError_SessionInvalid, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionInvalid, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     AwaClientDefineOperation_Free(&defineOperation);
@@ -291,7 +291,7 @@ TEST_F(TestClientDefineOperationWithConnectedSession, DISABLED_AwaClientDefineOp
 
 TEST_F(TestClientDefineOperationWithConnectedSession, AwaClientDefineOperation_Process_handles_null_operation)
 {
-    ASSERT_EQ(AwaError_OperationInvalid, AwaClientDefineOperation_Perform(NULL, defaults::timeout));
+    ASSERT_EQ(AwaError_OperationInvalid, AwaClientDefineOperation_Perform(NULL, global::timeout));
 }
 
 TEST_F(TestClientDefineOperationWithConnectedSession, AwaClientDefineOperation_Process_handles_disconnected_session)
@@ -305,7 +305,7 @@ TEST_F(TestClientDefineOperationWithConnectedSession, AwaClientDefineOperation_P
     // disconnect the session
     EXPECT_EQ(AwaError_Success, AwaClientSession_Disconnect(session_));
 
-    ASSERT_EQ(AwaError_SessionNotConnected, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    ASSERT_EQ(AwaError_SessionNotConnected, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     AwaObjectDefinition_Free(&definition);
     AwaClientDefineOperation_Free(&defineOperation);
@@ -320,8 +320,8 @@ TEST_F(TestClientDefineOperationWithConnectedSession, redefining_existing_standa
     EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition));
 
     // TODO: this should eventually return AlreadyDefined, but for now will return IPCError
-    //ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Process(defineOperation, defaults::timeout));
-    EXPECT_EQ(AwaError_AlreadyDefined, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    //ASSERT_EQ(AwaError_Success, AwaClientDefineOperation_Process(defineOperation, global::timeout));
+    EXPECT_EQ(AwaError_AlreadyDefined, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     // check that the session's object definition has not changed:
     {
@@ -375,8 +375,8 @@ TEST_P(TestClientDefineOperationRedefinition, redefine_existing_standard_object_
         EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Add(defineOperation, definition3));
     }
     // TODO: other error code may be more appropriate
-    //EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Process(defineOperation, defaults::timeout));
-    EXPECT_EQ(AwaError_AlreadyDefined, AwaClientDefineOperation_Perform(defineOperation, defaults::timeout));
+    //EXPECT_EQ(AwaError_Success, AwaClientDefineOperation_Process(defineOperation, global::timeout));
+    EXPECT_EQ(AwaError_AlreadyDefined, AwaClientDefineOperation_Perform(defineOperation, global::timeout));
 
     // check that the session's object definition has not changed for object 3:
     {

@@ -70,9 +70,11 @@ The response contains object definitions for all objects known by the daemon.
 
 Initiates a notification session between the IPC client and the daemon. This allows the daemon to store the Notification channel socket for use when sending Observe notifications and Events.
 
+This request should be sent from the socket that is intended to receive notifications.
+
 ```xml
 <Request>
-  <Type>ConnectNotify</Type>
+  <Type>EstablishNotify</Type>
   <SessionID>12345678</SessionID>
   <Target>Client</Target>  <!-- optional IPC target -->
 </Request>
@@ -82,7 +84,7 @@ The response contains a response code and no content.
 
 ```xml
 <Response>
-  <Type>ConnectNotify</Type>
+  <Type>EstablishNotify</Type>
   <SessionID>12345678</SessionID>
   <Code>200</Code>
 </Response>
