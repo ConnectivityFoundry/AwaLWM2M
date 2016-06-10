@@ -1,8 +1,6 @@
 set (awa_common_SOURCES
   lwm2m_list.c
   network_abstraction_linux.c
-  dtls_abstraction_gnutls.c
-  coap_abstraction_libcoap.c
   lwm2m_debug.c
   lwm2m_util.c
   lwm2m_util_linux.c
@@ -18,20 +16,54 @@ set (awa_common_SOURCES
   lwm2m_events.c
 )
 
+if (WITH_LIBCOAP)
+  list (APPEND awa_common_SOURCES coap_abstraction_libcoap.c)
+endif ()
+
+if (WITH_ERBIUM)
+  list (APPEND awa_common_SOURCES coap_abstraction_erbium.c)
+endif ()
+
+if (WITH_GNUTLS)
+  list (APPEND awa_common_SOURCES dtls_abstraction_gnutls.c)
+endif ()
+
+if (WITH_CYASSL)
+  list (APPEND awa_common_SOURCES dtls_abstraction_cyassl.c)
+endif ()
+
+if (NOT WITH_GNUTLS AND NOT WITH_CYASSL)
+  list (APPEND awa_common_SOURCES dtls_abstraction_dummy.c)
+endif ()
+
 # currently the API and core are a little tangled so we need to define the include
 # path here. the API tests depend on core, which depends on the API.
 set (API_INCLUDE_DIR ../../../api/include CACHE INTERNAL "API_INCLUDE_DIR")
 
 set (awa_common_INCLUDE_DIRS
-  ${LIBCOAP_INCLUDE_DIR}
   ${API_INCLUDE_DIR}
 )
 
+if (WITH_LIBCOAP)
+  list (APPEND awa_common_INCLUDE_DIRS ${LIBCOAP_INCLUDE_DIR})
+endif ()
+
+if (WITH_ERBIUM)
+  list (APPEND awa_common_INCLUDE_DIRS ${LIBCOAP_INCLUDE_DIR})
+endif ()
+
 set (awa_common_LIBS
   libxml_static
-  libcoap_static
   libb64_static
 )
+
+if (WITH_LIBCOAP)
+  list (APPEND awa_common_LIBS libcoap_static)
+endif ()
+
+if (WITH_ERBIUM)
+  list (APPEND awa_common_LIBS awa_erbiumstatic)
+endif ()
 
 if (WITH_JSON)
   # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
