@@ -22,13 +22,6 @@ This will install all dependencies and build the Awa binaries, documentation and
 
 Note: when Awa builds, it runs a suite of unit tests to check that it is functioning correctly. Many of these tests intentionally trigger errors, which will be displayed in the docker build log as red errors. These can be ignored.
 
-## Using the pre-build docker image
-
-A pre-built docker image is also available from the docker registry:
-
- TODO
-
-
 ## Using the container
 
 Once you have a docker image, you may now run Awa binaries directly.
@@ -70,7 +63,3 @@ Now you can simply run:
 
 ``` $ as awa-server-read -a ipc --clientID Client1 /3/0```
 
-
-## Docker Compose
-
- TODO
