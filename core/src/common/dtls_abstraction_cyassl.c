@@ -236,7 +236,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress)
         session->Session = CyaSSL_new(session->Context);
         if (session->Session)
         {
-            CyaSSL_dtls_set_peer(session->Session, networkAddress, sizeof(struct sockaddr));
+            CyaSSL_dtls_set_peer(session->Session, networkAddress, sizeof(struct sockaddr_storage));
             CyaSSL_set_fd(session->Session, index);
             CyaSSL_set_using_nonblock(session->Session, 1);
             CyaSSL_SetIORecv(session->Context, DecryptCallBack);
