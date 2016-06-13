@@ -19,9 +19,6 @@ RUN apt-get update -yq && apt-get install -yq \
 	doxygen \
 	graphviz \
 	cmake
-#	libsqlite3-dev \
-#	libncurses5-dev \
-#	libncursesw5-dev \
 # apt-get clean is automatic for Ubuntu images
 
 # install pyenv
