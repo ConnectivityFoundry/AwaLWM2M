@@ -33,9 +33,6 @@ make clean
 rm -rf $BUILD_DIR
 rm -rf tools/tools_tests.xml
 
-# concatenate with an existing CMAKE_OPTIONS environment variable:
-CMAKE_OPTIONS="$CMAKE_OPTIONS -DENABLE_GCOV=ON"
-
 # Build for x86 and run valgrind check on all tests
 make BUILD_DIR=$BUILD_DIR CMAKE_OPTIONS="$CMAKE_OPTIONS" valgrind_comprehensive
 
