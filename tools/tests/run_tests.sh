@@ -22,22 +22,58 @@
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #************************************************************************************************************************/
 
-set -o errexit
+if [ x$BUILD_DIR == "x" ] ; then
+  # assume a sensible default for local development:
+  BUILD_DIR=../../build
+fi
 
-BUILD_DIR=build
+BUILD_DIR_ABS=$PWD/$BUILD_DIR
 
-#export ac_cv_func_malloc_0_nonnull=yes
+if [ x"${LWM2M_TOOLS_PATH}" == "x" ] ; then
+  LWM2M_TOOLS_PATH=$BUILD_DIR_ABS/tools
+fi
 
-# clean out existing build artefacts
-make clean
-rm -rf $BUILD_DIR
-rm -rf tools/tools_tests.xml
+if ! [[ "$LWM2M_TOOLS_PATH" = /* ]] ; then
+  echo "LWM2M_TOOLS_PATH should be set to an absolute path"
+  exit 1
+fi
 
-# concatenate with an existing CMAKE_OPTIONS environment variable:
-CMAKE_OPTIONS="$CMAKE_OPTIONS -DENABLE_GCOV=ON"
+if [ x"${LWM2M_CLIENTD_BIN}" == "x" ] ; then
+  LWM2M_CLIENTD_BIN=$BUILD_DIR_ABS/core/src/client/awa_clientd
+fi
 
-# Build for x86 and run valgrind check on all tests
-make BUILD_DIR=$BUILD_DIR CMAKE_OPTIONS="$CMAKE_OPTIONS" valgrind_comprehensive
+if ! [[ "$LWM2M_CLIENTD_BIN" = /* ]] ; then
+  echo "LWM2M_CLIENTD_BIN should be set to an absolute path"
+  exit 1
+fi
 
-# legacy CI support
-ln -sfn $BUILD_DIR .build_x86
+if [ x"${LWM2M_SERVERD_BIN}" == "x" ] ; then
+  LWM2M_SERVERD_BIN=$BUILD_DIR_ABS/core/src/server/awa_serverd
+fi
+
+if ! [[ "$LWM2M_SERVERD_BIN" = /* ]] ; then
+  echo "LWM2M_SERVERD_BIN should be set to an absolute path"
+  exit 1
+fi
+
+if [ x"${LWM2M_BOOTSTRAPD_BIN}" == "x" ] ; then
+  LWM2M_BOOTSTRAPD_BIN=$BUILD_DIR_ABS/core/src/bootstrap/awa_bootstrapd
+fi
+
+if ! [[ "$LWM2M_BOOTSTRAPD_BIN" = /* ]] ; then
+  echo "LWM2M_BOOTSTRAPD_BIN should be set to an absolute path"
+  exit 1
+fi
+
+export LWM2M_TOOLS_PATH
+export LWM2M_CLIENTD_BIN
+export LWM2M_SERVERD_BIN
+export LWM2M_BOOTSTRAPD_BIN
+
+echo "Using Environment Variables:"
+echo "  LWM2M_TOOLS_PATH=$LWM2M_TOOLS_PATH"
+echo "  LWM2M_CLIENTD_BIN=$LWM2M_CLIENTD_BIN"
+echo "  LWM2M_SERVERD_BIN=$LWM2M_SERVERD_BIN"
+echo "  LWM2M_BOOTSTRAPD_BIN=$LWM2M_BOOTSTRAPD_BIN"
+
+PYTHONPATH=../../api/python:$PYTHONPATH nosetests -w python $@
