@@ -1,3 +1,6 @@
+// Suppress all warnings about unmatched suppressions!
+unmatchedSuppression:*
+
 // Suppress all warnings from gengetopt-generated files:
 *:*/*cmdline.c
 
