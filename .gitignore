@@ -1,7 +1,6 @@
 cppcheck-result.xml
 *_out.xml
 staging/
-bin/
 *~
 *.o
 *.pyc
@@ -33,3 +32,4 @@ daemon.log
 awa_clientd.log
 awa_serverd.log
 awa_bootstrapd.log
+
