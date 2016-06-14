@@ -12,13 +12,11 @@ awa_clientd
 awa_serverd
 awa_bootstrapd
 test_*_runner
-valgrind/
 
 # CMake builds
 build/
-build_debug/
-.build_x86/
-.build_openwrt/
+build.openwrt/
+.build_x86
 
 # Eclipse
 .project

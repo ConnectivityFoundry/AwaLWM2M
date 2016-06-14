@@ -345,6 +345,7 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
 // return 0 on success
 static int WaitForLwM2MServerIpc(int ipcPort, int timeout /*seconds*/)
 {
+    //std::cout << "WaitForLwM2MServerIpc(ipcPort " << ipcPort << ", timeout " << timeout << ")" << std::endl;
     const char * request = "<Request><Type>ListClients</Type></Request>";
     return WaitForIpc(ipcPort, timeout, request, strlen(request));
 }
