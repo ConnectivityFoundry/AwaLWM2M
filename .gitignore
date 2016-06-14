@@ -12,6 +12,7 @@ awa_clientd
 awa_serverd
 awa_bootstrapd
 test_*_runner
+valgrind/
 
 # CMake builds
 build/
