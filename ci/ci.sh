@@ -43,15 +43,17 @@ then
   export PATH=/repos/creator-git/dists/openwrt/staging_dir/target-mipsel_mips32_uClibc-0.9.33.2/host/bin:/repos/creator-git/dists/openwrt/staging_dir/toolchain-mipsel_mips32_gcc-4.9-linaro_uClibc-0.9.33.2/bin:/repos/creator-git/dists/openwrt/staging_dir/toolchain-mipsel_mips32_gcc-4.9-linaro_uClibc-0.9.33.2/bin:/repos/creator-git/dists/openwrt/staging_dir/host/bin:/repos/creator-git/dists/openwrt/staging_dir/host/bin:$PATH
   export STAGING_DIR="/repos/creator-git/dists/openwrt/staging_dir/target-mipsel_mips32_uClibc-0.9.33.2"
   export ac_cv_func_malloc_0_nonnull=yes
-  rm -rf build_openwrt
-  make BUILD_DIR=build_openwrt CMAKE_OPTIONS=-DCMAKE_TOOLCHAIN_FILE=ci/openwrt-toolchain.cmake
+  rm -rf build.openwrt
+  make BUILD_DIR=build.openwrt CMAKE_OPTIONS=-DCMAKE_TOOLCHAIN_FILE=ci/openwrt-toolchain.cmake
 fi
 
 # setup lcov
+LCOV_TRACEFILE=awa_test.info
 mkdir -p $BUILD_DIR
-(cd $BUILD_DIR
- lcov --rc lcov_branch_coverage=1 --zerocounters --directory .
- lcov --rc lcov_branch_coverage=1 --capture --initial --directory . --output-file test_lwm2m || true
+(
+  cd $BUILD_DIR
+  lcov --rc lcov_branch_coverage=1 --zerocounters --directory .
+  lcov --rc lcov_branch_coverage=1 --capture --initial --directory . --output-file $LCOV_TRACEFILE || true
 )
 
 # build for x86 and run test cases
@@ -61,21 +63,19 @@ make BUILD_DIR=$BUILD_DIR CMAKE_OPTIONS="$CMAKE_OPTIONS" tests
 # prepare coverage results
 (
   cd $BUILD_DIR
-  lcov --rc lcov_branch_coverage=1 --no-checksum --directory . --capture --output-file tmp_test_lwm2m.info
-  lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "api/tests/*" --output-file tmp_test_lwm2m.info
-  lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "api/src/unsupported*" --output-file tmp_test_lwm2m.info
-  lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "core/tests/*" --output-file tmp_test_lwm2m.info
-  lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "/usr/*" --output-file tmp_test_lwm2m.info
-  lcov --rc lcov_branch_coverage=1 --remove tmp_test_lwm2m.info "$BUILD_DIR/*" --output-file tmp_test_lwm2m.info
+  LCOV_TRACEFILE_FILTERED=$(basename -s .info $LCOV_TRACEFILE)_filtered.info
+  lcov --rc lcov_branch_coverage=1 --no-checksum --directory . --capture --output-file $LCOV_TRACEFILE
+  lcov --rc lcov_branch_coverage=1 --remove $LCOV_TRACEFILE \
+       "api/tests/*" "api/src/unsupported*" "/usr/*" "$BUILD_DIR/*-src/*" \
+       --output-file $LCOV_TRACEFILE_FILTERED
   mkdir -p lcov-html
-  cd lcov-html
-  genhtml --rc genhtml_branch_coverage=1 ../tmp_test_lwm2m.info
-)
+  (
+    cd lcov-html
+    genhtml --rc genhtml_branch_coverage=1 ../$LCOV_TRACEFILE_FILTERED
+  )
 
-# prepare cobertura coverage results
-(
-  cd $BUILD_DIR
-  python ../ci/lcov_cobertura.py tmp_test_lwm2m.info -b ../
+  # prepare cobertura coverage results
+  python ../ci/lcov_cobertura.py $LCOV_TRACEFILE_FILTERED -b ../
 )
 
 # run cppcheck
