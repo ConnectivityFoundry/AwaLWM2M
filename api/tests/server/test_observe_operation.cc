@@ -319,7 +319,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     {
         int count;
 
-        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
+        explicit CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -418,7 +418,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     {
         int count;
 
-        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
+        explicit CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -586,7 +586,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     {
         int count;
 
-        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
+        explicit CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -905,7 +905,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_honour
     {
         int count;
 
-        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
+        explicit CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -954,7 +954,7 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     {
         int count;
 
-        CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
+        explicit CallbackHandler1(AwaServerSession * session)  : ObserveWaitCondition(session), count(0) {};
 
         virtual void callbackHandler(const AwaChangeSet * changeSet)
         {

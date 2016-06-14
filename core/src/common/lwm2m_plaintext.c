@@ -198,7 +198,7 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
         case AwaResourceType_Boolean:
                 if (bufferLen == 1)
                 {
-                    bool temp;
+                    bool temp = false;
 
                     if (buffer[0] == '0')
                     {
