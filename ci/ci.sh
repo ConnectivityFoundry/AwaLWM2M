@@ -66,7 +66,7 @@ make BUILD_DIR=$BUILD_DIR CMAKE_OPTIONS="$CMAKE_OPTIONS" tests
   LCOV_TRACEFILE_FILTERED=$(basename -s .info $LCOV_TRACEFILE)_filtered.info
   lcov --rc lcov_branch_coverage=1 --no-checksum --directory . --capture --output-file $LCOV_TRACEFILE
   lcov --rc lcov_branch_coverage=1 --remove $LCOV_TRACEFILE \
-       "api/tests/*" "api/src/unsupported*" "/usr/*" "$BUILD_DIR/*-src/*" \
+       "api/tests/*" "api/src/unsupported*" "core/tests/*" "/usr/*" "$BUILD_DIR/*-src/*" \
        --output-file $LCOV_TRACEFILE_FILTERED
   mkdir -p lcov-html
   (
