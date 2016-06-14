@@ -217,7 +217,6 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     socklen_t fromAddrLen = sizeof(fromAddr);
 
     fromAddr.sin_family = AF_INET;
-    fromAddr.sin_family = SOCK_DGRAM;
     fromAddr.sin_port = htons(ipcPort);
 
     if (inet_aton("127.0.0.1", &fromAddr.sin_addr) == 0)
