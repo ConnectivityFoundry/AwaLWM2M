@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 #/************************************************************************************************************************
 # Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
