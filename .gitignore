@@ -1,7 +1,6 @@
 cppcheck-result.xml
 *_out.xml
 staging/
-bin/
 *~
 *.o
 *.pyc
@@ -12,10 +11,12 @@ awa_clientd
 awa_serverd
 awa_bootstrapd
 test_*_runner
+valgrind/
 
 # CMake builds
 build/
 build.openwrt/
+.build_x86
 
 # Eclipse
 .project
@@ -31,3 +32,4 @@ daemon.log
 awa_clientd.log
 awa_serverd.log
 awa_bootstrapd.log
+
