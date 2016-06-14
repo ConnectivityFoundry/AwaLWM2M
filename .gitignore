@@ -16,6 +16,7 @@ test_*_runner
 # CMake builds
 build/
 build.openwrt/
+.build_x86
 
 # Eclipse
 .project
