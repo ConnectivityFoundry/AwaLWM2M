@@ -70,7 +70,6 @@ well_known_core_get_handler(void *request, void *response, uint8_t *buffer,
 {
   size_t strpos = 0;            /* position in overall string (which is larger than the buffer) */
   size_t bufpos = 0;            /* position within buffer (bytes written) */
-  size_t tmplen = 0;
   resource_t *resource = NULL;
 
 #if COAP_LINK_FORMAT_FILTERING
@@ -103,6 +102,7 @@ well_known_core_get_handler(void *request, void *response, uint8_t *buffer,
 
   for(resource = (resource_t *)list_head(rest_get_resources()); resource;
       resource = resource->next) {
+      size_t tmplen = 0;
 #if COAP_LINK_FORMAT_FILTERING
     /* Filtering */
     if(len) {

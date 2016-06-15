@@ -506,11 +506,12 @@ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
     current_option += coap_pkt->token_len;
 
     unsigned int option_number = 0;
-    unsigned int option_delta = 0;
-    size_t option_length = 0;
 
     while(current_option < data + data_len)
     {
+        unsigned int option_delta = 0;
+        size_t option_length = 0;
+
         /* payload marker 0xFF, currently only checking for 0xF* because rest is reserved */
         if((current_option[0] & 0xF0) == 0xF0) {
             coap_pkt->payload = ++current_option;

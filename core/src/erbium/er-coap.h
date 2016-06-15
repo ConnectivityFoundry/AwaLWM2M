@@ -43,7 +43,6 @@
 #include "er-coap-constants.h"
 #include "er-coap-conf.h"
 
-
 #ifdef CONTIKI
 
 #include "contiki-net.h"
@@ -59,7 +58,7 @@
 
 typedef uip_ipaddr_t ipaddr_t
 
-#endif
+#endif // CONTIKI
 
 #ifdef POSIX
 
@@ -78,7 +77,7 @@ typedef uip_ipaddr_t ipaddr_t
 #define MIN(n, m)   (((n) < (m)) ? (n) : (m))
 #define random_rand random
 
-#endif
+#endif // POSIX
 
 #ifdef MICROCHIP_PIC32      // TODO - fixme
 
@@ -97,9 +96,13 @@ typedef uip_ipaddr_t ipaddr_t
 #define MIN(n, m)   (((n) < (m)) ? (n) : (m))
 #define random_rand random
 
-#endif
+#endif // MICROCHIP_PIC32
 
-        /* REST_MAX_CHUNK_SIZE can be different from 2^x so we need to get next lower 2^x for COAP_MAX_BLOCK_SIZE */
+#ifndef REST_MAX_CHUNK_SIZE
+#define REST_MAX_CHUNK_SIZE (512)
+#endif /* REST_MAX_CHUNK_SIZE */
+
+/* REST_MAX_CHUNK_SIZE can be different from 2^x so we need to get next lower 2^x for COAP_MAX_BLOCK_SIZE */
 #ifndef COAP_MAX_BLOCK_SIZE
 #define COAP_MAX_BLOCK_SIZE           (REST_MAX_CHUNK_SIZE < 32 ? 16 : \
         (REST_MAX_CHUNK_SIZE < 64 ? 32 : \

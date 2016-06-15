@@ -173,7 +173,7 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                     {
                         break;
                     }
-                    else if isdigit(uri[index])
+                    else if (isdigit(uri[index]))
                     {
                         port = (port * 10) + (uri[index] - '0');
                     }
@@ -379,12 +379,11 @@ static int getUriHostLength(const char * uri, int uriLength)
 {
     // Search for end of host + optional port
     int result = uriLength;
-    int lengthRemaining;
     char * pathStart = memchr(uri, '/', uriLength);
     if (pathStart && pathStart[1] == '/' )
     {
         pathStart += 2;
-        lengthRemaining = uriLength - (pathStart - uri);
+        int lengthRemaining = uriLength - (pathStart - uri);
         if (lengthRemaining > 0)
         {
             pathStart = memchr(pathStart, '/', lengthRemaining);
@@ -508,7 +507,7 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
 {
     bool result = false;
     struct sockaddr sourceSocket;
-    socklen_t sourceSocketLength = sizeof(struct sockaddr);
+    socklen_t sourceSocketLength = sizeof(struct sockaddr_storage);
     errno = 0;
     *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT, &sourceSocket, &sourceSocketLength);
     int lastError = errno;
@@ -629,7 +628,7 @@ bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const 
     int socketHandle = networkSocket->Socket;
     if (destAddress->Address.Sa.sa_family == AF_INET)
         socketHandle = networkSocket->SocketIPv4;
-    size_t addressLength = sizeof(struct sockaddr);
+    size_t addressLength = sizeof(struct sockaddr_storage);
     while (bufferLength > 0)
     {
         errno = 0;
