@@ -420,7 +420,7 @@ coap_serialize_message(void *packet, uint8_t *buffer)
             "Proxy-Uri");
     COAP_SERIALIZE_STRING_OPTION(COAP_OPTION_PROXY_SCHEME, proxy_scheme, '\0',
             "Proxy-Scheme");
-    COAP_SERIALIZE_INT_OPTION(COAP_OPTION_SIZE1, size1, "Size1");
+    //COAP_SERIALIZE_INT_OPTION(COAP_OPTION_SIZE1, size1, "Size1"); // Cppcheck Results claims this isn't used
 
     PRINTF("-Done serializing at %p----\n", option);
 
@@ -506,11 +506,12 @@ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
     current_option += coap_pkt->token_len;
 
     unsigned int option_number = 0;
-    unsigned int option_delta = 0;
-    size_t option_length = 0;
 
     while(current_option < data + data_len)
     {
+        unsigned int option_delta = 0;
+        size_t option_length = 0;
+
         /* payload marker 0xFF, currently only checking for 0xF* because rest is reserved */
         if((current_option[0] & 0xF0) == 0xF0) {
             coap_pkt->payload = ++current_option;

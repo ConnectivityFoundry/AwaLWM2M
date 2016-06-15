@@ -67,9 +67,9 @@ void coap_init_transactions(void)
 coap_transaction_t * coap_new_transaction(NetworkSocket * networkSocket, uint16_t mid, NetworkAddress * remoteAddress)
 {
     coap_transaction_t * t = (coap_transaction_t *)malloc(sizeof(*t)); //memb_alloc(&transactions_memb);
-    memset(t, 0, sizeof(coap_transaction_t));
     if(t)
     {
+        memset(t, 0, sizeof(coap_transaction_t));
         t->mid = mid;
         t->retrans_counter = 0;
         t->networkSocket = networkSocket;

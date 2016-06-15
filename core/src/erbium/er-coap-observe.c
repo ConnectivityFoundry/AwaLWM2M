@@ -202,7 +202,7 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
   url_len = strlen(url);
   for(obs = (coap_observer_t *)list_head(observers_list); obs;
       obs = obs->next) {
-    obs_url_len = strlen(obs->url);
+    int obs_url_len = strlen(obs->url);
 
     /* Do a match based on the parent/sub-resource match so that it is
        possible to do parent-node observe */
@@ -254,11 +254,11 @@ coap_observe_handler(resource_t *resource, void *request, void *response)
 {
   coap_packet_t *const coap_req = (coap_packet_t *)request;
   coap_packet_t *const coap_res = (coap_packet_t *)response;
-  coap_observer_t * obs;
 
   if(coap_req->code == COAP_GET && coap_res->code < 128) { /* GET request and response without error code */
     if(IS_OPTION(coap_req, COAP_OPTION_OBSERVE)) {
       if(coap_req->observe == 0) {
+        coap_observer_t * obs;
         obs = add_observer(&UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
                            coap_req->token, coap_req->token_len,
                            coap_req->uri_path, coap_req->uri_path_len);
