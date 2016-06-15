@@ -379,12 +379,11 @@ static int getUriHostLength(const char * uri, int uriLength)
 {
     // Search for end of host + optional port
     int result = uriLength;
-    int lengthRemaining;
     char * pathStart = memchr(uri, '/', uriLength);
     if (pathStart && pathStart[1] == '/' )
     {
         pathStart += 2;
-        lengthRemaining = uriLength - (pathStart - uri);
+        int lengthRemaining = uriLength - (pathStart - uri);
         if (lengthRemaining > 0)
         {
             pathStart = memchr(pathStart, '/', lengthRemaining);

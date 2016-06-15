@@ -420,7 +420,7 @@ coap_serialize_message(void *packet, uint8_t *buffer)
             "Proxy-Uri");
     COAP_SERIALIZE_STRING_OPTION(COAP_OPTION_PROXY_SCHEME, proxy_scheme, '\0',
             "Proxy-Scheme");
-    //COAP_SERIALIZE_INT_OPTION(COAP_OPTION_SIZE1, size1, "Size1"); // Cppcheck Results claims this isn't used
+    COAP_SERIALIZE_INT_OPTION(COAP_OPTION_SIZE1, size1, "Size1");
 
     PRINTF("-Done serializing at %p----\n", option);
 
