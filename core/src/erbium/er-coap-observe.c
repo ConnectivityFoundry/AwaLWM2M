@@ -180,7 +180,7 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
   coap_packet_t notification[1]; /* this way the packet can be treated as pointer as usual */
   coap_packet_t request[1]; /* this way the packet can be treated as pointer as usual */
   coap_observer_t *obs = NULL;
-  int url_len, obs_url_len;
+  int url_len;
   char url[COAP_OBSERVER_URL_LEN];
 
   url_len = strlen(resource->url);
