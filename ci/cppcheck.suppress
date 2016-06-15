@@ -1,3 +1,6 @@
+// Suppress all warnings about unmatched suppressions!
+unmatchedSuppression:*
+
 // Suppress all warnings from gengetopt-generated files:
 *:*/*cmdline.c
 
@@ -7,4 +10,11 @@ unusedFunction:api/src/unsupported.c
 // Unused function warnings are occasionally useful, but more often than not annoying.
 // Suppress all unused function warnings for now.
 unusedFunction:*
+
+// False positives
+
+// "Member variable 'CallbackHandler1::count' is not initialized in the constructor."
+uninitMemberVar:api/tests/client/test_subscribe_operation.cc
+uninitMemberVar:api/tests/server/test_observe_operation.cc
+uninitMemberVar:api/tests/server/test_server_events.cc
 
