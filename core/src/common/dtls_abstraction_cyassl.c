@@ -30,9 +30,17 @@
 #define CYASSL_DTLS
 #endif
 
+#ifndef XMALLOC_USER
+#define XMALLOC_USER
+#endif
+
 #include "cyassl/ssl.h"
 #include "cyassl/version.h"
 #include "cyassl/ctaocrypt/memory.h"
+
+#ifdef MICROCHIP_PIC32
+#include <tcpip/berkeley_api.h>
+#endif
 
 typedef struct
 {
@@ -68,6 +76,11 @@ static int EncryptCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBuffer
 static unsigned int PSKCallBack(CYASSL* sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len);
 static int SSLSendCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
 
+#ifdef MICROCHIP_PIC32
+#ifndef wolfDTLSv1_2_client_method
+WOLFSSL_METHOD* wolfDTLSv1_2_client_method(void);
+#endif
+#endif
 
 void *XMALLOC(size_t n, void* heap, int type)
 {
@@ -236,7 +249,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress)
         session->Session = CyaSSL_new(session->Context);
         if (session->Session)
         {
-            CyaSSL_dtls_set_peer(session->Session, networkAddress, sizeof(struct sockaddr));
+            CyaSSL_dtls_set_peer(session->Session, networkAddress, sizeof(struct sockaddr_storage));
             CyaSSL_set_fd(session->Session, index);
             CyaSSL_set_using_nonblock(session->Session, 1);
             CyaSSL_SetIORecv(session->Context, DecryptCallBack);
