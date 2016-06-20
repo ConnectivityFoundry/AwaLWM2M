@@ -58,7 +58,7 @@ struct _NetworkAddress
 struct _NetworkSocket
 {
     int Socket;
-    int SocketIPv4;
+    int SocketIPv6;
     NetworkSocketType SocketType;
     uint16_t Port;
     NetworkSocketError LastError;
@@ -264,10 +264,10 @@ void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addre
     {
         addressType->Size = sizeof(addressType->Addr);
         memcpy(&addressType->Addr, &address->Address, addressType->Size);
-        if (addressType->Addr.Sa.sa_family == AF_INET6)
-            addressType->Addr.Sin6.sin6_port = ntohs(address->Address.Sin6.sin6_port);
-        else
-            addressType->Addr.Sin.sin_port = ntohs(address->Address.Sin.sin_port);
+//        if (addressType->Addr.Sa.sa_family == AF_INET6)
+//            addressType->Addr.Sin6.sin6_port = ntohs(address->Address.Sin6.sin6_port);
+//        else
+//            addressType->Addr.Sin.sin_port = ntohs(address->Address.Sin.sin_port);
     }
 }
 
@@ -421,6 +421,17 @@ NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket)
     return result;
 }
 
+int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
+{
+    int result = -1;
+    if (networkSocket)
+    {
+        result = networkSocket->Socket;
+        if (result == SOCKET_ERROR)
+            result = networkSocket->SocketIPv6;
+    }
+    return result;
+}
 
 void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, uint8_t * cert, int certLength, CertificateFormat format)
 {
@@ -447,20 +458,19 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             socketMode = SOCK_STREAM;
         }
 
-        networkSocket->Socket = socket(AF_INET6, socketMode, protocol);
+        networkSocket->Socket = socket(AF_INET, socketMode, protocol);
         if (networkSocket->Socket != SOCKET_ERROR)
         {
             int yes = 1;
             setsockopt(networkSocket->Socket, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
             struct sockaddr *address = NULL;
             socklen_t addressLength = 0;
-            addressLength = sizeof(struct sockaddr_in6);
-            struct sockaddr_in6 ipAddress;
+            addressLength = sizeof(struct sockaddr_in);
+            struct sockaddr_in ipAddress;
             memset(&ipAddress, 0, addressLength);
-            ipAddress.sin6_family = AF_INET6;
-            //memset(&ipAddress->sin6_addr, 0, sizeof(ipAddress->sin6_addr));
-            //ipAddress->sin6_addr.__in6_u = IN6ADDR_ANY_INIT; //IN6ADDR_ANY_INIT
-            ipAddress.sin6_port = htons(networkSocket->Port);
+            ipAddress.sin_family = AF_INET;
+            ipAddress.sin_addr.s_addr = INADDR_ANY;
+            ipAddress.sin_port = htons(networkSocket->Port);
             address = (struct sockaddr *)&ipAddress;
             int flag = fcntl(networkSocket->Socket, F_GETFL);
             flag = flag | O_NONBLOCK;
@@ -473,26 +483,29 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
                 result = true;
             }
         }
-        networkSocket->SocketIPv4 = socket(AF_INET, socketMode, protocol);
-        if (networkSocket->SocketIPv4 != SOCKET_ERROR)
+        networkSocket->SocketIPv6 = socket(AF_INET6, socketMode, protocol);
+        if (networkSocket->SocketIPv6 != SOCKET_ERROR)
         {
 
+            int yes = 1;
+            setsockopt(networkSocket->SocketIPv6, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
             struct sockaddr *address = NULL;
             socklen_t addressLength = 0;
-            addressLength = sizeof(struct sockaddr_in);
-            struct sockaddr_in ipAddress;
+            addressLength = sizeof(struct sockaddr_in6);
+            struct sockaddr_in6 ipAddress;
             memset(&ipAddress, 0, addressLength);
-            ipAddress.sin_family = AF_INET;
-            ipAddress.sin_addr.s_addr = INADDR_ANY;
-            ipAddress.sin_port = htons(networkSocket->Port);
+            ipAddress.sin6_family = AF_INET6;
+            //memset(&ipAddress->sin6_addr, 0, sizeof(ipAddress->sin6_addr));
+            //ipAddress->sin6_addr.__in6_u = IN6ADDR_ANY_INIT; //IN6ADDR_ANY_INIT
+            ipAddress.sin6_port = htons(networkSocket->Port);
             address = (struct sockaddr *)&ipAddress;
-            int flag = fcntl(networkSocket->SocketIPv4, F_GETFL);
+            int flag = fcntl(networkSocket->SocketIPv6, F_GETFL);
             flag = flag | O_NONBLOCK;
-            if (fcntl(networkSocket->SocketIPv4, F_SETFL, flag) < 0)
+            if (fcntl(networkSocket->SocketIPv6, F_SETFL, flag) < 0)
             {
 
             }
-            if (bind(networkSocket->SocketIPv4, address, addressLength) != SOCKET_ERROR)
+            if (bind(networkSocket->SocketIPv6, address, addressLength) != SOCKET_ERROR)
             {
                 result = true;
             }
@@ -506,10 +519,10 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
 bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, int bufferLength, NetworkAddress ** sourceAddress, int *readLength)
 {
     bool result = false;
-    struct sockaddr sourceSocket;
+    struct sockaddr_storage sourceSocket;
     socklen_t sourceSocketLength = sizeof(struct sockaddr_storage);
     errno = 0;
-    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT, &sourceSocket, &sourceSocketLength);
+    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT, (struct sockaddr *)&sourceSocket, &sourceSocketLength);
     int lastError = errno;
     if (*readLength == SOCKET_ERROR)
     {
@@ -570,10 +583,10 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
                        result = true;
                        if (*readLength == 0)
                        {
-                           readUDP(networkSocket, networkSocket->SocketIPv4, buffer, bufferLength, sourceAddress, readLength);
+                           readUDP(networkSocket, networkSocket->SocketIPv6, buffer, bufferLength, sourceAddress, readLength);
                        }
                    }
-                   else if ((networkSocket->SocketIPv4 != SOCKET_ERROR) && readUDP(networkSocket, networkSocket->SocketIPv4, buffer, bufferLength, sourceAddress, readLength))
+                   else if ((networkSocket->SocketIPv6 != SOCKET_ERROR) && readUDP(networkSocket, networkSocket->SocketIPv6, buffer, bufferLength, sourceAddress, readLength))
                    {
                        result = true;
                    }
@@ -626,8 +639,8 @@ bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const 
 {
     bool result = false;
     int socketHandle = networkSocket->Socket;
-    if (destAddress->Address.Sa.sa_family == AF_INET)
-        socketHandle = networkSocket->SocketIPv4;
+    if (destAddress->Address.Sa.sa_family == AF_INET6)
+        socketHandle = networkSocket->SocketIPv6;
     size_t addressLength = sizeof(struct sockaddr_storage);
     while (bufferLength > 0)
     {
@@ -659,6 +672,7 @@ bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const 
         buffer += sentBytes;
         bufferLength -= sentBytes;
     }
+
     result = (bufferLength == 0);
     return result;
 }
@@ -713,8 +727,8 @@ void NetworkSocket_Free(NetworkSocket ** networkSocket)
     {
         if ((*networkSocket)->Socket != SOCKET_ERROR)
             close((*networkSocket)->Socket);
-        if ((*networkSocket)->SocketIPv4 != SOCKET_ERROR)
-            close((*networkSocket)->SocketIPv4);
+        if ((*networkSocket)->SocketIPv6 != SOCKET_ERROR)
+            close((*networkSocket)->SocketIPv6);
         free(*networkSocket);
         *networkSocket = NULL;
     }

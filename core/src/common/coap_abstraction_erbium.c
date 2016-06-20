@@ -4,12 +4,12 @@
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  following conditions are met:
-     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
-        following disclaimer.
-     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-        following disclaimer in the documentation and/or other materials provided with the distribution.
-     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
-        products derived from this software without specific prior written permission.
+ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ following disclaimer in the documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ products derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -18,8 +18,7 @@
  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-************************************************************************************************************************/
-
+ ************************************************************************************************************************/
 
 #include <string.h>
 #include <stdlib.h>
@@ -32,9 +31,14 @@
 #include "er-coap-engine.h"
 #include "er-coap.h"
 
+#ifndef MAX_COAP_PATH
+#define MAX_COAP_PATH 64
+#endif
+
 typedef struct
 {
     AddressType Address;
+    char Path[MAX_COAP_PATH];
     TransactionCallback Callback;
     void * Context;
     bool TransactionUsed;
@@ -49,25 +53,57 @@ static CoapInfo coapInfo;
 static void * context = NULL;
 static RequestHandler requestHandler = NULL;
 
+#ifndef MAX_COAP_TRANSACTIONS
 #define MAX_COAP_TRANSACTIONS (2)
+#endif
+
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS];
 
 static NetworkSocket * networkSocket = NULL;
 extern NetworkAddress * sourceAddress;
 
+typedef enum
+{
+    ObserveState_None, ObserveState_Establish, ObserveState_Cancel
+} ObserveState;
+
+typedef struct
+{
+    NetworkAddress * Address;
+    char Path[MAX_COAP_PATH];
+    int Token;
+    TransactionCallback Callback;
+    void * Context;
+} Observation;
+
+#ifndef MAX_COAP_OBSERVATIONS
+#define MAX_COAP_OBSERVATIONS (10)
+#endif
+
+Observation Observations[MAX_COAP_TRANSACTIONS];
+
 static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCallback callback, void * context);
+static int removeObserve(NetworkAddress * remoteAddress, char * path);
+
 
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
 {
     Lwm2m_Info("Bind port: %d\n", port);
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
+    memset(Observations, 0, sizeof(Observations));
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     DTLS_Init();
     networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
     if (networkSocket)
-        NetworkSocket_StartListening(networkSocket);
+    {
+        if (NetworkSocket_StartListening(networkSocket))
+        {
+            coapInfo.fd = NetworkSocket_GetFileDescriptor(networkSocket);
+        }
+    }
     return &coapInfo;
 }
 
@@ -75,7 +111,6 @@ void coap_SetLogLevel(int logLevel)
 {
     // TODO - set log level for Erbium (replace PRINTFs)
 }
-
 
 int coap_WaitMessage(int timeout, int fd)
 {
@@ -93,43 +128,36 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
     int payloadLen = 0;
     int content = -1;
 
-    coap_packet_t *const request = (coap_packet_t *)packet;
+    coap_packet_t * const request = (coap_packet_t *) packet;
 
-    CoapResponse coapResponse = {
-       .responseContent = buffer,
-       .responseContentLen = preferred_size,
-       .responseCode = 400,
-    };
-
+    CoapResponse coapResponse =
+    { .responseContent = buffer, .responseContentLen = preferred_size, .responseCode = 400, };
 
     payloadLen = coap_get_payload(request, &payload);
 
     if ((urlLen = coap_get_header_uri_path(request, &url)))
     {
-        char uriBuf[64] = {0};
-        rest_resource_flags_t method = (rest_resource_flags_t)(1 << (((coap_packet_t *)packet)->code - 1));//coap_get_rest_method(request);
+        char uriBuf[MAX_COAP_PATH] = { 0 };
+        rest_resource_flags_t method = (rest_resource_flags_t) (1 << (((coap_packet_t *) packet)->code - 1)); //coap_get_rest_method(request);
 
         uriBuf[0] = '/';
         memcpy(&uriBuf[1], url, urlLen);
 
+        char queryBuf[128] = { 0 };
         const char * query = NULL;
 
-        coap_get_header_uri_query(request, &query);
+        int queryLength = coap_get_header_uri_query(request, &query);
+        if (queryLength > 0)
+            memcpy(queryBuf, query, queryLength);
 
-        CoapRequest coapRequest = {
-            .ctxt = context,
-            .addr = { 0 },
-            .path = uriBuf,
-            .query = query,
-            .token = request->token,
-            .tokenLength = request->token_len,
-            .requestContent = payload,
-            .requestContentLen = payloadLen,
-        };
+        CoapRequest coapRequest =
+        { .ctxt = context, .addr =
+        { 0 }, .path = uriBuf, .query = queryBuf, .token = request->token, .tokenLength = request->token_len, .requestContent = payload,
+                .requestContentLen = payloadLen, };
 
         NetworkAddress_SetAddressType(sourceAddress, &coapRequest.addr);
 
-        switch(method)
+        switch (method)
         {
         case METHOD_GET:
 
@@ -139,30 +167,33 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             int32_t observe;
 
             if (!coap_get_header_observe(request, &observe))
-              observe = -1;
+                observe = -1;
 
-            switch(observe)
+            switch (observe)
             {
-                case -1:
-                    Lwm2m_Debug("Coap GET for %s\n", uriBuf);
-                    coapRequest.type = COAP_GET_REQUEST;
-                    requestHandler(&coapRequest, &coapResponse);
-                    break;
-                case 0:
-                    Lwm2m_Debug("Coap OBSERVE for %s\n", uriBuf);
+            case -1:
+                Lwm2m_Debug("Coap GET for %s\n", uriBuf)
+                ;
+                coapRequest.type = COAP_GET_REQUEST;
+                requestHandler(&coapRequest, &coapResponse);
+                break;
+            case 0:
+                Lwm2m_Debug("Coap OBSERVE for %s\n", uriBuf)
+                ;
 
-                    coapRequest.type = COAP_OBSERVE_REQUEST;
-                    requestHandler(&coapRequest, &coapResponse);
-                    coap_set_header_observe(response, 1);
-                    break;
-                case 1:
-                    Lwm2m_Debug("Coap CANCEL OBSERVE for %s\n", uriBuf);
+                coapRequest.type = COAP_OBSERVE_REQUEST;
+                requestHandler(&coapRequest, &coapResponse);
+                coap_set_header_observe(response, 1);
+                break;
+            case 1:
+                Lwm2m_Debug("Coap CANCEL OBSERVE for %s\n", uriBuf)
+                ;
 
-                    coapRequest.type = COAP_CANCEL_OBSERVE_REQUEST;
-                    requestHandler(&coapRequest, &coapResponse);
-                    break;
-                default:
-                    break;
+                coapRequest.type = COAP_CANCEL_OBSERVE_REQUEST;
+                requestHandler(&coapRequest, &coapResponse);
+                break;
+            default:
+                break;
             }
             coap_set_header_content_format(response, coapResponse.responseContentType); /* text/plain is the default, hence this option could be omitted. */
             break;
@@ -171,8 +202,13 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coap_get_header_content_format(request, &content);
             coapRequest.contentType = content;
             coapRequest.type = COAP_POST_REQUEST;
-            Lwm2m_Debug("Coap POST for %s\n", uriBuf);
+            Lwm2m_Debug("Coap POST for %s\n", uriBuf)
+            ;
             requestHandler(&coapRequest, &coapResponse);
+            if (coapResponse.responseContentLen > 0 && coapResponse.responseCode == 201)
+            {
+                coap_set_header_location_path(response, coapResponse.responseContent);
+            }
             break;
 
         case METHOD_PUT:
@@ -180,7 +216,8 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coapRequest.contentType = content;
             coapRequest.type = COAP_PUT_REQUEST;
 
-            Lwm2m_Debug("Coap PUT for %s\n", uriBuf);
+            Lwm2m_Debug("Coap PUT for %s\n", uriBuf)
+            ;
             requestHandler(&coapRequest, &coapResponse);
             break;
 
@@ -188,7 +225,8 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coapRequest.contentType = ContentType_None;
             coapRequest.type = COAP_DELETE_REQUEST;
 
-            Lwm2m_Debug("Coap DELETE for %s\n", uriBuf);
+            Lwm2m_Debug("Coap DELETE for %s\n", uriBuf)
+            ;
             requestHandler(&coapRequest, &coapResponse);
             break;
 
@@ -196,7 +234,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             break;
         }
 
-        if (coapResponse.responseContentLen > 0 && coapResponse.responseCode == 205 )
+        if (coapResponse.responseContentLen > 0 && coapResponse.responseCode == 205)
         {
             coap_set_payload(response, coapResponse.responseContent, coapResponse.responseContentLen);
         }
@@ -212,20 +250,20 @@ bool coap_getPathQueryFromURI(const char * uri, char * path, char * query)
     char * pathStart = strchr(uri, '/');
     if (pathStart && pathStart[1] == '/')
     {
-        pathStart+=2;
+        pathStart += 2;
         pathStart = strchr(pathStart, '/');
         if (pathStart)
         {
             pathStart += 1;
             char * pathEnd = strchr(pathStart, '?');
-            if(pathEnd == NULL)
+            if (pathEnd == NULL )
             {
                 strcpy(path, pathStart);
             }
             else
             {
                 char * queryStart = pathEnd + 1;
-                int length  = pathEnd - pathStart;
+                int length = pathEnd - pathStart;
                 memcpy(path, pathStart, length);
                 path[length] = '\0';
                 strcpy(query, queryStart);
@@ -253,43 +291,55 @@ int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 
 void coap_CoapRequestCallback(void *callback_data, void *response)
 {
-    TransactionType * transaction = (TransactionType *)callback_data;
-    coap_packet_t * coap_response = (coap_packet_t *)response;
+    TransactionType * transaction = (TransactionType *) callback_data;
+    coap_packet_t * coap_response = (coap_packet_t *) response;
     int ContentType = 0;
     const char *url = NULL;
     char * payload = NULL;
-    char uriBuf[64] = {0};
+    char uriBuf[64] =
+    { 0 };
 
-    if(callback_data != NULL)
+    if (transaction != NULL)
     {
-        if(response != NULL)
+        if (transaction->Callback)
         {
-            int urlLen = 0;
-            if ((urlLen = coap_get_header_location_path(response, &url)))
+            if (response != NULL )
             {
-                uriBuf[0] = '/';
-                memcpy(&uriBuf[1], url, urlLen);
+                int urlLen = 0;
+                if ((urlLen = coap_get_header_location_path(response, &url)))
+                {
+                    uriBuf[0] = '/';
+                    memcpy(&uriBuf[1], url, urlLen);
+                }
+                else
+                {
+                    uriBuf[0] = '/';
+                    urlLen = strlen(transaction->Path);
+                    memcpy(&uriBuf[1], transaction->Path, urlLen);
+                }
+                coap_get_header_content_format(response, &ContentType);
+                int payloadLen = coap_get_payload(response, (const uint8_t **) &payload);
+
+                transaction->Callback(transaction->Context, &transaction->Address, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code),
+                        ContentType, payload, payloadLen);
             }
-
-            coap_get_header_content_format(response, &ContentType);
-            int payloadLen = coap_get_payload(response, (const uint8_t **)&payload);
-
-            transaction->Callback(transaction->Context, &transaction->Address, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code), ContentType, payload, payloadLen);
+            else
+            {
+                transaction->Callback(transaction->Context, NULL, NULL, 0, 0, NULL, 0);
+            }
         }
-        else
-        {
-            transaction->Callback(transaction->Context, NULL, NULL, 0, 0, NULL, 0);
-        }
-
         transaction->TransactionUsed = false;
     }
 }
 
-void coap_createCoapRequest(void * context, coap_method_t method, const char * uri, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
+void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType contentType, ObserveState observeState,
+        const char * payload, int payloadLen, TransactionCallback callback, void * context)
 {
     coap_packet_t request;
-    char path[128] = {0};
-    char query[128] = {0};
+    char path[MAX_COAP_PATH] =
+    { 0 };
+    char query[128] =
+    { 0 };
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
 
@@ -302,18 +352,47 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
     coap_init_message(&request, COAP_TYPE_CON, method, coap_get_mid());
 
     coap_set_header_uri_path(&request, path);
-    coap_set_header_uri_query(&request, query);
+    if (strlen(query) > 0)
+        coap_set_header_uri_query(&request, query);
     // TODO - REVIEW: Erbium must copy path/query from request - else mem out of scope
 
     if (contentType != ContentType_None)
     {
-        coap_set_header_content_format(&request, contentType);
-        coap_set_payload(&request, payload, payloadLen);
+        if ((method == COAP_POST) || (method == COAP_PUT))
+        {
+            coap_set_header_content_format(&request, contentType);
+            coap_set_payload(&request, payload, payloadLen);
+        }
+        else
+        {
+            coap_set_header_accept(&request, contentType);
+        }
+    }
+
+
+    if (method == COAP_GET)
+    {
+        if (observeState == ObserveState_Establish)
+        {
+            coap_set_header_observe(&request, 0);
+            int token = addObserve(remoteAddress, path, callback, context);
+            if (token != 0)
+                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+
+        }
+        else if (observeState == ObserveState_Cancel)
+        {
+            coap_set_header_observe(&request, 1);
+            int token = removeObserve(remoteAddress, path);
+            if (token != 0)
+                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+        }
     }
 
     if (CurrentTransaction[CurrentTransactionIndex].TransactionUsed && CurrentTransaction[CurrentTransactionIndex].TransactionPtr)
     {
-        Lwm2m_Warning("Canceled previous transaction [%d]: %p\n", CurrentTransactionIndex, CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
+        Lwm2m_Warning("Canceled previous transaction [%d]: %p\n", CurrentTransactionIndex,
+                CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
         coap_clear_transaction(&CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
     }
 
@@ -321,6 +400,7 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
     if ((transaction = coap_new_transaction(networkSocket, request.mid, remoteAddress)))
     {
         transaction->callback = coap_CoapRequestCallback;
+        memcpy(CurrentTransaction[CurrentTransactionIndex].Path, path, MAX_COAP_PATH);
         CurrentTransaction[CurrentTransactionIndex].Callback = callback;
         CurrentTransaction[CurrentTransactionIndex].Context = context;
         CurrentTransaction[CurrentTransactionIndex].TransactionUsed = true;
@@ -336,7 +416,7 @@ void coap_createCoapRequest(void * context, coap_method_t method, const char * u
 
         CurrentTransactionIndex++;
 
-        if(CurrentTransactionIndex >= MAX_COAP_TRANSACTIONS)
+        if (CurrentTransactionIndex >= MAX_COAP_TRANSACTIONS)
         {
             CurrentTransactionIndex = 0;
         }
@@ -348,7 +428,7 @@ int coap_Destroy(void)
     Lwm2m_Info("Close port: \n");     //  TODO - remove
     if (networkSocket)
         NetworkSocket_Free(&networkSocket);
-	// TODO - close any open sessions
+    // TODO - close any open sessions
 //    coap_free_context(coapContext);
 //    DestroyLists();
     return 0;
@@ -356,46 +436,52 @@ int coap_Destroy(void)
 
 void coap_Process(void)
 {
-	// TODO - needed for Erbium? (e.g. for transaction failed timeout)?
-	// Do nothing - libCoap only
+    coap_check_transactions();
 }
 
 void coap_HandleMessage(void)
 {
-	// Do nothing - libCoap only
+    coap_receive(networkSocket);
 }
 
 void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback)
 {
-	// Do nothing - libCoap only
+    coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_None, NULL, 0, callback, context);
 }
 
-void coap_PostRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
+void coap_PostRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen,
+        TransactionCallback callback)
 {
-    coap_createCoapRequest(context, COAP_POST, path, contentType, payload, payloadLen, callback);
+    coap_createCoapRequest(COAP_POST, path, contentType, ObserveState_None, payload, payloadLen, callback, context);
 }
 
-void coap_PutRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
+void coap_PutRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen,
+        TransactionCallback callback)
 {
-    coap_createCoapRequest(context, COAP_PUT, path, contentType, payload, payloadLen, callback);
+    coap_createCoapRequest(COAP_PUT, path, contentType, ObserveState_None, payload, payloadLen, callback, context);
 }
 
 // This is a dummy function - Delete requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_DeleteRequest(void * context, const char * path, TransactionCallback callback)
 {
+    coap_createCoapRequest(COAP_DELETE, path, ContentType_None, ObserveState_None, NULL, 0, callback, context);
 }
 
 // This is a dummy function - Observe requests are not required on the constrained device and are only used by the LWM2M Server.
-void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback callback, NotificationFreeCallback notificationFreeCallback)
+void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback callback,
+        NotificationFreeCallback notificationFreeCallback)
 {
+    coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_Establish, NULL, 0, callback, context);
 }
 
 // This is a dummy function - Cancel Observe Requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_CancelObserve(void * context, const char * path, ContentType contentType, TransactionCallback callback)
 {
+    coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_Cancel, NULL, 0, callback, context);
 }
 
-void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType, const char * payload, int payloadLen, int sequence)
+void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType,
+        const char * payload, int payloadLen, int sequence)
 {
     // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
     coap_packet_t notify;
@@ -445,5 +531,100 @@ int coap_DeregisterUri(const char * path)
 {
     // Do nothing
     return 0;
+}
+
+static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCallback callback, void * context)
+{
+    int result = 0;
+    int index;
+    Observation * observation = NULL;
+    for (index = 0; index < MAX_COAP_OBSERVATIONS; index++)
+    {
+        if (Observations[index].Token == 0)
+        {
+            observation = &Observations[index];
+            break;
+        }
+    }
+    if (observation)
+    {
+        observation->Address = remoteAddress;
+        int length = strlen(path);
+        memcpy(observation->Path, path, length);
+        observation->Path[length] = '\0';
+        bool found;
+        do
+        {
+            result = rand();
+            if (result == 0)
+                found = true;
+            else
+            {
+                found = false;
+                for (index = 0; index < MAX_COAP_OBSERVATIONS; index++)
+                {
+                    if (Observations[index].Token == result)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        } while (found);
+        observation->Token = result;
+        observation->Callback =  callback;
+        observation->Context = context;
+    }
+    return result;
+}
+
+static int removeObserve(NetworkAddress * remoteAddress, char * path)
+{
+    int result = 0;
+    int index;
+    for (index = 0; index < MAX_COAP_OBSERVATIONS; index++)
+    {
+        if ((NetworkAddress_Compare(Observations[index].Address, sourceAddress) == 0) && (strcmp(Observations[index].Path,path) == 0))
+        {
+            result = Observations[index].Token;
+            memset(&Observations[index],0, sizeof(Observation));
+            break;
+        }
+    }
+    return result;
+}
+
+
+void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * message)
+{
+    if (message->token_len == sizeof(int))
+    {
+        int token;
+        memcpy(&token, message->token, sizeof(int));
+        Observation * observation = NULL;
+        int index;
+        for (index = 0; index < MAX_COAP_OBSERVATIONS; index++)
+        {
+            if ((Observations[index].Token == token) && (NetworkAddress_Compare(Observations[index].Address, sourceAddress) == 0))
+            {
+                observation = &Observations[index];
+                break;
+            }
+        }
+        if (observation && observation->Callback)
+        {
+            AddressType address;
+            int ContentType = 0;
+            char * payload = NULL;
+
+            NetworkAddress_SetAddressType(sourceAddress, &address);
+            coap_get_header_content_format(message, &ContentType);
+            int payloadLen = coap_get_payload(message, (const uint8_t **) &payload);
+
+            observation->Callback(observation->Context, &address, Observations[index].Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
+                    ContentType, payload, payloadLen);
+        }
+    }
+
 }
 

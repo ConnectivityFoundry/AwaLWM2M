@@ -96,4 +96,8 @@ PT_THREAD(coap_blocking_request
 void coap_set_service_callback(service_callback_t callback);
 int coap_receive(NetworkSocket * networkSocket);
 
+void coap_set_service_callback(service_callback_t callback);
+
+void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * message);
+
 #endif /* ER_COAP_ENGINE_H_ */
