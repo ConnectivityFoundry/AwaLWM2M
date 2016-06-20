@@ -306,14 +306,14 @@ void NetworkAddress_Free(NetworkAddress ** address)
 
 static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength)
 {
-    if (address && uri && uriLength > 0)
+    if (address)
     {
         int index;
         for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
         {
             if (networkAddressCache[index].address == NULL)
             {
-                if (uriLength > 0)
+                if (uri && uriLength > 0)
                 {
                     networkAddressCache[index].uri = (char *)malloc(uriLength + 1);
                     if (networkAddressCache[index].uri)
@@ -370,8 +370,6 @@ static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress)
             }
         }
     }
-    if (!result)
-        Lwm2m_Debug("No Rx address match\n");
     return result;
 }
 
