@@ -42,9 +42,7 @@
 
 #include "er-coap.h"
 #include "er-coap-transactions.h"
-#include "er-coap-observe.h"
 #include "er-coap-separate.h"
-#include "er-coap-observe-client.h"
 #include "network_abstraction.h"
 
 #ifdef CONTIKI
