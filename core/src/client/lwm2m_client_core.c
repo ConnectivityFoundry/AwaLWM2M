@@ -1285,12 +1285,13 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
         int objectID = -1;
         int pos = 0;
 
-#ifdef CONTIKI
         bool first = true;
-#else
+#ifndef CONTIKI
+#ifdef WITH_JSON
         // Always add "ct" field for </> to signal we support JSON.
         pos += snprintf(buffer + pos, len - pos, "<%s>;ct=%d", altPath ? altPath : "/", ContentType_ApplicationOmaLwm2mJson);
-        bool first = false;
+        first = false;
+#endif // WITH_JSON
 #endif // CONTIKI
 
         // Loop through all objects in the object store.

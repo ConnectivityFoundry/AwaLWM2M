@@ -3,6 +3,7 @@ common_src = \
     coap_abstraction_contiki.c \
     lwm2m_debug.c \
     lwm2m_util.c \
+    lwm2m_util_contiki.c \
     lwm2m_object_store.c \
     lwm2m_definition.c \
     lwm2m_endpoints.c \

@@ -12,6 +12,23 @@ enable_testing ()
 
 # TODO: set TARGET_CONFIGURE_OPTS from environment?
 
+
+# Options for supported CoAP and DTLS libraries:
+option (WITH_LIBCOAP "Enable libcoap CoAP support)" ON)
+option (WITH_ERBIUM "Enable Erbium CoAP support)" OFF)
+option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
+option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
+
+if (WITH_ERBIUM)
+  message (WARNING "Disabling libcoap support")
+  set (WITH_LIBCOAP OFF)
+endif ()
+
+if (WITH_GNUTLS AND WITH_CYASSL)
+  message (FATAL_ERROR "WITH_GNUTLS and WITH_CYASSL are mutually exclusive and cannot be specified together." )
+endif ()
+
+
 # build tests, but disable running by default
 option (BUILD_TESTS "Build tests" ON)
 option (RUN_TESTS "Enable tests" OFF)
