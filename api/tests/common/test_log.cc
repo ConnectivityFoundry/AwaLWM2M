@@ -74,6 +74,7 @@ typedef TestLogCapture<CaptureStderr> TestLogCaptureStderr;
 TEST_F(TestLogCaptureFile, deliberate_memory_leak)
 {
     char * lost = (char *)malloc(1024);
+	ASSERT_TRUE(NULL != lost);
     (void)lost;
 }
 
