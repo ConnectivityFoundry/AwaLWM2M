@@ -75,6 +75,10 @@ if (WITH_JSON)
   )
 endif ()
 
+if (WITH_GNUTLS)
+  list (APPEND awa_common_LIBS gnutls)
+endif ()
+
 if (ENABLE_GCOV)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
