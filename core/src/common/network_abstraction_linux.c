@@ -86,6 +86,7 @@ typedef enum
 static NetworkAddressCache networkAddressCache[MAX_NETWORK_ADDRESS_CACHE] = {{0}};
 
 static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength);
+static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress, const char * uri, int uriLength);
 static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength);
 static int getUriHostLength(const char * uri, int uriLength);
 
@@ -192,27 +193,36 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                 if (resolvedAddress)
                 {
                     size_t size = sizeof(struct _NetworkAddress);
-                    result = (NetworkAddress *)malloc(size);
-                    if (result)
+                    NetworkAddress * networkAddress = (NetworkAddress *)malloc(size);
+                    if (networkAddress)
                     {
-                        memset(result, 0, size);
-                        result->Secure = secure;
+                        memset(networkAddress, 0, size);
+                        networkAddress->Secure = secure;
                         if (resolvedAddress->h_addrtype == AF_INET)
                         {
-                            result->Address.Sin.sin_family = AF_INET;
-                            memcpy(&result->Address.Sin.sin_addr,*(resolvedAddress->h_addr_list),sizeof(struct in_addr));
-                            result->Address.Sin.sin_port = htons(port);
+                            networkAddress->Address.Sin.sin_family = AF_INET;
+                            memcpy(&networkAddress->Address.Sin.sin_addr,*(resolvedAddress->h_addr_list),sizeof(struct in_addr));
+                            networkAddress->Address.Sin.sin_port = htons(port);
                         }
                         else if (resolvedAddress->h_addrtype == AF_INET6)
                         {
-                            result->Address.Sin6.sin6_family = AF_INET6;
-                            memcpy(&result->Address.Sin6.sin6_addr,*(resolvedAddress->h_addr_list),sizeof(struct in6_addr));
-                            result->Address.Sin6.sin6_port = htons(port);
+                            networkAddress->Address.Sin6.sin6_family = AF_INET6;
+                            memcpy(&networkAddress->Address.Sin6.sin6_addr,*(resolvedAddress->h_addr_list),sizeof(struct in6_addr));
+                            networkAddress->Address.Sin6.sin6_port = htons(port);
                         }
                         else
                         {
-                            free(result);
-                            result = NULL;
+                            free(networkAddress);
+                            networkAddress = NULL;
+                        }
+                    }
+                    if (networkAddress)
+                    {
+                        result = getCachedAddress(networkAddress, uri, uriHostLength);
+                        if (result)
+                        {
+                            // Matched existing address
+                            free(networkAddress);
                         }
                     }
                 }
@@ -346,7 +356,7 @@ static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength)
     {
         if (networkAddressCache[index].uri && (memcmp(networkAddressCache[index].uri, uri, uriLength) == 0))
         {
-            Lwm2m_Debug("Address uri matched: %s\n", networkAddressCache[index].uri);
+            //Lwm2m_Debug("Address uri matched: %s\n", networkAddressCache[index].uri);
             result = networkAddressCache[index].address;
             break;
         }
@@ -354,7 +364,7 @@ static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength)
     return result;
 }
 
-static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress)
+static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress, const char * uri, int uriLength)
 {
     NetworkAddress * result = NULL;
     int index;
@@ -365,6 +375,18 @@ static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress)
         {
             if (NetworkAddress_Compare(matchAddress, address) == 0)
             {
+                if (uri && uriLength > 0 && networkAddressCache[index].uri == NULL)
+                {
+                    // Add info to cached address
+                    address->Secure = matchAddress->Secure;
+                    networkAddressCache[index].uri = (char *)malloc(uriLength + 1);
+                    if (networkAddressCache[index].uri)
+                    {
+                        memcpy(networkAddressCache[index].uri, uri, uriLength);
+                        networkAddressCache[index].uri[uriLength] = 0;
+                        Lwm2m_Debug("Address add uri: %s\n", networkAddressCache[index].uri);
+                    }
+                }
                 result = address;
                 break;
             }
@@ -541,7 +563,7 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
         size_t size = sizeof(struct _NetworkAddress);
         memset(&matchAddress, 0, size);
         memcpy(&matchAddress.Address.Sa, &sourceSocket, sourceSocketLength);
-        networkAddress = getCachedAddress(&matchAddress);
+        networkAddress = getCachedAddress(&matchAddress, NULL, 0);
 
         if (networkAddress == NULL)
         {
