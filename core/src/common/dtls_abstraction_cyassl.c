@@ -49,6 +49,8 @@ typedef struct
     #define MAX_DTLS_SESSIONS 3
 #endif
 
+const char * DTLS_LibraryName = "CyaSSL";
+
 DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
 uint8_t * certificate = NULL;

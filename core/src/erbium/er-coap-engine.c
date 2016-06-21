@@ -274,19 +274,15 @@ int coap_receive(NetworkSocket * networkSocket)
                         callback(callback_data, message);
                     }
                 }
-                /* if(ACKed transaction) */
-                transaction = NULL;
-
-#if COAP_OBSERVE_CLIENT
+//#if COAP_OBSERVE_CLIENT
                 /* if observe notification */
-                if((message->type == COAP_TYPE_CON || message->type == COAP_TYPE_NON)
+                else if((message->type == COAP_TYPE_CON || message->type == COAP_TYPE_NON)
                         && IS_OPTION(message, COAP_OPTION_OBSERVE))
                 {
                     PRINTF("Observe [%u]\n", message->observe);
-                    coap_handle_notification(&UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
-                            message);
+                    coap_handle_notification(sourceAddress, message);
                 }
-#endif /* COAP_OBSERVE_CLIENT */
+//#endif /* COAP_OBSERVE_CLIENT */
             } /* request or response */
         } /* parsed correctly */
 
