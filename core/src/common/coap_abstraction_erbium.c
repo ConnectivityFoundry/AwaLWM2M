@@ -81,7 +81,7 @@ typedef struct
 #define MAX_COAP_OBSERVATIONS (10)
 #endif
 
-Observation Observations[MAX_COAP_TRANSACTIONS];
+Observation Observations[MAX_COAP_OBSERVATIONS];
 
 static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCallback callback, void * context);
