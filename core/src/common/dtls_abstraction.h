@@ -47,6 +47,8 @@ typedef enum
 
 typedef NetworkTransmissionError (*DTLS_NetworkSendCallback)(NetworkAddress * destAddress,const uint8_t * buffer, int bufferLength, void *context);
 
+extern const char * DTLS_LibraryName;
+
 void DTLS_Init(void);
 
 void DTLS_Shutdown(void);
