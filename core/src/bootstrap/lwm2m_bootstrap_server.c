@@ -41,6 +41,7 @@
 
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
+#include "dtls_abstraction.h"
 #include "lwm2m_core.h"
 #include "lwm2m_object_defs.h"
 #include "bootstrap/lwm2m_bootstrap.h"
@@ -156,6 +157,8 @@ static int Bootstrap_Start(Options * options)
     }
     Lwm2m_Info("Awa LWM2M Bootstrap Server, version %s\n", version);
     Lwm2m_Info("  Process ID     : %d\n", getpid());
+    Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
+    Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
     Lwm2m_Info("  CoAP port      : %d\n", options->Port);
 
     if (options->InterfaceName != NULL)

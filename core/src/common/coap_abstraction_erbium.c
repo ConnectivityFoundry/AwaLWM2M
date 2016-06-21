@@ -53,6 +53,8 @@ static CoapInfo coapInfo;
 static void * context = NULL;
 static RequestHandler requestHandler = NULL;
 
+const char * coap_LibraryName = "Erbium";
+
 #ifndef MAX_COAP_TRANSACTIONS
 #define MAX_COAP_TRANSACTIONS (2)
 #endif
@@ -81,7 +83,7 @@ typedef struct
 #define MAX_COAP_OBSERVATIONS (10)
 #endif
 
-Observation Observations[MAX_COAP_TRANSACTIONS];
+Observation Observations[MAX_COAP_OBSERVATIONS];
 
 static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCallback callback, void * context);
@@ -621,7 +623,7 @@ void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * me
             coap_get_header_content_format(message, &ContentType);
             int payloadLen = coap_get_payload(message, (const uint8_t **) &payload);
 
-            observation->Callback(observation->Context, &address, Observations[index].Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
+            observation->Callback(observation->Context, &address, observation->Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
                     ContentType, payload, payloadLen);
         }
     }

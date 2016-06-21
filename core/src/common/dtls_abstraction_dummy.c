@@ -26,6 +26,7 @@
 #include "lwm2m_debug.h"
 #include "dtls_abstraction.h"
 
+const char * DTLS_LibraryName = "None";
 
 void DTLS_Init(void)
 {

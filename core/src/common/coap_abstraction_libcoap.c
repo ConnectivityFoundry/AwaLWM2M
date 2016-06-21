@@ -85,6 +85,8 @@ typedef struct
     AddressType * Address;
 } NotificationHandler;
 
+const char * coap_LibraryName = "libcoap";
+
 static struct ListHead transactionCallbackList;
 static struct ListHead notifyCallbackList;
 static coap_context_t * coapContext = NULL;

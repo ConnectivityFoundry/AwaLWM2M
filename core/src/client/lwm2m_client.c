@@ -41,6 +41,7 @@
 #include "lwm2m_core.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
+#include "dtls_abstraction.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_connectivity_object.h"
@@ -185,6 +186,8 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("Awa LWM2M Client, version %s\n", version);
     Lwm2m_Info("  Process ID     : %d\n", getpid());
     Lwm2m_Info("  Endpoint name  : \'%s\'\n", options->EndPointName);
+    Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
+    Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
     Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
