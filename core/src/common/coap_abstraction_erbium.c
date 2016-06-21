@@ -49,6 +49,8 @@ static CoapInfo coapInfo;
 static void * context = NULL;
 static RequestHandler requestHandler = NULL;
 
+const char * coap_LibraryName = "Erbium";
+
 #define MAX_COAP_TRANSACTIONS (2)
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS];
