@@ -621,7 +621,7 @@ void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * me
             coap_get_header_content_format(message, &ContentType);
             int payloadLen = coap_get_payload(message, (const uint8_t **) &payload);
 
-            observation->Callback(observation->Context, &address, Observations[index].Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
+            observation->Callback(observation->Context, &address, observation->Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
                     ContentType, payload, payloadLen);
         }
     }
