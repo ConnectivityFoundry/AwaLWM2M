@@ -10,58 +10,58 @@ set (test_api_runner_SOURCES
   support/log.cc
 
   common/test_log.cc
-  common/test_error.cc
-  common/test_lwm2m_error.cc
-  common/test_ipc.cc
-  common/test_utils.cc
-  common/test_iterator.cc
-  common/test_path.cc
-  common/test_string_iterator.cc
-  common/test_path_iterator.cc
-  common/test_path_result.cc
-  common/test_array_types.cc
-  common/test_objects_tree.cc
-  common/test_queue.cc
-  common/test_list.cc
-  common/test_map.cc
-  common/test_xmltree.cc
-  common/test_operation_common.cc
-  common/test_response_common.cc
-  common/test_define_common.cc
-  common/test_session_common.cc
-  common/test_subscribe_observe_common.cc
-  common/test_define_operation.cc
-  common/test_value.cc
-  common/test_bootstrap.cc
-  common/test_daemon.cc
-  common/test_client_server_interaction.cc
-  
-  client/test_client.cc
-  client/test_client_session.cc
-  client/test_client_define_operation.cc
-  client/test_client_define_defaults.cc
-  client/test_set_operation.cc
-  client/test_get_operation.cc
-  client/test_client_delete_operation.cc
-  client/test_subscribe_operation.cc
-  client/test_client_iterator.cc
-
-  server/test_server_session.cc
-  server/test_server_define_operation.cc
-  server/test_server_define_defaults.cc
-  server/test_list_clients_operation.cc
-  server/test_write_operation.cc
-  server/test_set_write_common.cc
-  server/test_read_operation.cc
-  server/test_write_attributes_operation.cc
-  server/test_changeset.cc 
-  server/test_server_delete_operation.cc
-  server/test_execute_operation.cc
-  server/test_server_events.cc
-  server/test_server_response.cc
-  server/test_server.cc
-  server/test_observe_operation.cc
-  server/test_server_notification.cc
+#  common/test_error.cc
+#  common/test_lwm2m_error.cc
+#  common/test_ipc.cc
+#  common/test_utils.cc
+#  common/test_iterator.cc
+#  common/test_path.cc
+#  common/test_string_iterator.cc
+#  common/test_path_iterator.cc
+#  common/test_path_result.cc
+#  common/test_array_types.cc
+#  common/test_objects_tree.cc
+#  common/test_queue.cc
+#  common/test_list.cc
+#  common/test_map.cc
+#  common/test_xmltree.cc
+#  common/test_operation_common.cc
+#  common/test_response_common.cc
+#  common/test_define_common.cc
+#  common/test_session_common.cc
+#  common/test_subscribe_observe_common.cc
+#  common/test_define_operation.cc
+#  common/test_value.cc
+#  common/test_bootstrap.cc
+#  common/test_daemon.cc
+#  common/test_client_server_interaction.cc
+#  
+#  client/test_client.cc
+#  client/test_client_session.cc
+#  client/test_client_define_operation.cc
+#  client/test_client_define_defaults.cc
+#  client/test_set_operation.cc
+#  client/test_get_operation.cc
+#  client/test_client_delete_operation.cc
+#  client/test_subscribe_operation.cc
+#  client/test_client_iterator.cc
+#
+#  server/test_server_session.cc
+#  server/test_server_define_operation.cc
+#  server/test_server_define_defaults.cc
+#  server/test_list_clients_operation.cc
+#  server/test_write_operation.cc
+#  server/test_set_write_common.cc
+#  server/test_read_operation.cc
+#  server/test_write_attributes_operation.cc
+#  server/test_changeset.cc 
+#  server/test_server_delete_operation.cc
+#  server/test_execute_operation.cc
+#  server/test_server_events.cc
+#  server/test_server_response.cc
+#  server/test_server.cc
+#  server/test_observe_operation.cc
+#  server/test_server_notification.cc
 )
 
 set (test_static_api_runner_SOURCES
@@ -73,11 +73,11 @@ set (test_static_api_runner_SOURCES
   support/static_api_support.cc
   support/log.cc
 
-  static-client/test_static_api.cc
-  static-client/test_static_api_with_pointer.cc
-  static-client/test_static_api_handlers.cc
-  static-client/test_static_api_get_resource_instance_pointer.cc
-  static-client/test_static_api_create_delete.cc
+#  static-client/test_static_api.cc
+#  static-client/test_static_api_with_pointer.cc
+#  static-client/test_static_api_handlers.cc
+#  static-client/test_static_api_get_resource_instance_pointer.cc
+#  static-client/test_static_api_create_delete.cc
 )
 
 
