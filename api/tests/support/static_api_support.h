@@ -40,14 +40,14 @@
 
 namespace Awa {
 
-struct SingleStaticClientPollCondition : public PollCondition
+struct SingleStaticClientPollCondition : public WaitCondition
 {
     AwaStaticClient * StaticClient;
     AwaServerListClientsOperation * Operation;
     std::string ClientEndpointName;
 
-    SingleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int maxCount) :
-        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
+    SingleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int seconds) :
+        WaitCondition(1e5, 1e5*seconds), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
     virtual ~SingleStaticClientPollCondition() {}
 
     virtual bool Check()
