@@ -72,6 +72,8 @@ typedef struct
     int fd;
 } CoapInfo;
 
+extern const char * coap_LibraryName;
+
 CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel);
 
 int coap_Destroy(void);

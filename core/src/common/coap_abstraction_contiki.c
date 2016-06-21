@@ -44,6 +44,8 @@ typedef struct
 #define COAP_RESPONSE_CODE(N) (((N)/100 << 5) | (N)%100)
 #define PRINT6ADDR(addr) "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]\n", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15]
 
+const char * coap_LibraryName = "Erbium (Contiki)";
+
 static CoapInfo coapInfo;
 static void * context = NULL;
 static RequestHandler requestHandler = NULL;
