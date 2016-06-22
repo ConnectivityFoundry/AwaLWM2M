@@ -40,69 +40,126 @@
 
 namespace Awa {
 
-struct SingleStaticClientPollCondition : public WaitCondition
+struct SingleStaticClientWaitCondition : public WaitCondition
 {
     AwaStaticClient * StaticClient;
-    AwaServerListClientsOperation * Operation;
+    AwaServerSession * ServerSession;
     std::string ClientEndpointName;
+    bool found;
 
-    SingleStaticClientPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, int seconds) :
-        WaitCondition(1e5, 1e5*seconds), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName) {}
-    virtual ~SingleStaticClientPollCondition() {}
+    SingleStaticClientWaitCondition(AwaStaticClient * StaticClient, AwaServerSession * ServerSession, std::string ClientEndpointName, int milliseconds) :
+        WaitCondition(1e4, (milliseconds * 1e3)), StaticClient(StaticClient), ServerSession(ServerSession), ClientEndpointName(ClientEndpointName), found(false)
+    {
+        AwaServerSession_SetClientRegisterEventCallback(ServerSession, Client_Register, this);
+    }
+    virtual ~SingleStaticClientWaitCondition() {}
 
     virtual bool Check()
     {
-        bool found = false;
+        found = false;
 
-        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, global::timeout));
-        AwaClientIterator * iterator = AwaServerListClientsOperation_NewClientIterator(Operation);
-        EXPECT_TRUE(iterator != NULL);
-        if (AwaClientIterator_Next(iterator))
-        {
-            if (ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
-            {
-                found = true;
-            }
-        }
-        AwaClientIterator_Free(&iterator);
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, (this->checkPeriod_ / 1e3)));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
         AwaStaticClient_Process(StaticClient);
         return found;
     }
+
+    static void Client_Register(const AwaServerClientRegisterEvent * event, void * context)
+    {
+        if (context)
+        {
+            auto * that = static_cast<SingleStaticClientWaitCondition*>(context);
+
+            AwaClientIterator * iterator = AwaServerClientRegisterEvent_NewClientIterator(event);
+            EXPECT_TRUE(iterator != NULL);
+            if (AwaClientIterator_Next(iterator))
+            {
+                if (that->ClientEndpointName.compare(AwaClientIterator_GetClientID(iterator)) == 0)
+                {
+                    that->found = true;
+                }
+            }
+            AwaClientIterator_Free(&iterator);
+        }
+    }
 };
 
-struct SingleStaticClientObjectPollCondition : public PollCondition
+struct SingleStaticClientObjectWaitCondition : public WaitCondition
 {
     AwaStaticClient * StaticClient;
-    AwaServerListClientsOperation * Operation;
+    AwaServerSession * ServerSession;
     std::string ClientEndpointName;
     std::string ObjectPath;
     bool inverse;
+    bool found;
 
-    SingleStaticClientObjectPollCondition(AwaStaticClient * StaticClient, AwaServerListClientsOperation * Operation, std::string ClientEndpointName, std::string ObjectPath, int maxCount, bool inverse = false) :
-        PollCondition(maxCount), StaticClient(StaticClient), Operation(Operation), ClientEndpointName(ClientEndpointName), ObjectPath(ObjectPath), inverse(inverse) {}
-    virtual ~SingleStaticClientObjectPollCondition() {}
+    SingleStaticClientObjectWaitCondition(AwaStaticClient * StaticClient, AwaServerSession * ServerSession, std::string ClientEndpointName, std::string ObjectPath, int milliseconds, bool inverse = false) :
+        WaitCondition(1e4, (milliseconds * 1e3)), StaticClient(StaticClient), ServerSession(ServerSession), ClientEndpointName(ClientEndpointName), ObjectPath(ObjectPath), inverse(inverse), found(inverse)
+    {
+        AwaServerSession_SetClientRegisterEventCallback(ServerSession, Client_Register, this);
+        AwaServerSession_SetClientUpdateEventCallback(ServerSession, Client_Update, this);
+    }
+    virtual ~SingleStaticClientObjectWaitCondition() {}
 
     virtual bool Check()
     {
-        bool found = inverse;
+        found = inverse;
 
-        EXPECT_EQ(AwaError_Success, AwaServerListClientsOperation_Perform(Operation, global::timeout));
-        const AwaServerListClientsResponse * clientListResponse = AwaServerListClientsOperation_GetResponse(Operation, ClientEndpointName.c_str());
-        EXPECT_TRUE(clientListResponse != NULL);
-        AwaRegisteredEntityIterator * objectIterator = AwaServerListClientsResponse_NewRegisteredEntityIterator(clientListResponse);
-        EXPECT_TRUE(objectIterator != NULL);
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, (this->checkPeriod_ / 1e3)));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
 
-        while (AwaRegisteredEntityIterator_Next(objectIterator))
-        {
-            if (ObjectPath.compare(AwaRegisteredEntityIterator_GetPath(objectIterator)) == 0)
-            {
-                found = !inverse;
-            }
-        }
-
-        AwaRegisteredEntityIterator_Free(&objectIterator);
         AwaStaticClient_Process(StaticClient);
         return found;
+    }
+
+
+
+    static void Client_Register(const AwaServerClientRegisterEvent * event, void * context)
+    {
+        if (context)
+        {
+            auto * that = static_cast<SingleStaticClientObjectWaitCondition*>(context);
+
+
+            AwaRegisteredEntityIterator * objectIterator = AwaServerClientRegisterEvent_NewRegisteredEntityIterator(event, that->ClientEndpointName.c_str());
+            if(objectIterator)
+            {
+
+                while (AwaRegisteredEntityIterator_Next(objectIterator))
+                {
+                    if (that->ObjectPath.compare(AwaRegisteredEntityIterator_GetPath(objectIterator)) == 0)
+                    {
+                        that->found = !(that->inverse);
+                    }
+                }
+
+                AwaRegisteredEntityIterator_Free(&objectIterator);
+            }
+        }
+    }
+
+    static void Client_Update(const AwaServerClientUpdateEvent * event, void * context)
+    {
+        if (context)
+        {
+            auto * that = static_cast<SingleStaticClientObjectWaitCondition*>(context);
+
+
+            AwaRegisteredEntityIterator * objectIterator = AwaServerClientUpdateEvent_NewRegisteredEntityIterator(event, that->ClientEndpointName.c_str());
+            if(objectIterator)
+            {
+
+                while (AwaRegisteredEntityIterator_Next(objectIterator))
+                {
+                    if (that->ObjectPath.compare(AwaRegisteredEntityIterator_GetPath(objectIterator)) == 0)
+                    {
+                        that->found = !(that->inverse);
+                    }
+                }
+
+                AwaRegisteredEntityIterator_Free(&objectIterator);
+            }
+        }
     }
 };
 
@@ -150,14 +207,14 @@ protected:
     AwaStaticClient * client_;
 };
 
-class StaticClientCallbackPollCondition : public PollCondition
+class StaticClientCallbackWaitCondition : public WaitCondition
 {
 protected:
     AwaStaticClient * StaticClient;
 
 public:
-    StaticClientCallbackPollCondition(AwaStaticClient * StaticClient, int maxCount) :
-        PollCondition(maxCount), StaticClient(StaticClient), complete(false) {}
+    StaticClientCallbackWaitCondition(AwaStaticClient * StaticClient, int milliseconds) :
+        WaitCondition(1e4, (milliseconds * 1e3)), StaticClient(StaticClient), complete(false) {}
     bool complete;
     virtual bool Check()
     {
@@ -174,6 +231,14 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
 void * do_write_operation(void * attr);
 void * do_read_operation(void * attr);
 void * do_execute_operation(void * attr);
+
+typedef struct
+{
+    volatile bool Run;
+    AwaStaticClient * StaticClient;
+} StaticClientProccessInfo;
+
+void * do_static_client_process(void * attr);
 
 } // namespace Awa
 
