@@ -102,6 +102,14 @@ void DTLS_Init(void)
 
 void DTLS_Shutdown(void)
 {
+    int index;
+    for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+    {
+        if (sessions[index].Session)
+        {
+            FreeSession(&sessions[index]);
+        }
+    }
     if (_CertCredentials)
     {
         gnutls_certificate_free_credentials(_CertCredentials);
