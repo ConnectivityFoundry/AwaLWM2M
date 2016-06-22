@@ -124,11 +124,9 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_EQ(AwaError_Success, AwaStaticClient_DefineResource(client_, 7999, 1, "TestResource", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7999, 1, &i, sizeof(i), 0));
 
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     EXPECT_TRUE(condition.Wait());
-    AwaServerListClientsOperation_Free(&operation);
+
 
     AwaServerDefineOperation * defineOperation = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOperation != NULL);
@@ -147,18 +145,44 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 
     pthread_t writeThread;
     pthread_create(&writeThread, NULL, do_write_operation, (void *)writeOperation);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
+
+    struct WriteCheckInt : public WaitCondition
+    {
+        AwaStaticClient * StaticClient;
+        AwaInteger * ValuePointer;
+
+        WriteCheckInt(AwaStaticClient * StaticClient, AwaInteger * ValuePointer) :
+            WaitCondition(1e4, (global::timeout * 1e3)) , StaticClient(StaticClient), ValuePointer(ValuePointer) {}
+
+        bool Check()
+        {
+            bool result = false;
+            EXPECT_TRUE(ValuePointer != NULL);
+            if(ValuePointer && StaticClient)
+            {
+                AwaStaticClient_Process(StaticClient);
+
+                if(*ValuePointer == 5)
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+    };
+    WriteCheckInt writeCheck(client_, &i);
+
+    ASSERT_TRUE(writeCheck.Wait());
+
     pthread_join(writeThread, NULL);
 
     AwaServerWriteOperation_Free(&writeOperation);
 
-    AwaStaticClient_Process(client_);
-
     ASSERT_EQ(5, i);
 }
 
-TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_CoAPtimeout)
+TEST_F(TestStaticClientWithPointerWithServer, DISABLED_AwaStaticClient_WithPointer_Create_and_Write_Operation_CoAPtimeout)
 {
     // Static client definition
     uint8_t opaque[16] = {0};
@@ -167,11 +191,8 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, &opaque, sizeof(opaque), 0));
 
     // Server definition
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     EXPECT_TRUE(condition.Wait());
-    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
@@ -204,7 +225,6 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
-
 TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create_and_Write_Operation_for_Object_and_Opaque_Resource)
 {
     // Static client definition
@@ -214,11 +234,8 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, opaque, sizeof(opaque), 0));
 
     // Server definition
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     EXPECT_TRUE(condition.Wait());
-    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
@@ -239,27 +256,58 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 
     pthread_t writeThread;
     pthread_create(&writeThread, NULL, do_write_operation, (void *)writeOperation);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
+
+    struct WriteCheckOpaque : public WaitCondition
+    {
+        AwaStaticClient * StaticClient;
+        void * ValuePointer;
+        AwaOpaque Opaque;
+
+        WriteCheckOpaque(AwaStaticClient * StaticClient, void * ValuePointer, AwaOpaque Opaque) :
+            WaitCondition(1e4, (global::timeout * 1e3)) , StaticClient(StaticClient), ValuePointer(ValuePointer), Opaque(Opaque) {}
+
+        bool Check()
+        {
+            bool result = false;
+
+            if(StaticClient)
+            {
+                AwaStaticClient_Process(StaticClient);
+
+                if(ValuePointer)
+                {
+                    if(memcmp(ValuePointer, Opaque.Data, Opaque.Size) == 0)
+                    {
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+    };
+    WriteCheckOpaque writeCheck(client_, opaque, o);
+
+    ASSERT_TRUE(writeCheck.Wait());
+    sleep(5);
+
     pthread_join(writeThread, NULL);
 
     AwaServerWriteOperation_Free(&writeOperation);
 
     ASSERT_EQ(0, memcmp(opaque, o.Data, o.Size));
 
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-
     // Read
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
     EXPECT_TRUE(readOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/7998/0/1"));
 
-    pthread_t readThread;
-    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-    pthread_join(readThread, NULL);
+    StaticClientProccessInfo processInfo = { .Run = true, .StaticClient = client_ };
+    pthread_t processThread;
+    pthread_create(&processThread, NULL, do_static_client_process, &processInfo);
+    AwaServerReadOperation_Perform(readOperation, global::timeout * 20);
+    processInfo.Run = false;
+    pthread_join(processThread, NULL);
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     EXPECT_TRUE(readResponse != NULL);
@@ -281,11 +329,8 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetResourceStorageWithPointer(client_, 7998, 1, &stringData, sizeof(stringData), 0));
 
     // Server definition
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     EXPECT_TRUE(condition.Wait());
-    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOpertaion = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOpertaion != NULL);
@@ -306,8 +351,41 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
 
     pthread_t writeThread;
     pthread_create(&writeThread, NULL, do_write_operation, (void *)writeOperation);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
+
+
+    struct WriteCheckString : public WaitCondition
+    {
+        AwaStaticClient * StaticClient;
+        char * ValuePointer;
+        const char * String;
+
+        WriteCheckString(AwaStaticClient * StaticClient, char * ValuePointer, const char * String) :
+            WaitCondition(1e4, (global::timeout * 1e3)) , StaticClient(StaticClient), ValuePointer(ValuePointer), String(String) {}
+
+        bool Check()
+        {
+            bool result = false;
+
+            if(StaticClient)
+            {
+                AwaStaticClient_Process(StaticClient);
+
+                if(ValuePointer)
+                {
+                    if(memcmp(ValuePointer, String, strlen(String)) == 0)
+                    {
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+    };
+    WriteCheckString writeCheck(client_, stringData, writeData);
+
+    ASSERT_TRUE(writeCheck.Wait());
+
     pthread_join(writeThread, NULL);
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -315,19 +393,17 @@ TEST_F(TestStaticClientWithPointerWithServer, AwaStaticClient_WithPointer_Create
     ASSERT_EQ(strlen(writeData), strlen(stringData));
     ASSERT_EQ(0, memcmp(writeData, stringData, strlen(writeData)));
 
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-
     // Read
     AwaServerReadOperation * readOperation = AwaServerReadOperation_New(session_);
     EXPECT_TRUE(readOperation != NULL);
     EXPECT_EQ(AwaError_Success, AwaServerReadOperation_AddPath(readOperation, global::clientEndpointName, "/7998/0/1"));
 
-    pthread_t readThread;
-    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-    pthread_join(readThread, NULL);
+    StaticClientProccessInfo processInfo = { .Run = true, .StaticClient = client_ };
+    pthread_t processThread;
+    pthread_create(&processThread, NULL, do_static_client_process, &processInfo);
+    AwaServerReadOperation_Perform(readOperation, global::timeout * 20);
+    processInfo.Run = false;
+    pthread_join(processThread, NULL);
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation, global::clientEndpointName);
     EXPECT_TRUE(readResponse != NULL);
@@ -451,10 +527,11 @@ public:
         TestStaticClientWithServer::TearDown();
     }
 
-    struct callback1 : public StaticClientCallbackPollCondition
+    struct callback1 : public StaticClientCallbackWaitCondition
     {
-        callback1(AwaStaticClient * StaticClient, int maxCount, AwaServerSession * session) : StaticClientCallbackPollCondition(StaticClient, maxCount),
-                                                                                              session_(session){};
+        callback1(AwaStaticClient * StaticClient, int maxCount, AwaServerSession * session) :
+            StaticClientCallbackWaitCondition(StaticClient, maxCount),
+            session_(session) {};
         virtual bool Check()
         {
             if (!observeThreadAlive_)
@@ -595,11 +672,8 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
     }
     EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, observeDetail::TEST_OBJECT_NON_ARRAY_TYPES, 0));
 
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     EXPECT_TRUE(condition.Wait());
-    AwaServerListClientsOperation_Free(&operation);
 
     AwaServerDefineOperation * defineOperation = AwaServerDefineOperation_New(session_);
     EXPECT_TRUE(defineOperation != NULL);
@@ -649,13 +723,13 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
     Lwm2m_Debug("Performing Observe Operation\n");
 
     pthread_t t;
-    ServerObserveThreadContext serverObserveContext_;
-    memset(&serverObserveContext_, 0, sizeof(serverObserveContext_));
-    serverObserveContext_.ObserveOperation = observeOperation;
-    serverObserveContext_.ObserveThreadAlive = &cbHandler_->observeThreadAlive_;
-    pthread_create(&t, NULL, do_observe_operation, (void *)&serverObserveContext_);
+    ServerObserveThreadContext serverObserveContext;
+    memset(&serverObserveContext, 0, sizeof(serverObserveContext));
+    serverObserveContext.ObserveOperation = observeOperation;
+    serverObserveContext.ObserveThreadAlive = &cbHandler_->observeThreadAlive_;
+    pthread_create(&t, NULL, do_observe_operation, (void *)&serverObserveContext);
 
-    ASSERT_TRUE(cbHandler_->Wait());
+    ASSERT_TRUE(cbHandler_->Wait(5e6));
 
     pthread_join(t, NULL);
 

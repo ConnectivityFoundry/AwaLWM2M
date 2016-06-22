@@ -1339,13 +1339,8 @@ TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
 TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
 {
 
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, 20);
     ASSERT_TRUE(condition.Wait());
-
-    AwaServerListClientsOperation_Free(&operation);
 
     struct CallbackHandler1 : public EventWaitCondition
     {
@@ -1391,13 +1386,8 @@ TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
 TEST_F(TestServerEventsWithConnectedSession, ClientDeregisterEvent)
 {
 
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, 20);
     ASSERT_TRUE(condition.Wait());
-
-    AwaServerListClientsOperation_Free(&operation);
 
     struct CallbackHandler1 : public EventWaitCondition
     {
