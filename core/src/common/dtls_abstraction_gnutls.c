@@ -86,7 +86,7 @@ void DTLS_Init(void)
     //    unsigned int bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_DH, GNUTLS_SEC_PARAM_LEGACY);
     //    gnutls_dh_params_init(&_DHParameters);
     //    gnutls_dh_params_generate2(_DHParameters, bits);
-    gnutls_priority_init(&_PriorityCache, "PERFORMANCE:%SERVER_PRECEDENCE", NULL);
+    gnutls_priority_init(&_PriorityCache, "NONE:+VERS-ALL:+ECDHE-ECDSA:+ECDHE-PSK:+PSK:+CURVE-ALL:+AES-128-CCM-8:+AES-128-CBC:+MAC-ALL:-SHA1:+COMP-ALL:+SIGN-ALL:+CTYPE-X.509", NULL);
 }
 
 void DTLS_Shutdown(void)
@@ -116,7 +116,7 @@ void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
 }
 
 
-bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength)
+bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
 {
     bool result = false;
     DTLS_Session * session = GetSession(sourceAddress);
@@ -135,6 +135,23 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
             session->SessionEstablished = (gnutls_handshake(session->Session) == GNUTLS_E_SUCCESS);
             if (session->SessionEstablished)
                 Lwm2m_Info("Session established");
+        }
+    }
+    else
+    {
+        int index;
+        for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+        {
+            if (!sessions[index].Session)
+            {
+                SetupNewSession(index, sourceAddress, false);
+                sessions[index].UserContext = context;
+                gnutls_transport_set_push_function(sessions[index].Session, SSLSendCallBack);
+                sessions[index].Buffer = encrypted;
+                sessions[index].BufferLength = encryptedLength;
+                sessions[index].SessionEstablished = (gnutls_handshake(sessions[index].Session) == GNUTLS_E_SUCCESS);
+                break;
+            }
         }
     }
     return result;
@@ -210,14 +227,13 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
         flags = GNUTLS_CLIENT | GNUTLS_DATAGRAM | GNUTLS_NONBLOCK;
     else
         flags = GNUTLS_SERVER | GNUTLS_DATAGRAM | GNUTLS_NONBLOCK;
-    if (gnutls_init(&session->Session, flags) == GNUTLS_E_SUCCESS)
 #else
     if (client)
         flags = GNUTLS_CLIENT;
     else
         flags = GNUTLS_SERVER;
-    if (gnutls_init(&session->Session, flags) == GNUTLS_E_SUCCESS)
 #endif
+    if (gnutls_init(&session->Session, flags) == GNUTLS_E_SUCCESS)
     {
         gnutls_transport_set_pull_function(session->Session, DecryptCallBack);
         gnutls_transport_set_push_function(session->Session, SSLSendCallBack);

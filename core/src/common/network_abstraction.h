@@ -53,7 +53,8 @@ typedef enum
 {
     NetworkSocketType_NotSet = 0,
     NetworkSocketType_UDP = 1,
-    NetworkSocketType_TCP = 2
+    NetworkSocketType_TCP = 2,
+    NetworkSocketType_Secure = 4
 } NetworkSocketType;
 
 
@@ -75,7 +76,7 @@ NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket);
 
 int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket);
 
-void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, uint8_t * cert, int certLength, CertificateFormat format);
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format);
 
 void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, uint8_t * key, int keyLength);
 

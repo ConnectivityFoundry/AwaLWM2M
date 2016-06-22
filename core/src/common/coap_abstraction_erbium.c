@@ -89,8 +89,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
 static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCallback callback, void * context);
 static int removeObserve(NetworkAddress * remoteAddress, char * path);
 
-
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
     Lwm2m_Info("Bind port: %d\n", port);
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
@@ -98,7 +97,10 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     DTLS_Init();
-    networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
+    if (secure)
+    	networkSocket = NetworkSocket_New(NetworkSocketType_UDP | NetworkSocketType_Secure, port);
+    else
+    	networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
     if (networkSocket)
     {
         if (NetworkSocket_StartListening(networkSocket))
@@ -107,6 +109,16 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
         }
     }
     return &coapInfo;
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+{
+	NetworkSocket_SetCertificate(networkSocket, cert, certLength, format);
+}
+
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+{
+	NetworkSocket_SetPSK(networkSocket, identity, key, keyLength);
 }
 
 void coap_SetLogLevel(int logLevel)
