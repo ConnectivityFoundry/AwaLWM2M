@@ -157,12 +157,14 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
         uriBuf[0] = '/';
         memcpy(&uriBuf[1], url, urlLen);
 
-        char queryBuf[128] = { 0 };
+        char queryBuf[128] = "?";
         const char * query = NULL;
 
         int queryLength = coap_get_header_uri_query(request, &query);
         if (queryLength > 0)
-            memcpy(queryBuf, query, queryLength);
+            memcpy(&queryBuf[1], query, queryLength);
+
+        queryBuf[queryLength+1] = '\0';
 
         CoapRequest coapRequest =
         { .ctxt = context, .addr =
@@ -186,22 +188,19 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             switch (observe)
             {
             case -1:
-                Lwm2m_Debug("Coap GET for %s\n", uriBuf)
-                ;
+                Lwm2m_Debug("Coap GET for %s\n", uriBuf);
                 coapRequest.type = COAP_GET_REQUEST;
                 requestHandler(&coapRequest, &coapResponse);
                 break;
             case 0:
-                Lwm2m_Debug("Coap OBSERVE for %s\n", uriBuf)
-                ;
+                Lwm2m_Debug("Coap OBSERVE for %s\n", uriBuf);
 
                 coapRequest.type = COAP_OBSERVE_REQUEST;
                 requestHandler(&coapRequest, &coapResponse);
                 coap_set_header_observe(response, 1);
                 break;
             case 1:
-                Lwm2m_Debug("Coap CANCEL OBSERVE for %s\n", uriBuf)
-                ;
+                Lwm2m_Debug("Coap CANCEL OBSERVE for %s\n", uriBuf);
 
                 coapRequest.type = COAP_CANCEL_OBSERVE_REQUEST;
                 requestHandler(&coapRequest, &coapResponse);
@@ -216,8 +215,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coap_get_header_content_format(request, &content);
             coapRequest.contentType = content;
             coapRequest.type = COAP_POST_REQUEST;
-            Lwm2m_Debug("Coap POST for %s\n", uriBuf)
-            ;
+            Lwm2m_Debug("Coap POST for %s\n", uriBuf);
             requestHandler(&coapRequest, &coapResponse);
             if (coapResponse.responseContentLen > 0 && coapResponse.responseCode == 201)
             {
@@ -230,8 +228,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coapRequest.contentType = content;
             coapRequest.type = COAP_PUT_REQUEST;
 
-            Lwm2m_Debug("Coap PUT for %s\n", uriBuf)
-            ;
+            Lwm2m_Debug("Coap PUT for %s\n", uriBuf);
             requestHandler(&coapRequest, &coapResponse);
             break;
 
@@ -239,8 +236,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             coapRequest.contentType = ContentType_None;
             coapRequest.type = COAP_DELETE_REQUEST;
 
-            Lwm2m_Debug("Coap DELETE for %s\n", uriBuf)
-            ;
+            Lwm2m_Debug("Coap DELETE for %s\n", uriBuf);
             requestHandler(&coapRequest, &coapResponse);
             break;
 
