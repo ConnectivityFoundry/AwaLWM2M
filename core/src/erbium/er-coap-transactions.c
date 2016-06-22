@@ -143,6 +143,7 @@ void coap_send_transaction(coap_transaction_t *t)
     }
     else
     {
+        PRINTF("Failed to sened transaciton %u\n", t->mid);
         t->sent = false;
     }
 }

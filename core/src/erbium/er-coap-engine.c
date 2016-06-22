@@ -104,7 +104,7 @@ int coap_receive(NetworkSocket * networkSocket)
 
             PRINTF("  Parsed: v %u, t %u, tkl %u, c %u, mid %u\n", message->version, message->type, message->token_len, message->code,
                     message->mid);
-            PRINTF("  URL: %.*s\n", message->uri_path_len, message->uri_path);
+            PRINTF("  URL: %.*s\n", (int)message->uri_path_len, message->uri_path);
             PRINTF("  Payload: %.*s\n", message->payload_len, message->payload);
 
             /* handle requests */
@@ -138,8 +138,8 @@ int coap_receive(NetworkSocket * networkSocket)
                     }
                     if (coap_get_header_block2(message, &block_num, NULL, &block_size, &block_offset))
                     {
-                        PRINTF("Blockwise: block request %lu (%u/%u) @ %lu bytes\n", block_num, block_size, COAP_MAX_BLOCK_SIZE,
-                                block_offset);
+                        PRINTF("Blockwise: block request %lu (%u/%u) @ %lu bytes\n", (long unsigned int)block_num, block_size, COAP_MAX_BLOCK_SIZE,
+                                (long unsigned int)block_offset);
                         block_size = MIN(block_size, COAP_MAX_BLOCK_SIZE);
                         new_offset = block_offset;
                     }
@@ -194,7 +194,7 @@ int coap_receive(NetworkSocket * networkSocket)
                                     }
                                     else
                                     {
-                                        PRINTF("Blockwise: blockwise resource, new offset %ld\n", new_offset);
+                                        PRINTF("Blockwise: blockwise resource, new offset %ld\n", (long int)new_offset);
                                         coap_set_header_block2(response, block_num, new_offset != -1 || response->payload_len > block_size,
                                                 block_size);
 

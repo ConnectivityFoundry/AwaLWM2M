@@ -430,6 +430,8 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     AwaStaticClient * client = AwaStaticClient_New();
     EXPECT_TRUE(client != NULL);
 
+    AwaStaticClient_SetLogLevel(static_cast<AwaLogLevel>(global::logLevel));
+
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetBootstrapServerURI(client, bootstrapURI.c_str()));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetEndPointName(client, clientEndpointName.c_str()));
     EXPECT_EQ(AwaError_Success, AwaStaticClient_SetCoAPListenAddressPort(client, "0.0.0.0", 5683));
@@ -442,13 +444,9 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
     EXPECT_EQ(AwaError_Success, AwaServerSession_SetIPCAsUDP(session, serverAddress.c_str(), serverIpcPort));
     EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
 
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session);
-    EXPECT_TRUE(NULL != operation);
-
-    SingleStaticClientPollCondition condition(client, operation, clientEndpointName, 10);
+    SingleStaticClientWaitCondition condition(client, session, clientEndpointName, global::timeout);
     ASSERT_TRUE(condition.Wait());
 
-    AwaServerListClientsOperation_Free(&operation);
     AwaServerSession_Free(&session);
 
     AwaStaticClient_Free(&client);
@@ -460,13 +458,8 @@ TEST_F(TestStaticClient,  AwaStaticClient_Bootstrap_Test)
 
 TEST_F(TestStaticClientWithServer,  AwaStaticClient_Factory_Bootstrap_Test)
 {
-    AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-    EXPECT_TRUE(NULL != operation);
-
-    SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 20);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     ASSERT_TRUE(condition.Wait());
-
-    AwaServerListClientsOperation_Free(&operation);
 }
 
 } // namespace Awa

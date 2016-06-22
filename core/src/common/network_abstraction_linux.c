@@ -224,6 +224,10 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                             // Matched existing address
                             free(networkAddress);
                         }
+                        else
+                        {
+                            result = networkAddress;
+                        }
                     }
                 }
             }
