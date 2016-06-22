@@ -696,7 +696,7 @@ static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * c
             if (Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID) == -1)
             {
                 Lwm2m_Error("Failed to create optional resource: /%d/%d/%d\n", objectID, objectInstanceID, resourceID);
-                result = AwaResult_InternalError;
+                result = AwaResult_GetLastResult();
                 goto error;
             }
         }
@@ -724,6 +724,7 @@ static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * c
         {
             if (Lwm2mCore_SetResourceInstanceValue(context, objectID, objectInstanceID, resourceID, id, value, length) != 0)
             {
+                Lwm2m_Error("Failed to set resource /%d/%d/%d value\n", objectID, objectInstanceID, resourceID);
                 result = AwaResult_InternalError;
                 break;
             }
@@ -1834,6 +1835,7 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
                 case Lwm2mTreeNodeType_ResourceInstance: // no break
                 default:
                     // Should never happen.
+                    Lwm2m_Error("Internal Error\n");
                     *responseCode = AwaResult_InternalError;
                     break;
             }

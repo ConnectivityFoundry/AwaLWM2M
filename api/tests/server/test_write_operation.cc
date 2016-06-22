@@ -433,7 +433,10 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_TRUE(NULL != response);
     const AwaPathResult * pathResult = AwaServerWriteResponse_GetPathResult(response, path);
     EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
-    EXPECT_EQ(AwaLWM2MError_MethodNotAllowed, AwaPathResult_GetLWM2MError(pathResult));
+
+    // libcoap returns AwaLWM2MError_MethodNotAllowed, Erbium returns AwaLWM2MError_NotFound
+    std::vector<AwaError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
+    EXPECT_TRUE(std::find(expectedErrors.begin(), expectedErrors.end(), AwaPathResult_GetLWM2MError(pathResult)) != expectedErrors.end());
 
     AwaServerWriteOperation_Free(&writeOperation);
 }
@@ -465,7 +468,6 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     AwaServerWriteOperation_Free(&writeOperation);
 }
 
-
 TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_non_existent_resource_should_fail)
 {
     ObjectDescription object = { 1000, "Object1000", 0, 1,
@@ -495,7 +497,10 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_TRUE(NULL != response);
     const AwaPathResult * pathResult = AwaServerWriteResponse_GetPathResult(response, path);
     EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
-    EXPECT_EQ(AwaLWM2MError_MethodNotAllowed, AwaPathResult_GetLWM2MError(pathResult));
+
+    // libcoap returns AwaLWM2MError_MethodNotAllowed, Erbium returns AwaLWM2MError_NotFound
+    std::vector<AwaError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
+    EXPECT_TRUE(std::find(expectedErrors.begin(), expectedErrors.end(), AwaPathResult_GetLWM2MError(pathResult)) != expectedErrors.end());
 
     AwaServerWriteOperation_Free(&writeOperation);
 }

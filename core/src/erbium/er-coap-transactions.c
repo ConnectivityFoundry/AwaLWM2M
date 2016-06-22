@@ -39,7 +39,6 @@
 #include "string.h"
 #include "../common/lwm2m_list.h"
 #include "er-coap-transactions.h"
-#include "er-coap-observe.h"
 
 /*---------------------------------------------------------------------------*/
 //MEMB(transactions_memb, coap_transaction_t, COAP_MAX_OPEN_TRANSACTIONS);
@@ -144,6 +143,7 @@ void coap_send_transaction(coap_transaction_t *t)
     }
     else
     {
+        PRINTF("Failed to sened transaciton %u\n", t->mid);
         t->sent = false;
     }
 }

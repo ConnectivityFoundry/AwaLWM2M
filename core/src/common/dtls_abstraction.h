@@ -47,6 +47,8 @@ typedef enum
 
 typedef NetworkTransmissionError (*DTLS_NetworkSendCallback)(NetworkAddress * destAddress,const uint8_t * buffer, int bufferLength, void *context);
 
+extern const char * DTLS_LibraryName;
+
 void DTLS_Init(void);
 
 void DTLS_Shutdown(void);
@@ -57,7 +59,7 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback);
 
 void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength);
 
-bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength);
+bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context);
 
 bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTextLength, uint8_t * encryptedBuffer, int encryptedBufferLength, int * encryptedLength, void *context);
 

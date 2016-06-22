@@ -41,6 +41,7 @@
 #include "lwm2m_core.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
+#include "dtls_abstraction.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_connectivity_object.h"
@@ -53,6 +54,7 @@
 #include "lwm2m_client_xml_handlers.h"
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_object_defs.h"
+#include "lwm2m_client_cert.h"
 
 
 #define DEFAULT_COAP_PORT (6000)
@@ -185,17 +187,21 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("Awa LWM2M Client, version %s\n", version);
     Lwm2m_Info("  Process ID     : %d\n", getpid());
     Lwm2m_Info("  Endpoint name  : \'%s\'\n", options->EndPointName);
+    Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
+    Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
     Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
-    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
         result = 1;
         goto error_close_log;
     }
+
+    coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
 
     // if required read the bootstrap information from a file
     const BootstrapInfo * factoryBootstrapInfo;

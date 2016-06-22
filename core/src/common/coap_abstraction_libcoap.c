@@ -85,6 +85,8 @@ typedef struct
     AddressType * Address;
 } NotificationHandler;
 
+const char * coap_LibraryName = "libcoap";
+
 static struct ListHead transactionCallbackList;
 static struct ListHead notifyCallbackList;
 static coap_context_t * coapContext = NULL;
@@ -1148,7 +1150,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     }
 }
 
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
     char port_str[32];
 
@@ -1171,6 +1173,20 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     ListInit(&notifyCallbackList);
 
     return &coapInfo;
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+{
+	(void)cert;
+	(void)certLength;
+	(void)format;
+}
+
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+{
+    (void)identity;
+    (void)key;
+    (void)keyLength;
 }
 
 void coap_SetLogLevel(int logLevel)

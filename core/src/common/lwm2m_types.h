@@ -71,7 +71,7 @@ typedef struct
         struct sockaddr_in  Sin;
         struct sockaddr_in6 Sin6;
     } Addr;
-
+    bool Secure;
 } AddressType;
 #endif
 
@@ -80,6 +80,7 @@ typedef struct
 {
     int Port;
     uip_ipaddr_t Addr;
+    bool Secure;
 } AddressType;
 #endif
 
