@@ -1376,8 +1376,8 @@ TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
     pthread_t executeThread;
     pthread_create(&executeThread, NULL, do_execute_operation, (void *)updateExecute);
     EXPECT_TRUE(cbHandler.Wait());
-    //Expecting two registration updates
-    EXPECT_EQ(2, cbHandler.count);
+    //Expecting one or more registration updates
+    EXPECT_GT(cbHandler.count, 0);
     pthread_join(executeThread, NULL);
 
     AwaServerExecuteOperation_Free(&updateExecute);
