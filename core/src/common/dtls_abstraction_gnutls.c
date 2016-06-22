@@ -31,6 +31,14 @@
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
+typedef enum
+{
+    CredentialType_NotSet,
+    CredentialType_ClientPSK,
+    CredentialType_ServerPSK
+}CredentialType;
+
+
 typedef struct
 {
     NetworkAddress * NetworkAddress;
@@ -64,10 +72,12 @@ DTLS_NetworkSendCallback NetworkSend = NULL;
 //Comment out as init of DH params takes a while
 //static gnutls_dh_params_t _DHParameters;
 static gnutls_priority_t _PriorityCache;
+static gnutls_certificate_credentials_t _CertCredentials = NULL;
 
 
 static DTLS_Session * GetSession(NetworkAddress * address);
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
+static void FreeSession(DTLS_Session * session);
 static ssize_t DecryptCallBack(gnutls_transport_ptr_t context, void *recieveBuffer, size_t receiveBufferLegth);
 static ssize_t EncryptCallBack(gnutls_transport_ptr_t context, const void * sendBuffer,size_t sendBufferLength);
 static int PSKClientCallBack(gnutls_session_t session, char **username, gnutls_datum_t * key);
@@ -77,6 +87,7 @@ static ssize_t SSLSendCallBack(gnutls_transport_ptr_t context, const void * send
 static int ReceiveTimeout(gnutls_transport_ptr_t context, unsigned int ms);
 static int CertificateVerify(gnutls_session_t session);
 #endif
+
 
 
 void DTLS_Init(void)
@@ -91,6 +102,11 @@ void DTLS_Init(void)
 
 void DTLS_Shutdown(void)
 {
+    if (_CertCredentials)
+    {
+        gnutls_certificate_free_credentials(_CertCredentials);
+        _CertCredentials = NULL;
+    }
 //  gnutls_dh_params_deinit(_DHParameters);
     gnutls_priority_deinit(_PriorityCache);
     gnutls_global_deinit();
@@ -128,6 +144,11 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
         {
             *decryptedLength = gnutls_read(session->Session, decryptBuffer, decryptBufferLength);
             result = (*decryptedLength > 0);
+            if (!result)
+            {
+                FreeSession(session);
+                session = NULL;
+            }
         }
         else
         {
@@ -137,7 +158,8 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
                 Lwm2m_Info("Session established");
         }
     }
-    else
+
+    if (!session)
     {
         int index;
         for (index = 0;index < MAX_DTLS_SESSIONS; index++)
@@ -244,8 +266,11 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
 
         if (certificate || !pskIdentity)
         {
-            gnutls_certificate_credentials_t credentials;
-            if (gnutls_certificate_allocate_credentials(&credentials) == GNUTLS_E_SUCCESS)
+            if (_CertCredentials)
+            {
+                gnutls_credentials_set(session->Session, GNUTLS_CRD_CERTIFICATE, _CertCredentials);
+            }
+            else if (gnutls_certificate_allocate_credentials(&_CertCredentials) == GNUTLS_E_SUCCESS)
             {
                 if (certificate)
                 {
@@ -258,17 +283,16 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
     //                if (client)
     //                    gnutls_certificate_set_x509_trust_mem(session->Credentials, &certificateData, format);
     //                else
-                    gnutls_certificate_set_x509_key_mem(credentials, &certificateData, &certificateData, format);
+                    gnutls_certificate_set_x509_key_mem(_CertCredentials, &certificateData, &certificateData, format);
                 }
 #if GNUTLS_VERSION_MAJOR >= 3
-                    gnutls_certificate_set_verify_function(credentials, CertificateVerify);
+                    gnutls_certificate_set_verify_function(_CertCredentials, CertificateVerify);
                     //gnutls_certificate_set_retrieve_function(xcred, cert_callback);
                     //gnutls_session_set_verify_cert(session->Session, NULL, GNUTLS_VERIFY_DISABLE_CA_SIGN);
 #else
-                    gnutls_certificate_set_verify_flags(credentials, GNUTLS_VERIFY_DISABLE_CA_SIGN);
+                    gnutls_certificate_set_verify_flags(_CertCredentials, GNUTLS_VERIFY_DISABLE_CA_SIGN);
 #endif
-                gnutls_credentials_set(session->Session, GNUTLS_CRD_CERTIFICATE, credentials);
-                session->Credentials = credentials;
+                gnutls_credentials_set(session->Session, GNUTLS_CRD_CERTIFICATE, _CertCredentials);
             }
         }
         else if (pskIdentity)
@@ -282,11 +306,13 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                     {
                         gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
                         session->Credentials = credentials;
+                        session->CredentialType = CredentialType_ClientPSK;
                     }
                     else
                     {
                         gnutls_psk_set_client_credentials_function(credentials, PSKClientCallBack);
                         session->Credentials = credentials;
+                        session->CredentialType = CredentialType_ClientPSK;
                     }
                 }
             }
@@ -298,6 +324,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                     gnutls_psk_set_server_credentials_function(credentials, PSKCallBack);
                     gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
                     session->Credentials = credentials;
+                    session->CredentialType = CredentialType_ServerPSK;
                 }
             }
         }
@@ -315,6 +342,20 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
     }
 }
 
+static void FreeSession(DTLS_Session * session)
+{
+    if (session->Credentials)
+    {
+        if (session->CredentialType == CredentialType_ClientPSK)
+            gnutls_psk_free_client_credentials(session->Credentials);
+        else if (session->CredentialType == CredentialType_ServerPSK)
+            gnutls_psk_free_server_credentials(session->Credentials);
+
+    }
+    gnutls_deinit(session->Session);
+    memset(session,0, sizeof(DTLS_Session));
+
+}
 
 #if GNUTLS_VERSION_MAJOR >= 3
 static int CertificateVerify(gnutls_session_t session)
