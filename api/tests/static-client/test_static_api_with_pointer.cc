@@ -529,8 +529,8 @@ public:
 
     struct callback1 : public StaticClientCallbackWaitCondition
     {
-        callback1(AwaStaticClient * StaticClient, int maxCount, AwaServerSession * session) :
-            StaticClientCallbackWaitCondition(StaticClient, maxCount),
+        callback1(AwaStaticClient * StaticClient, int milliseconds, AwaServerSession * session) :
+            StaticClientCallbackWaitCondition(StaticClient, milliseconds),
             session_(session) {};
         virtual bool Check()
         {

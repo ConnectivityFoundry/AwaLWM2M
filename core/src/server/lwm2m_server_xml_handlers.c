@@ -993,6 +993,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
     }
     else
     {
+        Lwm2m_Error("No response\n");
         responseNode = IPC_NewResponseNode(subType, AwaResult_InternalError, request->SessionID);
     }
     IPC_SendResponse(responseNode, IPCSockFd, IPCAddr, IPCAddrLen);

@@ -1251,7 +1251,7 @@ struct EventWaitCondition : public WaitCondition
     int CallbackCount;
 
     EventWaitCondition(AwaServerSession * ServerSession, AwaStaticClient * StaticClient, std::string ClientEndpointName, int callbackCountMax) :
-        WaitCondition(50e4),
+        WaitCondition(50e4, global::timeout * 1e3 * 20),
         ServerSession(ServerSession),
         StaticClient(StaticClient),
         ClientEndpointName(ClientEndpointName),
@@ -1261,7 +1261,7 @@ struct EventWaitCondition : public WaitCondition
 
     virtual bool Check()
     {
-        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, global::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(ServerSession, this->checkPeriod_ / 1e3));
         EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(ServerSession));
         if (StaticClient != NULL)
         {
@@ -1339,7 +1339,7 @@ TEST_F(TestServerEventsWithConnectedSession, ClientRegisterEvent)
 TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
 {
 
-    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, 20);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     ASSERT_TRUE(condition.Wait());
 
     struct CallbackHandler1 : public EventWaitCondition
@@ -1386,7 +1386,7 @@ TEST_F(TestServerEventsWithConnectedSession, ClientUpdateEvent)
 TEST_F(TestServerEventsWithConnectedSession, ClientDeregisterEvent)
 {
 
-    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, 20);
+    SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
     ASSERT_TRUE(condition.Wait());
 
     struct CallbackHandler1 : public EventWaitCondition
