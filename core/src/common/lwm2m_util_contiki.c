@@ -45,7 +45,17 @@ uint64_t Lwm2mCore_GetTickCountMs(void)
 
 void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * addr)
 {
-    snprintf(path, pathSize, "coap://[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]:%d", uip_htons(addr->Addr.u16[0]), uip_htons(addr->Addr.u16[1]), uip_htons(addr->Addr.u16[2]), uip_htons(addr->Addr.u16[3]), uip_htons(addr->Addr.u16[4]), uip_htons(addr->Addr.u16[5]), uip_htons(addr->Addr.u16[6]), uip_htons(addr->Addr.u16[7]), addr->Port);
+    memcpy(path,"coap",4);
+    path += 4;
+    pathSize -= 4;
+
+    if (addr->Secure)
+    {
+        *path = 's';
+        path++;
+        pathSize--;
+    }
+    snprintf(path, pathSize, "://[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]:%d", uip_htons(addr->Addr.u16[0]), uip_htons(addr->Addr.u16[1]), uip_htons(addr->Addr.u16[2]), uip_htons(addr->Addr.u16[3]), uip_htons(addr->Addr.u16[4]), uip_htons(addr->Addr.u16[5]), uip_htons(addr->Addr.u16[6]), uip_htons(addr->Addr.u16[7]), addr->Port);
 }
 
 const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)

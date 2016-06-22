@@ -49,8 +49,9 @@ void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
 }
 
 
-bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength)
+bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
 {
+    (void)context;
     bool result = false;
     if (encryptedLength <= decryptBufferLength && encryptedLength > 0)
     {
@@ -63,6 +64,7 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
 
 bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTextLength, uint8_t * encryptedBuffer, int encryptedBufferLength, int * encryptedLength, void *context)
 {
+    (void)context;
     bool result = false;
     if (plainTextLength <= encryptedBufferLength && plainTextLength > 0)
     {

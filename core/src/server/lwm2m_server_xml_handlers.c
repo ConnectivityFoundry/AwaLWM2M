@@ -319,17 +319,26 @@ const char * xmlif_GetURIForClient(Lwm2mClientType * client, ObjectInstanceResou
             break;
     }
 
+    char * path = uri;
+    memcpy(path, "coap", 4);
+    path += 4;
+    if (client->Address.Secure)
+    {
+        *path = 's';
+        path++;
+    }
+
     if (key->ResourceID != -1)
     {
-        sprintf(uri, "coap://%s/%d/%d/%d", addr, key->ObjectID, key->InstanceID, key->ResourceID);
+        sprintf(path, "://%s/%d/%d/%d", addr, key->ObjectID, key->InstanceID, key->ResourceID);
     }
     else if (key->InstanceID != -1)
     {
-        sprintf(uri, "coap://%s/%d/%d", addr, key->ObjectID, key->InstanceID);
+        sprintf(path, "://%s/%d/%d", addr, key->ObjectID, key->InstanceID);
     }
     else
     {
-        sprintf(uri, "coap://%s/%d", addr, key->ObjectID);
+        sprintf(path, "://%s/%d", addr, key->ObjectID);
     }
 
     return (const char *)&uri[0];

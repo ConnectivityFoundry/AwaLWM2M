@@ -278,6 +278,7 @@ void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addre
     {
         addressType->Size = sizeof(addressType->Addr);
         memcpy(&addressType->Addr, &address->Address, addressType->Size);
+        addressType->Secure = address->Secure;
 //        if (addressType->Addr.Sa.sa_family == AF_INET6)
 //            addressType->Addr.Sin6.sin6_port = ntohs(address->Address.Sin6.sin6_port);
 //        else
@@ -457,7 +458,7 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
     return result;
 }
 
-void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, uint8_t * cert, int certLength, CertificateFormat format)
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format)
 {
     DTLS_SetCertificate(cert, certLength, format);
 }
@@ -476,7 +477,7 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
     {
         int protocol = IPPROTO_UDP;
         int socketMode = SOCK_DGRAM;
-        if (networkSocket->SocketType == NetworkSocketType_TCP)
+        if ((networkSocket->SocketType & NetworkSocketType_TCP) == NetworkSocketType_TCP)
         {
             protocol = IPPROTO_TCP;
             socketMode = SOCK_STREAM;
@@ -567,6 +568,7 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
         size_t size = sizeof(struct _NetworkAddress);
         memset(&matchAddress, 0, size);
         memcpy(&matchAddress.Address.Sa, &sourceSocket, sourceSocketLength);
+        matchAddress.Secure = (networkSocket->SocketType & NetworkSocketType_Secure) == NetworkSocketType_Secure;
         networkAddress = getCachedAddress(&matchAddress, NULL, 0);
 
         if (networkAddress == NULL)
@@ -598,7 +600,7 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
         if (buffer && bufferLength > 0 && readLength)
         {
             *readLength = 0;
-            if (networkSocket->SocketType == NetworkSocketType_UDP)
+            if ((networkSocket->SocketType & NetworkSocketType_UDP) == NetworkSocketType_UDP)
             {
                 if (sourceAddress)
                 {
@@ -616,7 +618,7 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
                    }
                    if ((*readLength > 0) && *sourceAddress && (*sourceAddress)->Secure)
                    {
-                       if (DTLS_Decrypt(*sourceAddress, buffer, *readLength, encryptBuffer, ENCRYPT_BUFFER_LENGTH, readLength))
+                       if (DTLS_Decrypt(*sourceAddress, buffer, *readLength, encryptBuffer, ENCRYPT_BUFFER_LENGTH, readLength, networkSocket))
                        {
                            if (*readLength > 0)
                            {
@@ -709,7 +711,7 @@ bool NetworkSocket_Send(NetworkSocket * networkSocket, NetworkAddress * destAddr
         networkSocket->LastError = NetworkSocketError_NoError;
         if (buffer && bufferLength > 0)
         {
-            if (networkSocket->SocketType == NetworkSocketType_UDP)
+            if ((networkSocket->SocketType & NetworkSocketType_UDP) == NetworkSocketType_UDP)
             {
                 if (destAddress)
                 {
