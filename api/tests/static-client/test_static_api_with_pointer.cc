@@ -530,7 +530,7 @@ public:
     struct callback1 : public StaticClientCallbackWaitCondition
     {
         callback1(AwaStaticClient * StaticClient, int maxCount, AwaServerSession * session) :
-            StaticClientCallbackPollCondition(StaticClient, maxCount),
+            StaticClientCallbackWaitCondition(StaticClient, maxCount),
             session_(session) {};
         virtual bool Check()
         {
