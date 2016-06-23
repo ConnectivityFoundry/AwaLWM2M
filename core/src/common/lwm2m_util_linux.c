@@ -60,17 +60,29 @@ void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * add
     const char* ip;
     int port;
 
+
+    memcpy(path, "coap", 4);
+    path += 4;
+    pathSize -= 4;
+
+    if (addr->Secure)
+    {
+        *path = 's';
+        path++;
+        pathSize--;
+    }
+
     switch (addr->Addr.Sa.sa_family)
     {
         case AF_INET:
             ip = inet_ntop(AF_INET, &addr->Addr.Sin.sin_addr, buffer, sizeof(buffer));
             port = ntohs(addr->Addr.Sin.sin_port);
-            snprintf(path, pathSize, "coap://%s:%d", ip, port);
+            snprintf(path, pathSize, "://%s:%d", ip, port);
             break;
         case AF_INET6:
             ip = inet_ntop(AF_INET6, &addr->Addr.Sin6.sin6_addr, buffer, sizeof(buffer));
             port =  ntohs(addr->Addr.Sin6.sin6_port);
-            snprintf(path, pathSize, "coap://[%s]:%d", ip, port);
+            snprintf(path, pathSize, "://[%s]:%d", ip, port);
             break;
         default:
             Lwm2m_Error("Unsupported address family: %d\n", addr->Addr.Sa.sa_family);

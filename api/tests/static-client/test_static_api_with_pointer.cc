@@ -529,8 +529,9 @@ public:
 
     struct callback1 : public StaticClientCallbackWaitCondition
     {
-        callback1(AwaStaticClient * StaticClient, int maxCount, AwaServerSession * session) : StaticClientCallbackWaitCondition(StaticClient, maxCount),
-                                                                                              session_(session){};
+        callback1(AwaStaticClient * StaticClient, int milliseconds, AwaServerSession * session) :
+            StaticClientCallbackWaitCondition(StaticClient, milliseconds),
+            session_(session) {};
         virtual bool Check()
         {
             if (!observeThreadAlive_)
@@ -722,11 +723,11 @@ TEST_P(TestStaticClientObserveValue, TestObserveValueSingle)
     Lwm2m_Debug("Performing Observe Operation\n");
 
     pthread_t t;
-    ServerObserveThreadContext serverObserveContext_;
-    memset(&serverObserveContext_, 0, sizeof(serverObserveContext_));
-    serverObserveContext_.ObserveOperation = observeOperation;
-    serverObserveContext_.ObserveThreadAlive = &cbHandler_->observeThreadAlive_;
-    pthread_create(&t, NULL, do_observe_operation, (void *)&serverObserveContext_);
+    ServerObserveThreadContext serverObserveContext;
+    memset(&serverObserveContext, 0, sizeof(serverObserveContext));
+    serverObserveContext.ObserveOperation = observeOperation;
+    serverObserveContext.ObserveThreadAlive = &cbHandler_->observeThreadAlive_;
+    pthread_create(&t, NULL, do_observe_operation, (void *)&serverObserveContext);
 
     ASSERT_TRUE(cbHandler_->Wait(5e6));
 

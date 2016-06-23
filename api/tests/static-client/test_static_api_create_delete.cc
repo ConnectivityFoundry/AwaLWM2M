@@ -130,6 +130,7 @@ TEST_F(TestStaticClientCreateDeleteWithServer, AwaStaticClient_CreateDelete_Reso
 
     const AwaInteger * responseValue = NULL;
     EXPECT_EQ(AwaError_Success, AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, "/7997/0/1", &responseValue));
+    ASSERT_TRUE(NULL != responseValue);
     ASSERT_EQ(i, *responseValue);
 
     ASSERT_EQ(AwaError_Success, AwaStaticClient_DeleteResource(client_, 7997, 0, 1));
