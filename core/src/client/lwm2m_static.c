@@ -98,7 +98,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     {
         if (client->CoAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
-            client->CoAPInfo = coap_Init(client->CoAPListenAddress, client->CoAPListenPort, Lwm2m_GetLogLevel());
+            client->CoAPInfo = coap_Init(client->CoAPListenAddress, client->CoAPListenPort, false, Lwm2m_GetLogLevel());
 
             if (client->CoAPInfo != NULL)
             {

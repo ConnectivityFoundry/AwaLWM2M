@@ -41,7 +41,8 @@ static const char * WriteModeStrings[] =
 
 const char * WriteMode_ToString(AwaWriteMode writeMode)
 {
-    static const char * result = "Unknown WriteMode";
+    static const char * UnknownResult = "Unknown WriteMode";
+    const char * result = UnknownResult;
     size_t numEntries = WriteMode_GetNumberOfWriteModeStrings();
 
     if ((writeMode >= 0) && (writeMode < numEntries))

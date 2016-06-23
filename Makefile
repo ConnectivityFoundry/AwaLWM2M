@@ -113,7 +113,7 @@ TEST_PATHS=--clientDaemonPath=$(LWM2M_CLIENTD_BIN) \
 .PHONY: gtest_tests
 gtest_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)
 	$(TEST_SRC_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_SRC_XML)"        $(TEST_PATHS)
-	$(TEST_STATIC_API_BIN) $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_STATIC_API_XML)" $(TEST_PATHS)
+	$(TEST_STATIC_API_BIN) $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_STATIC_API_XML)" $(TEST_PATHS) --defaultTimeout=5000
 	$(TEST_API_BIN)        $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_API_XML)"        $(TEST_PATHS)
 	$(TEST_TOOLS_BIN)      $(TEST_OPTIONS) $(GTEST_OPTIONS) --gtest_output="xml:$(TEST_TOOLS_XML)"      $(TEST_PATHS)
 

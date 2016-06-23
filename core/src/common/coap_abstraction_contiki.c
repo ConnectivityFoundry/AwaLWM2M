@@ -473,10 +473,24 @@ int coap_Poll(void)
     return 0;
 }
 
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
     rest_init_engine();
     return &coapInfo;
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+{
+	(void)cert;
+	(void)certLength;
+	(void)format;
+}
+
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+{
+	(void)identity;
+	(void)key;
+	(void)keyLength;
 }
 
 void coap_SetLogLevel(int logLevel)

@@ -157,6 +157,7 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
+                Lwm2m_Error("Invalid float\n");
                 AwaResult_SetResult(AwaResult_InternalError);
                 goto error;
             }

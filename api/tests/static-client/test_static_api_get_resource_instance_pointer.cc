@@ -113,11 +113,8 @@ protected:
 
         EXPECT_EQ(AwaError_Success, AwaStaticClient_CreateObjectInstance(client_, data.ObjectID, 0));
 
-        AwaServerListClientsOperation * operation = AwaServerListClientsOperation_New(session_);
-        EXPECT_TRUE(NULL != operation);
-        SingleStaticClientPollCondition condition(client_, operation, global::clientEndpointName, 10);
+        SingleStaticClientWaitCondition condition(client_, session_, global::clientEndpointName, global::timeout);
         EXPECT_TRUE(condition.Wait());
-        AwaServerListClientsOperation_Free(&operation);
 
         AwaServerDefineOperation * defineOperation = AwaServerDefineOperation_New(session_);
         EXPECT_TRUE(defineOperation != NULL);
@@ -198,11 +195,13 @@ TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointe
         ValueSize++;
     ASSERT_EQ(data.ValueSize, ValueSize);
 
-    pthread_t readThread;
-    pthread_create(&readThread, NULL, do_read_operation, (void *)readOperation_);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-    pthread_join(readThread, NULL);
+    StaticClientProccessInfo processInfo = { .Run = true, .StaticClient = client_ };
+    pthread_t processThread;
+
+    pthread_create(&processThread, NULL, do_static_client_process, &processInfo);
+    AwaServerReadOperation_Perform(readOperation_, global::timeout * 20);
+    processInfo.Run = false;
+    pthread_join(processThread, NULL);
 
     const AwaServerReadResponse * readResponse = AwaServerReadOperation_GetResponse(readOperation_, global::clientEndpointName);
     EXPECT_TRUE(readResponse != NULL);
@@ -262,11 +261,12 @@ TEST_P(TestStaticClientGetResourceInstancePointer, TestGetResourceInstancePointe
             break;
     }
 
-    pthread_t writeThread;
-    pthread_create(&writeThread, NULL, do_write_operation, (void *)writeOperation_);
-    AwaStaticClient_Process(client_);
-    AwaStaticClient_Process(client_);
-    pthread_join(writeThread, NULL);
+    processInfo.Run = true;
+    pthread_create(&processThread, NULL, do_static_client_process, &processInfo);
+    AwaServerWriteOperation_Perform(writeOperation_, global::clientEndpointName, global::timeout * 20);
+    processInfo.Run = false;
+    pthread_join(processThread, NULL);
+
 
     ASSERT_EQ(0, memcmp(data.Value, StaticClientAllocedValue_, data.ValueSize));
 }

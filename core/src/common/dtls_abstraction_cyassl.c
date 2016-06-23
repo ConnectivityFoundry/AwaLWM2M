@@ -125,8 +125,9 @@ void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
 }
 
 
-bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength)
+bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
 {
+    (void)context;
     bool result = false;
     DTLS_Session * session = GetSession(sourceAddress);
     if (session)

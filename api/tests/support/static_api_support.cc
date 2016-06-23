@@ -50,7 +50,7 @@ AwaResult handler(AwaStaticClient * context, AwaOperation operation, AwaObjectID
 
     if (callback)
     {
-        auto * callbackClass = static_cast<StaticClientCallbackPollCondition*>(callback);
+        auto * callbackClass = static_cast<StaticClientCallbackWaitCondition*>(callback);
         result = callbackClass->handler(context, operation, objectID, objectInstanceID, resourceID, resourceInstanceID, dataPointer, dataSize, changed);
     }
 
@@ -78,6 +78,17 @@ void * do_execute_operation(void * attr)
 {
     AwaServerExecuteOperation * executeOperation = (AwaServerExecuteOperation *)attr;
     AwaServerExecuteOperation_Perform(executeOperation, global::timeout);
+    return 0;
+}
+
+void * do_static_client_process(void * attr)
+{
+    StaticClientProccessInfo * processInfo = (StaticClientProccessInfo *)attr;
+
+    while(processInfo->Run)
+    {
+        AwaStaticClient_Process(processInfo->StaticClient);
+    }
     return 0;
 }
 
