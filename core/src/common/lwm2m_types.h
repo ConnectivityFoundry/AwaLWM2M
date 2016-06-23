@@ -89,6 +89,7 @@ typedef struct
 {
     uint16_t Port;
     uint32_t Address;
+    bool Secure;
 } AddressType;
 #endif
 
