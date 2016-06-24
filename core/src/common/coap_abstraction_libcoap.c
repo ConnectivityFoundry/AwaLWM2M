@@ -246,6 +246,7 @@ static int create_Transaction(coap_tid_t transactionID, coap_address_t * address
         return -1;
     }
 
+    memset(transaction, 0, sizeof(*transaction));
     transaction->TransactionID = transactionID;
     transaction->Context = context;
     transaction->Callback = transactionCallback;
