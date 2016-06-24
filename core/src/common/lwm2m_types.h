@@ -28,12 +28,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef POSIX
+#ifndef CONTIKI
+#ifndef MICROCHIP_PIC32
   #include <sys/socket.h>
   #include <netinet/in.h>
 #endif
-
-#ifdef CONTIKI
+#else
   #include "net/ip/uip.h"
 #endif
 
@@ -60,7 +60,8 @@ typedef int ObjectInstanceIDType;
 typedef int ResourceIDType;
 typedef int ResourceInstanceIDType;
 
-#ifdef POSIX
+#ifndef CONTIKI
+#ifndef MICROCHIP_PIC32
 typedef struct
 {
     socklen_t Size;
@@ -73,6 +74,7 @@ typedef struct
     } Addr;
     bool Secure;
 } AddressType;
+#endif
 #endif
 
 #ifdef CONTIKI
