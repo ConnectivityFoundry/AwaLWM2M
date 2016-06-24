@@ -30,6 +30,13 @@
 #define CYASSL_DTLS
 #endif
 
+#ifdef MICROCHIP_PIC32
+#ifndef XMALLOC_USER
+#define XMALLOC_USER
+#endif
+#include <tcpip/berkeley_api.h>
+#endif // MICROCHIP_PIC32
+
 #include "cyassl/ssl.h"
 #include "cyassl/version.h"
 #include "cyassl/ctaocrypt/memory.h"
@@ -70,6 +77,11 @@ static int EncryptCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBuffer
 static unsigned int PSKCallBack(CYASSL* sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len);
 static int SSLSendCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
 
+#ifdef MICROCHIP_PIC32
+#ifndef wolfDTLSv1_2_client_method
+WOLFSSL_METHOD* wolfDTLSv1_2_client_method(void);
+#endif
+#endif
 
 void *XMALLOC(size_t n, void* heap, int type)
 {

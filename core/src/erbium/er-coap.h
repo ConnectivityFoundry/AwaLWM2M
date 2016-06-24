@@ -43,7 +43,6 @@
 #include "er-coap-constants.h"
 #include "er-coap-conf.h"
 
-
 #ifdef CONTIKI
 
 #include "contiki-net.h"
@@ -59,9 +58,7 @@
 
 typedef uip_ipaddr_t ipaddr_t
 
-#endif
-
-#ifdef POSIX
+#else
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -78,7 +75,8 @@ typedef uip_ipaddr_t ipaddr_t
 #define MIN(n, m)   (((n) < (m)) ? (n) : (m))
 #define random_rand random
 
-#endif
+#endif // CONTIKI
+
 
 #ifndef REST_MAX_CHUNK_SIZE
 #define REST_MAX_CHUNK_SIZE (512)
@@ -107,8 +105,8 @@ typedef uip_ipaddr_t ipaddr_t
 
 #endif
 
-        /* bitmap for set options */
-        enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
+/* bitmap for set options */
+enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
 
 #define SET_OPTION(packet, opt) ((packet)->options[opt / OPTION_MAP_SIZE] |= 1 << (opt % OPTION_MAP_SIZE))
 #define IS_OPTION(packet, opt) ((packet)->options[opt / OPTION_MAP_SIZE] & (1 << (opt % OPTION_MAP_SIZE)))
