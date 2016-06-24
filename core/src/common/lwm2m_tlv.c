@@ -711,11 +711,9 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
                 case sizeof(float):
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(float*)value);
                     break;
-#ifndef MICROCHIP_PIC32                    
                 case sizeof(double):
                     valueLength = TlvEncodeFloat(buffer, len, type, id, *(double*)value);
                     break;
-#endif                    
                 default:
                     Lwm2m_Error("Invalid length for float: %d\n", size);
                     break;

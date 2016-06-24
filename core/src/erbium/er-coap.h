@@ -58,45 +58,25 @@
 
 typedef uip_ipaddr_t ipaddr_t
 
+#else
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
+
+#define ERBIUM_DEBUG 0
+#if ERBIUM_DEBUG
+#define PRINTF printf
+#else
+#define PRINTF(...)
+#endif
+#define MIN(n, m)   (((n) < (m)) ? (n) : (m))
+#define random_rand random
+
 #endif // CONTIKI
 
-#ifdef POSIX
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
-
-#define ERBIUM_DEBUG 0
-#if ERBIUM_DEBUG
-#define PRINTF printf
-#else
-#define PRINTF(...)
-#endif
-#define MIN(n, m)   (((n) < (m)) ? (n) : (m))
-#define random_rand random
-
-#endif // POSIX
-
-#ifdef MICROCHIP_PIC32      // TODO - fixme
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
-
-#define ERBIUM_DEBUG 0
-#if ERBIUM_DEBUG
-#define PRINTF printf
-#else
-#define PRINTF(...)
-#endif
-#define MIN(n, m)   (((n) < (m)) ? (n) : (m))
-#define random_rand random
-
-#endif // MICROCHIP_PIC32
 
 #ifndef REST_MAX_CHUNK_SIZE
 #define REST_MAX_CHUNK_SIZE (512)

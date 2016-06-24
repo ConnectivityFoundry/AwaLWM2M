@@ -30,17 +30,16 @@
 #define CYASSL_DTLS
 #endif
 
+#ifdef MICROCHIP_PIC32
 #ifndef XMALLOC_USER
 #define XMALLOC_USER
 #endif
+#include <tcpip/berkeley_api.h>
+#endif // MICROCHIP_PIC32
 
 #include "cyassl/ssl.h"
 #include "cyassl/version.h"
 #include "cyassl/ctaocrypt/memory.h"
-
-#ifdef MICROCHIP_PIC32
-#include <tcpip/berkeley_api.h>
-#endif
 
 typedef struct
 {

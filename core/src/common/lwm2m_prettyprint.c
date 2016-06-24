@@ -184,11 +184,9 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             case sizeof(float):
                 valueLength =  PPEncodeFloat(valueBuffer, len - headerLen, *(float*)value);
                 break;
-#ifndef MICROCHIP_PIC32         // TODO - FIXME       
             case sizeof(double):
                 valueLength =  PPEncodeFloat(valueBuffer, len - headerLen, *(double*)value);
                 break;
-#endif
             default:
                 Lwm2m_Error("ERROR: prettyprint - invalid length for float\n");
                 break;

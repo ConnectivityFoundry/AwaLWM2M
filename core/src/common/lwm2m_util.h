@@ -61,7 +61,7 @@ int64_t ptrToInt64(void * ptr);
 void Lwm2mCore_AddressTypeToPath(char * path, size_t pathSize, AddressType * addr);
 
 #ifndef CONTIKI
-#ifndef MICROCHIP_PIC32      // TODO - FIXME: try ifdef POSIX ?
+#ifndef MICROCHIP_PIC32
 const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa);
 #endif
 #endif
