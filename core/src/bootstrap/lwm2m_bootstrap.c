@@ -52,7 +52,7 @@ typedef struct
     char * EndPointName;
 } Lwm2mBootstrapClient;
 
-static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS];
+static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS] = { 0 };
 
 static char * GetEndPointNameFromQuery(const char * query)
 {
