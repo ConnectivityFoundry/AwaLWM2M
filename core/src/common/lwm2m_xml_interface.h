@@ -72,6 +72,18 @@ TreeNode xmlif_GenerateConnectResponse(DefinitionRegistry * definitionRegistry, 
 
 TreeNode xmlif_ConstructObjectDefinitionNode(const DefinitionRegistry * definitions, const ObjectDefinition * objFormat, int objectID);
 
+int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
+                                   TreeNode objectMetadataNode,
+                                   ObjectOperationHandlers * objectOperationHandlers,
+                                   ResourceOperationHandlers * resourceOperationHandlers,
+                                   ResourceOperationHandlers * executeOperationHandlers);
+
+int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
+                                            TreeNode objectDefinitionNode,
+                                            ObjectOperationHandlers * objectOperationHandlers,
+                                            ResourceOperationHandlers * resourceOperationHandlers,
+                                            ResourceOperationHandlers * executeOperationHandlers);
+
 #ifdef __cplusplus
 }
 #endif

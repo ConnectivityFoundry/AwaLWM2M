@@ -48,6 +48,7 @@
 #include "lwm2m_ipc.h"
 #include "ipc_session.h"
 #include "../../api/src/ipc_defs.h"
+#include "lwm2m_core.h"
 
 typedef struct
 {
@@ -434,6 +435,497 @@ TreeNode xmlif_ConstructObjectDefinitionNode(const DefinitionRegistry * definiti
 
 error:
     return NULL;
+}
+
+// Accept ObjectMetadata (IPC XML)
+int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
+                                   TreeNode objectMetadataNode,
+                                   ObjectOperationHandlers * objectOperationHandlers,
+                                   ResourceOperationHandlers * resourceOperationHandlers,
+                                   ResourceOperationHandlers * executeOperationHandlers)
+{
+    int result = AwaResult_Success;
+    int res;
+    ObjectIDType objectID = -1;
+    const char * objectName = NULL;
+    const char * value;
+    TreeNode node;
+
+    uint16_t maximumInstances = 1;
+    uint16_t minimumInstances = 0;
+
+    node = TreeNode_Navigate(objectMetadataNode, "ObjectMetadata/SerialisationName");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            objectName = value;
+            printf("objectName %s\n", objectName);
+        }
+    }
+
+    node = TreeNode_Navigate(objectMetadataNode, "ObjectMetadata/ObjectID");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            objectID = atoi(value);
+        }
+    }
+
+    // Defining objects/resources uses a min/max approach. From this it can be determined if a an object/resource is multi/single and mandatory/optional.
+    //
+    // If an object/resource is a Singleton/Collection (respectively) then the maximumInstances determines this:
+    //
+    // If maximumInstances = 1 then the object is single-instance or the resource is single-instance
+    // If maximumInstances > 1 then the object is multiple-instance or the resource is multiple-instance
+    //
+    // Note: see IS_MULTIPLE_INSTANCE in lwm2m_definition.h
+    //
+    // If an object/resource is mandatory/optional then the minimumInstances determines this:
+    //
+    // If minimumInstances = 0 then the object/resource is optional
+    // If minimumInstances > 1 then the object/resource is mandatory
+    //
+    // Note: see IS_MANDATORY in lwm2m_definition.h
+
+    node = TreeNode_Navigate(objectMetadataNode, "ObjectMetadata/MaximumInstances");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            maximumInstances = atoi(value);
+        }
+    }
+
+    node = TreeNode_Navigate(objectMetadataNode, "ObjectMetadata/MinimumInstances");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            minimumInstances = atoi(value);
+        }
+    }
+
+    res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
+    if (res < 0)
+    {
+        result = AwaResult_Forbidden;
+        goto error;
+    }
+
+    node = TreeNode_Navigate(objectMetadataNode, "ObjectMetadata/Properties");
+    if (node != NULL)
+    {
+        TreeNode property;
+        int childIndex = 0;
+        while ((property = TreeNode_GetChild(node, childIndex)) != NULL)
+        {
+            TreeNode resNode;
+            ResourceIDType resourceID = AWA_INVALID_ID;
+            int dataType = -1;
+            const char * resourceName = NULL;
+            uint16_t resourceMaximumInstances = 1;
+            uint16_t resourceMinimumInstances = 0;
+            Lwm2mTreeNode * defaultValueNode = NULL;
+
+            AwaResourceOperations operation = AwaResourceOperations_None;
+
+            resNode = TreeNode_Navigate(property, "Property/PropertyID");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceID = atoi(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/SerialisationName");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceName = value;
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/DataType");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    dataType = xmlif_StringToDataType(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/MaximumInstances");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceMaximumInstances = atoi(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/MinimumInstances");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceMinimumInstances = atoi(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/Access");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    operation = xmlif_StringToOperation(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "Property/DefaultValue");
+            if (resNode != NULL)
+            {
+                defaultValueNode = Lwm2mTreeNode_Create();
+                Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
+
+                value = TreeNode_GetValue(resNode);
+
+                const uint8_t * defaultValue = NULL;
+                int defaultValueLength = 0;
+
+                if (value != NULL)
+                {
+                    defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                }
+
+                if (defaultValueLength >= 0)
+                {
+                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                    Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                    Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                    Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
+                    Lwm2mTreeNode_SetID(resourceInstanceNode, 0);
+                }
+                else
+                {
+                    Lwm2m_Error("xmlif_DecodeValue failed\n");
+                }
+
+                if (defaultValue != NULL)
+                {
+                    free((void*)defaultValue);
+                }
+            }
+            else
+            {
+                resNode = TreeNode_Navigate(property, "Property/DefaultValueArray");
+                if (resNode != NULL)
+                {
+                    defaultValueNode = Lwm2mTreeNode_Create();
+                    Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
+
+                    TreeNode resourceInstance;
+                    int childIndex = 0;
+                    while ((resourceInstance = Xml_FindFrom(resNode, "ResourceInstance", &childIndex)) != NULL)
+                    {
+                        int resourceInstanceID = xmlif_GetInteger(resourceInstance, "ResourceInstance/ID");
+                        value = xmlif_GetOpaque(resourceInstance, "ResourceInstance/Value");
+
+                        const uint8_t * defaultValue = NULL;
+                        int defaultValueLength = 0;
+
+                        defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                        if (defaultValueLength >= 0)
+                        {
+                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                            Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
+                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
+                        }
+                        else
+                        {
+                            Lwm2m_Error("xmlif_DecodeValue failed\n");
+                        }
+                        free((void*)defaultValue);
+                    }
+                }
+            }
+
+            if (operation & AwaResourceOperations_Execute)
+            {
+                // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
+                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, executeOperationHandlers, defaultValueNode);
+            }
+            else
+            {
+                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, resourceOperationHandlers, defaultValueNode);
+            }
+
+            Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
+
+            if (res < 0)
+            {
+                result = AwaResult_Forbidden;
+                goto error;
+            }
+
+            childIndex++;
+        }
+    }
+
+error:
+    return result;
+}
+
+// Accept ObjectDefinition (Device Server XML)
+int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
+                                            TreeNode objectDefinitionNode,
+                                            ObjectOperationHandlers * objectOperationHandlers,
+                                            ResourceOperationHandlers * resourceOperationHandlers,
+                                            ResourceOperationHandlers * executeOperationHandlers)
+{
+    int result = AwaResult_Success;
+    int res;
+    ObjectIDType objectID = -1;
+    const char * objectName = NULL;
+    const char * value;
+    TreeNode node;
+
+    uint16_t maximumInstances = 1;
+    uint16_t minimumInstances = 0;
+
+    node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/SerialisationName");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            objectName = value;
+        }
+    }
+
+    node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/ObjectID");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            objectID = atoi(value);
+        }
+    }
+
+    node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/Singleton");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            maximumInstances = (strcmp(value, "True") == 0) ? 1 : LWM2M_MAX_ID;
+        }
+    }
+
+    node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/IsMandatory");
+    if (node != NULL)
+    {
+        value = TreeNode_GetValue(node);
+        if (value != NULL)
+        {
+            minimumInstances = (strcmp(value, "True") == 0) ? 1 : 0;
+        }
+    }
+
+    res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
+    if (res < 0)
+    {
+        result = AwaResult_Forbidden;
+        goto error;
+    }
+
+    node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/Properties");
+    if (node != NULL)
+    {
+        TreeNode property;
+        int childIndex = 0;
+        while ((property = TreeNode_GetChild(node, childIndex)) != NULL)
+        {
+            TreeNode resNode;
+            ResourceIDType resourceID = AWA_INVALID_ID;
+            int dataType = -1;
+            const char * resourceName = NULL;
+            uint16_t resourceMaximumInstances = 1;
+            uint16_t resourceMinimumInstances = 0;
+            Lwm2mTreeNode * defaultValueNode = NULL;
+
+            AwaResourceOperations operation = AwaResourceOperations_None;
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/PropertyID");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceID = atoi(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/SerialisationName");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceName = value;
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/DataType");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    dataType = xmlif_StringToDataType(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/IsCollection");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceMaximumInstances = (strcmp(value, "True") == 0) ? LWM2M_MAX_ID : 1;
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/IsMandatory");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    resourceMinimumInstances = (strcmp(value, "True") == 0) ? 1 : 0;
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/Access");
+            if (resNode != NULL)
+            {
+                value = TreeNode_GetValue(resNode);
+                if (value != NULL)
+                {
+                    operation = xmlif_StringToOperation(value);
+                }
+            }
+
+            resNode = TreeNode_Navigate(property, "PropertyDefinition/DefaultValue");
+            if (resNode != NULL)
+            {
+                defaultValueNode = Lwm2mTreeNode_Create();
+                Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
+
+                value = TreeNode_GetValue(resNode);
+
+                const uint8_t * defaultValue = NULL;
+                int defaultValueLength = 0;
+
+                if (value != NULL)
+                {
+                    defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                }
+
+                if (defaultValueLength >= 0)
+                {
+                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                    Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                    Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                    Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
+                    Lwm2mTreeNode_SetID(resourceInstanceNode, 0);
+                }
+                else
+                {
+                    Lwm2m_Error("xmlif_DecodeValue failed\n");
+                }
+
+                if (defaultValue != NULL)
+                {
+                    free((void*)defaultValue);
+                }
+            }
+            else
+            {
+                resNode = TreeNode_Navigate(property, "PropertyDefinition/DefaultValueArray");
+                if (resNode != NULL)
+                {
+                    defaultValueNode = Lwm2mTreeNode_Create();
+                    Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
+
+                    TreeNode resourceInstance;
+                    int childIndex = 0;
+                    while ((resourceInstance = Xml_FindFrom(resNode, "ResourceInstance", &childIndex)) != NULL)
+                    {
+                        int resourceInstanceID = xmlif_GetInteger(resourceInstance, "ResourceInstance/ID");
+                        value = xmlif_GetOpaque(resourceInstance, "ResourceInstance/Value");
+
+                        const uint8_t * defaultValue = NULL;
+                        int defaultValueLength = 0;
+
+                        defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                        if (defaultValueLength >= 0)
+                        {
+                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
+                            Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
+                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
+                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
+                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
+                        }
+                        else
+                        {
+                            Lwm2m_Error("xmlif_DecodeValue failed\n");
+                        }
+                        free((void*)defaultValue);
+                    }
+                }
+            }
+
+            if (operation & AwaResourceOperations_Execute)
+            {
+                // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
+                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, executeOperationHandlers, defaultValueNode);
+            }
+            else
+            {
+                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, resourceOperationHandlers, defaultValueNode);
+            }
+
+            Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
+
+            if (res < 0)
+            {
+                result = AwaResult_Forbidden;
+                goto error;
+            }
+
+            childIndex++;
+        }
+    }
+
+error:
+    return result;
 }
 
 #endif // CONTIKI
