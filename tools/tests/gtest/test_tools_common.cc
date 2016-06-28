@@ -364,6 +364,31 @@ TEST_F(TestToolsCommon, PrintAllObjectDefinitions_handles_null_iterator)
     PrintAllObjectDefinitions(NULL, false);
 }
 
+TEST_F(TestToolsCommon,ResourceOperationToString_handles_valid_input)
+{
+    const char * output = NULL;
+    std::string expectedOutput = "ReadOnly";
+
+    output = ResourceOperationToString(AwaResourceOperations_ReadOnly);
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+}
+
+TEST_F(TestToolsCommon,ResourceOperationToString_handles_invalid_input)
+{
+    const char * output = NULL;
+    std::string expectedOutput = "BAD OPERATION";
+
+
+    output = ResourceOperationToString((AwaResourceOperations)-10);
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+
+    output = ResourceOperationToString((AwaResourceOperations)(AwaResourceOperations_LAST+1));
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+}
+
 } // namespace Awa
 
 
