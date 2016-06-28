@@ -389,6 +389,32 @@ TEST_F(TestToolsCommon,ResourceOperationToString_handles_invalid_input)
     ASSERT_STREQ(expectedOutput.c_str(), output);
 }
 
+TEST_F(TestToolsCommon,ResourceTypeToString_handles_valid_input)
+{
+    const char * output = NULL;
+    std::string expectedOutput = "Time";
+
+    output = ResourceTypeToString(AwaResourceType_Time);
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+}
+
+TEST_F(TestToolsCommon,ResourceTypeToString_handles_invalid_input)
+{
+    const char * output = NULL;
+    std::string expectedOutput = "BAD TYPE";
+
+
+    output = ResourceTypeToString((AwaResourceType)-10);
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+
+    output = ResourceTypeToString((AwaResourceType)(30));
+
+    ASSERT_STREQ(expectedOutput.c_str(), output);
+}
+
+
 } // namespace Awa
 
 
