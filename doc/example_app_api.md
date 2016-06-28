@@ -4,11 +4,11 @@
 ----
 
 
-# Awa LightweightM2M.
+# Awa LightweightM2M  
 
-## Example: Create a client application on a gateway device using the Awa API.
+## Example: Create a client application on a gateway device using the Awa API  
 
-### Application overview.
+### Application overview  
 
 ![](Awa_client_tutorial_application_positioning.png)
 
@@ -31,7 +31,7 @@ The client-tutorial application makes use of the Awa API to define objects and r
 
 Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
-## Awa LightweightM2M installation.
+## Awa LightweightM2M installation  
 
 Use the command below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
@@ -50,7 +50,7 @@ This example will assume that you have installed it to `~/AwaLWM2M/build/install
 ----
 
 
-## Creating the application.
+## Creating the application  
 
 
 Now we create a new directory for the project. We'll use *tutorial*:
@@ -154,7 +154,7 @@ Heater[/1000/0]:
 ----
 
 
-## Adding further resources.
+## Adding further resources  
 
 Further object resources are easily defined. Note that a resource's data type is implied by the API function used to create it, e.g. resource 101, (defined above), was of type string and thus used *AwaObjectDefinition_AddResourceDefinitionAsString()*. Our new resource, 104, will be of type float, so we'll use *AwaObjectDefinition_AddResourceDefinitionAsFloat()* to create it. Function parameters remain the same.
 
@@ -283,7 +283,7 @@ So far our object definitions have remained local to the client. The next sectio
 
 
 
-## Creating a server application using the Awa API.
+## Creating a server application using the Awa API  
 
 Let's create a server side application that makes use of our new object.
 
@@ -399,7 +399,7 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-## Example: Create a server event application using the Awa API.
+## Example: Create a server event application using the Awa API  
 
 This example will demonstrate how to build a standalone application using the Awa Server API. This application will receive events from the LWM2M server for client registrations.
 
