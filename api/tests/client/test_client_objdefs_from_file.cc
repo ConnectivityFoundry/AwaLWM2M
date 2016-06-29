@@ -205,9 +205,8 @@ static const char * badObjDefXML = R"(
 
 class ObjDefsFile {
 public:
-    ObjDefsFile(const char * content) {
+    explicit ObjDefsFile(const char * content) : filename_(TempFilename().GetFilename()) {
         // save objDefs to a temporary file
-        filename_ = TempFilename().GetFilename();
         std::ofstream file(filename_, std::ios::out);
         file << content << std::endl;
         file.close();

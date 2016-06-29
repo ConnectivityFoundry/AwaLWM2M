@@ -162,7 +162,6 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
             size_t nmemb = fread(doc, pos, 1, f);
             if (nmemb == 1)
             {
-                fclose(f);
                 Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
                 TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
                 count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
@@ -182,6 +181,7 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
             Lwm2m_Error("Out of memory\n");
             result = -1;
         }
+        fclose(f);
     }
     else
     {
