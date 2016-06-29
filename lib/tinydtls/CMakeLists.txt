@@ -22,7 +22,7 @@ ExternalProject_Add(tinydtls
 set (TINYDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/tinydtls-src ${CMAKE_BINARY_DIR}/tinydtls-build CACHE INTERNAL "")
 
 add_library(tinydtls_static STATIC IMPORTED GLOBAL)
-set_target_properties(tinydtls_static PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/tinydtls-build/tinydtls.a")
+set_target_properties(tinydtls_static PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/tinydtls-build/libtinydtls.a")
 #set_target_properties(tinydtls_static PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${TINYDTLS_INCLUDE_DIR})
 
 
