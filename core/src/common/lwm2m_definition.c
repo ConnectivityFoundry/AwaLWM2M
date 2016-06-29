@@ -251,6 +251,18 @@ int Definition_RegisterObjectType(DefinitionRegistry * registry, const char * ob
         goto error;
     }
 
+    if (objName == NULL)
+    {
+        Lwm2m_Error("objName is NULL\n");
+        goto error;
+    }
+
+    if ((objectID < 0) || (objectID > LWM2M_LIMITS_MAX_OBJECT_ID))
+    {
+        Lwm2m_Error("object ID out of range\n");
+        goto error;
+    }
+
     if ((objFormat = Definition_NewObjectType(objName, objectID, MaximumInstances, MinimumInstances, Handlers)) == NULL)
     {
         goto error;
@@ -403,6 +415,7 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
 
     if (registry == NULL)
     {
+        Lwm2m_Error("registry is NULL\n");
         goto error;
     }
 
@@ -415,18 +428,21 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
 
     if (Operations_IsResourceTypeExecutable(operations) && resourceType != AwaResourceType_None)
     {
+        Lwm2m_Error("Executable resource must be type None\n");
         AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Operations_IsResourceTypeExecutable(operations) && maximumInstances > 1)
     {
+        Lwm2m_Error("Executable resource must be single-instance\n")
         AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }
 
     if (Definition_LookupResourceDefinition(registry, objectID, resourceID))
     {
+        Lwm2m_Error("Resource is already defined\n");
         AwaResult_SetResult(AwaResult_AlreadyDefined);
         goto error;
     }
@@ -434,7 +450,7 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
     ObjectDefinition * objFormat;
     if (!(objFormat = Definition_LookupObjectDefinition(registry, objectID)))
     {
-        Lwm2m_Error("Failed to look up object format\n");
+        Lwm2m_Error("Failed to retrieve object definition\n");
         AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }

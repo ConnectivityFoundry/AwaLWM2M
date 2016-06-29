@@ -133,7 +133,7 @@ static const char * multipleObjDefsXML = R"(
           <PropertyID>44</PropertyID>
           <Name>Test Resource 44</Name>
           <SerialisationName>TestResource44</SerialisationName>
-          <DataType>Float</DataType>
+          <DataType>None</DataType>
           <IsCollection>False</IsCollection>
           <IsMandatory>False</IsMandatory>
           <Access>Execute</Access>
@@ -141,7 +141,7 @@ static const char * multipleObjDefsXML = R"(
 
         <!-- optional, multiple -->
         <PropertyDefinition>
-          <PropertyID>43</PropertyID>
+          <PropertyID>45</PropertyID>
           <Name>Test Resource 45</Name>
           <SerialisationName>TestResource45</SerialisationName>
           <DataType>String</DataType>
@@ -177,6 +177,29 @@ static const char * singleObjDefXML = R"(
     </ObjectDefinition>
 )";
 
+// an executable resource must be of type 'None'
+#if 0
+static const char * badObjDefXML = R"(
+    <ObjectDefinition>
+      <ObjectID>7301</ObjectID>
+      <Name>Test Object 1</Name>
+      <SerialisationName>TestObject1</SerialisationName>
+      <Singleton>True</Singleton>
+      <IsMandatory>True</IsMandatory>
+      <Properties>
+        <PropertyDefinition>
+          <PropertyID>0</PropertyID>
+          <Name>Test Resource</Name>
+          <SerialisationName>TestResource</SerialisationName>
+          <DataType>String</DataType>
+          <IsCollection>False</IsCollection>
+          <IsMandatory>False</IsMandatory>
+          <Access>Execute</Access>
+        </PropertyDefinition>
+      </Properties>
+    </ObjectDefinition>
+)";
+#endif //0
 
 } // namespace detail
 
@@ -215,14 +238,30 @@ private:
     ObjDefsFile objDefsFile_;
 };
 
-static ::testing::AssertionResult expectNoResources(const AwaObjectDefinition * obj) {
+static size_t CountResources(const AwaObjectDefinition * obj) {
     AwaResourceDefinitionIterator * resIt = AwaObjectDefinition_NewResourceDefinitionIterator(obj);
-    ::testing::AssertionResult result = AwaResourceDefinitionIterator_Next(resIt) ? ::testing::AssertionFailure() << "Resources defined" : ::testing::AssertionSuccess();
+    size_t i = 0;
+    while (AwaResourceDefinitionIterator_Next(resIt))
+    {
+        ++i;
+    }
     AwaResourceDefinitionIterator_Free(&resIt);
-    return result;
+    return i;
 }
 
-static void checkResource(const AwaObjectDefinition * obj, AwaResourceID resID, const char * resName,
+static void CheckObject(const AwaClientSession * session, AwaObjectID objID, const char * objName, int minInstances, int maxInstances, int numResources) {
+    const AwaObjectDefinition * obj = AwaClientSession_GetObjectDefinition(session, objID);
+    EXPECT_TRUE(NULL != obj);
+    EXPECT_EQ(objID, AwaObjectDefinition_GetID(obj));
+    EXPECT_STREQ(objName, AwaObjectDefinition_GetName(obj));
+    EXPECT_EQ(minInstances, AwaObjectDefinition_GetMinimumInstances(obj));
+    EXPECT_EQ(maxInstances, AwaObjectDefinition_GetMaximumInstances(obj));
+    if (numResources >= 0) {
+        EXPECT_EQ(static_cast<size_t>(numResources), CountResources(obj));
+    }
+}
+
+static void CheckResource(const AwaObjectDefinition * obj, AwaResourceID resID, const char * resName,
                           int minInstances, int maxInstances, AwaResourceType resType, AwaResourceOperations resOps) {
     const AwaResourceDefinition * res = AwaObjectDefinition_GetResourceDefinition(obj, resID);
     EXPECT_TRUE(NULL != res);
@@ -234,73 +273,34 @@ static void checkResource(const AwaObjectDefinition * obj, AwaResourceID resID, 
     EXPECT_EQ(resOps, AwaResourceDefinition_GetSupportedOperations(res));
 }
 
-#define EXPECT_RESOURCE(...) { SCOPED_TRACE(""); checkResource(__VA_ARGS__); }
+static void CheckResource(AwaClientSession * session, AwaObjectID objID, AwaResourceID resID, const char * resName,
+                          int minInstances, int maxInstances, AwaResourceType resType, AwaResourceOperations resOps) {
+    const AwaObjectDefinition * obj = AwaClientSession_GetObjectDefinition(session, objID);
+    return CheckResource(obj, resID, resName, minInstances, maxInstances, resType, resOps);
+}
+
+
+#define EXPECT_RESOURCE(...) { SCOPED_TRACE(""); CheckResource(__VA_ARGS__); }
+#define EXPECT_OBJECT(...) { SCOPED_TRACE(""); CheckObject(__VA_ARGS__); }
 
 TEST_F(TestClientObjDefsMultipleFromFile, test_valid_file) {
 
     // check definition of object 7301
-    const AwaObjectDefinition * obj7301 = AwaClientSession_GetObjectDefinition(session_, 7301);
-    ASSERT_TRUE(NULL != obj7301);
+    EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
+    EXPECT_RESOURCE(session_, 7301, 0,  "TestResource",  0, 1,          AwaResourceType_String,        AwaResourceOperations_ReadOnly);
 
-    EXPECT_EQ(7301, AwaObjectDefinition_GetID(obj7301));
-    EXPECT_STREQ("TestObject1", AwaObjectDefinition_GetName(obj7301));          // should use serialisation name for object name
-    EXPECT_EQ(1, AwaObjectDefinition_GetMinimumInstances(obj7301));
-    EXPECT_EQ(1, AwaObjectDefinition_GetMinimumInstances(obj7301));
-    EXPECT_FALSE(expectNoResources(obj7301));
+    EXPECT_OBJECT(session_, 7302, "TestObject2", 1, AWA_MAX_ID, 0);
 
-    // check resources of 7301
-    const AwaResourceDefinition * res7301_0 = AwaObjectDefinition_GetResourceDefinition(obj7301, 0);
-    ASSERT_TRUE(NULL != res7301_0);
-    EXPECT_EQ(0, AwaResourceDefinition_GetID(res7301_0));
-    EXPECT_STREQ("TestResource", AwaResourceDefinition_GetName(res7301_0));      // should use serialisation name for resource name
-    EXPECT_EQ(0, AwaResourceDefinition_GetMinimumInstances(res7301_0));
-    EXPECT_EQ(1, AwaResourceDefinition_GetMaximumInstances(res7301_0));
-    EXPECT_EQ(AwaResourceType_String, AwaResourceDefinition_GetType(res7301_0));
-    EXPECT_EQ(AwaResourceOperations_ReadOnly, AwaResourceDefinition_GetSupportedOperations(res7301_0));
+    EXPECT_OBJECT(session_, 7303, "TestObject3", 0, AWA_MAX_ID, 0);
 
-    // check definition of object 7302
-    const AwaObjectDefinition * obj7302 = AwaClientSession_GetObjectDefinition(session_, 7302);
-    ASSERT_TRUE(NULL != obj7302);
-    EXPECT_EQ(7302, AwaObjectDefinition_GetID(obj7302));
-    EXPECT_STREQ("TestObject2", AwaObjectDefinition_GetName(obj7302));          // should use serialisation name for object name
-    EXPECT_EQ(1, AwaObjectDefinition_GetMinimumInstances(obj7302));
-    EXPECT_EQ(AWA_MAX_ID, AwaObjectDefinition_GetMaximumInstances(obj7302));
-    EXPECT_TRUE(expectNoResources(obj7302));
+    EXPECT_OBJECT(session_, 7304, "TestObject4", 0, 1, 0);
 
-    // check definition of object 7303
-    const AwaObjectDefinition * obj7303 = AwaClientSession_GetObjectDefinition(session_, 7303);
-    ASSERT_TRUE(NULL != obj7303);
-    EXPECT_EQ(7303, AwaObjectDefinition_GetID(obj7303));
-    EXPECT_STREQ("TestObject3", AwaObjectDefinition_GetName(obj7303));          // should use serialisation name for object name
-    EXPECT_EQ(0, AwaObjectDefinition_GetMinimumInstances(obj7303));
-    EXPECT_EQ(AWA_MAX_ID, AwaObjectDefinition_GetMaximumInstances(obj7303));
-    EXPECT_TRUE(expectNoResources(obj7303));
-
-    // check definition of object 7304
-    const AwaObjectDefinition * obj7304 = AwaClientSession_GetObjectDefinition(session_, 7304);
-    ASSERT_TRUE(NULL != obj7304);
-    EXPECT_EQ(7304, AwaObjectDefinition_GetID(obj7304));
-    EXPECT_STREQ("TestObject4", AwaObjectDefinition_GetName(obj7304));          // should use serialisation name for object name
-    EXPECT_EQ(0, AwaObjectDefinition_GetMinimumInstances(obj7304));
-    EXPECT_EQ(1, AwaObjectDefinition_GetMaximumInstances(obj7304));
-    EXPECT_TRUE(expectNoResources(obj7304));
-
-    // check definition of object 7310
-    const AwaObjectDefinition * obj7310 = AwaClientSession_GetObjectDefinition(session_, 7310);
-    ASSERT_TRUE(NULL != obj7310);
-    EXPECT_EQ(7310, AwaObjectDefinition_GetID(obj7310));
-    EXPECT_STREQ("TestObject10", AwaObjectDefinition_GetName(obj7310));          // should use serialisation name for object name
-    EXPECT_EQ(0, AwaObjectDefinition_GetMinimumInstances(obj7310));
-    EXPECT_EQ(AWA_MAX_ID, AwaObjectDefinition_GetMaximumInstances(obj7310));
-    EXPECT_FALSE(expectNoResources(obj7310));
-
-    // check resources of 7310
-    EXPECT_RESOURCE(obj7310, 0,  "TestResource0",  0, 1,          AwaResourceType_None,        AwaResourceOperations_None);
-    EXPECT_RESOURCE(obj7310, 42, "TestResource42", 1, 1,          AwaResourceType_Integer,     AwaResourceOperations_ReadWrite);
-    EXPECT_RESOURCE(obj7310, 43, "TestResource43", 1, AWA_MAX_ID, AwaResourceType_FloatArray,  AwaResourceOperations_ReadOnly);
-    EXPECT_RESOURCE(obj7310, 44, "TestResource44", 0, 1,          AwaResourceType_Float,       AwaResourceOperations_Execute);
-    EXPECT_RESOURCE(obj7310, 45, "TestResource45", 0, AWA_MAX_ID, AwaResourceType_StringArray, AwaResourceOperations_ReadWrite);
-
+    EXPECT_OBJECT(session_, 7310, "TestObject10", 0, AWA_MAX_ID, 5);
+    EXPECT_RESOURCE(session_, 7310, 0,  "TestResource0",  0, 1,          AwaResourceType_None,        AwaResourceOperations_None);
+    EXPECT_RESOURCE(session_, 7310, 42, "TestResource42", 1, 1,          AwaResourceType_Integer,     AwaResourceOperations_ReadWrite);
+    EXPECT_RESOURCE(session_, 7310, 43, "TestResource43", 1, AWA_MAX_ID, AwaResourceType_FloatArray,  AwaResourceOperations_ReadOnly);
+    EXPECT_RESOURCE(session_, 7310, 44, "TestResource44", 0, 1,          AwaResourceType_None,        AwaResourceOperations_Execute);
+    EXPECT_RESOURCE(session_, 7310, 45, "TestResource45", 0, AWA_MAX_ID, AwaResourceType_StringArray, AwaResourceOperations_ReadWrite);
 }
 
 
@@ -319,24 +319,8 @@ private:
 
 TEST_F(TestClientObjDefsSingleFromFile, test_valid_file) {
 
-    // check definition of object 7301
-    const AwaObjectDefinition * obj7301 = AwaClientSession_GetObjectDefinition(session_, 7301);
-    ASSERT_TRUE(NULL != obj7301);
-
-    EXPECT_EQ(7301, AwaObjectDefinition_GetID(obj7301));
-    EXPECT_STREQ("TestObject1", AwaObjectDefinition_GetName(obj7301));          // should use serialisation name for object name
-    EXPECT_EQ(1, AwaObjectDefinition_GetMinimumInstances(obj7301));
-    EXPECT_EQ(1, AwaObjectDefinition_GetMinimumInstances(obj7301));
-    EXPECT_FALSE(expectNoResources(obj7301));
-
-    const AwaResourceDefinition * res7301_0 = AwaObjectDefinition_GetResourceDefinition(obj7301, 0);
-    ASSERT_TRUE(NULL != res7301_0);
-    EXPECT_EQ(0, AwaResourceDefinition_GetID(res7301_0));
-    EXPECT_STREQ("TestResource", AwaResourceDefinition_GetName(res7301_0));      // should use serialisation name for resource name
-    EXPECT_EQ(0, AwaResourceDefinition_GetMinimumInstances(res7301_0));
-    EXPECT_EQ(1, AwaResourceDefinition_GetMaximumInstances(res7301_0));
-    EXPECT_EQ(AwaResourceType_String, AwaResourceDefinition_GetType(res7301_0));
-    EXPECT_EQ(AwaResourceOperations_ReadOnly, AwaResourceDefinition_GetSupportedOperations(res7301_0));
+    EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
+    EXPECT_RESOURCE(session_, 7301, 0,  "TestResource",  0, 1,          AwaResourceType_String,        AwaResourceOperations_ReadOnly);
 }
 
 class TestClientObjDefsFromFileNotFound : public TestClientWithConnectedSession {
@@ -347,7 +331,8 @@ public:
     }
 };
 
-TEST_F(TestClientObjDefsFromFileNotFound, test_file_not_found) {
+// Disabled: missing file causes daemon to abort, not able to test via API
+TEST_F(TestClientObjDefsFromFileNotFound, DISABLED_test_file_not_found) {
     EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7301));
     EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7302));
     EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7303));

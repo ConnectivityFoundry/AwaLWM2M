@@ -145,7 +145,10 @@ static void Daemonise(bool verbose)
 
 static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char * filename)
 {
-    int result = -1;
+    DefinitionCount count = { 0 };
+    int result = 0;
+
+    Lwm2m_Info("Load definitions: from \'%s\'\n", filename);
 
     FILE *f = fopen(filename, "rb");
     if (f != NULL)
@@ -160,14 +163,12 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
             if (nmemb == 1)
             {
                 fclose(f);
-
                 Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
                 TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
-                result = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
-
+                count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
+                result = 0;
                 Tree_Delete(objectDefinitionsNode);
                 free(doc);
-                result = 0;
             }
             else
             {
@@ -186,6 +187,28 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
     {
         perror("fopen");
         result = -1;
+    }
+
+    if (result == 0)
+    {
+        if (count.NumObjectsFailed > 0) {
+            Lwm2m_Warning("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
+        }
+        if (count.NumResourcesFailed > 0) {
+            Lwm2m_Warning("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
+        }
+        Lwm2m_Info("Load definitions: %zu object%s and %zu resource%s defined\n", count.NumObjectsOK, count.NumObjectsOK != 1 ? "s" : "", count.NumResourcesOK, count.NumResourcesOK != 1 ? "s" : "");
+
+        // regard nothing defined as failure
+        if (count.NumObjectsOK == 0 && count.NumResourcesOK == 0)
+        {
+            result = -1;
+        }
+    }
+
+    if (result < 0)
+    {
+        Lwm2m_Error("Load definitions: failed\n");
     }
     return result;
 }
@@ -295,10 +318,6 @@ static int Lwm2mClient_Start(Options * options)
         {
             Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFile);
             goto error_core;
-        }
-        else
-        {
-            Lwm2m_Info("Loaded object definitions from %s\n", options->ObjDefsFile);
         }
     }
 

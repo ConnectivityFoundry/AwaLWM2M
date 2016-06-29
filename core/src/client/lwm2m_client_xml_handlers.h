@@ -59,7 +59,7 @@ void xmlif_RegisterHandlers(void);
 
 void xmlif_DestroyExecuteHandlers(void);
 
-int xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode content);
+DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode content);
 
 
 #ifdef __cplusplus

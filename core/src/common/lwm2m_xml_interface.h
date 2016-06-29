@@ -78,11 +78,18 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
                                    ResourceOperationHandlers * resourceOperationHandlers,
                                    ResourceOperationHandlers * executeOperationHandlers);
 
-int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
-                                            TreeNode objectDefinitionNode,
-                                            ObjectOperationHandlers * objectOperationHandlers,
-                                            ResourceOperationHandlers * resourceOperationHandlers,
-                                            ResourceOperationHandlers * executeOperationHandlers);
+typedef struct {
+    size_t NumObjectsOK;
+    size_t NumObjectsFailed;
+    size_t NumResourcesOK;
+    size_t NumResourcesFailed;
+} DefinitionCount;
+
+DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
+                                                        TreeNode objectDefinitionNode,
+                                                        ObjectOperationHandlers * objectOperationHandlers,
+                                                        ResourceOperationHandlers * resourceOperationHandlers,
+                                                        ResourceOperationHandlers * executeOperationHandlers);
 
 #ifdef __cplusplus
 }

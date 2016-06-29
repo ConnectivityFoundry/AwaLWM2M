@@ -445,7 +445,6 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
                                    ResourceOperationHandlers * executeOperationHandlers)
 {
     int result = AwaResult_Success;
-    int res;
     ObjectIDType objectID = -1;
     const char * objectName = NULL;
     const char * value;
@@ -511,7 +510,7 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
         }
     }
 
-    res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
+    int res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
     if (res < 0)
     {
         result = AwaResult_Forbidden;
@@ -692,14 +691,13 @@ error:
 }
 
 // Accept ObjectDefinition (Device Server XML)
-int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
-                                            TreeNode objectDefinitionNode,
-                                            ObjectOperationHandlers * objectOperationHandlers,
-                                            ResourceOperationHandlers * resourceOperationHandlers,
-                                            ResourceOperationHandlers * executeOperationHandlers)
+DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
+                                                        TreeNode objectDefinitionNode,
+                                                        ObjectOperationHandlers * objectOperationHandlers,
+                                                        ResourceOperationHandlers * resourceOperationHandlers,
+                                                        ResourceOperationHandlers * executeOperationHandlers)
 {
-    int result = AwaResult_Success;
-    int res;
+    DefinitionCount definitionCount = { 0 };
     ObjectIDType objectID = -1;
     const char * objectName = NULL;
     const char * value;
@@ -749,11 +747,15 @@ int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
         }
     }
 
-    res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
+    int res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
     if (res < 0)
     {
-        result = AwaResult_Forbidden;
+        ++definitionCount.NumObjectsFailed;
         goto error;
+    }
+    else
+    {
+        ++definitionCount.NumObjectsOK;
     }
 
     node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/Properties");
@@ -911,16 +913,19 @@ int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
 
             if (res < 0)
             {
-                result = AwaResult_Forbidden;
-                goto error;
+                Lwm2m_Error("Resource %d definition failed\n", resourceID);
+                ++definitionCount.NumResourcesFailed;
             }
-
-            childIndex++;
+            else
+            {
+                ++definitionCount.NumResourcesOK;
+            }
+            ++childIndex;
         }
     }
 
 error:
-    return result;
+    return definitionCount;
 }
 
 #endif // CONTIKI

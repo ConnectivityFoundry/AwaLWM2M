@@ -1194,29 +1194,35 @@ error:
 }
 
 // Can handle <ObjectDefinitions><Items>... or <ObjectDefinition>...
-int xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode rootNode)
+DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode rootNode)
 {
+    DefinitionCount result = { 0 };
     TreeNode itemsNode = TreeNode_Navigate(rootNode, "ObjectDefinitions/Items");
     TreeNode objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, 0) : rootNode;
     int objectDefinitionIndex = 1;
-    int successCount = 0;
+
     while (objectDefinition != NULL)
     {
-        if (xmlif_RegisterObjectFromDeviceServerXML(context,
-                                                    objectDefinition,
-                                                    &defaultObjectOperationHandlers,
-                                                    &defaultResourceOperationHandlers,
-                                                    &xmlifResourceOperationHandlers) == AwaResult_Success)
-        {
-            ++successCount;
-        }
+        DefinitionCount definitionCount = xmlif_RegisterObjectFromDeviceServerXML(context,
+                                                                                  objectDefinition,
+                                                                                  &defaultObjectOperationHandlers,
+                                                                                  &defaultResourceOperationHandlers,
+                                                                                  &xmlifResourceOperationHandlers);
+        result.NumObjectsOK += definitionCount.NumObjectsOK;
+        result.NumObjectsFailed += definitionCount.NumObjectsFailed;
+        result.NumResourcesOK += definitionCount.NumResourcesOK;
+        result.NumResourcesFailed += definitionCount.NumResourcesFailed;
+
         objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, objectDefinitionIndex++) : NULL;
     }
 
-    // Send an update so that all servers this client is connected to know that the client has this object defined.
-    Lwm2m_SetUpdateRegistration(context);
+    if (result.NumObjectsOK > 0)
+    {
+        // Send an update so that all servers this client is connected to know that the client has at least one new object defined.
+        Lwm2m_SetUpdateRegistration(context);
+    }
 
-    return 0;
+    return result;
 }
 
 
