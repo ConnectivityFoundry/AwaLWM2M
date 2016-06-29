@@ -293,7 +293,7 @@ static int Lwm2mClient_Start(Options * options)
     {
         if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFile) != 0)
         {
-            Lwm2m_Error("Failed to load object definitions from %s\n", options->ObjDefsFile);
+            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFile);
             goto error_core;
         }
         else

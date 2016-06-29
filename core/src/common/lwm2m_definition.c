@@ -101,13 +101,13 @@ static ObjectDefinition * NewObjectType(const char * objName, ObjectIDType objec
              memset(&objFormat->Handlers, 0, sizeof(*handlers));
          }
 
+         ListInit(&objFormat->Resource);
+
          Lwm2m_Debug("New object defined:\n");
          Lwm2m_Debug("  ID : %d\n", objFormat->ObjectID);
          Lwm2m_Debug("  Name : %s\n", objFormat->ObjectName);
          Lwm2m_Debug("  Minimum instances: %d\n", objFormat->MinimumInstances);
          Lwm2m_Debug("  Maximum instances: %d\n", objFormat->MaximumInstances);
-
-         ListInit(&objFormat->Resource);
      }
      else
      {
@@ -371,6 +371,14 @@ ResourceDefinition * NewResourceType(ObjectDefinition * objFormat, const char * 
         }
 
         ListAdd(&resFormat->list, &objFormat->Resource);
+
+        Lwm2m_Debug("New resource defined for object %d:\n", objFormat->ObjectID);
+        Lwm2m_Debug("  ID : %d\n", resFormat->ResourceID);
+        Lwm2m_Debug("  Name : %s\n", resFormat->ResourceName);
+        Lwm2m_Debug("  Minimum instances: %d\n", resFormat->MinimumInstances);
+        Lwm2m_Debug("  Maximum instances: %d\n", resFormat->MaximumInstances);
+        Lwm2m_Debug("  Type : %d\n", resFormat->Type);
+        Lwm2m_Debug("  Operation : %d\n", resFormat->Operation);
     }
     return resFormat;
 }

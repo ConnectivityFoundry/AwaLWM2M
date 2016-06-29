@@ -705,7 +705,8 @@ int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
     const char * value;
     TreeNode node;
 
-    uint16_t maximumInstances = 1;
+    // default to optional, multiple
+    uint16_t maximumInstances = LWM2M_MAX_ID;
     uint16_t minimumInstances = 0;
 
     node = TreeNode_Navigate(objectDefinitionNode, "ObjectDefinition/SerialisationName");
@@ -902,15 +903,9 @@ int xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
                 }
             }
 
-            if (operation & AwaResourceOperations_Execute)
-            {
-                // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
-                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, executeOperationHandlers, defaultValueNode);
-            }
-            else
-            {
-                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, resourceOperationHandlers, defaultValueNode);
-            }
+            // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
+            ResourceOperationHandlers * handlers = (operation & AwaResourceOperations_Execute) ? executeOperationHandlers : resourceOperationHandlers;
+            res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, handlers, defaultValueNode);
 
             Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
 
