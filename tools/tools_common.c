@@ -1603,12 +1603,12 @@ void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, O
             case OutputFormat_PlainTextVerbose:
                 format = "\nObject: ID:%d name:%s minInstances:%s maxInstances:%s\n";
                 msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
-                msprintf2(&collection, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMaximumInstances(objectDefinition));
                 break;
             case OutputFormat_PlainTextQuiet:
                 format = "OBJECT %d %s %s %s\n";
                 msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
-                msprintf2(&collection, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMaximumInstances(objectDefinition));
                 break;
             case OutputFormat_DeviceServerXML:
                 format = "<ObjectDefinition>\n"
@@ -1618,7 +1618,7 @@ void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, O
                          "    <Singleton>%s</Singleton>\n"
                          "    <Properties>\n";
                 msprintf2(&mandatory, "%s", AwaObjectDefinition_GetMinimumInstances(objectDefinition) == 0 ? "False" : "True");
-                msprintf2(&collection, "%s", AwaObjectDefinition_GetMinimumInstances(objectDefinition) <= 1 ? "False" : "True");
+                msprintf2(&collection, "%s", AwaObjectDefinition_GetMaximumInstances(objectDefinition) > 1 ? "False" : "True");
                 break;
 
             default:
