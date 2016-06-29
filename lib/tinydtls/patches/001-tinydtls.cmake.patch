@@ -1,0 +1,76 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..ed3889c
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,69 @@
++cmake_minimum_required(VERSION 2.8.2)
++Include (CheckIncludeFile)
++check_include_file (assert.h HAVE_ASSERT_H)
++check_include_file (sys/time.h HAVE_SYS_TIME_H)
++check_include_file (time.h HAVE_TIME_H)
++
++set (tinydtls_SOURCES
++  dtls.c
++  crypto.c
++  hmac.c
++  aes/rijndael.c
++  sha2/sha2.c
++  ccm.c
++  netq.c
++  ecc/ecc.c
++  dtls_time.c
++  peer.c
++  session.c
++)
++
++# fetch the INCLUDE_DIRECTORIES properties of non-linked dependencies:
++# (it is not possible to link with an OBJECT library, so these are not automatic)
++#get_property (LIB_XML_INCLUDE_DIR TARGET libxml_static PROPERTY INCLUDE_DIRECTORIES)
++
++
++set (tinydtls_INCLUDE_DIRS
++  ${CMAKE_CURRENT_SOURCE_DIR}
++  ${CMAKE_CURRENT_SOURCE_DIR}/aes
++  ${CMAKE_CURRENT_SOURCE_DIR}/sha2
++  ${CMAKE_CURRENT_BINARY_DIR}/ecc
++)
++
++set (tinydtls_LIBS
++)
++
++if (ENABLE_GCOV)
++  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
++  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
++endif ()
++
++# From Contiki Makefiles
++add_definitions (-DDTLS_PSK)
++add_definitions (-DDTLSv12)
++add_definitions (-DWITH_SHA256)
++add_definitions (-DPOSIX)
++
++# static library libtinydtls.a
++add_library (tinydtls_static STATIC ${tinydtls_SOURCES})
++set_target_properties (tinydtls_static PROPERTIES OUTPUT_NAME "tinydtls")
++set_target_properties (tinydtls_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
++target_include_directories(tinydtls_static PUBLIC ${tinydtls_INCLUDE_DIRS})
++target_link_libraries (tinydtls_static ${tinydtls_LIBS})
++
++# TODO - needed? c.f. libawa_static)
++#if (ENABLE_GCOV)
++#  target_link_libraries (tinydtls_static gcov)
++#endif ()
++
++# libtinydtls.so
++add_library (tinydtls_shared SHARED ${tinydtls_SOURCES})
++set_target_properties (tinydtls_shared PROPERTIES OUTPUT_NAME "tinydtls")
++set_target_properties (tinydtls_shared PROPERTIES POSITION_INDEPENDENT_CODE ON)
++target_include_directories (tinydtls_shared PUBLIC ${tinydtls_INCLUDE_DIRS})
++target_link_libraries (tinydtls_shared ${tinydtls_LIBS})
++
++install (TARGETS tinydtls_shared
++    LIBRARY DESTINATION lib
++)
++
+
