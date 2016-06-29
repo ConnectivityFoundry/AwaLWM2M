@@ -1523,7 +1523,7 @@ int GetNextTargetResourceInstanceIDFromPath(Target ** targets, int numTargets, c
     return resourceInstanceID;
 }
 
-void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, bool quiet)
+void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, OutputFormat format)
 {
     // Unsorted
     while (AwaObjectDefinitionIterator_Next(iterator))
@@ -1531,13 +1531,14 @@ void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, bool quie
         const AwaObjectDefinition * objectDefinition = AwaObjectDefinitionIterator_Get(iterator);
         if (objectDefinition != NULL)
         {
-            PrintObjectDefinitionHeader(objectDefinition, quiet);
-            PrintObjectDefinition(objectDefinition, quiet);
+            PrintObjectDefinitionHeader(objectDefinition, format);
+            PrintObjectDefinition(objectDefinition, format);
+            PrintObjectDefinitionFooter(objectDefinition, format);
         }
     }
 }
 
-void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted, bool quiet)
+void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, OutputFormat format, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted)
 {
     if (objectDefinition != NULL)
     {
@@ -1545,7 +1546,7 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
 
         if (*lastObjectIDPrinted != objectID)
         {
-            PrintObjectDefinitionHeader(objectDefinition, quiet);
+            PrintObjectDefinitionHeader(objectDefinition, format);
             *lastObjectIDPrinted = objectID;
         }
 
@@ -1555,11 +1556,11 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
             // Print a single resource, with object header if required
             if (resourceDefinition != NULL)
             {
-                PrintResourceDefinition(resourceDefinition, quiet, objectID);
+                PrintResourceDefinition(resourceDefinition, format, objectID);
             }
             else
             {
-                if (!quiet)
+                if (format == OutputFormat_PlainTextVerbose)
                 {
                     Error("    Resource: ID:%d Not defined\n", resourceID);
                 }
@@ -1572,12 +1573,13 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
         else
         {
             // Print an entire object
-            PrintObjectDefinition(objectDefinition, quiet);
+            PrintObjectDefinition(objectDefinition, format);
+            PrintObjectDefinitionFooter(objectDefinition, format);
         }
     }
     else
     {
-        if (!quiet)
+        if (format == OutputFormat_PlainTextVerbose)
         {
             Error("Object: ID:%d Not defined\n", objectID);
         }
@@ -1588,28 +1590,80 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
     }
 }
 
-void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, bool quiet)
+void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
 {
     if (objectDefinition != NULL)
     {
         const char * format = NULL;
-        if (!quiet)
+        char * mandatory = NULL;
+        char * collection = NULL;
+
+        switch(outputFormat)
         {
-            format = "\nObject: ID:%d name:%s minInstances:%d maxInstances:%d\n";
+            case OutputFormat_PlainTextVerbose:
+                format = "\nObject: ID:%d name:%s minInstances:%s maxInstances:%s\n";
+                msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                break;
+            case OutputFormat_PlainTextQuiet:
+                format = "OBJECT %d %s %s %s\n";
+                msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                break;
+            case OutputFormat_DeviceServerXML:
+                format = "<ObjectDefinition>\n"
+                         "    <ObjectID>%d</ObjectID>\n"
+                         "    <SerialiastionName>%s</SerialiastionName>\n"
+                         "    <IsMandatory>%s</IsMandatory>\n"
+                         "    <Singleton>%s</Singleton>\n"
+                         "    <Properties>\n";
+                msprintf2(&mandatory, "%s", AwaObjectDefinition_GetMinimumInstances(objectDefinition) == 0 ? "False" : "True");
+                msprintf2(&collection, "%s", AwaObjectDefinition_GetMinimumInstances(objectDefinition) <= 1 ? "False" : "True");
+                break;
+
+            default:
+                format = NULL;
         }
-        else
+
+        if(format != NULL)
         {
-            format = "OBJECT %d %s %d %d\n";
+            printf(format,
+                   AwaObjectDefinition_GetID(objectDefinition),
+                   AwaObjectDefinition_GetName(objectDefinition),
+                   mandatory,
+                   collection);
+
+            free(mandatory);
+            free(collection);
         }
-        printf(format,
-               AwaObjectDefinition_GetID(objectDefinition),
-               AwaObjectDefinition_GetName(objectDefinition),
-               AwaObjectDefinition_GetMinimumInstances(objectDefinition),
-               AwaObjectDefinition_GetMaximumInstances(objectDefinition));
     }
 }
 
-void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool quiet)
+void PrintObjectDefinitionFooter(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
+{
+    if (objectDefinition != NULL)
+    {
+        const char * format = NULL;
+
+        switch(outputFormat)
+        {
+            case OutputFormat_DeviceServerXML:
+                format = "    </Properties>\n"
+                         "</ObjectDefinition>\n";
+                break;
+
+            default:
+                format = NULL;
+        }
+
+        if(format != NULL)
+        {
+            printf("%s",format);
+        }
+    }
+}
+
+void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
 {
     // Print all resources defined as part of this object
     if (objectDefinition != NULL)
@@ -1620,14 +1674,14 @@ void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool qu
             while (AwaResourceDefinitionIterator_Next(resourceIterator))
             {
                 const AwaResourceDefinition * resourceDefinition = AwaResourceDefinitionIterator_Get(resourceIterator);
-                PrintResourceDefinition(resourceDefinition, quiet, AwaObjectDefinition_GetID(objectDefinition));
+                PrintResourceDefinition(resourceDefinition, outputFormat, AwaObjectDefinition_GetID(objectDefinition));
             }
         }
         AwaResourceDefinitionIterator_Free(&resourceIterator);
     }
 }
 
-void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, bool quiet, AwaObjectID objectID)
+void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, OutputFormat outputFormat, AwaObjectID objectID)
 {
     // Use objectID for quiet output
     if (resourceDefinition != NULL)
@@ -1635,27 +1689,58 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, b
         const char * newLine = "";
         const char * format = NULL;
         char * id = NULL;
+        char * mandatory = NULL;
+        char * collection = NULL;
         AwaResourceID resourceID = AwaResourceDefinition_GetID(resourceDefinition);
-        if (!quiet)
+
+        switch(outputFormat)
         {
-            newLine = strlen(AwaResourceDefinition_GetName(resourceDefinition)) > 20 ? "\n                                              " : "";
-            format = "    %s name:%-20s%s type:%-16s minInstances:%d maxInstances:%d operations:%s\n";
-            msprintf2(&id, "Resource: ID:%-3d", resourceID);
+            case OutputFormat_PlainTextVerbose:
+                newLine = strlen(AwaResourceDefinition_GetName(resourceDefinition)) > 20 ? "\n                                              " : "";
+                format = "    %s name:%-20s%s type:%-16s minInstances:%s maxInstances:%s operations:%s\n";
+                msprintf2(&id, "Resource: ID:%-3d", resourceID);
+                msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
+                msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                break;
+            case OutputFormat_PlainTextQuiet:
+                format = "%s %s %.0s%s %s %s %s\n";
+                msprintf2(&id, "%d %d", objectID, resourceID);
+                msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
+                msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                break;
+
+            case OutputFormat_DeviceServerXML:
+                format = "       <PropertyDefinition>\n"
+                        "            <PropertyID>%s</PropertyID>\n"
+                        "            <SerialiastionName>%s</SerialiastionName>\n"
+                        "            <DataType>%s%s</DataType>\n"
+                        "            <IsMandatory>%s</IsMandatory>\n"
+                        "            <IsCollection>%s</IsCollection>\n"
+                        "            <Access>%s</Access>\n"
+                        "        </PropertyDefinition>\n";
+                msprintf2(&id, "%d", resourceID);
+                msprintf2(&mandatory, "%s", AwaResourceDefinition_GetMinimumInstances(resourceDefinition) == 0 ? "False" : "True");
+                msprintf2(&collection, "%s", AwaResourceDefinition_GetMaximumInstances(resourceDefinition) <= 1 ? "False" : "True");
+                break;
+            default:
+                format = NULL;
+                break;
         }
-        else
+
+        if(format != NULL)
         {
-            format = "%s %s %.0s%s %d %d %s\n";
-            msprintf2(&id, "%d %d", objectID, resourceID);
+            printf(format,
+                   id,
+                   AwaResourceDefinition_GetName(resourceDefinition),
+                   newLine,
+                   ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition)),
+                   mandatory,
+                   collection,
+                   ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition)));
+            free(id);
+            free(mandatory);
+            free(collection);
         }
-        printf(format,
-               id,
-               AwaResourceDefinition_GetName(resourceDefinition),
-               newLine,
-               ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition)),
-               AwaResourceDefinition_GetMinimumInstances(resourceDefinition),
-               AwaResourceDefinition_GetMaximumInstances(resourceDefinition),
-               ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition)));
-        free(id);
     }
 }
 
