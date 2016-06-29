@@ -2,9 +2,9 @@
 ![](img.png)
 ----
 
-# Awa LightweightM2M. 
+# Awa LightweightM2M 
 
-## User guide.
+## User guide
 
 This document is aimed at application developers who are using the Awa LightweightM2M libraries and tools as a foundation, or enhancement of their own M2M applications.
 
@@ -13,7 +13,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 ----
 
 
-### Contents.
+### Contents  
 
 * [Introduction.](userguide.md#introduction) 
 * [The LWM2M object model.](userguide.md#the-lwm2m-object-model) 
@@ -217,7 +217,7 @@ Usage: ````awa_bootstrapd [options] ````
 Example: ````awa_bootstrapd --port 15685 --config bootstrap.conf ````
 
 
-**The configuration file.**  
+**The configuration file**  
 
 The format of this file is same as the factory bootstrap file that can be supplied to the client daemon. The contents describe the LwM2M Security and Server objects that the bootstrap server will write to a client that connects. 
 
@@ -260,7 +260,7 @@ NotificationStoringWhenDisabledOrOffline=true
 ## Using the LWM2M client  
 
 
-### Connecting the gateway client to the gateway LWM2M server.
+### Connecting the gateway client to the gateway LWM2M server  
 ````
 $ build/core/src/bootstrap/awa_bootstrapd --verbose --port 15685
 $ build/core/src/server/awa_serverd --verbose
@@ -547,7 +547,7 @@ Multiple resources and object instances can be read using:
 
 [Back to the table of contents](userguide.md#contents)
 
-### Deleting an object instance from a registered client.
+### Deleting an object instance from a registered client  
 
 The *awa-server-delete* tool is used to delete an instance of an object from a connected client. For example, to delete object 1000, instance 0 from the client "imagination1":
 

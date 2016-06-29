@@ -4,14 +4,13 @@
 ----
 
 
-# Awa LightweightM2M.
+# Awa LightweightM2M  
 
-## Example: Create a client application on a device using the Awa API.
+## Example: Create a client application on a device using the Awa API  
 
-### Application overview.
+### Application overview
 
-TODO: same image but with static API...
-![](Awa_client_tutorial_application_positioning.png)
+![](Awa_client_tutorial_application_positioning_static_api.png)
 
 This example shows how to:
 
@@ -24,13 +23,11 @@ This example shows how to:
 
 The *client-static-tutorial* application makes use of the Awa Static API to define objects and resources and to expose them via LwM2M:
 
-
-TODO: same image but with static API...
-![](client-tutorial.png)
+![](Awa_client_tutorial_static_api.png)
 
 Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
-## Awa LightweightM2M installation.
+## Awa LightweightM2M installation  
 
 Use the command below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
@@ -140,7 +137,7 @@ Client: AwaStaticClient1
   /1/0     LWM2MServer
 ```
 
-### Add a custom object using the Awa static API.
+### Add a custom object using the Awa static API  
 
 The following code expands on the previous example, by demonstrating how to add a custom object - the "heater" object
 
@@ -280,7 +277,7 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-## Example: Create a standalone LWM2M client within a contiki environment.
+## Example: Create a standalone LWM2M client within a contiki environment  
 
 Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree
 for a contiki environment.
