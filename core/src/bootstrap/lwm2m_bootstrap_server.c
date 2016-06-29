@@ -41,9 +41,12 @@
 
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
+#include "dtls_abstraction.h"
 #include "lwm2m_core.h"
 #include "lwm2m_object_defs.h"
 #include "bootstrap/lwm2m_bootstrap.h"
+#include "bootstrap/lwm2m_bootstrap_cert.h"
+
 
 #define DEFAULT_IP_ADDRESS          "0.0.0.0"
 #define MAX_BOOTSTRAP_CONFIG_FILES  (2)
@@ -60,6 +63,7 @@ typedef struct
     char * InterfaceName;
     int AddressFamily;
     bool Version;
+    bool Secure;
 } Options;
 
 static FILE * logFile;
@@ -156,7 +160,10 @@ static int Bootstrap_Start(Options * options)
     }
     Lwm2m_Info("Awa LWM2M Bootstrap Server, version %s\n", version);
     Lwm2m_Info("  Process ID     : %d\n", getpid());
+    Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
+    Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
     Lwm2m_Info("  CoAP port      : %d\n", options->Port);
+    Lwm2m_Info("  Secure         : %s\n", options->Secure ? "true": "false");
 
     if (options->InterfaceName != NULL)
     {
@@ -183,13 +190,19 @@ static int Bootstrap_Start(Options * options)
         ipAddress[NI_MAXHOST - 1] = '\0';  // Defensive
     }
 
-    CoapInfo * coap = coap_Init(ipAddress, options->Port, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init(ipAddress, options->Port, options->Secure, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         printf("Unable to map address to network interface\n");
         result = 1;
         goto error_close_log;
     }
+
+    if (options->Secure)
+    {
+        coap_SetCertificate(bootsrapCert, sizeof(bootsrapCert), CertificateFormat_PEM);
+    }
+
     Lwm2mContextType * context = Lwm2mCore_Init(coap);
 
     // must happen after coap_Init()
@@ -270,6 +283,7 @@ static void PrintUsage(void)
     printf("  --verbose, -v           : Generate verbose output\n");
     printf("  --logFile, -l FILE      : Log output to FILE\n");
     printf("  --version, -V           : Print version and exit\n");
+    printf("  --secure, -s            : Communications are secured with TLS\n");
     printf("  --help, -h              : Show usage\n\n");
 
     printf("Example:\n");
@@ -292,6 +306,7 @@ static void PrintOptions(const Options * options)
     printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
     printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
     printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
+    printf("  Secure        (--secure)          : %s\n", options->Secure ? "true": "false");
 }
 
 static int ParseOptions(int argc, char ** argv, Options * options)
@@ -310,6 +325,7 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             {"verbose",       no_argument,            0, 'v'},
             {"daemonize",     no_argument,            0, 'd'},
             {"logFile",       required_argument,      0, 'l'},
+            {"secure",        no_argument,            0, 's'},
             {"version",       no_argument,            0, 'V'},
             {"help",          no_argument,            0, 'h'},
             {0,               0,                      0,  0 }
@@ -345,6 +361,9 @@ static int ParseOptions(int argc, char ** argv, Options * options)
             case 'l':
                 options->LogFile = optarg;
                 break;
+            case 's':
+                options->Secure = true;
+                break;
             case 'V':
                 options->Version = true;
                 break;
@@ -371,6 +390,7 @@ int main(int argc, char ** argv)
         .InterfaceName = NULL,
         .AddressFamily = AF_INET,
         .Version = false,
+        .Secure = false,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)

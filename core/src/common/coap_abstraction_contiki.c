@@ -44,6 +44,8 @@ typedef struct
 #define COAP_RESPONSE_CODE(N) (((N)/100 << 5) | (N)%100)
 #define PRINT6ADDR(addr) "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]\n", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15]
 
+const char * coap_LibraryName = "Erbium (Contiki)";
+
 static CoapInfo coapInfo;
 static void * context = NULL;
 static RequestHandler requestHandler = NULL;
@@ -51,6 +53,12 @@ static RequestHandler requestHandler = NULL;
 #define MAX_COAP_TRANSACTIONS (2)
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
+
+int coap_WaitMessage(int timeout, int fd)
+{
+    // No wait in Contiki
+    return timeout;
+}
 
 static void coap_HandleResource(/*CoapRequestHandlerCallbacks * RequestCB,*/ void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
@@ -465,10 +473,24 @@ int coap_Poll(void)
     return 0;
 }
 
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
     rest_init_engine();
     return &coapInfo;
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+{
+	(void)cert;
+	(void)certLength;
+	(void)format;
+}
+
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+{
+	(void)identity;
+	(void)key;
+	(void)keyLength;
 }
 
 void coap_SetLogLevel(int logLevel)

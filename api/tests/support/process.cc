@@ -217,7 +217,6 @@ int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_
     socklen_t fromAddrLen = sizeof(fromAddr);
 
     fromAddr.sin_family = AF_INET;
-    fromAddr.sin_family = SOCK_DGRAM;
     fromAddr.sin_port = htons(ipcPort);
 
     if (inet_aton("127.0.0.1", &fromAddr.sin_addr) == 0)
@@ -345,6 +344,7 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
 // return 0 on success
 static int WaitForLwM2MServerIpc(int ipcPort, int timeout /*seconds*/)
 {
+    //std::cout << "WaitForLwM2MServerIpc(ipcPort " << ipcPort << ", timeout " << timeout << ")" << std::endl;
     const char * request = "<Request><Type>ListClients</Type></Request>";
     return WaitForIpc(ipcPort, timeout, request, strlen(request));
 }

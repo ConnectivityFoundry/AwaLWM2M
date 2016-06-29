@@ -1,6 +1,8 @@
 add_subdirectory (b64)
 add_subdirectory (hmac)
-add_subdirectory (libcoap)
+if (WITH_LIBCOAP)
+  add_subdirectory (libcoap)
+endif ()
 add_subdirectory (xml)
 
 if (WITH_JSON)

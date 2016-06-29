@@ -61,12 +61,12 @@ class TestDelete(tools_common.AwaTest):
     def test_delete_non_existing_object_non_existing_instance(self):
          # test that a single resource can be set and retrieved
         expectedStdout = ""
-        expectedStderr = "AwaServerDeleteOperation_Perform failed\nFailed to delete target /123/456: AwaLWM2MError_MethodNotAllowed\n"
+        expectedStderr = "AwaServerDeleteOperation_Perform failed\nFailed to delete target /123/456: AwaLWM2MError_"
         expectedCode = 1
         
         result = server_delete(self.config, "/123/456")
         self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStderr, result.stderr[:len(expectedStderr)])
         self.assertEqual(expectedCode,   result.code)
         
     def test_delete_no_slash(self):

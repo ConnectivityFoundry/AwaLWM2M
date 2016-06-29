@@ -195,13 +195,14 @@ const char * ResourceOperationToString(AwaResourceOperations operation)
             "Execute",
     };
 
-    if (sizeof(table) / sizeof(table[0]) != AwaResourceOperations_LAST)
+    if (sizeof(table) / sizeof(table[0]) != AwaResourceOperations_LAST + 1)
     {
-        Error("ResourceOperationToString table is wrong size!\n");
+        Error("ResourceOperationToString table is wrong size!");
     }
     else
     {
-        if ((operation >= 0) && (operation < AwaResourceOperations_LAST))
+        operation += 1; //AwaResourceOperations_Invalid does not start at 0, so offset required.
+        if ((operation >= 0) && (operation < AwaResourceOperations_LAST + 1))
         {
             result = table[operation];
         }

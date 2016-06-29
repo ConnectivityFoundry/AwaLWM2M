@@ -66,12 +66,12 @@ class TestDelete(tools_common.AwaTest):
         self.assertEqual(expectedCode,   result.code)
         
         expectedStdout = ""
-        expectedStderr = "AwaClientDeleteOperation_Perform failed\nFailed to delete target /3/0/0: AwaError_PathNotFound\n"
+        expectedStderr = "AwaClientDeleteOperation_Perform failed\nFailed to delete target /3/0/0: AwaError_"
         expectedCode = 1
         
         result = client_delete(self.config, "/3/0/0")
         self.assertEqual(expectedStdout, result.stdout)
-        self.assertEqual(expectedStderr, result.stderr)
+        self.assertEqual(expectedStderr, result.stderr[:len(expectedStderr)])
         self.assertEqual(expectedCode,   result.code)
         
     def test_delete_no_slash(self):

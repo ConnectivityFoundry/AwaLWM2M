@@ -27,7 +27,6 @@ set (test_core_runner_INCLUDE_DIRS
 set (test_core_runner_LIBRARIES
   gtest
   pthread
-  libcoap_static
   awa_static
   awa_common_static
 )

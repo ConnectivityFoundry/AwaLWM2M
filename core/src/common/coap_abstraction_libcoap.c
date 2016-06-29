@@ -37,6 +37,8 @@
 #include <errno.h>
 #include <signal.h>
 #include <inttypes.h>
+#include <poll.h>
+
 
 #include "coap_abstraction.h"
 #include "lwm2m_util.h"
@@ -83,6 +85,8 @@ typedef struct
     AddressType * Address;
 } NotificationHandler;
 
+const char * coap_LibraryName = "libcoap";
+
 static struct ListHead transactionCallbackList;
 static struct ListHead notifyCallbackList;
 static coap_context_t * coapContext = NULL;
@@ -98,6 +102,44 @@ void coap_SetContext(void * ctxt)
 void coap_SetRequestHandler(RequestHandler handler)
 {
     requestHandler = handler;
+}
+
+int coap_WaitMessage(int timeout, int fd)
+{
+	// TODO - review/needs fixing?: moved from lwm2m_static/AwaStaticClient_Process()
+    int result;
+    struct pollfd fds[1];
+    int nfds = 1;
+
+    fds[0].fd = fd;
+    fds[0].events = POLLIN;
+
+    result = poll(fds, nfds, timeout);
+    if (result < 0)
+    {
+        if (errno == EINTR)
+        {
+            result = timeout;
+        }
+        else
+        {
+            perror("poll:");
+        }
+    }
+    else if (result > 0)
+    {
+        if (fds[0].revents == POLLIN)
+        {
+            coap_HandleMessage();
+        }
+        result = timeout;
+    }
+
+    if (result == timeout)
+    {
+        coap_Process();
+    }
+    return result;
 }
 
 int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
@@ -204,6 +246,7 @@ static int create_Transaction(coap_tid_t transactionID, coap_address_t * address
         return -1;
     }
 
+    memset(transaction, 0, sizeof(*transaction));
     transaction->TransactionID = transactionID;
     transaction->Context = context;
     transaction->Callback = transactionCallback;
@@ -1108,7 +1151,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     }
 }
 
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
     char port_str[32];
 
@@ -1131,6 +1174,20 @@ CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel)
     ListInit(&notifyCallbackList);
 
     return &coapInfo;
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+{
+	(void)cert;
+	(void)certLength;
+	(void)format;
+}
+
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+{
+    (void)identity;
+    (void)key;
+    (void)keyLength;
 }
 
 void coap_SetLogLevel(int logLevel)

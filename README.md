@@ -78,7 +78,7 @@ Note that for our purposes the terms *user* and *developer* have the following d
 
 The Awa API documentation is available as a Doxygen presentation which is generated via the following process.
 
-  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html): ```` sudo apt-get install doxygen````
+  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html) and [Graphviz](http://www.graphviz.org): ```` sudo apt-get install doxygen graphviz````
 
   2. Generate the documentation: ```` make docs````
 

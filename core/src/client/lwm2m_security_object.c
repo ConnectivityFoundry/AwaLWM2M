@@ -32,8 +32,6 @@
 #include "lwm2m_server_object.h"
 
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
-
 #define SECURITY_STRING_LEN (64)
 #define SERVER_URI_LEN (255)
 

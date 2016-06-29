@@ -25,6 +25,7 @@
 #define COAP_ABSTRACTION_H
 
 #include "lwm2m_types.h"
+#include "network_abstraction.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,7 +73,12 @@ typedef struct
     int fd;
 } CoapInfo;
 
-CoapInfo * coap_Init(const char * ipAddress, int port, int logLevel);
+extern const char * coap_LibraryName;
+
+CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel);
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format);
+void coap_SetPSK(const char * identity, uint8_t * key, int keyLength);
 
 int coap_Destroy(void);
 void coap_Process(void);
@@ -90,6 +96,8 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
 void coap_SetContext(void * ctxt);
 void coap_SetRequestHandler(RequestHandler handler);
+
+int coap_WaitMessage(int timeout, int fd);
 
 int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr);
 
