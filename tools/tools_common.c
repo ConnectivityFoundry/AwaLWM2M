@@ -1613,7 +1613,7 @@ void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, O
             case OutputFormat_DeviceServerXML:
                 format = "<ObjectDefinition>\n"
                          "    <ObjectID>%d</ObjectID>\n"
-                         "    <SerialiastionName>%s</SerialiastionName>\n"
+                         "    <SerialisationName>%s</SerialisationName>\n"
                          "    <IsMandatory>%s</IsMandatory>\n"
                          "    <Singleton>%s</Singleton>\n"
                          "    <Properties>\n";
@@ -1712,7 +1712,7 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
             case OutputFormat_DeviceServerXML:
                 format = "       <PropertyDefinition>\n"
                         "            <PropertyID>%s</PropertyID>\n"
-                        "            <SerialiastionName>%s</SerialiastionName>\n"
+                        "            <SerialisationName>%s</SerialisationName>\n"
                         "            <DataType>%s%s</DataType>\n"
                         "            <IsMandatory>%s</IsMandatory>\n"
                         "            <IsCollection>%s</IsCollection>\n"
