@@ -42,6 +42,7 @@
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "dtls_abstraction.h"
+#include "xmltree.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_connectivity_object.h"
@@ -55,7 +56,7 @@
 #include "lwm2m_xml_interface.h"
 #include "lwm2m_object_defs.h"
 #include "lwm2m_client_cert.h"
-#include "xmltree.h"
+#include "lwm2m_client_psk.h"
 
 
 #define DEFAULT_COAP_PORT (6000)
@@ -279,6 +280,7 @@ static int Lwm2mClient_Start(Options * options)
     }
 
     coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
+    coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
 
     // if required read the bootstrap information from a file
     const BootstrapInfo * factoryBootstrapInfo;

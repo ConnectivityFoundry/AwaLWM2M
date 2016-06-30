@@ -463,7 +463,7 @@ void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t *
     DTLS_SetCertificate(cert, certLength, format);
 }
 
-void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, uint8_t * key, int keyLength)
+void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength)
 {
 
     DTLS_SetPSK(identity, key, keyLength);

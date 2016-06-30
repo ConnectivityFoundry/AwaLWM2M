@@ -78,7 +78,7 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket);
 
 void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format);
 
-void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, uint8_t * key, int keyLength);
+void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength);
 
 bool NetworkSocket_StartListening(NetworkSocket * networkSocket);
 

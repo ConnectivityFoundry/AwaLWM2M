@@ -9,6 +9,10 @@ if (WITH_JSON)
   add_subdirectory (jsmn)
 endif ()
 
+if (WITH_TINYDTLS)
+  add_subdirectory (tinydtls)
+endif ()
+
 if (BUILD_TESTS)
   # gtest is CMake-enabled
   #  defines libraries 'gtest' and 'gtest-main'
