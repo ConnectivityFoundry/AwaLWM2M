@@ -20,58 +20,23 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-#include <stdbool.h>
-#include <string.h>
 
-#include "lwm2m_debug.h"
-#include "dtls_abstraction.h"
+#ifndef LWM2M_SERVER_PSK_H_
+#define LWM2M_SERVER_PSK_H_
 
-const char * DTLS_LibraryName = "None";
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void DTLS_Init(void)
-{
+const char * pskIdentity = "oFIrQFrW8EWcZ5u7eGfrkw";
+
+const uint8_t pskKey[] = {
+        0x7C, 0xCD, 0xE1, 0x4A, 0x5C, 0xF3, 0xB7, 0x1C, 0x0C, 0x08, 0xC8, 0xB7, 0xF9, 0xE5
+};
+
+
+#ifdef __cplusplus
 }
+#endif
 
-void DTLS_Shutdown(void)
-{
-}
-
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
-{
-}
-
-void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
-{
-}
-
-void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
-{
-}
-
-
-bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
-{
-    (void)context;
-    bool result = false;
-    if (encryptedLength <= decryptBufferLength && encryptedLength > 0)
-    {
-        memcpy(decryptBuffer, encrypted, encryptedLength);
-        *decryptedLength = encryptedLength;
-        result = true;
-    }
-    return result;
-}
-
-bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTextLength, uint8_t * encryptedBuffer, int encryptedBufferLength, int * encryptedLength, void *context)
-{
-    (void)context;
-    bool result = false;
-    if (plainTextLength <= encryptedBufferLength && plainTextLength > 0)
-    {
-        memcpy(encryptedBuffer, plainText, plainTextLength);
-        *encryptedLength = plainTextLength;
-        result = true;
-    }
-    return result;
-}
-
+#endif /* LWM2M_SERVER_PSK_H_ */

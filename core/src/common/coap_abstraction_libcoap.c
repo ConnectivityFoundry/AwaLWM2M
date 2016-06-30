@@ -1183,7 +1183,7 @@ void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat
 	(void)format;
 }
 
-void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+void coap_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
     (void)identity;
     (void)key;
