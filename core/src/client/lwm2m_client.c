@@ -42,6 +42,7 @@
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "dtls_abstraction.h"
+#include "xmltree.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_connectivity_object.h"
@@ -74,6 +75,7 @@ typedef struct
     int AddressFamily;
     const char * FactoryBootstrapFile;
     bool Version;
+    char * ObjDefsFile;
 } Options;
 
 
@@ -140,6 +142,81 @@ static void Daemonise(bool verbose)
     close (STDIN_FILENO);
     close (STDOUT_FILENO);
     close (STDERR_FILENO);
+}
+
+static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char * filename)
+{
+    DefinitionCount count = { 0 };
+    int result = 0;
+
+    Lwm2m_Info("Load definitions: from \'%s\'\n", filename);
+
+    FILE *f = fopen(filename, "rb");
+    if (f != NULL)
+    {
+        fseek(f, 0, SEEK_END);
+        long pos = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        uint8_t * doc = malloc(pos);
+        if (doc != NULL)
+        {
+            size_t nmemb = fread(doc, pos, 1, f);
+            if (nmemb == 1)
+            {
+                Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
+                TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
+                count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
+                result = 0;
+                Tree_Delete(objectDefinitionsNode);
+                free(doc);
+            }
+            else
+            {
+                perror("fread");
+                result = -1;
+                free(doc);
+            }
+        }
+        else
+        {
+            Lwm2m_Error("Out of memory\n");
+            result = -1;
+        }
+        fclose(f);
+    }
+    else
+    {
+        perror("fopen");
+        result = -1;
+    }
+
+    if (result == 0)
+    {
+        // regard any failures as fatal
+
+        if (count.NumObjectsFailed > 0) {
+            Lwm2m_Error("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
+            result = -1;
+        }
+        if (count.NumResourcesFailed > 0) {
+            Lwm2m_Error("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
+            result = -1;
+        }
+        Lwm2m_Info("Load definitions: %zu object%s and %zu resource%s defined\n", count.NumObjectsOK, count.NumObjectsOK != 1 ? "s" : "", count.NumResourcesOK, count.NumResourcesOK != 1 ? "s" : "");
+
+        // also regard nothing defined as failure
+        if (count.NumObjectsOK == 0 && count.NumResourcesOK == 0)
+        {
+            Lwm2m_Error("No objects or resources defined\n");
+            result = -1;
+        }
+    }
+
+    if (result < 0)
+    {
+        Lwm2m_Error("Load definitions: failed\n");
+    }
+    return result;
 }
 
 static int Lwm2mClient_Start(Options * options)
@@ -242,6 +319,15 @@ static int Lwm2mClient_Start(Options * options)
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
 
+    if (options->ObjDefsFile)
+    {
+        if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFile) != 0)
+        {
+            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFile);
+            goto error_core;
+        }
+    }
+
     // Listen for UDP packets on IPC port
     int xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
@@ -329,6 +415,7 @@ static void PrintUsage(void)
     printf("  --daemonize, -d          : Detach process from terminal and run in the background\n");
     printf("  --verbose, -v            : Generate verbose output\n");
     printf("  --logFile, -l FILE       : Log output to FILE\n");
+    printf("  --objDefs, -o FILE       : Load object definitions from FILE\n");
     printf("  --version, -V            : Print version and exit\n");
     printf("  --help, -h               : Show usage\n\n");
 
@@ -346,6 +433,7 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName);
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap);
     printf("  LogFile              (--logFile)          : %s\n", options->LogFile);
+    printf("  ObjectDefinitions    (--objDefs)          : %s\n", options->ObjDefsFile);
     printf("  AddressFamily        (--addressFamily)    : %d\n", options->AddressFamily == AF_INET? 4 : 6);
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile);
 }
@@ -358,21 +446,22 @@ static int ParseOptions(int argc, char ** argv, Options * options)
 
         static struct option longOptions[] =
         {
-            {"port",             required_argument, 0, 'p'},
-            {"addressFamily",    required_argument, 0, 'a'},
-            {"ipcPort",          required_argument, 0, 'i'},
-            {"bootstrap",        required_argument, 0, 'b'},
-            {"factoryBootstrap", required_argument, 0, 'f'},
-            {"endPointName",     required_argument, 0, 'e'},
-            {"verbose",          no_argument,       0, 'v'},
-            {"daemonize",        no_argument,       0, 'd'},
-            {"logFile",          required_argument, 0, 'l'},
-            {"version",          no_argument,       0, 'V'},
-            {"help",             no_argument,       0, 'h'},
-            {0,                  0,                 0,  0 }
+            {"port",              required_argument, 0, 'p'},
+            {"addressFamily",     required_argument, 0, 'a'},
+            {"ipcPort",           required_argument, 0, 'i'},
+            {"bootstrap",         required_argument, 0, 'b'},
+            {"factoryBootstrap",  required_argument, 0, 'f'},
+            {"endPointName",      required_argument, 0, 'e'},
+            {"verbose",           no_argument,       0, 'v'},
+            {"daemonize",         no_argument,       0, 'd'},
+            {"logFile",           required_argument, 0, 'l'},
+            {"objDefs",           required_argument, 0, 'o'},
+            {"version",           no_argument,       0, 'V'},
+            {"help",              no_argument,       0, 'h'},
+            {0,                   0,                 0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "p:a:i:b:f:e:vdl:Vh", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "p:a:i:b:f:e:vdl:o:Vh", longOptions, &optionIndex);
         if (c == -1)
         {
             break;
@@ -406,6 +495,9 @@ static int ParseOptions(int argc, char ** argv, Options * options)
                 break;
             case 'l':
                 options->LogFile = optarg;
+                break;
+            case 'o':
+                options->ObjDefsFile = optarg;
                 break;
             case 'V':
                 options->Version = true;
@@ -442,6 +534,7 @@ int main(int argc, char ** argv)
         .AddressFamily = AF_INET,
         .FactoryBootstrapFile = NULL,
         .Version = false,
+        .ObjDefsFile = NULL,
     };
 
     if (ParseOptions(argc, argv, &options) == 0)

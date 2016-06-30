@@ -390,6 +390,10 @@ TreeNode TreeNode_Navigate(const TreeNode rootNode, const char* path)
                         if (pathError)
                             currentNode = NULL;
                     }
+                    else
+                    {
+                        currentNode = NULL;
+                    }
                 }
             }
             Flow_MemFree((void **) &_path);
