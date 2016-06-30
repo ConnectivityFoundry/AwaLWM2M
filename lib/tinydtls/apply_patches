@@ -1,0 +1,3 @@
+#!/bin/sh
+
+for x in $1/*.patch; do patch < $x; done

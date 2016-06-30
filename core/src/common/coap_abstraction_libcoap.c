@@ -246,6 +246,7 @@ static int create_Transaction(coap_tid_t transactionID, coap_address_t * address
         return -1;
     }
 
+    memset(transaction, 0, sizeof(*transaction));
     transaction->TransactionID = transactionID;
     transaction->Context = context;
     transaction->Callback = transactionCallback;
@@ -1182,7 +1183,7 @@ void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat
 	(void)format;
 }
 
-void coap_SetPSK(const char * identity, uint8_t * key, int keyLength)
+void coap_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
     (void)identity;
     (void)key;
