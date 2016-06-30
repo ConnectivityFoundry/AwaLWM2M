@@ -750,6 +750,7 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
     int res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, objectOperationHandlers);
     if (res < 0)
     {
+        Lwm2m_Error("Object %d definition failed - %s (%d)\n", objectID, AwaError_ToString(AwaResult_ToAwaError(AwaResult_GetLastResult(), AwaError_Unspecified)), AwaResult_GetLastResult());
         ++definitionCount.NumObjectsFailed;
         goto error;
     }
