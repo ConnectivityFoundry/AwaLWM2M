@@ -463,7 +463,7 @@ void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t *
     DTLS_SetCertificate(cert, certLength, format);
 }
 
-void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, uint8_t * key, int keyLength)
+void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength)
 {
 
     DTLS_SetPSK(identity, key, keyLength);
@@ -486,8 +486,6 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
         networkSocket->Socket = socket(AF_INET, socketMode, protocol);
         if (networkSocket->Socket != SOCKET_ERROR)
         {
-            int yes = 1;
-            setsockopt(networkSocket->Socket, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
             struct sockaddr *address = NULL;
             socklen_t addressLength = 0;
             addressLength = sizeof(struct sockaddr_in);
@@ -501,7 +499,7 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             flag = flag | O_NONBLOCK;
             if (fcntl(networkSocket->Socket, F_SETFL, flag) < 0)
             {
-
+                // ignore error
             }
             if (bind(networkSocket->Socket, address, addressLength) != SOCKET_ERROR)
             {
@@ -513,33 +511,31 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
         {
 
             int yes = 1;
-            setsockopt(networkSocket->SocketIPv6, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
-            struct sockaddr *address = NULL;
-            socklen_t addressLength = 0;
-            addressLength = sizeof(struct sockaddr_in6);
-            struct sockaddr_in6 ipAddress;
-            memset(&ipAddress, 0, addressLength);
-            ipAddress.sin6_family = AF_INET6;
-            //memset(&ipAddress->sin6_addr, 0, sizeof(ipAddress->sin6_addr));
-            //ipAddress->sin6_addr.__in6_u = IN6ADDR_ANY_INIT; //IN6ADDR_ANY_INIT
-            ipAddress.sin6_port = htons(networkSocket->Port);
-            address = (struct sockaddr *)&ipAddress;
-            int flag = fcntl(networkSocket->SocketIPv6, F_GETFL);
-            flag = flag | O_NONBLOCK;
-            if (fcntl(networkSocket->SocketIPv6, F_SETFL, flag) < 0)
+            if (setsockopt(networkSocket->SocketIPv6, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes) != SOCKET_ERROR))
             {
-
-            }
-            if (bind(networkSocket->SocketIPv6, address, addressLength) != SOCKET_ERROR)
-            {
-                result = true;
+                struct sockaddr *address = NULL;
+                socklen_t addressLength = 0;
+                addressLength = sizeof(struct sockaddr_in6);
+                struct sockaddr_in6 ipAddress;
+                memset(&ipAddress, 0, addressLength);
+                ipAddress.sin6_family = AF_INET6;
+                ipAddress.sin6_port = htons(networkSocket->Port);
+                address = (struct sockaddr *)&ipAddress;
+                int flag = fcntl(networkSocket->SocketIPv6, F_GETFL);
+                flag = flag | O_NONBLOCK;
+                if (fcntl(networkSocket->SocketIPv6, F_SETFL, flag) < 0)
+                {
+                    // ignore error
+                }
+                if (bind(networkSocket->SocketIPv6, address, addressLength) != SOCKET_ERROR)
+                {
+                    result = true;
+                }
             }
         }
     }
     return result;
 }
-
-//bool NetworkSocket_Connect(NetworkSocket networkSocket, NetworkAddress * destAddress);
 
 bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, int bufferLength, NetworkAddress ** sourceAddress, int *readLength)
 {
