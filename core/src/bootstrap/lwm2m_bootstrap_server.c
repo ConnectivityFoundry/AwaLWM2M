@@ -46,6 +46,7 @@
 #include "lwm2m_object_defs.h"
 #include "bootstrap/lwm2m_bootstrap.h"
 #include "bootstrap/lwm2m_bootstrap_cert.h"
+#include "bootstrap/lwm2m_bootstrap_psk.h"
 
 
 #define DEFAULT_IP_ADDRESS          "0.0.0.0"
@@ -201,6 +202,7 @@ static int Bootstrap_Start(Options * options)
     if (options->Secure)
     {
         coap_SetCertificate(bootsrapCert, sizeof(bootsrapCert), CertificateFormat_PEM);
+        coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
     }
 
     Lwm2mContextType * context = Lwm2mCore_Init(coap);
