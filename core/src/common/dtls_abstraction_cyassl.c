@@ -65,8 +65,8 @@ int certificateLength = 0;
 CertificateFormat certificateFormat;
 
 const char * pskIdentity = NULL;
-uint8_t * pskKey;
-int pskKeyLength;
+const uint8_t * pskKey = NULL;
+int pskKeyLength = 0;
 
 DTLS_NetworkSendCallback NetworkSend = NULL;
 
@@ -129,7 +129,7 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
     NetworkSend = sendCallback;
 }
 
-void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
+void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
     pskIdentity = identity;
     pskKey = key;

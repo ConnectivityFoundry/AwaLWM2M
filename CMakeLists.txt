@@ -18,14 +18,15 @@ option (WITH_LIBCOAP "Enable libcoap CoAP support)" ON)
 option (WITH_ERBIUM "Enable Erbium CoAP support)" OFF)
 option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
 option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
+option (WITH_TINYDTLS "Enable TinyDTLS DTLS support" OFF)
 
 if (WITH_ERBIUM)
   message (WARNING "Disabling libcoap support")
   set (WITH_LIBCOAP OFF)
 endif ()
 
-if (WITH_GNUTLS AND WITH_CYASSL)
-  message (FATAL_ERROR "WITH_GNUTLS and WITH_CYASSL are mutually exclusive and cannot be specified together." )
+if (WITH_GNUTLS AND (WITH_CYASSL OR WITH_TINYDTLS))
+  message (FATAL_ERROR "WITH_GNUTLS, WITH_CYASSL and WITH_TINYDTLS are mutually exclusive and cannot be specified together." )
 endif ()
 
 

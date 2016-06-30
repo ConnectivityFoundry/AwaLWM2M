@@ -132,10 +132,10 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
     NetworkSend = sendCallback;
 }
 
-void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
+void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
     pskIdentity = identity;
-    pskKey.data = key;
+    pskKey.data = (unsigned char *)key;
     pskKey.size = keyLength;
 }
 
