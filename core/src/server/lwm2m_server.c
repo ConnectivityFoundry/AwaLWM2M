@@ -48,6 +48,7 @@
 #include "lwm2m_object_defs.h"
 #include "lwm2m_core.h"
 #include "lwm2m_server_cert.h"
+#include "lwm2m_server_psk.h"
 
 
 #define DEFAULT_IP_ADDRESS "0.0.0.0"
@@ -72,7 +73,6 @@ typedef struct
 static FILE * logFile = NULL;
 static const char * version = VERSION;  // from Makefile
 static volatile int quit = 0;
-
 
 
 static void PrintOptions(const Options * options);
@@ -211,6 +211,7 @@ static int Lwm2mServer_Start(Options * options)
     if (options->Secure)
     {
     	coap_SetCertificate(serverCert, sizeof(serverCert), CertificateFormat_PEM);
+        coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
     }
 
     Lwm2mContextType * context = Lwm2mCore_Init(NULL, options->ContentType);  // NULL, don't map coap with objectStore

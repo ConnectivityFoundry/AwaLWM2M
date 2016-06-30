@@ -1,9 +1,9 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..92970cb
+index 0000000..c42591b
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,139 @@
 +cmake_minimum_required(VERSION 2.8.2)
 +Include (CheckIncludeFile)
 +Include (CheckFunctionExists)
@@ -106,6 +106,10 @@ index 0000000..92970cb
 +if (ENABLE_GCOV)
 +  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
 +  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
++endif ()
++
++if (DEBUG)
++  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
 +endif ()
 +
 +# From TinyDTLS Makefiles

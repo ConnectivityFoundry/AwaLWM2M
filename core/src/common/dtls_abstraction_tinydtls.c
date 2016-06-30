@@ -72,19 +72,20 @@ typedef struct
 
 const char * DTLS_LibraryName = "TinyDTLS";
 
-DTLS_Session sessions[MAX_DTLS_SESSIONS];
+static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
-uint8_t * certificate = NULL;
-int certificateLength = 0;
-CertificateFormat certificateFormat;
+static uint8_t * certificate = NULL;
+static int certificateLength = 0;
+static CertificateFormat certificateFormat;
 
-const char * pskIdentity = NULL;
-uint8_t * pskKey;
-int pskKeyLength = 0;
+static const char * pskIdentity = NULL;
+static const uint8_t * pskKey = NULL;
+static int pskKeyLength = 0;
 
-DTLS_NetworkSendCallback NetworkSend = NULL;
+static DTLS_NetworkSendCallback NetworkSend = NULL;
 
 
+static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context);
 static DTLS_Session * GetSession(NetworkAddress * address);
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
 static void FreeSession(DTLS_Session * session);
@@ -93,6 +94,7 @@ static int CertificateVerify(struct dtls_context_t *ctx, const session_t *sessio
 #endif
 static int DecryptCallBack(struct dtls_context_t *context, session_t *session, uint8 *recieveBuffer, size_t receiveBufferLegth);
 static int EncryptCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength);
+static int EventCallBack(struct dtls_context_t *context, session_t *session, dtls_alert_level_t level, unsigned short code);
 static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtls_credentials_type_t type, const unsigned char *id,
         size_t id_len, unsigned char *result, size_t result_length);
 static int SSLSendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength);
@@ -128,7 +130,7 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
     NetworkSend = sendCallback;
 }
 
-void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
+void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
     pskIdentity = identity;
     pskKey = key;
@@ -139,30 +141,29 @@ void DTLS_SetPSK(const char * identity, uint8_t * key, int keyLength)
 bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
 {
     bool result = false;
+    bool tryAgain = true;
     DTLS_Session * session = GetSession(sourceAddress);
     if (!session)
     {
-        int index;
-        for (index = 0;index < MAX_DTLS_SESSIONS; index++)
-        {
-            if (!sessions[index].Context)
-            {
-                SetupNewSession(index, sourceAddress, false);
-                sessions[index].UserContext = context;
-                sessions[index].Callbacks.write = SSLSendCallBack;
-                break;
-            }
-        }
+        session = AllocateSession(sourceAddress, false, context);
     }
-    if (session)
+    while (session && tryAgain)
     {
+        tryAgain = false;
         session->Buffer = decryptBuffer;
         session->BufferLength = decryptBufferLength;
+        bool hadSessionEstablished = session->SessionEstablished;
         if (dtls_handle_message(session->Context, &session->Session, encrypted, encryptedLength) == TINY_DTLS_SUCCESS)
         {
             *decryptedLength = decryptBufferLength - session->BufferLength;
-            if (!session->SessionEstablished)
+            if (session->SessionEstablished)
             {
+                result = (*decryptedLength > 0);
+            }
+            else
+            {
+                if (hadSessionEstablished)
+                    tryAgain = true;
                 dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
                 if (peer)
                 {
@@ -173,10 +174,14 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
         else
         {
             *decryptedLength = 0;
+            if (session->SessionEstablished)
+            {
+                FreeSession(session);
+                session = AllocateSession(sourceAddress, false, context);
+                tryAgain = true;
+            }
         }
     }
-
-
     return result;
 }
 
@@ -206,17 +211,28 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
     }
     else
     {
-        int index;
-        for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+        session = AllocateSession(destAddress, true, context);
+        if (session)
         {
-            if (!sessions[index].Context)
-            {
-                SetupNewSession(index, destAddress, true);
-                sessions[index].UserContext = context;
-                sessions[index].Callbacks.write = SSLSendCallBack;
-                dtls_connect(sessions[index].Context, &sessions[index].Session);
-                break;
-            }
+            dtls_connect(session->Context, &session->Session);
+        }
+    }
+    return result;
+}
+
+static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context)
+{
+    DTLS_Session * result = NULL;
+    int index;
+    for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+    {
+        if (!sessions[index].Context)
+        {
+            SetupNewSession(index, address, client);
+            sessions[index].UserContext = context;
+            sessions[index].Callbacks.write = SSLSendCallBack;
+            result = &sessions[index];
+            break;
         }
     }
     return result;
@@ -240,6 +256,8 @@ static DTLS_Session * GetSession(NetworkAddress * address)
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client)
 {
     DTLS_Session * session = &sessions[index];
+    if (!client)
+        session->Callbacks.event = EventCallBack;
     session->Callbacks.read = DecryptCallBack;
     session->Callbacks.write = SSLSendCallBack;
 #ifdef DTLS_PSK
@@ -251,12 +269,28 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
 #endif
     session->NetworkAddress = networkAddress;
     session->Context = dtls_new_context(session);
+    if (session->Context)
+    {
+        dtls_set_handler(session->Context, &session->Callbacks);
+//        if (!client)
+//        {
+//            //dtls_peer_t *peer =
+//            dtls_new_peer(&session->Session);
+//        }
+    }
 }
 
 static void FreeSession(DTLS_Session * session)
 {
     if (session->Context)
+    {
+        dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
+        if (peer)
+        {
+            dtls_reset_peer(session->Context, peer);
+        }
         dtls_free_context(session->Context);
+    }
     memset(session,0, sizeof(DTLS_Session));
 }
 
@@ -316,12 +350,35 @@ static int EncryptCallBack(struct dtls_context_t *context, session_t *session, u
     return result;
 }
 
+static int EventCallBack(struct dtls_context_t *context, session_t *session, dtls_alert_level_t level, unsigned short code)
+{
+    if (code == DTLS_EVENT_CONNECTED)
+    {
+        DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
+        if (dtlsSession)
+        {
+            if (dtlsSession->SessionEstablished)
+            {
+                dtlsSession->Callbacks.write = NULL;
+                dtls_peer_t * peer = dtls_get_peer(context, session);
+                if (peer)
+                {
+                    dtls_reset_peer(context, peer);
+                }
+                dtlsSession->Callbacks.write = SSLSendCallBack;
+            }
+            dtlsSession->SessionEstablished = false;
+        }
+    }
+    return 0;
+}
 
 static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtls_credentials_type_t type, const unsigned char *id,
         size_t id_len, unsigned char *result, size_t result_length)
 {
     switch (type)
     {
+    case DTLS_PSK_HINT:
     case DTLS_PSK_IDENTITY:
         if (id_len)
         {
