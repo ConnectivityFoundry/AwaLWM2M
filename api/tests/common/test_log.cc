@@ -71,6 +71,13 @@ typedef TestLogCapture<CaptureFile> TestLogCaptureFile;
 typedef TestLogCapture<CaptureStdout> TestLogCaptureStdout;
 typedef TestLogCapture<CaptureStderr> TestLogCaptureStderr;
 
+TEST_F(TestLogCaptureFile, deliberate_memory_leak)
+{
+    char * lost = (char *)malloc(1024);
+	ASSERT_TRUE(NULL != lost);
+    (void)lost;
+}
+
 TEST_F(TestLogCaptureFile, test_Log_level_None)
 {
     const char * inputString = "Hello, World!";

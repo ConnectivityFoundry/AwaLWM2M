@@ -1,20 +1,20 @@
 set (test_core_runner_SOURCES
   main.cc
 
-  test_lwm2m_core.cc
-  test_object_store_interface.cc
-  test_template.cc
-  test_tlv.cc
-  test_definition_registry.cc
-  test_plaintext.cc
-  test_prettyprint.cc
-  test_lwm2m_types.cc
+#  test_lwm2m_core.cc
+#  test_object_store_interface.cc
+#  test_template.cc
+#  test_tlv.cc
+#  test_definition_registry.cc
+#  test_plaintext.cc
+#  test_prettyprint.cc
+#  test_lwm2m_types.cc
 
-  test_lwm2m_tree.cc
-  test_lwm2m_tree_builder.cc
+#  test_lwm2m_tree.cc
+#  test_lwm2m_tree_builder.cc
   unit_support.cc
-  test_object_tree.cc
-  test_xml.cc
+#  test_object_tree.cc
+#  test_xml.cc
 )
 
 set (test_core_runner_INCLUDE_DIRS
