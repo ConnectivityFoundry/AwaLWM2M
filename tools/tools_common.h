@@ -102,8 +102,9 @@ void FreeTarget(Target ** targetPtr);
 bool IsIDValid(int id);
 
 const char * ResourceTypeToString(AwaResourceType type);
-
+const char * DeviceServerXML_ResourceTypeToString(AwaResourceType type);
 const char * ResourceOperationToString(AwaResourceOperations operation);
+const char * DeviceServerXML_ResourceOperationToString(AwaResourceOperations operation);
 
 bool IsArrayType(AwaResourceType type);
 

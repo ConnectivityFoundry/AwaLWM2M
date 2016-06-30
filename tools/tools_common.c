@@ -183,6 +183,42 @@ const char * ResourceTypeToString(AwaResourceType type)
     return result;
 }
 
+const char * DeviceServerXML_ResourceTypeToString(AwaResourceType type)
+{
+    const char * result = "BAD TYPE";
+    const char * table[] = {
+            "Invalid",
+            "None",
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Opaque",
+            "Time",
+            "ObjectLink",
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Opaque",
+            "Time",
+            "ObjectLink",
+    };
+
+    if (sizeof(table) / sizeof(table[0]) != AwaResourceType_LAST)
+    {
+        Error("ResourceTypeToString table is wrong size!\n");
+    }
+    else
+    {
+        if ((type >= 0) && (type < AwaResourceType_LAST))
+        {
+            result = table[type];
+        }
+    }
+    return result;
+}
+
 const char * ResourceOperationToString(AwaResourceOperations operation)
 {
     const char * result = "BAD OPERATION";
@@ -191,6 +227,33 @@ const char * ResourceOperationToString(AwaResourceOperations operation)
             "None",
             "ReadOnly",
             "WriteOnly",
+            "ReadWrite",
+            "Execute",
+    };
+
+    if (sizeof(table) / sizeof(table[0]) != AwaResourceOperations_LAST + 1)
+    {
+        Error("ResourceOperationToString table is wrong size!");
+    }
+    else
+    {
+        operation += 1; //AwaResourceOperations_Invalid does not start at 0, so offset required.
+        if ((operation >= 0) && (operation < AwaResourceOperations_LAST + 1))
+        {
+            result = table[operation];
+        }
+    }
+    return result;
+}
+
+const char * DeviceServerXML_ResourceOperationToString(AwaResourceOperations operation)
+{
+    const char * result = "BAD OPERATION";
+    const char * table[] = {
+            "Invalid",
+            "None",
+            "Read",
+            "Write",
             "ReadWrite",
             "Execute",
     };
@@ -1689,8 +1752,10 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
         const char * newLine = "";
         const char * format = NULL;
         char * id = NULL;
+        const char * resourceType = "";
         char * mandatory = NULL;
         char * collection = NULL;
+        const char * resourceOperation = "";
         AwaResourceID resourceID = AwaResourceDefinition_GetID(resourceDefinition);
 
         switch(outputFormat)
@@ -1701,12 +1766,16 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
                 msprintf2(&id, "Resource: ID:%-3d", resourceID);
                 msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
                 msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                resourceType = ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
                 break;
             case OutputFormat_PlainTextQuiet:
                 format = "%s %s %.0s%s %s %s %s\n";
                 msprintf2(&id, "%d %d", objectID, resourceID);
                 msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
                 msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                resourceType = ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
                 break;
 
             case OutputFormat_DeviceServerXML:
@@ -1721,6 +1790,8 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
                 msprintf2(&id, "%d", resourceID);
                 msprintf2(&mandatory, "%s", AwaResourceDefinition_GetMinimumInstances(resourceDefinition) == 0 ? "False" : "True");
                 msprintf2(&collection, "%s", AwaResourceDefinition_GetMaximumInstances(resourceDefinition) <= 1 ? "False" : "True");
+                resourceType = DeviceServerXML_ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = DeviceServerXML_ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
                 break;
             default:
                 format = NULL;
@@ -1733,10 +1804,10 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
                    id,
                    AwaResourceDefinition_GetName(resourceDefinition),
                    newLine,
-                   ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition)),
+                   resourceType,
                    mandatory,
                    collection,
-                   ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition)));
+                   resourceOperation);
             free(id);
             free(mandatory);
             free(collection);
