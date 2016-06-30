@@ -194,14 +194,14 @@ const char * DeviceServerXML_ResourceTypeToString(AwaResourceType type)
             "Float",
             "Boolean",
             "Opaque",
-            "Time",
+            "DateTime",
             "ObjectLink",
             "String",
             "Integer",
             "Float",
             "Boolean",
             "Opaque",
-            "Time",
+            "DateTime",
             "ObjectLink",
     };
 
