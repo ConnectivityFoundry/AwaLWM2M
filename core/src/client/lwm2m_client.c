@@ -191,17 +191,22 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
 
     if (result == 0)
     {
+        // regard any failures as fatal
+
         if (count.NumObjectsFailed > 0) {
-            Lwm2m_Warning("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
+            Lwm2m_Error("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
+            result = -1;
         }
         if (count.NumResourcesFailed > 0) {
-            Lwm2m_Warning("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
+            Lwm2m_Error("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
+            result = -1;
         }
         Lwm2m_Info("Load definitions: %zu object%s and %zu resource%s defined\n", count.NumObjectsOK, count.NumObjectsOK != 1 ? "s" : "", count.NumResourcesOK, count.NumResourcesOK != 1 ? "s" : "");
 
-        // regard nothing defined as failure
+        // also regard nothing defined as failure
         if (count.NumObjectsOK == 0 && count.NumResourcesOK == 0)
         {
+            Lwm2m_Error("No objects or resources defined\n");
             result = -1;
         }
     }
