@@ -435,7 +435,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
 
     // libcoap returns AwaLWM2MError_MethodNotAllowed, Erbium returns AwaLWM2MError_NotFound
-    std::vector<AwaError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
+    std::vector<AwaLWM2MError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
     EXPECT_TRUE(std::find(expectedErrors.begin(), expectedErrors.end(), AwaPathResult_GetLWM2MError(pathResult)) != expectedErrors.end());
 
     AwaServerWriteOperation_Free(&writeOperation);
@@ -499,7 +499,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_LWM2MError, AwaPathResult_GetError(pathResult));
 
     // libcoap returns AwaLWM2MError_MethodNotAllowed, Erbium returns AwaLWM2MError_NotFound
-    std::vector<AwaError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
+    std::vector<AwaLWM2MError> expectedErrors { (AwaError)AwaLWM2MError_MethodNotAllowed, (AwaError)AwaLWM2MError_NotFound };
     EXPECT_TRUE(std::find(expectedErrors.begin(), expectedErrors.end(), AwaPathResult_GetLWM2MError(pathResult)) != expectedErrors.end());
 
     AwaServerWriteOperation_Free(&writeOperation);
