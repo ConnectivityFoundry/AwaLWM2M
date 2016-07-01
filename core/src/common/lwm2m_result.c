@@ -57,6 +57,10 @@ int AwaResult_ToAwaError(AwaResult result, int defaultError)
         return AwaError_PathNotFound;
     case AwaResult_MethodNotAllowed:
         return AwaError_PathInvalid;
+    case AwaResult_AlreadyDefined:
+        return AwaError_AlreadyDefined;
+    case AwaResult_MismatchedDefinition:
+        return AwaError_DefinitionInvalid;
     default:
         return defaultError;
     }

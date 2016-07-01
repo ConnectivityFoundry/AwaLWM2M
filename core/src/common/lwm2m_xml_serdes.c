@@ -44,6 +44,7 @@ AwaResourceType xmlif_StringToDataType(const char * value)
             return i;
         }
     }
+    Lwm2m_Warning("Unrecognised \'%s\'\n", value);
     return -1;
 }
 
@@ -67,6 +68,7 @@ AwaResourceOperations xmlif_StringToOperation(const char * value)
             return i;
         }
     }
+    Lwm2m_Warning("Unrecognised \'%s\'\n", value);
     return AwaResourceOperations_None;
 }
 

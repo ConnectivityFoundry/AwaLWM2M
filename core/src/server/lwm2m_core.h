@@ -63,7 +63,6 @@ int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
 int Lwm2mCore_GetResourceInstanceLength(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 int Lwm2mCore_GetResourceInstanceCount(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                        ResourceInstanceIDType resourceInstanceID, const void * Value, size_t ValueSize);
 

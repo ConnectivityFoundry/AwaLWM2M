@@ -189,7 +189,7 @@ protected:
       TestClientBase::TearDown();
   }
 
-private:
+protected:
   AwaClientDaemon daemon_;
 };
 

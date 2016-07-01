@@ -26,7 +26,6 @@
 
 #include "awa/error.h"
 #include "awa/common.h"
-#include "lwm2m_definition.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +40,10 @@ size_t msprintf(char ** string, const char * format, ...) __attribute__ ((format
 const char * Utils_ResourceTypeToString(AwaResourceType resourceType);
 
 size_t Utils_GetNumberOfResourceTypeStrings(void);
+
+const char * Utils_ResourceOperationToString(AwaResourceOperations resourceOp);
+
+size_t Utils_GetNumberOfResourceOperationStrings(void);
 
 AwaResourceType Utils_GetPrimativeResourceType(AwaResourceType resourceType);
 
