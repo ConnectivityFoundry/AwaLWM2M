@@ -101,10 +101,7 @@ static void RegisterObjects(Lwm2mContextType * context, Options * options)
     }
     Lwm2m_RegisterServerObject(context);
     Lwm2m_RegisterACLObject(context);
-    Lwm2m_RegisterDeviceObject(context);
-    Lwm2m_RegisterConnectivityObjects(context);
-    Lwm2m_RegisterFirmwareObject(context);
-    Lwm2m_RegisterLocationObject(context);
+
 }
 
 // Fork off a daemon process, the parent will exit at this point

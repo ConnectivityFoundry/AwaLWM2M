@@ -280,13 +280,14 @@ static int WaitForLWM2MClientIpc(int ipcPort, int timeout /*seconds*/)
     return WaitForIpc(ipcPort, timeout, request, strlen(request));
 }
 
-pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const char * endpointName, const char * bootstrapConfig, const char * bootstrapURI, const std::vector<std::string> & additionalOptions)
+pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const char * endpointName, const char * bootstrapConfig, const char * bootstrapURI, const char * objectDefinitionsFile, const std::vector<std::string> & additionalOptions)
 {
     // unfortunately, execvp requires char * not const char * parameters
     std::string sCoapPort = std::to_string(iCoapPort);
     std::string sIpcPort = std::to_string(iIpcPort);
     std::string sLogFile = logFile;
     std::string sEndpointName = endpointName;
+    std::string sObjectDefinitionsFile = objectDefinitionsFile;
 
     char * cCoapPort = new char[sCoapPort.length() + 1];
     std::strcpy(cCoapPort, sCoapPort.c_str());
@@ -300,6 +301,9 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
     char * cEndpointName = new char[sEndpointName.length() + 1];
     std::strcpy(cEndpointName, sEndpointName.c_str());
 
+    char * cObjectDefinitionsFile = new char [sObjectDefinitionsFile.length() + 1];
+    std::strcpy(cObjectDefinitionsFile, sObjectDefinitionsFile.c_str());
+
     // suppress "deprecated conversion from string constant" warning
 #pragma GCC diagnostic ignored "-Wwrite-strings"
     std::vector<const char *> commandVector {
@@ -308,6 +312,7 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
         "--port", cCoapPort,
         "--ipcPort", cIpcPort,
         "--logFile", cLogFile,
+        "--objDefs", cObjectDefinitionsFile,
         "--endPointName", cEndpointName };
 #pragma GCC diagnostic pop
 
@@ -335,6 +340,7 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
     delete[] cIpcPort;
     delete[] cLogFile;
     delete[] cEndpointName;
+    delete[] cObjectDefinitionsFile;
 
     // wait for LWM2M Client to respond on IPC
     if (WaitForLWM2MClientIpc(iIpcPort, 10 /*seconds*/) != 0)

@@ -65,6 +65,8 @@ const char * const clientDaemonPath    = "core/src/client/awa_clientd";
 const char * const serverDaemonPath    = "core/src/server/awa_serverd";
 const char * const bootstrapServerDaemonPath = "core/src/bootstrap/awa_bootstrapd";
 const char * const bootstrapServerConfig     = "../api/tests/bootstrap-gtest.config";
+const char * const objectDefinitionsFile     = "../api/tests/object-defs-gtest.xml";
+
 
 } // namespace defaults
 
@@ -89,6 +91,7 @@ extern const char * clientEndpointName;
 extern const char * clientLogFile;
 extern const char * serverLogFile;
 extern const char * bootstrapServerLogFile;
+extern const char * objectDefinitionsFile;
 extern int timeout;
 
 } // namespace global
@@ -134,6 +137,7 @@ public:
         endpointName_(global::clientEndpointName),
         bootstrapConfig_(global::bootstrapServerConfig),
         bootstrapURI_(),
+        objectDefinitionsFile_(global::objectDefinitionsFile),
         additionalOptions_() {}
     AwaClientDaemon(int coapPort, int ipcPort, std::string logFile, std::string endpointName) :
         Daemon(),
@@ -142,6 +146,7 @@ public:
         logFile_(logFile),
         endpointName_(endpointName),
         bootstrapURI_(),
+        objectDefinitionsFile_(global::objectDefinitionsFile),
         additionalOptions_() {}
     virtual ~AwaClientDaemon() {}
 
@@ -175,7 +180,7 @@ public:
     }
     virtual bool Start()
     {
-        pid_ = StartAwaClient(global::clientDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str(), global::bootstrapServerConfig, bootstrapURI_.c_str(), additionalOptions_);
+        pid_ = StartAwaClient(global::clientDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str(), global::bootstrapServerConfig, bootstrapURI_.c_str(), objectDefinitionsFile_.c_str(), additionalOptions_);
         std::string bootstrapModeDescription = "Bootstrap " + std::string(bootstrapURI_.empty() ? ("config " + std::string(global::bootstrapServerConfig)) : ("URI " + std::string(bootstrapURI_)));
         global::testLog << "Spawned Awa Client: "
              << "pid " << pid_
@@ -220,6 +225,7 @@ private:
     std::string endpointName_;
     std::string bootstrapConfig_;
     std::string bootstrapURI_;
+    std::string objectDefinitionsFile_;
     std::vector<std::string> additionalOptions_;
 };
 
