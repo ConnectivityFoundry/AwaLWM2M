@@ -50,7 +50,7 @@
 #include "tools_common.h"
 
 
-static void Explore(const AwaClientSession * session, const Target * target, AwaObjectID * lastObjectIDPrinted, bool quiet)
+static void Explore(const AwaClientSession * session, const Target * target, AwaObjectID * lastObjectIDPrinted, OutputFormat outputFormat)
 {
     if (session != NULL)
     {
@@ -60,7 +60,7 @@ static void Explore(const AwaClientSession * session, const Target * target, Awa
         {
             if (IsIDValid(objectID))
             {
-                PrintDefinitionTarget(AwaClientSession_GetObjectDefinition(session, objectID), objectID, resourceID, lastObjectIDPrinted, quiet);
+                PrintDefinitionTarget(AwaClientSession_GetObjectDefinition(session, objectID), outputFormat, objectID, resourceID, lastObjectIDPrinted);
             }
             else
             {
@@ -83,6 +83,7 @@ int main(int argc, char ** argv)
     int result = 0;
     struct gengetopt_args_info ai;
     AwaClientSession * session = NULL;
+    OutputFormat outputFormat = OutputFormat_None;
 
     if (cmdline_parser(argc, argv, &ai) != 0)
     {
@@ -91,6 +92,19 @@ int main(int argc, char ** argv)
 
     g_logLevel = ai.debug_given ? 2 : (ai.verbose_given ? 1 : 0);
     AwaLog_SetLevel(ai.debug_given ? AwaLogLevel_Debug : (ai.verbose_given ? AwaLogLevel_Verbose : AwaLogLevel_Warning));
+
+    if(ai.export_given)
+    {
+        outputFormat = OutputFormat_DeviceServerXML;
+    }
+    else if(ai.quiet_given)
+    {
+        outputFormat = OutputFormat_PlainTextQuiet;
+    }
+    else
+    {
+        outputFormat = OutputFormat_PlainTextVerbose;
+    }
 
     // Establish Awa Session with the daemon
     session = Client_EstablishSession(ai.ipcAddress_arg, ai.ipcPort_arg);
@@ -120,7 +134,7 @@ int main(int argc, char ** argv)
                 Target * target = CreateTarget(ai.inputs[i]);
                 if (target != NULL)
                 {
-                    Explore(session, target, &lastObjectIDPrinted, ai.quiet_given);
+                    Explore(session, target, &lastObjectIDPrinted, outputFormat);
                     FreeTarget(&target);
                 }
             }
