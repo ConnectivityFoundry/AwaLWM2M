@@ -134,21 +134,26 @@ Usage: `awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]
 
 | options | description |
 |-----|-----|
-| --port, -p |  port number for CoAP communications |
-| --ipcPort, -i |  port number for IPC communications |
-| --endPointName, -e | client end point name |
-| --bootstrap, -b  | bootstrap server URI |
-| --factoryBootstrap, -f | factory bootstrap information file |
-| --logFile, -l | log filename |
-| --daemonise, -d | run as daemon |
-| --verbose, -v | enable verbose output |
-| --help | show usage |
+| --port, -p | Use local port number PORT for CoAP communications |
+| --addressFamily, -a | Address family for network interface. Use 4 for IPv4, 6 for IPv6 |
+| --ipcPort, -i | Use port number PORT for IPC communications |  
+| --endPointName, -e | Use NAME as client end point name |  
+| --bootstrap, -b  | Use bootstrap server URI |  
+| --factoryBootstrap, -f | Load factory bootstrap information from FILE |  
+| --daemonise, -d | Detach process from terminal and run in the background |  
+| --verbose, -v | Generate verbose output |  
+| --logFile, -l | Log output to FILE | 
+| --objDefs, -o | Load object definitions from FILE | 
+| --version, -V | Print version and exit |
+| --help | Show usage |
 
 Example:
 
     awa_clientd --port 6000 --endPointName client1 --bootstrap coap://0.0.0.0:2134
 
 The factory bootstrap information file contains the server information that would be written by a bootstrap server during the bootstrap process. The bootstrap server uses the same file format.
+
+Object definitions can be loaded into the client daemon before it attempts to bootstrap with a LWM2M bootstrap server, or register with a LWM2M server. See [Object Definition Files](object_definition_files.md) for details.
 
 [Back to the table of contents](userguide.md#contents)
 

@@ -133,14 +133,16 @@ public:
         logFile_(global::clientLogFile),
         endpointName_(global::clientEndpointName),
         bootstrapConfig_(global::bootstrapServerConfig),
-        bootstrapURI_() {}
+        bootstrapURI_(),
+        additionalOptions_() {}
     AwaClientDaemon(int coapPort, int ipcPort, std::string logFile, std::string endpointName) :
         Daemon(),
         coapPort_(coapPort),
         ipcPort_(ipcPort),
         logFile_(logFile),
         endpointName_(endpointName),
-        bootstrapURI_() {}
+        bootstrapURI_(),
+        additionalOptions_() {}
     virtual ~AwaClientDaemon() {}
 
     void SetCoapPort(int port)
@@ -167,10 +169,13 @@ public:
     {
         bootstrapURI_ = bootstrapURI;
     }
-
+    void SetAdditionalOptions(const std::vector<std::string> & options)
+    {
+        additionalOptions_ = options;
+    }
     virtual bool Start()
     {
-        pid_ = StartAwaClient(global::clientDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str(), global::bootstrapServerConfig, bootstrapURI_.c_str());
+        pid_ = StartAwaClient(global::clientDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), endpointName_.c_str(), global::bootstrapServerConfig, bootstrapURI_.c_str(), additionalOptions_);
         std::string bootstrapModeDescription = "Bootstrap " + std::string(bootstrapURI_.empty() ? ("config " + std::string(global::bootstrapServerConfig)) : ("URI " + std::string(bootstrapURI_)));
         global::testLog << "Spawned Awa Client: "
              << "pid " << pid_
@@ -178,7 +183,16 @@ public:
              << ", Local CoAP port " << coapPort_
              << ", IPC port " << ipcPort_
              << ", " << bootstrapModeDescription
-             << ", logging to " << logFile_ << std::endl;
+             << ", logging to " << logFile_;
+        if (additionalOptions_.size() > 0)
+        {
+            global::testLog << ", [ ";
+            for (auto x : additionalOptions_) {
+                global::testLog << x << ", ";
+            }
+            global::testLog << "]";
+        }
+        global::testLog << std::endl;
         return pid_ >= 0;
     }
     virtual void SkipStart()
@@ -206,6 +220,7 @@ private:
     std::string endpointName_;
     std::string bootstrapConfig_;
     std::string bootstrapURI_;
+    std::vector<std::string> additionalOptions_;
 };
 
 class AwaServerDaemon : public Daemon
