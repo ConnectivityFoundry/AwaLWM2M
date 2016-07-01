@@ -361,7 +361,7 @@ TEST_F(TestToolsCommon, GetNextTargetResourceInstanceIDFromPath_handles_null_ind
 
 TEST_F(TestToolsCommon, PrintAllObjectDefinitions_handles_null_iterator)
 {
-    PrintAllObjectDefinitions(NULL, false);
+    PrintAllObjectDefinitions(NULL, OutputFormat_PlainTextVerbose);
 }
 
 TEST_F(TestToolsCommon,ResourceOperationToString_handles_valid_input)
