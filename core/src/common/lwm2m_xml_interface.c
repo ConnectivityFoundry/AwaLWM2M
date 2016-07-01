@@ -925,6 +925,11 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
         }
     }
 
+    if(definitionCount.NumObjectsFailed == 0 && minimumInstances > 0)
+    {
+        Lwm2mCore_CreateObjectInstance(context, objectID, 0);
+    }
+
 error:
     return definitionCount;
 }
