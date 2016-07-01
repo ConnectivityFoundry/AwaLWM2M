@@ -183,6 +183,42 @@ const char * ResourceTypeToString(AwaResourceType type)
     return result;
 }
 
+const char * DeviceServerXML_ResourceTypeToString(AwaResourceType type)
+{
+    const char * result = "BAD TYPE";
+    const char * table[] = {
+            "Invalid",
+            "None",
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Opaque",
+            "DateTime",
+            "ObjectLink",
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Opaque",
+            "DateTime",
+            "ObjectLink",
+    };
+
+    if (sizeof(table) / sizeof(table[0]) != AwaResourceType_LAST)
+    {
+        Error("ResourceTypeToString table is wrong size!\n");
+    }
+    else
+    {
+        if ((type >= 0) && (type < AwaResourceType_LAST))
+        {
+            result = table[type];
+        }
+    }
+    return result;
+}
+
 const char * ResourceOperationToString(AwaResourceOperations operation)
 {
     const char * result = "BAD OPERATION";
@@ -191,6 +227,33 @@ const char * ResourceOperationToString(AwaResourceOperations operation)
             "None",
             "ReadOnly",
             "WriteOnly",
+            "ReadWrite",
+            "Execute",
+    };
+
+    if (sizeof(table) / sizeof(table[0]) != AwaResourceOperations_LAST + 1)
+    {
+        Error("ResourceOperationToString table is wrong size!");
+    }
+    else
+    {
+        operation += 1; //AwaResourceOperations_Invalid does not start at 0, so offset required.
+        if ((operation >= 0) && (operation < AwaResourceOperations_LAST + 1))
+        {
+            result = table[operation];
+        }
+    }
+    return result;
+}
+
+const char * DeviceServerXML_ResourceOperationToString(AwaResourceOperations operation)
+{
+    const char * result = "BAD OPERATION";
+    const char * table[] = {
+            "Invalid",
+            "None",
+            "Read",
+            "Write",
             "ReadWrite",
             "Execute",
     };
@@ -619,8 +682,6 @@ static void AddBanner(char ** cstring, char ** resourceValue, const char * path,
         free(*cstring);
         *cstring = tmp;
     }
-    *lastObjectID = objectID;
-    *lastObjectInstanceID = objectInstanceID;
 
     char * tmp = NULL;
     if (quiet)
@@ -643,6 +704,9 @@ static void AddBanner(char ** cstring, char ** resourceValue, const char * path,
     *cstring = tmp;
     free(*resourceValue);
     *resourceValue = NULL;
+
+    *lastObjectID = objectID;
+    *lastObjectInstanceID = objectInstanceID;
 }
 
 static char * EncodeOpaque(AwaOpaque * value)
@@ -715,482 +779,502 @@ static AwaError AddPathToCString(char ** cstring, const char * path, void * resp
     if (response != NULL)
     {
         const char * objectName = AwaObjectDefinition_GetName(objectDefinition);
-        const char * resourceName = AwaResourceDefinition_GetName(resourceDefinition);
 
-        char * resourceValue = NULL;
-        AwaResourceType resourceType = AwaResourceDefinition_GetType(resourceDefinition);
-        switch (resourceType)
+        if (objectInstanceID == AWA_INVALID_ID)
         {
-            case AwaResourceType_String:
-            {
-                const char * value = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsCStringPointer(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsCStringPointer(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsCStringPointer(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-
-                if (result == AwaError_Success)
-                {
-                    resourceValue = strdup(value);
-                }
-            }
-            break;
-
-            case AwaResourceType_Integer:
-            {
-                const AwaInteger * value = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsIntegerPointer(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsIntegerPointer(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    msprintf2(&resourceValue, "%"PRId64, *value);
-                }
-            }
-            break;
-
-            case AwaResourceType_Time:
-            {
-                const AwaTime * value = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsTimePointer(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsTimePointer(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsTimePointer(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    msprintf2(&resourceValue, "%"PRId64, *value);
-                }
-            }
-            break;
-
-            case AwaResourceType_Float:
-            {
-                const AwaFloat * value = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsFloatPointer(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsFloatPointer(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsFloatPointer(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    // IEEE 754 supports up to 17 significant digits
-                    msprintf2(&resourceValue, "%.17g", *value);
-                }
-            }
-            break;
-
-            case AwaResourceType_Boolean:
-            {
-                const AwaBoolean * value = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsBooleanPointer(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsBooleanPointer(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    msprintf2(&resourceValue, "%s", *value != 0? "True" : "False");
-                }
-            }
-            break;
-
-            case AwaResourceType_Opaque:
-            {
-                AwaOpaque value = { 0 };
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsOpaque(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsOpaque(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsOpaque(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    resourceValue = EncodeOpaque(&value);
-                }
-            }
-            break;
-
-            case AwaResourceType_ObjectLink:
-            {
-                AwaObjectLink value = { 0 };
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValueAsObjectLink(getResponse, path, &value);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValueAsObjectLink(changeSet, path, &value);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValueAsObjectLink(readResponse, path, &value);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    msprintf2(&resourceValue, "ObjectLink[%d:%d]", value.ObjectID, value.ObjectInstanceID);
-                }
-            }
-            break;
-
-            case AwaResourceType_StringArray:
-            {
-                const AwaStringArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsStringArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsStringArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
-                        while (AwaCStringArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaCStringArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            const char * value = AwaCStringArrayIterator_GetValueAsCString(iterator);
-                            resourceValue = strdup(value);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaCStringArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_IntegerArray:
-            {
-                const AwaIntegerArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsIntegerArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsIntegerArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
-                    while (AwaIntegerArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaIntegerArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaInteger value = AwaIntegerArrayIterator_GetValue(iterator);
-                            msprintf2(&resourceValue, "%"PRId64, value);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaIntegerArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_FloatArray:
-            {
-                const AwaFloatArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsFloatArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsFloatArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaFloatArrayIterator * iterator = AwaFloatArray_NewFloatArrayIterator(array);
-                    while (AwaFloatArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaFloatArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaFloat value = AwaFloatArrayIterator_GetValue(iterator);
-                            // IEEE 754 supports up to 17 significant digits
-                            msprintf2(&resourceValue, "%.17g", value);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaFloatArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_BooleanArray:
-            {
-                const AwaBooleanArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsBooleanArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsBooleanArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaBooleanArrayIterator * iterator = AwaBooleanArray_NewBooleanArrayIterator(array);
-                    while (AwaBooleanArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaBooleanArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaBoolean value = AwaBooleanArrayIterator_GetValue(iterator);
-                            msprintf2(&resourceValue, "%s", value != 0? "True" : "False");
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaBooleanArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_OpaqueArray:
-            {
-                const AwaOpaqueArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsOpaqueArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsOpaqueArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaOpaqueArrayIterator * iterator = AwaOpaqueArray_NewOpaqueArrayIterator(array);
-                    while (AwaOpaqueArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaOpaqueArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaOpaque value = AwaOpaqueArrayIterator_GetValue(iterator);
-                            resourceValue = EncodeOpaque(&value);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaOpaqueArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_TimeArray:
-            {
-                const AwaTimeArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsTimeArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsTimeArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaTimeArrayIterator * iterator = AwaTimeArray_NewTimeArrayIterator(array);
-                    while (AwaTimeArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaTimeArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaTime value = AwaTimeArrayIterator_GetValue(iterator);
-                            msprintf2(&resourceValue, "%"PRId64, value);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaTimeArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_ObjectLinkArray:
-            {
-                const AwaObjectLinkArray * array = NULL;
-                switch (responseType)
-                {
-                    case ResponseType_GetResponse:
-                        result = AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, path, &array);
-                        break;
-                    case ResponseType_ChangeSet:
-                        result = AwaChangeSet_GetValuesAsObjectLinkArrayPointer(changeSet, path, &array);
-                        break;
-                    case ResponseType_ReadResponse:
-                        result = AwaServerReadResponse_GetValuesAsObjectLinkArrayPointer(readResponse, path, &array);
-                        break;
-                    default:
-                        Error("Unhandled response type");
-                        result = AwaError_Unsupported;
-                        break;
-                }
-                if (result == AwaError_Success)
-                {
-                    AwaObjectLinkArrayIterator * iterator = AwaObjectLinkArray_NewObjectLinkArrayIterator(array);
-                    while (AwaObjectLinkArrayIterator_Next(iterator))
-                    {
-                        AwaArrayIndex index = AwaObjectLinkArrayIterator_GetIndex(iterator);
-                        if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
-                        {
-                            AwaObjectLink value = AwaObjectLinkArrayIterator_GetValue(iterator);
-                            msprintf2(&resourceValue, "ObjectLink[%d:%d]", value.ObjectID, value.ObjectInstanceID);
-                            AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
-                        }
-                    }
-                    AwaObjectLinkArrayIterator_Free(&iterator);
-                }
-            }
-            break;
-
-            case AwaResourceType_None:
-            {
-                AwaResourceOperations resourceOperations = AwaResourceDefinition_GetSupportedOperations(resourceDefinition);
-                if (resourceOperations == AwaResourceOperations_Execute)
-                {
-                    resourceValue = strdup("[Executable]");
-                }
-                else
-                {
-                    resourceValue = strdup("[None]");
-                }
-                result = AwaError_Success;
-            }
-            break;
-
-            default:
-                resourceValue = strdup("[Unhandled]");
-                result = AwaError_Success;
-                break;
+            // no instances, so no resources either:
+            char * tmp = NULL;
+            msprintf2(&tmp, "%s%s[/%d]: No instances\n", *cstring, objectName, objectID);
+            free(*cstring);
+            *cstring = tmp;
         }
-
-        if (result == AwaError_Success)
+        else if (resourceID == AWA_INVALID_ID)
         {
-            if (!IsArrayType(resourceType))
+            // instance exists, but no resources created:
+            char * tmp = NULL;
+            msprintf2(&tmp, "%s%s[/%d/%d]:\n    No resources\n", *cstring, objectName, objectID, objectInstanceID);
+            free(*cstring);
+            *cstring = tmp;
+        }
+        else
+        {
+            const char * resourceName = AwaResourceDefinition_GetName(resourceDefinition);
+
+            char * resourceValue = NULL;
+            AwaResourceType resourceType = AwaResourceDefinition_GetType(resourceDefinition);
+            switch (resourceType)
             {
-                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, -1, quiet);
+                case AwaResourceType_String:
+                {
+                    const char * value = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsCStringPointer(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsCStringPointer(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsCStringPointer(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+
+                    if (result == AwaError_Success)
+                    {
+                        resourceValue = strdup(value);
+                    }
+                }
+                break;
+
+                case AwaResourceType_Integer:
+                {
+                    const AwaInteger * value = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsIntegerPointer(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsIntegerPointer(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsIntegerPointer(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        msprintf2(&resourceValue, "%"PRId64, *value);
+                    }
+                }
+                break;
+
+                case AwaResourceType_Time:
+                {
+                    const AwaTime * value = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsTimePointer(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsTimePointer(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsTimePointer(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        msprintf2(&resourceValue, "%"PRId64, *value);
+                    }
+                }
+                break;
+
+                case AwaResourceType_Float:
+                {
+                    const AwaFloat * value = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsFloatPointer(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsFloatPointer(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsFloatPointer(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        // IEEE 754 supports up to 17 significant digits
+                        msprintf2(&resourceValue, "%.17g", *value);
+                    }
+                }
+                break;
+
+                case AwaResourceType_Boolean:
+                {
+                    const AwaBoolean * value = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsBooleanPointer(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsBooleanPointer(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsBooleanPointer(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        msprintf2(&resourceValue, "%s", *value != 0? "True" : "False");
+                    }
+                }
+                break;
+
+                case AwaResourceType_Opaque:
+                {
+                    AwaOpaque value = { 0 };
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsOpaque(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsOpaque(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsOpaque(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        resourceValue = EncodeOpaque(&value);
+                    }
+                }
+                break;
+
+                case AwaResourceType_ObjectLink:
+                {
+                    AwaObjectLink value = { 0 };
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValueAsObjectLink(getResponse, path, &value);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValueAsObjectLink(changeSet, path, &value);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValueAsObjectLink(readResponse, path, &value);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        msprintf2(&resourceValue, "ObjectLink[%d:%d]", value.ObjectID, value.ObjectInstanceID);
+                    }
+                }
+                break;
+
+                case AwaResourceType_StringArray:
+                {
+                    const AwaStringArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsStringArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsStringArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsStringArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaCStringArrayIterator * iterator = AwaStringArray_NewCStringArrayIterator(array);
+                            while (AwaCStringArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaCStringArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                const char * value = AwaCStringArrayIterator_GetValueAsCString(iterator);
+                                resourceValue = strdup(value);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaCStringArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_IntegerArray:
+                {
+                    const AwaIntegerArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsIntegerArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsIntegerArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsIntegerArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaIntegerArrayIterator * iterator = AwaIntegerArray_NewIntegerArrayIterator(array);
+                        while (AwaIntegerArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaIntegerArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaInteger value = AwaIntegerArrayIterator_GetValue(iterator);
+                                msprintf2(&resourceValue, "%"PRId64, value);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaIntegerArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_FloatArray:
+                {
+                    const AwaFloatArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsFloatArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsFloatArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsFloatArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaFloatArrayIterator * iterator = AwaFloatArray_NewFloatArrayIterator(array);
+                        while (AwaFloatArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaFloatArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaFloat value = AwaFloatArrayIterator_GetValue(iterator);
+                                // IEEE 754 supports up to 17 significant digits
+                                msprintf2(&resourceValue, "%.17g", value);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaFloatArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_BooleanArray:
+                {
+                    const AwaBooleanArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsBooleanArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsBooleanArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsBooleanArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaBooleanArrayIterator * iterator = AwaBooleanArray_NewBooleanArrayIterator(array);
+                        while (AwaBooleanArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaBooleanArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaBoolean value = AwaBooleanArrayIterator_GetValue(iterator);
+                                msprintf2(&resourceValue, "%s", value != 0? "True" : "False");
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaBooleanArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_OpaqueArray:
+                {
+                    const AwaOpaqueArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsOpaqueArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsOpaqueArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsOpaqueArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaOpaqueArrayIterator * iterator = AwaOpaqueArray_NewOpaqueArrayIterator(array);
+                        while (AwaOpaqueArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaOpaqueArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaOpaque value = AwaOpaqueArrayIterator_GetValue(iterator);
+                                resourceValue = EncodeOpaque(&value);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaOpaqueArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_TimeArray:
+                {
+                    const AwaTimeArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsTimeArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsTimeArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsTimeArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaTimeArrayIterator * iterator = AwaTimeArray_NewTimeArrayIterator(array);
+                        while (AwaTimeArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaTimeArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaTime value = AwaTimeArrayIterator_GetValue(iterator);
+                                msprintf2(&resourceValue, "%"PRId64, value);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaTimeArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_ObjectLinkArray:
+                {
+                    const AwaObjectLinkArray * array = NULL;
+                    switch (responseType)
+                    {
+                        case ResponseType_GetResponse:
+                            result = AwaClientGetResponse_GetValuesAsObjectLinkArrayPointer(getResponse, path, &array);
+                            break;
+                        case ResponseType_ChangeSet:
+                            result = AwaChangeSet_GetValuesAsObjectLinkArrayPointer(changeSet, path, &array);
+                            break;
+                        case ResponseType_ReadResponse:
+                            result = AwaServerReadResponse_GetValuesAsObjectLinkArrayPointer(readResponse, path, &array);
+                            break;
+                        default:
+                            Error("Unhandled response type");
+                            result = AwaError_Unsupported;
+                            break;
+                    }
+                    if (result == AwaError_Success)
+                    {
+                        AwaObjectLinkArrayIterator * iterator = AwaObjectLinkArray_NewObjectLinkArrayIterator(array);
+                        while (AwaObjectLinkArrayIterator_Next(iterator))
+                        {
+                            AwaArrayIndex index = AwaObjectLinkArrayIterator_GetIndex(iterator);
+                            if ((resourceInstanceID == index) || (resourceInstanceID == AWA_INVALID_ID))
+                            {
+                                AwaObjectLink value = AwaObjectLinkArrayIterator_GetValue(iterator);
+                                msprintf2(&resourceValue, "ObjectLink[%d:%d]", value.ObjectID, value.ObjectInstanceID);
+                                AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, index, quiet);
+                            }
+                        }
+                        AwaObjectLinkArrayIterator_Free(&iterator);
+                    }
+                }
+                break;
+
+                case AwaResourceType_None:
+                {
+                    AwaResourceOperations resourceOperations = AwaResourceDefinition_GetSupportedOperations(resourceDefinition);
+                    if (resourceOperations == AwaResourceOperations_Execute)
+                    {
+                        resourceValue = strdup("[Executable]");
+                    }
+                    else
+                    {
+                        resourceValue = strdup("[None]");
+                    }
+                    result = AwaError_Success;
+                }
+                break;
+
+                default:
+                    resourceValue = strdup("[Unhandled]");
+                    result = AwaError_Success;
+                    break;
+            }
+
+            if (result == AwaError_Success)
+            {
+                if (!IsArrayType(resourceType))
+                {
+                    AddBanner(cstring, &resourceValue, path, objectName, resourceName, objectID, lastObjectID, objectInstanceID, lastObjectInstanceID, -1, quiet);
+                }
             }
         }
     }
@@ -1523,7 +1607,7 @@ int GetNextTargetResourceInstanceIDFromPath(Target ** targets, int numTargets, c
     return resourceInstanceID;
 }
 
-void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, bool quiet)
+void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, OutputFormat format)
 {
     // Unsorted
     while (AwaObjectDefinitionIterator_Next(iterator))
@@ -1531,13 +1615,14 @@ void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * iterator, bool quie
         const AwaObjectDefinition * objectDefinition = AwaObjectDefinitionIterator_Get(iterator);
         if (objectDefinition != NULL)
         {
-            PrintObjectDefinitionHeader(objectDefinition, quiet);
-            PrintObjectDefinition(objectDefinition, quiet);
+            PrintObjectDefinitionHeader(objectDefinition, format);
+            PrintObjectDefinition(objectDefinition, format);
+            PrintObjectDefinitionFooter(objectDefinition, format);
         }
     }
 }
 
-void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted, bool quiet)
+void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, OutputFormat format, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted)
 {
     if (objectDefinition != NULL)
     {
@@ -1545,7 +1630,7 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
 
         if (*lastObjectIDPrinted != objectID)
         {
-            PrintObjectDefinitionHeader(objectDefinition, quiet);
+            PrintObjectDefinitionHeader(objectDefinition, format);
             *lastObjectIDPrinted = objectID;
         }
 
@@ -1555,11 +1640,11 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
             // Print a single resource, with object header if required
             if (resourceDefinition != NULL)
             {
-                PrintResourceDefinition(resourceDefinition, quiet, objectID);
+                PrintResourceDefinition(resourceDefinition, format, objectID);
             }
             else
             {
-                if (!quiet)
+                if (format == OutputFormat_PlainTextVerbose)
                 {
                     Error("    Resource: ID:%d Not defined\n", resourceID);
                 }
@@ -1572,12 +1657,13 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
         else
         {
             // Print an entire object
-            PrintObjectDefinition(objectDefinition, quiet);
+            PrintObjectDefinition(objectDefinition, format);
+            PrintObjectDefinitionFooter(objectDefinition, format);
         }
     }
     else
     {
-        if (!quiet)
+        if (format == OutputFormat_PlainTextVerbose)
         {
             Error("Object: ID:%d Not defined\n", objectID);
         }
@@ -1588,28 +1674,80 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObje
     }
 }
 
-void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, bool quiet)
+void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
 {
     if (objectDefinition != NULL)
     {
         const char * format = NULL;
-        if (!quiet)
+        char * mandatory = NULL;
+        char * collection = NULL;
+
+        switch(outputFormat)
         {
-            format = "\nObject: ID:%d name:%s minInstances:%d maxInstances:%d\n";
+            case OutputFormat_PlainTextVerbose:
+                format = "\nObject: ID:%d name:%s minInstances:%s maxInstances:%s\n";
+                msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMaximumInstances(objectDefinition));
+                break;
+            case OutputFormat_PlainTextQuiet:
+                format = "OBJECT %d %s %s %s\n";
+                msprintf2(&mandatory, "%d", AwaObjectDefinition_GetMinimumInstances(objectDefinition));
+                msprintf2(&collection, "%d", AwaObjectDefinition_GetMaximumInstances(objectDefinition));
+                break;
+            case OutputFormat_DeviceServerXML:
+                format = "<ObjectDefinition>\n"
+                         "    <ObjectID>%d</ObjectID>\n"
+                         "    <SerialisationName>%s</SerialisationName>\n"
+                         "    <IsMandatory>%s</IsMandatory>\n"
+                         "    <Singleton>%s</Singleton>\n"
+                         "    <Properties>\n";
+                msprintf2(&mandatory, "%s", AwaObjectDefinition_GetMinimumInstances(objectDefinition) == 0 ? "False" : "True");
+                msprintf2(&collection, "%s", AwaObjectDefinition_GetMaximumInstances(objectDefinition) > 1 ? "False" : "True");
+                break;
+
+            default:
+                format = NULL;
         }
-        else
+
+        if(format != NULL)
         {
-            format = "OBJECT %d %s %d %d\n";
+            printf(format,
+                   AwaObjectDefinition_GetID(objectDefinition),
+                   AwaObjectDefinition_GetName(objectDefinition),
+                   mandatory,
+                   collection);
+
+            free(mandatory);
+            free(collection);
         }
-        printf(format,
-               AwaObjectDefinition_GetID(objectDefinition),
-               AwaObjectDefinition_GetName(objectDefinition),
-               AwaObjectDefinition_GetMinimumInstances(objectDefinition),
-               AwaObjectDefinition_GetMaximumInstances(objectDefinition));
     }
 }
 
-void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool quiet)
+void PrintObjectDefinitionFooter(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
+{
+    if (objectDefinition != NULL)
+    {
+        const char * format = NULL;
+
+        switch(outputFormat)
+        {
+            case OutputFormat_DeviceServerXML:
+                format = "    </Properties>\n"
+                         "</ObjectDefinition>\n";
+                break;
+
+            default:
+                format = NULL;
+        }
+
+        if(format != NULL)
+        {
+            printf("%s",format);
+        }
+    }
+}
+
+void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat)
 {
     // Print all resources defined as part of this object
     if (objectDefinition != NULL)
@@ -1620,14 +1758,14 @@ void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool qu
             while (AwaResourceDefinitionIterator_Next(resourceIterator))
             {
                 const AwaResourceDefinition * resourceDefinition = AwaResourceDefinitionIterator_Get(resourceIterator);
-                PrintResourceDefinition(resourceDefinition, quiet, AwaObjectDefinition_GetID(objectDefinition));
+                PrintResourceDefinition(resourceDefinition, outputFormat, AwaObjectDefinition_GetID(objectDefinition));
             }
         }
         AwaResourceDefinitionIterator_Free(&resourceIterator);
     }
 }
 
-void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, bool quiet, AwaObjectID objectID)
+void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, OutputFormat outputFormat, AwaObjectID objectID)
 {
     // Use objectID for quiet output
     if (resourceDefinition != NULL)
@@ -1635,27 +1773,66 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, b
         const char * newLine = "";
         const char * format = NULL;
         char * id = NULL;
+        const char * resourceType = "";
+        char * mandatory = NULL;
+        char * collection = NULL;
+        const char * resourceOperation = "";
         AwaResourceID resourceID = AwaResourceDefinition_GetID(resourceDefinition);
-        if (!quiet)
+
+        switch(outputFormat)
         {
-            newLine = strlen(AwaResourceDefinition_GetName(resourceDefinition)) > 20 ? "\n                                              " : "";
-            format = "    %s name:%-20s%s type:%-16s minInstances:%d maxInstances:%d operations:%s\n";
-            msprintf2(&id, "Resource: ID:%-3d", resourceID);
+            case OutputFormat_PlainTextVerbose:
+                newLine = strlen(AwaResourceDefinition_GetName(resourceDefinition)) > 20 ? "\n                                              " : "";
+                format = "    %s name:%-20s%s type:%-16s minInstances:%s maxInstances:%s operations:%s\n";
+                msprintf2(&id, "Resource: ID:%-3d", resourceID);
+                msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
+                msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                resourceType = ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
+                break;
+            case OutputFormat_PlainTextQuiet:
+                format = "%s %s %.0s%s %s %s %s\n";
+                msprintf2(&id, "%d %d", objectID, resourceID);
+                msprintf2(&mandatory, "%d", AwaResourceDefinition_GetMinimumInstances(resourceDefinition));
+                msprintf2(&collection, "%d", AwaResourceDefinition_GetMaximumInstances(resourceDefinition));
+                resourceType = ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
+                break;
+
+            case OutputFormat_DeviceServerXML:
+                format = "       <PropertyDefinition>\n"
+                        "            <PropertyID>%s</PropertyID>\n"
+                        "            <SerialisationName>%s</SerialisationName>\n"
+                        "            <DataType>%s%s</DataType>\n"
+                        "            <IsMandatory>%s</IsMandatory>\n"
+                        "            <IsCollection>%s</IsCollection>\n"
+                        "            <Access>%s</Access>\n"
+                        "        </PropertyDefinition>\n";
+                msprintf2(&id, "%d", resourceID);
+                msprintf2(&mandatory, "%s", AwaResourceDefinition_GetMinimumInstances(resourceDefinition) == 0 ? "False" : "True");
+                msprintf2(&collection, "%s", AwaResourceDefinition_GetMaximumInstances(resourceDefinition) <= 1 ? "False" : "True");
+                resourceType = DeviceServerXML_ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition));
+                resourceOperation = DeviceServerXML_ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition));
+                break;
+            default:
+                format = NULL;
+                break;
         }
-        else
+
+        if(format != NULL)
         {
-            format = "%s %s %.0s%s %d %d %s\n";
-            msprintf2(&id, "%d %d", objectID, resourceID);
+            printf(format,
+                   id,
+                   AwaResourceDefinition_GetName(resourceDefinition),
+                   newLine,
+                   resourceType,
+                   mandatory,
+                   collection,
+                   resourceOperation);
+            free(id);
+            free(mandatory);
+            free(collection);
         }
-        printf(format,
-               id,
-               AwaResourceDefinition_GetName(resourceDefinition),
-               newLine,
-               ResourceTypeToString(AwaResourceDefinition_GetType(resourceDefinition)),
-               AwaResourceDefinition_GetMinimumInstances(resourceDefinition),
-               AwaResourceDefinition_GetMaximumInstances(resourceDefinition),
-               ResourceOperationToString(AwaResourceDefinition_GetSupportedOperations(resourceDefinition)));
-        free(id);
     }
 }
 

@@ -280,7 +280,7 @@ static int WaitForLWM2MClientIpc(int ipcPort, int timeout /*seconds*/)
     return WaitForIpc(ipcPort, timeout, request, strlen(request));
 }
 
-pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const char * endpointName, const char * bootstrapConfig, const char * bootstrapURI)
+pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const char * endpointName, const char * bootstrapConfig, const char * bootstrapURI, const std::vector<std::string> & additionalOptions)
 {
     // unfortunately, execvp requires char * not const char * parameters
     std::string sCoapPort = std::to_string(iCoapPort);
@@ -321,6 +321,11 @@ pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort,
     {
         commandVector.push_back("--bootstrap");
         commandVector.push_back(bootstrapURI);
+    }
+
+    // append additional options
+    for (auto & x : additionalOptions) {
+        commandVector.push_back(x.c_str());
     }
 
     // don't wait for process to finish

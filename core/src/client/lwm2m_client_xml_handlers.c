@@ -263,254 +263,6 @@ int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, O
     return 0;
 }
 
-static int xmlif_RegisterObjectFromXML(Lwm2mContextType * context, TreeNode meta)
-{
-    int result = AwaResult_Success;
-    int res;
-    ObjectIDType objectID = -1;
-    const char * objectName = NULL;
-    const char * value;
-    TreeNode node;
-
-    uint16_t maximumInstances = 1;
-    uint16_t minimumInstances = 0;
-
-    node = TreeNode_Navigate(meta, "ObjectMetadata/SerialisationName");
-    if (node != NULL)
-    {
-        value = TreeNode_GetValue(node);
-        if (value != NULL)
-        {
-            objectName = value;
-        }
-    }
-
-    node = TreeNode_Navigate(meta, "ObjectMetadata/ObjectID");
-    if (node != NULL)
-    {
-        value = TreeNode_GetValue(node);
-        if (value != NULL)
-        {
-            objectID = atoi(value);
-        }
-    }
-
-    // Defining objects/resources uses a min/max approach. From this it can be determined if a an object/resource is multi/single and mandatory/optional.
-    //
-    // If an object/resource is a Singleton/Collection (respectively) then the maximumInstances determines this:
-    //
-    // If maximumInstances = 1 then the object is single-instance or the resource is single-instance
-    // If maximumInstances > 1 then the object is multiple-instance or the resource is multiple-instance
-    //
-    // Note: see IS_MULTIPLE_INSTANCE in lwm2m_dewfinition.h
-    //
-    // If an object/resource is mandatory/optional then the minimumInstances determines this:
-    //
-    // If minimumInstances = 0 then the object/resource is optional
-    // If minimumInstances > 1 then the object/resource is mandatory
-    //
-    // Note: see IS_MANDATORY in lwm2m_dewfinition.h
-
-    node = TreeNode_Navigate(meta, "ObjectMetadata/MaximumInstances");
-    if (node != NULL)
-    {
-        value = TreeNode_GetValue(node);
-        if (value != NULL)
-        {
-            maximumInstances = atoi(value);
-        }
-    }
-
-    node = TreeNode_Navigate(meta, "ObjectMetadata/MinimumInstances");
-    if (node != NULL)
-    {
-        value = TreeNode_GetValue(node);
-        if (value != NULL)
-        {
-            minimumInstances = atoi(value);
-        }
-    }
-
-    res = Lwm2mCore_RegisterObjectType(context, objectName ? objectName : "", objectID, maximumInstances, minimumInstances, &defaultObjectOperationHandlers);
-    if (res < 0)
-    {
-        result = AwaResult_Forbidden;
-        goto error;
-    }
-
-    node = TreeNode_Navigate(meta, "ObjectMetadata/Properties");
-    if (node != NULL)
-    {
-        TreeNode property;
-        int childIndex = 0;
-        while ((property = TreeNode_GetChild(node, childIndex)))
-        {
-            TreeNode resNode;
-            ResourceIDType resourceID = -1;
-            int dataType = -1;
-            const char * resourceName = NULL;
-            uint16_t resourceMaximumInstances = 1;
-            uint16_t resourceMinimumInstances = 0;
-            Lwm2mTreeNode * defaultValueNode = NULL;
-
-            AwaResourceOperations operation = AwaResourceOperations_None;
-
-            resNode = TreeNode_Navigate(property, "Property/PropertyID");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    resourceID = atoi(value);
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/SerialisationName");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    resourceName = value;
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/DataType");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    dataType = xmlif_StringToDataType(value);
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/MaximumInstances");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    resourceMaximumInstances = atoi(value);
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/MinimumInstances");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    resourceMinimumInstances = atoi(value);
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/Access");
-            if (resNode != NULL)
-            {
-                value = TreeNode_GetValue(resNode);
-                if (value != NULL)
-                {
-                    operation = xmlif_StringToOperation(value);
-                }
-            }
-
-            resNode = TreeNode_Navigate(property, "Property/DefaultValue");
-            if (resNode != NULL)
-            {
-                defaultValueNode = Lwm2mTreeNode_Create();
-                Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
-
-                value = TreeNode_GetValue(resNode);
-
-                const uint8_t * defaultValue = NULL;
-                int defaultValueLength = 0;
-
-                if (value != NULL)
-                {
-                    defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
-                }
-
-                if (defaultValueLength >= 0)
-                {
-                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                    Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
-                    Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-                    Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
-                    Lwm2mTreeNode_SetID(resourceInstanceNode, 0);
-                }
-                else
-                {
-                    Lwm2m_Error("xmlif_DecodeValue failed\n");
-                }
-
-                if (defaultValue != NULL)
-                {
-                    free((void*)defaultValue);
-                }
-            }
-            else
-            {
-                resNode = TreeNode_Navigate(property, "Property/DefaultValueArray");
-                if (resNode != NULL)
-                {
-                    defaultValueNode = Lwm2mTreeNode_Create();
-                    Lwm2mTreeNode_SetType(defaultValueNode, Lwm2mTreeNodeType_Resource);
-
-                    TreeNode resourceInstance;
-                    int childIndex = 0;
-                    while ((resourceInstance = Xml_FindFrom(resNode, "ResourceInstance", &childIndex)) != NULL)
-                    {
-                        int resourceInstanceID = xmlif_GetInteger(resourceInstance, "ResourceInstance/ID");
-                        value = xmlif_GetOpaque(resourceInstance, "ResourceInstance/Value");
-
-                        const uint8_t * defaultValue = NULL;
-                        int defaultValueLength = 0;
-
-                        defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
-                        if (defaultValueLength >= 0)
-                        {
-                            Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
-                            Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);
-                            Lwm2mTreeNode_SetType(resourceInstanceNode, Lwm2mTreeNodeType_ResourceInstance);
-                            Lwm2mTreeNode_SetValue(resourceInstanceNode, defaultValue, (uint16_t)defaultValueLength);
-                            Lwm2mTreeNode_SetID(resourceInstanceNode, resourceInstanceID);
-                        }
-                        else
-                        {
-                            Lwm2m_Error("xmlif_DecodeValue failed\n");
-                        }
-                        free((void*)defaultValue);
-                    }
-                }
-            }
-
-            if (operation & AwaResourceOperations_Execute)
-            {
-                // Register xmlif operation for any executable resources so that we can produce XML when a resource is executed.
-                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, &xmlifResourceOperationHandlers, defaultValueNode);
-            }
-            else
-            {
-                res = Lwm2mCore_RegisterResourceTypeWithDefaultValue(context, resourceName ? resourceName : "", objectID, resourceID, dataType, resourceMaximumInstances, resourceMinimumInstances, operation, &defaultResourceOperationHandlers, defaultValueNode);
-            }
-
-            Lwm2mTreeNode_DeleteRecursive(defaultValueNode);
-
-            if (res < 0)
-            {
-                result = AwaResult_Forbidden;
-                goto error;
-            }
-
-            childIndex++;
-        }
-    }
-
-error:
-    return result;
-}
-
 // Called to handle a request with the type "Connect". Returns 0 on success.
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
@@ -589,7 +341,11 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
     int successCount = 0;
     while (objectDefinition != NULL)
     {
-        if (xmlif_RegisterObjectFromXML(context, objectDefinition) == AwaResult_Success)
+        if (xmlif_RegisterObjectFromIPCXML(context,
+                                        objectDefinition,
+                                        &defaultObjectOperationHandlers,
+                                        &defaultResourceOperationHandlers,
+                                        &xmlifResourceOperationHandlers) == AwaResult_Success)
         {
             ++successCount;
         }
@@ -1436,5 +1192,38 @@ error:
     xmlif_GenerateResponse(request, NULL, NULL, result, IPC_MESSAGE_SUB_TYPE_DELETE, responseObjectsTree);
     return result;
 }
+
+// Can handle <ObjectDefinitions><Items>... or <ObjectDefinition>...
+DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode rootNode)
+{
+    DefinitionCount result = { 0 };
+    TreeNode itemsNode = TreeNode_Navigate(rootNode, "ObjectDefinitions/Items");
+    TreeNode objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, 0) : rootNode;
+    int objectDefinitionIndex = 1;
+
+    while (objectDefinition != NULL)
+    {
+        DefinitionCount definitionCount = xmlif_RegisterObjectFromDeviceServerXML(context,
+                                                                                  objectDefinition,
+                                                                                  &defaultObjectOperationHandlers,
+                                                                                  &defaultResourceOperationHandlers,
+                                                                                  &xmlifResourceOperationHandlers);
+        result.NumObjectsOK += definitionCount.NumObjectsOK;
+        result.NumObjectsFailed += definitionCount.NumObjectsFailed;
+        result.NumResourcesOK += definitionCount.NumResourcesOK;
+        result.NumResourcesFailed += definitionCount.NumResourcesFailed;
+
+        objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, objectDefinitionIndex++) : NULL;
+    }
+
+    if (result.NumObjectsOK > 0)
+    {
+        // Send an update so that all servers this client is connected to know that the client has at least one new object defined.
+        Lwm2m_SetUpdateRegistration(context);
+    }
+
+    return result;
+}
+
 
 #endif // CONTIKI

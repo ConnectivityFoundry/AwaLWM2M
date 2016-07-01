@@ -12,7 +12,6 @@ FILES:=awa-client-define_cmdline    \
        awa-server-write-attributes_cmdline        \
        awa-server-delete_cmdline                  \
        awa-server-list-clients_cmdline            \
-       awa-server-create_cmdline                  \
        awa-server-execute_cmdline                 \
        awa-server-observe_cmdline
 
