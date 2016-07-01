@@ -1,0 +1,29 @@
+# gengetopt configuration file
+#version "VERSION"
+versiontext "Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies."
+package "awa_clientd"
+
+# Options
+option "port"             p "Use local port number PORT for CoAP communications" int    optional default="6000"             typestr="PORT"
+option "addressFamily"    a "Address family for network interface. AF=4 for IPv4, AF=6 for IPv6"
+                                                                                 int    optional default="4"                typestr="AF"
+option "ipcPort"          i "Use port number PORT for IPC communications"        int    optional default="12345"            typestr="PORT"
+option "endPointName"     e "Use NAME as client end point name"                  string optional default="Awa Client"       typestr="NAME"
+option "daemonize"        d "Detach process from terminal and run in the background"
+                                                                                 flag off
+option "verbose"          v "Generate verbose output"                            flag off
+option "logFile"          l "Log output to FILE"                                 string optional                            typestr="FILE"
+
+#defgroup "required" groupdesc="One of these options is required" required
+#groupoption "bootstrap"        b "Use bootstrap server URI"                           string                                typestr="URI"  group="required"
+#groupoption "factoryBootstrap" f "Load factory bootstrap information from FILE"       string                                typestr="FILE" group="required"
+#groupoption "version"          V "Print version and exit"                             flag off                                             group="required"
+
+option "bootstrap"        b "Use bootstrap server URI"                           string optional                             typestr="URI"
+option "factoryBootstrap" f "Load factory bootstrap information from FILE"       string optional                             typestr="FILE"
+option "version"          V "Print version and exit"                             flag off
+
+text "\n"
+text "Example:\n"
+text "    awa_clientd --port 6000 --endPointName client1 --bootstrap coap://[::1]:2134\n"
+text "\n"

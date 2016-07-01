@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "awa_clientd_cmdline.h"
 #include "lwm2m_core.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
@@ -56,10 +57,6 @@
 #include "lwm2m_object_defs.h"
 #include "lwm2m_client_cert.h"
 #include "lwm2m_client_psk.h"
-
-
-#define DEFAULT_COAP_PORT (6000)
-#define DEFAULT_IPC_PORT (12345)
 
 
 typedef struct
@@ -311,31 +308,6 @@ error_close_log:
     return result;
 }
 
-static void PrintUsage(void)
-{
-    printf("Awa LWM2M Client, version %s\n", version);
-    printf("Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies.\n\n");
-
-    printf("Usage: awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]]\n\n");
-
-    printf("Options:\n");
-    printf("  --port, -p PORT          : Use local port number PORT for CoAP communications\n");
-    printf("  --addressFamily, -a AF   : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
-    printf("  --ipcPort, -i PORT       : Use port number PORT for IPC communications\n");
-    printf("  --endPointName, -e NAME  : Use NAME as client end point name\n");
-    printf("  --bootstrap, -b URI      : Use bootstrap server URI\n");
-    printf("  --factoryBootstrap, -f FILE\n"
-           "                           : Load factory bootstrap information from FILE\n");
-    printf("  --daemonize, -d          : Detach process from terminal and run in the background\n");
-    printf("  --verbose, -v            : Generate verbose output\n");
-    printf("  --logFile, -l FILE       : Log output to FILE\n");
-    printf("  --version, -V            : Print version and exit\n");
-    printf("  --help, -h               : Show usage\n\n");
-
-    printf("Example:\n");
-    printf("    awa_clientd --port 6000 --endPointName client1 --bootstrap coap://[::1]:2134\n\n");
-}
-
 static void PrintOptions(const Options * options)
 {
     printf("Options provided:\n");
@@ -350,104 +322,59 @@ static void PrintOptions(const Options * options)
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile);
 }
 
-static int ParseOptions(int argc, char ** argv, Options * options)
+static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai, Options * options)
 {
-    while (1)
+    int result = EXIT_SUCCESS;
+    if (cmdline_parser(argc, argv, ai) == 0)
     {
-        int optionIndex = 0;
+        options->CoapPort = ai->port_arg;
+        options->AddressFamily = ai->addressFamily_arg == 4 ? AF_INET : AF_INET6;
+        options->IpcPort = ai->ipcPort_arg;
+        options->BootStrap = ai->bootstrap_arg;
+        options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
+        options->EndPointName = ai->endPointName_arg;
+        options->Daemonise = ai->daemonize_flag;
+        options->Verbose = ai->verbose_flag;
+        options->LogFile = ai->logFile_arg;
+        options->Version = ai->version_flag;
 
-        static struct option longOptions[] =
+        // Check to see if at least one bootstrap option is specified
+        if (!options->Version && (options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
         {
-            {"port",             required_argument, 0, 'p'},
-            {"addressFamily",    required_argument, 0, 'a'},
-            {"ipcPort",          required_argument, 0, 'i'},
-            {"bootstrap",        required_argument, 0, 'b'},
-            {"factoryBootstrap", required_argument, 0, 'f'},
-            {"endPointName",     required_argument, 0, 'e'},
-            {"verbose",          no_argument,       0, 'v'},
-            {"daemonize",        no_argument,       0, 'd'},
-            {"logFile",          required_argument, 0, 'l'},
-            {"version",          no_argument,       0, 'V'},
-            {"help",             no_argument,       0, 'h'},
-            {0,                  0,                 0,  0 }
-        };
-
-        int c = getopt_long(argc, argv, "p:a:i:b:f:e:vdl:Vh", longOptions, &optionIndex);
-        if (c == -1)
-        {
-            break;
+            printf("Error: specify a bootstrap option (--bootstrap or --factoryBootstrap) or --version\n\n");
+            result = EXIT_FAILURE;
         }
 
-        switch (c)
-        {
-            case 'p':
-                options->CoapPort = atoi(optarg);
-                break;
-            case 'a':
-                options->AddressFamily = atoi(optarg) == 4 ? AF_INET : AF_INET6;
-                break;
-            case 'i':
-                options->IpcPort = atoi(optarg);
-                break;
-            case 'b':
-                options->BootStrap = optarg;
-                break;
-            case 'f':
-                options->FactoryBootstrapFile = optarg;
-                break;
-            case 'e':
-                options->EndPointName = optarg;
-                break;
-            case 'd':
-                options->Daemonise = true;
-                break;
-            case 'v':
-                options->Verbose = true;
-                break;
-            case 'l':
-                options->LogFile = optarg;
-                break;
-            case 'V':
-                options->Version = true;
-                break;
-            case 'h':
-            default:
-                PrintUsage();
-                exit(EXIT_FAILURE);
-        }
     }
-
-    // Check to see if at least one bootstrap option is specified
-    if (!options->Version && (options->BootStrap == NULL) && (options->FactoryBootstrapFile == NULL))
+    else
     {
-        printf("Error: please specify a bootstrap option (--bootstrap or --factoryBootstrap)\n\n");
-        PrintUsage();
-        exit(EXIT_FAILURE);
+        result = EXIT_FAILURE;
     }
-
-    return 0;
+    return result;
 }
 
 int main(int argc, char ** argv)
 {
+    int result = EXIT_FAILURE;
+    struct gengetopt_args_info ai;
     Options options =
     {
-        .CoapPort = DEFAULT_COAP_PORT,
-        .IpcPort = DEFAULT_IPC_PORT,
+        .CoapPort = 0,
+        .IpcPort = 0,
         .Verbose = false,
         .Daemonise = false,
         .BootStrap = NULL,
-        .EndPointName = "imagination1",
+        .EndPointName = NULL,
         .LogFile = NULL,
-        .AddressFamily = AF_INET,
+        .AddressFamily = 0,
         .FactoryBootstrapFile = NULL,
         .Version = false,
     };
 
-    if (ParseOptions(argc, argv, &options) == 0)
+    if (ParseOptions(argc, argv, &ai, &options) == EXIT_SUCCESS)
     {
-        Lwm2mClient_Start(&options);
+        result = Lwm2mClient_Start(&options);
     }
-
-    exit(EXIT_SUCCESS);
+    cmdline_parser_free(&ai);
+    exit(result);
 }
