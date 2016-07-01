@@ -69,6 +69,15 @@ typedef enum
     ResponseType_ReadResponse,
 } ResponseType;
 
+//Format of output
+typedef enum
+{
+    OutputFormat_None = 0,
+    OutputFormat_PlainTextVerbose,
+    OutputFormat_PlainTextQuiet,
+    OutputFormat_DeviceServerXML
+} OutputFormat;
+
 
 // Logging Support:
 
@@ -93,8 +102,9 @@ void FreeTarget(Target ** targetPtr);
 bool IsIDValid(int id);
 
 const char * ResourceTypeToString(AwaResourceType type);
-
+const char * DeviceServerXML_ResourceTypeToString(AwaResourceType type);
 const char * ResourceOperationToString(AwaResourceOperations operation);
+const char * DeviceServerXML_ResourceOperationToString(AwaResourceOperations operation);
 
 bool IsArrayType(AwaResourceType type);
 
@@ -144,11 +154,12 @@ int GetNextTargetResourceInstanceIDFromPath(Target ** targets, int numTargets, c
 
 
 // Definition Printing functions
-void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * defineIterator, bool quiet);
-void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted, bool quiet);
-void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, bool quiet);
-void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, bool quiet);
-void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, bool quiet, AwaObjectID objectID);
+void PrintAllObjectDefinitions(AwaObjectDefinitionIterator * defineIterator, OutputFormat format);
+void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, OutputFormat format, AwaObjectID objectID, AwaResourceID resourceID, AwaObjectID * lastObjectIDPrinted);
+void PrintObjectDefinitionHeader(const AwaObjectDefinition * objectDefinition, OutputFormat format);
+void PrintObjectDefinitionFooter(const AwaObjectDefinition * objectDefinition, OutputFormat outputFormat);
+void PrintObjectDefinition(const AwaObjectDefinition * objectDefinition, OutputFormat format);
+void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, OutputFormat format, AwaObjectID objectID);
 
 
 #ifdef __cplusplus
