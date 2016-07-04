@@ -1,5 +1,5 @@
-
 set (awa_serverd_SOURCES
+  awa_serverd_cmdline.c
   lwm2m_server_core.c
   lwm2m_server_xml_handlers.c
   lwm2m_server_xml_events.c
@@ -86,6 +86,9 @@ set_target_properties (awa_serverd_static PROPERTIES OUTPUT_NAME "lwm2mserver")
 # shared library liblwm2mserver.so
 add_library (awa_serverd_shared SHARED $<TARGET_OBJECTS:awa_serverd_object>)
 set_target_properties (awa_serverd_shared PROPERTIES OUTPUT_NAME "lwm2mserver")
+
+# disable -Wall warnings for _cmdline.c files
+set_source_files_properties (awa_serverd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)
 
 add_executable (awa_serverd lwm2m_server.c)
 target_include_directories (awa_serverd PRIVATE ${awa_serverd_INCLUDE_DIRS})

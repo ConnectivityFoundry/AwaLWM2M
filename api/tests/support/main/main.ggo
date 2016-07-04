@@ -16,6 +16,6 @@ option "coapClientPath"      - "Path to libcoap coap-client tool"  string option
 option "clientDaemonPath"    - "Path to LWM2M client daemon"       string optional default="core/src/client/awa_clientd"
 option "serverDaemonPath"    - "Path to LWM2M server daemon"       string optional default="core/src/server/awa_serverd"
 option "bootstrapDaemonPath" - "Path to LWM2M bootstrap daemon"    string optional default="core/src/bootstrap/awa_bootstrapd"
-option "bootstrapConfig"     - "Path to bootstrap config file"     string optional default="../api/tests/bootstrap-gtest.config"
+option "bootstrapConfig"     - "Path to bootstrap config file"     string optional default="../api/tests/gtest.bsc"
 
 option "defaultTimeout"      - "Set default timeout in milliseconds for IPC operations" int optional typestr="TIMEOUT"

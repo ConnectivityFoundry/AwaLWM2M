@@ -64,7 +64,7 @@ const char * const coapClientPath      = "lib/libcoap/examples/coap-client";
 const char * const clientDaemonPath    = "core/src/client/awa_clientd";
 const char * const serverDaemonPath    = "core/src/server/awa_serverd";
 const char * const bootstrapServerDaemonPath = "core/src/bootstrap/awa_bootstrapd";
-const char * const bootstrapServerConfig     = "../api/tests/bootstrap-gtest.config";
+const char * const bootstrapServerConfig     = "../api/tests/gtest.bsc";
 
 } // namespace defaults
 

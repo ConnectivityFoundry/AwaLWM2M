@@ -31,7 +31,7 @@ Once you have a docker image, you can run Awa binaries directly.
 
 To run the bootstrap daemon (with the localhost bootstrap config), use:
 
-``` $ docker run --rm -p 15685:15685/udp --name awa_bootstrapd -it flowm2m/awalwm2m awa_bootstrapd --config core/bootstrap-docker.config```
+``` $ docker run --rm -p 15685:15685/udp --name awa_bootstrapd -it flowm2m/awalwm2m awa_bootstrapd --config config/docker.bsc```
 
 To run the server daemon:
 
