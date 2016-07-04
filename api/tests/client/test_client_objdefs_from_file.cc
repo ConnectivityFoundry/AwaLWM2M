@@ -201,6 +201,52 @@ static const char * badObjDefXML = R"(
 )";
 #endif //0
 
+static const char * multipleFile1 = R"(
+<ObjectDefinitions>
+  <Items>
+    <ObjectDefinition>
+      <ObjectID>7301</ObjectID>
+      <Name>Test Object 1</Name>
+      <SerialisationName>TestObject1</SerialisationName>
+      <Singleton>True</Singleton>
+      <IsMandatory>True</IsMandatory>
+      <Properties>
+        <PropertyDefinition>
+          <PropertyID>0</PropertyID>
+          <Name>Test Resource</Name>
+          <SerialisationName>TestResource</SerialisationName>
+          <DataType>String</DataType>
+          <IsCollection>False</IsCollection>
+          <IsMandatory>False</IsMandatory>
+          <Access>Read</Access>
+        </PropertyDefinition>
+      </Properties>
+    </ObjectDefinition>
+  </Items>
+</ObjectDefinitions>
+)";
+
+static const char * multipleFile2 = R"(
+    <ObjectDefinition>
+      <ObjectID>7302</ObjectID>
+      <Name>Test Object 2</Name>
+      <SerialisationName>TestObject2</SerialisationName>
+      <Singleton>False</Singleton>
+      <IsMandatory>False</IsMandatory>
+      <Properties>
+        <PropertyDefinition>
+          <PropertyID>100</PropertyID>
+          <Name>Test Resource 100</Name>
+          <SerialisationName>TestResource100</SerialisationName>
+          <DataType>Integer</DataType>
+          <IsCollection>False</IsCollection>
+          <IsMandatory>False</IsMandatory>
+          <Access>ReadWrite</Access>
+        </PropertyDefinition>
+      </Properties>
+    </ObjectDefinition>
+)";
+
 } // namespace detail
 
 class ObjDefsFile {
@@ -339,5 +385,32 @@ TEST_F(TestClientObjDefsFromFileNotFound, DISABLED_test_file_not_found) {
     EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7310));
 }
 
+
+class TestClientObjDefsFromMultipleFiles : public TestClientWithConnectedSession {
+public:
+    TestClientObjDefsFromMultipleFiles() : objDefsFiles_ { ObjDefsFile{detail::multipleFile1}, ObjDefsFile{detail::multipleFile2} } {}
+    virtual void SetUp() {
+        std::vector<std::string> additionalOptions;
+        for (auto & it : objDefsFiles_) {
+            additionalOptions.push_back("--objDefs");
+            additionalOptions.push_back(it.GetFilename());
+        }
+        daemon_.SetAdditionalOptions(additionalOptions);
+        TestClientWithConnectedSession::SetUp();
+    }
+private:
+    std::vector<ObjDefsFile> objDefsFiles_;
+};
+
+TEST_F(TestClientObjDefsFromMultipleFiles, multiple_files) {
+
+    // check definition of object 7301
+    EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
+    EXPECT_RESOURCE(session_, 7301, 0,  "TestResource",  0, 1,          AwaResourceType_String,        AwaResourceOperations_ReadOnly);
+
+    // check definition of object 7302
+    EXPECT_OBJECT(session_, 7302, "TestObject2", 0, AWA_MAX_ID, 1);
+    EXPECT_RESOURCE(session_, 7302, 100,  "TestResource100",  0, 1,     AwaResourceType_Integer,        AwaResourceOperations_ReadWrite);
+}
 
 } // namespace Awa

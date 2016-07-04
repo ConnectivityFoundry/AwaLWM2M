@@ -58,8 +58,8 @@ typedef struct
     char * InterfaceName;
     int AddressFamily;
     int CoapPort;
-    const char * Config[MAX_BOOTSTRAP_CONFIG_FILES];
-    int ConfigCount;
+    const char * ConfigFiles[MAX_BOOTSTRAP_CONFIG_FILES];
+    int NumConfigFiles;
     bool Secure;
     bool Daemonise;
     bool Verbose;
@@ -210,7 +210,7 @@ static int Bootstrap_Start(Options * options)
     // must happen after coap_Init()
     Lwm2m_RegisterObjectTypes(context);
 
-    if (!Lwm2mBootstrap_BootStrapInit(context, options->Config, options->ConfigCount))
+    if (!Lwm2mBootstrap_BootStrapInit(context, options->ConfigFiles, options->NumConfigFiles))
     {
         printf("Failed to initialise bootstrap\n");
         result = 1;
@@ -276,9 +276,9 @@ static void PrintOptions(const Options * options)
     printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily == AF_INET? 4 : 6);
     printf("  Port           (--port)           : %d\n", options->CoapPort);
     int i;
-    for (i = 0; i < options->ConfigCount; ++i)
+    for (i = 0; i < options->NumConfigFiles; ++i)
     {
-        printf("  Config         (--config)         : %s\n", options->Config[i]);
+        printf("  Config         (--config)         : %s\n", options->ConfigFiles[i]);
     }
     printf("  Secure         (--secure)         : %d\n", options->Secure);
     printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
@@ -299,9 +299,9 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         int i;
         for (i = 0; i < ai->config_given; ++i)
         {
-            options->Config[i] = ai->config_arg[i];
+            options->ConfigFiles[i] = ai->config_arg[i];
         }
-        options->ConfigCount = ai->config_given;
+        options->NumConfigFiles = ai->config_given;
         options->Secure = ai->secure_flag;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
@@ -325,8 +325,8 @@ int main(int argc, char ** argv)
         .InterfaceName = NULL,
         .AddressFamily = AF_UNSPEC,
         .CoapPort = 0,
-        .Config = {0},
-        .ConfigCount = 0,
+        .ConfigFiles = {0},
+        .NumConfigFiles = 0,
         .Secure = false,
         .Daemonise = false,
         .Verbose = false,
