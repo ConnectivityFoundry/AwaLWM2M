@@ -1,4 +1,5 @@
 set (awa_bootstrapd_SOURCES
+  awa_bootstrapd_cmdline.c
   lwm2m_bootstrap_server.c
   lwm2m_bootstrap.c
   lwm2m_bootstrap_core.c
@@ -34,6 +35,9 @@ if (ENABLE_GCOV)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif ()
+
+# disable -Wall warnings for _cmdline.c files
+set_source_files_properties (awa_bootstrapd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)
 
 add_executable (awa_bootstrapd ${awa_bootstrapd_SOURCES})
 target_include_directories (awa_bootstrapd PRIVATE ${awa_bootstrapd_INCLUDE_DIRS})

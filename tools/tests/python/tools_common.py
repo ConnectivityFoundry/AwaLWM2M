@@ -82,7 +82,7 @@ class DefaultTestConfiguration(object):
     SERVER_LOG_FILE = "awa_serverd.log"
     CLIENT_LOG_FILE = "awa_clientd.log"
 
-    BOOTSTRAP_CONFIG_FILE = "../bootstrap.config"
+    BOOTSTRAP_CONFIG_FILE = "../test.bsc"
 
     CLIENT_ENDPOINT_NAME = "TestClient"
 
