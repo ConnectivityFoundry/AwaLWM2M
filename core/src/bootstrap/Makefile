@@ -1,4 +1,4 @@
-FILES:=awa_clientd_cmdline
+FILES:=awa_bootstrapd_cmdline
 
 # prevent autodeletion of intermediate files:
 #.SECONDARY:

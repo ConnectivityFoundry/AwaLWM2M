@@ -50,6 +50,12 @@ struct gengetopt_args_info
   char * endPointName_arg;	/**< @brief Use NAME as client end point name (default='Awa Client').  */
   char * endPointName_orig;	/**< @brief Use NAME as client end point name original value given at command line.  */
   const char *endPointName_help; /**< @brief Use NAME as client end point name help description.  */
+  char * bootstrap_arg;	/**< @brief Use bootstrap server URI.  */
+  char * bootstrap_orig;	/**< @brief Use bootstrap server URI original value given at command line.  */
+  const char *bootstrap_help; /**< @brief Use bootstrap server URI help description.  */
+  char * factoryBootstrap_arg;	/**< @brief Load factory bootstrap information from FILE.  */
+  char * factoryBootstrap_orig;	/**< @brief Load factory bootstrap information from FILE original value given at command line.  */
+  const char *factoryBootstrap_help; /**< @brief Load factory bootstrap information from FILE help description.  */
   int daemonize_flag;	/**< @brief Detach process from terminal and run in the background (default=off).  */
   const char *daemonize_help; /**< @brief Detach process from terminal and run in the background help description.  */
   int verbose_flag;	/**< @brief Generate verbose output (default=off).  */
@@ -57,12 +63,6 @@ struct gengetopt_args_info
   char * logFile_arg;	/**< @brief Log output to FILE.  */
   char * logFile_orig;	/**< @brief Log output to FILE original value given at command line.  */
   const char *logFile_help; /**< @brief Log output to FILE help description.  */
-  char * bootstrap_arg;	/**< @brief Use bootstrap server URI.  */
-  char * bootstrap_orig;	/**< @brief Use bootstrap server URI original value given at command line.  */
-  const char *bootstrap_help; /**< @brief Use bootstrap server URI help description.  */
-  char * factoryBootstrap_arg;	/**< @brief Load factory bootstrap information from FILE.  */
-  char * factoryBootstrap_orig;	/**< @brief Load factory bootstrap information from FILE original value given at command line.  */
-  const char *factoryBootstrap_help; /**< @brief Load factory bootstrap information from FILE help description.  */
   int version_flag;	/**< @brief Print version and exit (default=off).  */
   const char *version_help; /**< @brief Print version and exit help description.  */
   
@@ -71,11 +71,11 @@ struct gengetopt_args_info
   unsigned int addressFamily_given ;	/**< @brief Whether addressFamily was given.  */
   unsigned int ipcPort_given ;	/**< @brief Whether ipcPort was given.  */
   unsigned int endPointName_given ;	/**< @brief Whether endPointName was given.  */
+  unsigned int bootstrap_given ;	/**< @brief Whether bootstrap was given.  */
+  unsigned int factoryBootstrap_given ;	/**< @brief Whether factoryBootstrap was given.  */
   unsigned int daemonize_given ;	/**< @brief Whether daemonize was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
   unsigned int logFile_given ;	/**< @brief Whether logFile was given.  */
-  unsigned int bootstrap_given ;	/**< @brief Whether bootstrap was given.  */
-  unsigned int factoryBootstrap_given ;	/**< @brief Whether factoryBootstrap was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
@@ -202,6 +202,8 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_addressFamily_values[];  /**< @brief Possible values for addressFamily. */
 
 
 #ifdef __cplusplus

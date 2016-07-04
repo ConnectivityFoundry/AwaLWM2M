@@ -62,17 +62,16 @@
 typedef struct
 {
     int CoapPort;
+    int AddressFamily;
     int IpcPort;
-    bool Verbose;
-    bool Daemonise;
     char * EndPointName;
     char * BootStrap;
-    char * LogFile;
-    int AddressFamily;
     const char * FactoryBootstrapFile;
+    bool Daemonise;
+    bool Verbose;
+    char * LogFile;
     bool Version;
 } Options;
-
 
 static FILE * logFile = NULL;
 static const char * version = VERSION; // from Makefile
@@ -250,7 +249,7 @@ static int Lwm2mClient_Start(Options * options)
 
     xmlif_RegisterHandlers();
 
-    // Wait for messages on both the "IPC" and CoAP interfaces
+    // Wait for messages on both the IPC and CoAP interfaces
     while (!quit)
     {
         int loop_result;
@@ -310,16 +309,17 @@ error_close_log:
 
 static void PrintOptions(const Options * options)
 {
-    printf("Options provided:\n");
+    printf("Options specified or defaulted:\n");
     printf("  CoapPort             (--port)             : %d\n", options->CoapPort);
-    printf("  IpcPort              (--ipcPort)          : %d\n", options->IpcPort);
-    printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
-    printf("  Daemonize            (--daemonize)        : %d\n", options->Daemonise);
-    printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName);
-    printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap);
-    printf("  LogFile              (--logFile)          : %s\n", options->LogFile);
     printf("  AddressFamily        (--addressFamily)    : %d\n", options->AddressFamily == AF_INET? 4 : 6);
-    printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile);
+    printf("  IpcPort              (--ipcPort)          : %d\n", options->IpcPort);
+    printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName ? options->EndPointName : "");
+    printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap ? options->BootStrap : "");
+    printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile ? options->FactoryBootstrapFile : "");
+    printf("  Daemonize            (--daemonize)        : %d\n", options->Daemonise);
+    printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
+    printf("  LogFile              (--logFile)          : %s\n", options->LogFile ? options->LogFile : "");
+    printf("  Version              (--version)          : %d\n", options->Version);
 }
 
 static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai, Options * options)
@@ -330,9 +330,9 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->CoapPort = ai->port_arg;
         options->AddressFamily = ai->addressFamily_arg == 4 ? AF_INET : AF_INET6;
         options->IpcPort = ai->ipcPort_arg;
+        options->EndPointName = ai->endPointName_arg;
         options->BootStrap = ai->bootstrap_arg;
         options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
-        options->EndPointName = ai->endPointName_arg;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
         options->LogFile = ai->logFile_arg;
@@ -360,14 +360,14 @@ int main(int argc, char ** argv)
     Options options =
     {
         .CoapPort = 0,
+        .AddressFamily = AF_UNSPEC,
         .IpcPort = 0,
-        .Verbose = false,
-        .Daemonise = false,
-        .BootStrap = NULL,
         .EndPointName = NULL,
-        .LogFile = NULL,
-        .AddressFamily = 0,
+        .BootStrap = NULL,
         .FactoryBootstrapFile = NULL,
+        .Daemonise = false,
+        .Verbose = false,
+        .LogFile = NULL,
         .Version = false,
     };
 
