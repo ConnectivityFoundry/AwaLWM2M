@@ -321,7 +321,7 @@ TEST_F(TestObjectsTree, ObjectsTree_FindPathNode_handles_matching_path_complex)
     EXPECT_TRUE(NULL != resultNode); EXPECT_EQ(0, xmlif_GetInteger(resultNode, "Resource/ID"));
 
     ASSERT_EQ(InternalError_Success, ObjectsTree_FindPathNode(objectsNode, "/3/2", &resultNode));
-    TreeNode property = TreeNode_Navigate(resultNode, "Instance/Resource");   ASSERT_TRUE(NULL != property);
+    TreeNode property = TreeNode_Navigate(resultNode, "ObjectInstance/Resource");   ASSERT_TRUE(NULL != property);
 
     Tree_Delete(objectsNode);
 }

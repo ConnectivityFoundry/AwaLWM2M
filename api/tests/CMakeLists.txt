@@ -45,6 +45,7 @@ set (test_api_runner_SOURCES
   client/test_client_delete_operation.cc
   client/test_subscribe_operation.cc
   client/test_client_iterator.cc
+  client/test_client_objdefs_from_file.cc
 
   server/test_server_session.cc
   server/test_server_define_operation.cc

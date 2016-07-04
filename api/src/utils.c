@@ -29,6 +29,7 @@
 #include "memalloc.h"
 #include "awa/common.h"
 #include "log.h"
+#include "lwm2m_definition.h"
 
 size_t msprintf(char ** string, const char * format, ...)
 {
@@ -96,6 +97,36 @@ const char * Utils_ResourceTypeToString(AwaResourceType resourceType)
 size_t Utils_GetNumberOfResourceTypeStrings(void)
 {
     size_t numEntries = sizeof(ResourceTypeStrings) / sizeof(ResourceTypeStrings[0]);
+    return numEntries;
+}
+
+// This table must align with awa/common.h:AwaResourceOperations
+static const char * ResourceOperationStrings[] =
+{
+        "Invalid",
+        "None",
+        "ReadOnly",
+        "WriteOnly",
+        "ReadWrite",
+        "Execute",
+};
+
+// Check first and last Number of entries in table is same as last enum
+const char * Utils_ResourceOperationToString(AwaResourceOperations resourceOp)
+{
+    static const char * result = "Unknown Resource Operation";
+    size_t numEntries = Utils_GetNumberOfResourceOperationStrings();
+
+    if ((resourceOp >= 0) && (resourceOp < numEntries))
+    {
+        result = ResourceTypeStrings[resourceOp];
+    }
+    return result;
+}
+
+size_t Utils_GetNumberOfResourceOperationStrings(void)
+{
+    size_t numEntries = sizeof(ResourceOperationStrings) / sizeof(ResourceOperationStrings[0]);
     return numEntries;
 }
 

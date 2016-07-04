@@ -51,6 +51,12 @@ struct _Lwm2mContextType
 
 static Lwm2mContextType Lwm2mContext;
 
+//Dummy function to keep the linker happy.
+int Lwm2mCore_CreateObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
+{
+    return 0;
+}
+
 int Lwm2mCore_RegisterObjectType(Lwm2mContextType * context, const char * objName, ObjectIDType objectID,
                                  uint16_t maximumInstances, uint16_t minimumInstances, ObjectOperationHandlers * handlers)
 {

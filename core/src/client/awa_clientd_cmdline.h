@@ -56,6 +56,9 @@ struct gengetopt_args_info
   char * factoryBootstrap_arg;	/**< @brief Load factory bootstrap information from FILE.  */
   char * factoryBootstrap_orig;	/**< @brief Load factory bootstrap information from FILE original value given at command line.  */
   const char *factoryBootstrap_help; /**< @brief Load factory bootstrap information from FILE help description.  */
+  char * objDefs_arg;	/**< @brief Load object and resource definitions from FILE.  */
+  char * objDefs_orig;	/**< @brief Load object and resource definitions from FILE original value given at command line.  */
+  const char *objDefs_help; /**< @brief Load object and resource definitions from FILE help description.  */
   int daemonize_flag;	/**< @brief Detach process from terminal and run in the background (default=off).  */
   const char *daemonize_help; /**< @brief Detach process from terminal and run in the background help description.  */
   int verbose_flag;	/**< @brief Generate verbose output (default=off).  */
@@ -73,6 +76,7 @@ struct gengetopt_args_info
   unsigned int endPointName_given ;	/**< @brief Whether endPointName was given.  */
   unsigned int bootstrap_given ;	/**< @brief Whether bootstrap was given.  */
   unsigned int factoryBootstrap_given ;	/**< @brief Whether factoryBootstrap was given.  */
+  unsigned int objDefs_given ;	/**< @brief Whether objDefs was given.  */
   unsigned int daemonize_given ;	/**< @brief Whether daemonize was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
   unsigned int logFile_given ;	/**< @brief Whether logFile was given.  */

@@ -43,6 +43,7 @@
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "dtls_abstraction.h"
+#include "xmltree.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
 #include "lwm2m_connectivity_object.h"
@@ -67,6 +68,7 @@ typedef struct
     char * EndPointName;
     char * BootStrap;
     const char * FactoryBootstrapFile;
+    char * ObjDefsFile;
     bool Daemonise;
     bool Verbose;
     char * LogFile;
@@ -136,6 +138,81 @@ static void Daemonise(bool verbose)
     close (STDIN_FILENO);
     close (STDOUT_FILENO);
     close (STDERR_FILENO);
+}
+
+static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char * filename)
+{
+    DefinitionCount count = { 0 };
+    int result = 0;
+
+    Lwm2m_Info("Load definitions: from \'%s\'\n", filename);
+
+    FILE *f = fopen(filename, "rb");
+    if (f != NULL)
+    {
+        fseek(f, 0, SEEK_END);
+        long pos = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        uint8_t * doc = malloc(pos);
+        if (doc != NULL)
+        {
+            size_t nmemb = fread(doc, pos, 1, f);
+            if (nmemb == 1)
+            {
+                Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
+                TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
+                count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
+                result = 0;
+                Tree_Delete(objectDefinitionsNode);
+                free(doc);
+            }
+            else
+            {
+                perror("fread");
+                result = -1;
+                free(doc);
+            }
+        }
+        else
+        {
+            Lwm2m_Error("Out of memory\n");
+            result = -1;
+        }
+        fclose(f);
+    }
+    else
+    {
+        perror("fopen");
+        result = -1;
+    }
+
+    if (result == 0)
+    {
+        // regard any failures as fatal
+
+        if (count.NumObjectsFailed > 0) {
+            Lwm2m_Error("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
+            result = -1;
+        }
+        if (count.NumResourcesFailed > 0) {
+            Lwm2m_Error("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
+            result = -1;
+        }
+        Lwm2m_Info("Load definitions: %zu object%s and %zu resource%s defined\n", count.NumObjectsOK, count.NumObjectsOK != 1 ? "s" : "", count.NumResourcesOK, count.NumResourcesOK != 1 ? "s" : "");
+
+        // also regard nothing defined as failure
+        if (count.NumObjectsOK == 0 && count.NumResourcesOK == 0)
+        {
+            Lwm2m_Error("No objects or resources defined\n");
+            result = -1;
+        }
+    }
+
+    if (result < 0)
+    {
+        Lwm2m_Error("Load definitions: failed\n");
+    }
+    return result;
 }
 
 static int Lwm2mClient_Start(Options * options)
@@ -238,6 +315,15 @@ static int Lwm2mClient_Start(Options * options)
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
 
+    if (options->ObjDefsFile)
+    {
+        if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFile) != 0)
+        {
+            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFile);
+            goto error_core;
+        }
+    }
+
     // Listen for UDP packets on IPC port
     int xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
@@ -316,6 +402,7 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName ? options->EndPointName : "");
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap ? options->BootStrap : "");
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile ? options->FactoryBootstrapFile : "");
+    printf("  ObjectDefinitions    (--objDefs)          : %s\n", options->ObjDefsFile ? options->ObjDefsFile : "");
     printf("  Daemonize            (--daemonize)        : %d\n", options->Daemonise);
     printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
     printf("  LogFile              (--logFile)          : %s\n", options->LogFile ? options->LogFile : "");
@@ -333,6 +420,7 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->EndPointName = ai->endPointName_arg;
         options->BootStrap = ai->bootstrap_arg;
         options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
+        options->ObjDefsFile = ai->objDefs_arg;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
         options->LogFile = ai->logFile_arg;
@@ -344,7 +432,6 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
             printf("Error: specify a bootstrap option (--bootstrap or --factoryBootstrap) or --version\n\n");
             result = EXIT_FAILURE;
         }
-
     }
     else
     {
@@ -365,6 +452,7 @@ int main(int argc, char ** argv)
         .EndPointName = NULL,
         .BootStrap = NULL,
         .FactoryBootstrapFile = NULL,
+        .ObjDefsFile = NULL,
         .Daemonise = false,
         .Verbose = false,
         .LogFile = NULL,
