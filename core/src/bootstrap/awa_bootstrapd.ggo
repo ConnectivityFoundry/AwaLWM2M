@@ -1,0 +1,22 @@
+# gengetopt configuration file
+package "awa_bootstrapd"
+purpose "Awa LWM2M Bootstrap Server"
+versiontext "Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies."
+args "--no-version"
+
+option "ip"               a "Accept client bootstrap requests on IP address ADDR"      string optional default="0.0.0.0"          typestr="ADDR"
+option "interface"        e "Accept client bootstrap requests on network interface IF" string optional                            typestr="IF"
+option "addressFamily"    f "Address family for network interface. AF=4 for IPv4, AF=6 for IPv6"
+                                                                                       int    optional default="4"                typestr="AF"    values="4","6"
+option "port"             p "Use port number PORT for CoAP communications"             int    optional default="15685"            typestr="PORT"
+option "config"           c "Load server list configuration from FILE"                 string optional                            typestr="FILE"  multiple(1-4)
+option "secure"           s "CoAP communications are secured with DTLS"                flag off
+option "daemonize"        d "Detach process from terminal and run in the background"   flag off
+option "verbose"          v "Generate verbose output"                                  flag off
+option "logFile"          l "Log output to FILE"                                       string optional                            typestr="FILE"
+option "version"          V "Print version and exit"                                   flag off
+
+text "\n"
+text "Example:\n"
+text "    awa_bootstrapd --port 15685 --config bootstrap.config\n"
+text "\n"

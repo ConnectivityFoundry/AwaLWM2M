@@ -12,9 +12,9 @@
 
 The Awa API is covered by a comprehensive test suite based on Google Test.
 
-It is possible to run individual tests for debugging purposes, using the *--gtest_filter* flag. Wildcards (*) can be passed in order to run multiple tests/suits that match the filter. 
+It is possible to run individual tests for debugging purposes, using the *--gtest_filter* flag. Wildcards (*) can be passed in order to run multiple tests/suits that match the filter.
 
-For example:  ```` --gtest_filter=TestGet.\* ```` runs all tests in the TestGet suite.   
+For example:  ```` --gtest_filter=TestGet.\* ```` runs all tests in the TestGet suite.
 
 Refer to the gtest advanced guide for further details.
 
@@ -38,8 +38,8 @@ $ (cd build && make test_api_runner VERBOSE=1 && valgrind --leak-check=full --sh
 
 To run a test specifying an already-running server:
 ````
-# a custom debug bootstrap file is used so the client daemons connect to the correct server port, refer to api/tests/bootstrap-debug.config.
-$ (cd build && make test_api_runner VERBOSE=1 && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes api/tests/test_api_runner --logLevel 1 --gtest_filter=TestSuite.TestName --serverIpcPort 54321 --bootstrapConfig ../api/tests/bootstrap-debug.config)
+# a custom debug bootstrap file is used so the client daemons connect to the correct server port, refer to api/tests/debug.bsc.
+$ (cd build && make test_api_runner VERBOSE=1 && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes api/tests/test_api_runner --logLevel 1 --gtest_filter=TestSuite.TestName --serverIpcPort 54321 --bootstrapConfig ../api/tests/debug.bsc)
 ````
 
 ### Awa core testing.
@@ -109,5 +109,3 @@ $ make tests TEST_OPTIONS=--clientIpcPort=22222
 
 ----
 ----
-
-

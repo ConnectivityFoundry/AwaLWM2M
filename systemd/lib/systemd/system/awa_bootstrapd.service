@@ -8,7 +8,7 @@ Group=nogroup
 Type=simple
 ExecStart=/usr/bin/awa_bootstrapd \
     --logFile /var/log/awa/awa_bootstrapd.log \
-	--config /etc/awa/bootstrap.config \
+	--config /etc/awa/awa_serverd.bsc \
 	--port 15685
 StandardOutput=journal
 StandardError=journal
