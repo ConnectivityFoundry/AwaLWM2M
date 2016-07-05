@@ -73,6 +73,9 @@ public:
             std::perror("Error deleting file");
         }
     }
+    FileResource(const FileResource & that) = delete;
+    FileResource & operator=(const FileResource & that) = delete;
+
 
     std::string GetFilename() const {
         std::cerr << "Get filename: " << filename_ << std::endl;
