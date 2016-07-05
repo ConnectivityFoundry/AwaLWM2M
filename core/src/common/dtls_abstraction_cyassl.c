@@ -30,6 +30,10 @@
 #define CYASSL_DTLS
 #endif
 
+#ifndef WOLFSSL_DTLS
+#define WOLFSSL_DTLS
+#endif
+
 #ifdef MICROCHIP_PIC32
 #ifndef XMALLOC_USER
 #define XMALLOC_USER
@@ -44,10 +48,11 @@
 typedef struct
 {
     NetworkAddress * NetworkAddress;
-    CYASSL *Session;
-    CYASSL_CTX *Context;
+    CYASSL * Session;
+    CYASSL_CTX * Context;
     bool SessionEstablished;
-    void *UserContext;
+    bool Client;
+    void * UserContext;
     uint8_t * Buffer;
     int BufferLength;
 }DTLS_Session;
@@ -58,23 +63,25 @@ typedef struct
 
 const char * DTLS_LibraryName = "CyaSSL";
 
-DTLS_Session sessions[MAX_DTLS_SESSIONS];
+static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
-uint8_t * certificate = NULL;
-int certificateLength = 0;
-CertificateFormat certificateFormat;
+static uint8_t * certificate = NULL;
+static int certificateLength = 0;
+static CertificateFormat certificateFormat;
 
-const char * pskIdentity = NULL;
-const uint8_t * pskKey = NULL;
-int pskKeyLength = 0;
+static const char * pskIdentity = NULL;
+static const uint8_t * pskKey = NULL;
+static int pskKeyLength = 0;
 
-DTLS_NetworkSendCallback NetworkSend = NULL;
+static DTLS_NetworkSendCallback NetworkSend = NULL;
 
+static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context);
 static DTLS_Session * GetSession(NetworkAddress * address);
-static void SetupNewSession(int index, NetworkAddress * networkAddress);
+static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
 static int DecryptCallBack(CYASSL *sslSessioon, char *recieveBuffer, int receiveBufferLegth, void *vp);
 static int EncryptCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
-static unsigned int PSKCallBack(CYASSL* sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len);
+static unsigned int PSKCallBack(CYASSL *sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len);
+static unsigned int ServerPSKCallBack(WOLFSSL *sslSessioon, const char* identity, unsigned char* key, unsigned int key_max_len);
 static int SSLSendCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
 
 #ifdef MICROCHIP_PIC32
@@ -82,6 +89,8 @@ static int SSLSendCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBuffer
 WOLFSSL_METHOD* wolfDTLSv1_2_client_method(void);
 #endif
 #endif
+
+#ifdef XMALLOC_USER
 
 void *XMALLOC(size_t n, void* heap, int type)
 {
@@ -103,11 +112,13 @@ void XFREE(void *p, void* heap, int type)
     (void)type;
     free(p);
 }
+#endif
 
 void DTLS_Init(void)
 {
     memset(sessions,0,sizeof(DTLS_Session) * MAX_DTLS_SESSIONS);
     CyaSSL_Init();
+    CyaSSL_Debugging_ON();
     //CYASSL_API int  CyaSSL_dtls(CYASSL* ssl);
     //CyaSSL_SetAllocators(Flow_MemAlloc, Flow_MemSafeFree, Flow_MemRealloc);
 }
@@ -142,6 +153,10 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
     (void)context;
     bool result = false;
     DTLS_Session * session = GetSession(sourceAddress);
+    if (!session)
+    {
+        session = AllocateSession(sourceAddress, false, context);
+    }
     if (session)
     {
         session->Buffer = encrypted;
@@ -154,7 +169,13 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
         else
         {
             *decryptedLength = 0;
-            session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+            if (session->Client)
+                session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+            else
+            {
+                int acceptResult = CyaSSL_accept(session->Session);
+                session->SessionEstablished = (acceptResult == SSL_SUCCESS);
+            }
             if (session->SessionEstablished)
                 Lwm2m_Info("Session established");
         }
@@ -184,24 +205,38 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
         {
             session->UserContext = context;
             CyaSSL_SetIOSend(session->Context, SSLSendCallBack);
-            session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+            if (session->Client)
+                session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+            else
+                session->SessionEstablished = (CyaSSL_accept(session->Session) == SSL_SUCCESS);
             if (session->SessionEstablished)
                 Lwm2m_Info("Session established");
         }
     }
     else
     {
-        int index;
-        for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+        session = AllocateSession(destAddress, true, context);
+        if (session)
         {
-            if (!sessions[index].Session)
-            {
-                SetupNewSession(index, destAddress);
-                sessions[index].UserContext = context;
-                CyaSSL_SetIOSend(sessions[index].Context, SSLSendCallBack);
-                sessions[index].SessionEstablished = (CyaSSL_connect(sessions[index].Session) == SSL_SUCCESS);
-                break;
-            }
+            session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+        }
+    }
+    return result;
+}
+
+static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context)
+{
+    DTLS_Session * result = NULL;
+    int index;
+    for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+    {
+        if (!sessions[index].Context)
+        {
+            SetupNewSession(index, address, client);
+            sessions[index].UserContext = context;
+            CyaSSL_SetIOSend(sessions[index].Context, SSLSendCallBack);
+            result = &sessions[index];
+            break;
         }
     }
     return result;
@@ -222,13 +257,18 @@ static DTLS_Session * GetSession(NetworkAddress * address)
     return result;
 }
 
-static void SetupNewSession(int index, NetworkAddress * networkAddress)
+static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client)
 {
     DTLS_Session * session = &sessions[index];
     session->NetworkAddress = networkAddress;
-    session->Context =  CyaSSL_CTX_new(CyaDTLSv1_2_client_method());
+    session->Client = client;
+    if (client)
+        session->Context =  CyaSSL_CTX_new(CyaDTLSv1_2_client_method());
+    else
+        session->Context =  CyaSSL_CTX_new(CyaDTLSv1_2_server_method());
     if (session->Context)
     {
+        CyaSSL_CTX_set_cipher_list(session->Context, "ECDHE-ECDSA-AES128-CCM-8:ECDHE-ECDSA-AES128-SHA256:PSK-AES128-CCM-8:PSK-AES128-CBC-SHA256");
         if (certificate)
         {
             int format = SSL_FILETYPE_PEM;
@@ -237,9 +277,15 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress)
             CyaSSL_CTX_use_certificate_buffer(session->Context, certificate, certificateLength, format);
             CyaSSL_CTX_use_PrivateKey_buffer(session->Context, certificate, certificateLength, format);
         }
-        else if (pskIdentity)
+        if (pskIdentity)
         {
-            CyaSSL_CTX_set_psk_client_callback(session->Context, PSKCallBack);
+            if (client)
+                CyaSSL_CTX_set_psk_client_callback(session->Context, PSKCallBack);
+            else
+            {
+                CyaSSL_CTX_set_psk_server_callback(session->Context, ServerPSKCallBack);
+                CyaSSL_CTX_use_psk_identity_hint(session->Context, pskIdentity);
+            }
         }
 //        if (controlBlock->TLSCertificateData)
 //        {
@@ -312,7 +358,13 @@ static int EncryptCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBuffer
     return result;
 }
 
-static unsigned int PSKCallBack(CYASSL* sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len)
+static unsigned int ServerPSKCallBack(WOLFSSL *sslSessioon, const char* identity, unsigned char* key, unsigned int key_max_len)
+{
+    memcpy(key, pskKey, pskKeyLength);
+    return pskKeyLength;
+}
+
+static unsigned int PSKCallBack(CYASSL *sslSession, const char* hint, char* identity, unsigned int id_max_len, unsigned char* key, unsigned int key_max_len)
 {
     (void)sslSession;
     (void)hint;
