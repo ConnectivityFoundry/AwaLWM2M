@@ -12,6 +12,7 @@ option "port"             p "Use port number PORT for CoAP communications"      
 option "ipcPort"          i "Use port number PORT for IPC communications"                 int    optional default="54321"            typestr="PORT"
 option "contentType"      m "Use Content Type ID (TLV=1542, JSON=50)"                     int    optional default="1542"             typestr="ID"    values="50","1542"
 option "secure"           s "CoAP communications are secured with DTLS"                   flag off
+option "objDefs"          o "Load object and resource definitions from FILE"              string optional                            typestr="FILE"  multiple(1-16)
 option "daemonize"        d "Detach process from terminal and run in the background"      flag off
 option "verbose"          v "Generate verbose output"                                     flag off
 option "logFile"          l "Log output to FILE"                                          string optional                            typestr="FILE"

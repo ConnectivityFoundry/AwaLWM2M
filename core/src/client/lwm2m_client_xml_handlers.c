@@ -1216,14 +1216,13 @@ DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, Tre
         objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, objectDefinitionIndex++) : NULL;
     }
 
-    if (result.NumObjectsOK > 0)
-    {
-        // Send an update so that all servers this client is connected to know that the client has at least one new object defined.
-        Lwm2m_SetUpdateRegistration(context);
-    }
+//    if (result.NumObjectsOK > 0)
+//    {
+//        // Send an update so that all servers this client is connected to know that the client has at least one new object defined.
+//        Lwm2m_SetUpdateRegistration(context);
+//    }
 
     return result;
 }
-
 
 #endif // CONTIKI

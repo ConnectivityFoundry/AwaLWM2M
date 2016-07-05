@@ -39,6 +39,7 @@
 #include <signal.h>
 
 #include "awa_clientd_cmdline.h"
+#include "objdefs.h"
 #include "lwm2m_core.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
@@ -142,81 +143,6 @@ static void Daemonise(bool verbose)
     close (STDERR_FILENO);
 }
 
-static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char * filename)
-{
-    DefinitionCount count = { 0 };
-    int result = 0;
-
-    Lwm2m_Info("Load definitions: from \'%s\'\n", filename);
-
-    FILE *f = fopen(filename, "rb");
-    if (f != NULL)
-    {
-        fseek(f, 0, SEEK_END);
-        long pos = ftell(f);
-        fseek(f, 0, SEEK_SET);
-        uint8_t * doc = malloc(pos);
-        if (doc != NULL)
-        {
-            size_t nmemb = fread(doc, pos, 1, f);
-            if (nmemb == 1)
-            {
-                Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
-                TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
-                count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
-                result = 0;
-                Tree_Delete(objectDefinitionsNode);
-                free(doc);
-            }
-            else
-            {
-                perror("fread");
-                result = -1;
-                free(doc);
-            }
-        }
-        else
-        {
-            Lwm2m_Error("Out of memory\n");
-            result = -1;
-        }
-        fclose(f);
-    }
-    else
-    {
-        perror("fopen");
-        result = -1;
-    }
-
-    if (result == 0)
-    {
-        // regard any failures as fatal
-
-        if (count.NumObjectsFailed > 0) {
-            Lwm2m_Error("%zu object definition%s failed\n", count.NumObjectsFailed, count.NumObjectsFailed != 1 ? "s" : "" );
-            result = -1;
-        }
-        if (count.NumResourcesFailed > 0) {
-            Lwm2m_Error("%zu resource definition%s failed\n", count.NumResourcesFailed, count.NumResourcesFailed != 1 ? "s" : "");
-            result = -1;
-        }
-        Lwm2m_Info("Load definitions: %zu object%s and %zu resource%s defined\n", count.NumObjectsOK, count.NumObjectsOK != 1 ? "s" : "", count.NumResourcesOK, count.NumResourcesOK != 1 ? "s" : "");
-
-        // also regard nothing defined as failure
-        if (count.NumObjectsOK == 0 && count.NumResourcesOK == 0)
-        {
-            Lwm2m_Error("No objects or resources defined\n");
-            result = -1;
-        }
-    }
-
-    if (result < 0)
-    {
-        Lwm2m_Error("Load definitions: failed\n");
-    }
-    return result;
-}
-
 static int Lwm2mClient_Start(Options * options)
 {
     int result = 0;
@@ -317,14 +243,10 @@ static int Lwm2mClient_Start(Options * options)
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
 
-    int i;
-    for (i = 0; i < options->NumObjDefsFiles; ++i)
+    // load any specified objDef files
+    if (LoadObjectDefinitionsFromFiles(context, options->ObjDefsFiles, options->NumObjDefsFiles) != 0)
     {
-        if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFiles[i]) != 0)
-        {
-            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFiles[i]);
-            goto error_core;
-        }
+        goto error_core;
     }
 
     // Listen for UDP packets on IPC port
@@ -335,7 +257,6 @@ static int Lwm2mClient_Start(Options * options)
         result = 1;
         goto error_core;
     }
-
     xmlif_RegisterHandlers();
 
     // Wait for messages on both the IPC and CoAP interfaces

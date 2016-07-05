@@ -63,6 +63,7 @@ set (test_api_runner_SOURCES
   server/test_server.cc
   server/test_observe_operation.cc
   server/test_server_notification.cc
+  server/test_server_objdefs_from_file.cc
 )
 
 set (test_static_api_runner_SOURCES

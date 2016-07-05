@@ -23,7 +23,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "awa/client.h"
+#include "awa/server.h"
 #include "support/support.h"
 #include "support/file_resource.h"
 
@@ -251,12 +251,12 @@ static const char * multipleFile2 = R"(
 
 } // namespace detail
 
-class TestClientObjDefsMultipleFromFile : public TestClientWithConnectedSession {
+class TestServerObjDefsMultipleFromFile : public TestServerWithConnectedSession {
 public:
-    TestClientObjDefsMultipleFromFile() : objDefsFile_(detail::multipleObjDefsXML) {}
+    TestServerObjDefsMultipleFromFile() : objDefsFile_(detail::multipleObjDefsXML) {}
     virtual void SetUp() {
         daemon_.SetAdditionalOptions({ "--objDefs", objDefsFile_.GetFilename()});
-        TestClientWithConnectedSession::SetUp();
+        TestServerWithConnectedSession::SetUp();
     }
 private:
     FileResource objDefsFile_;
@@ -273,8 +273,8 @@ static size_t CountResources(const AwaObjectDefinition * obj) {
     return i;
 }
 
-static void CheckObject(const AwaClientSession * session, AwaObjectID objID, const char * objName, int minInstances, int maxInstances, int numResources) {
-    const AwaObjectDefinition * obj = AwaClientSession_GetObjectDefinition(session, objID);
+static void CheckObject(const AwaServerSession * session, AwaObjectID objID, const char * objName, int minInstances, int maxInstances, int numResources) {
+    const AwaObjectDefinition * obj = AwaServerSession_GetObjectDefinition(session, objID);
     EXPECT_TRUE(NULL != obj);
     EXPECT_EQ(objID, AwaObjectDefinition_GetID(obj));
     EXPECT_STREQ(objName, AwaObjectDefinition_GetName(obj));
@@ -297,9 +297,9 @@ static void CheckResource(const AwaObjectDefinition * obj, AwaResourceID resID, 
     EXPECT_EQ(resOps, AwaResourceDefinition_GetSupportedOperations(res));
 }
 
-static void CheckResource(AwaClientSession * session, AwaObjectID objID, AwaResourceID resID, const char * resName,
+static void CheckResource(AwaServerSession * session, AwaObjectID objID, AwaResourceID resID, const char * resName,
                           int minInstances, int maxInstances, AwaResourceType resType, AwaResourceOperations resOps) {
-    const AwaObjectDefinition * obj = AwaClientSession_GetObjectDefinition(session, objID);
+    const AwaObjectDefinition * obj = AwaServerSession_GetObjectDefinition(session, objID);
     return CheckResource(obj, resID, resName, minInstances, maxInstances, resType, resOps);
 }
 
@@ -307,7 +307,7 @@ static void CheckResource(AwaClientSession * session, AwaObjectID objID, AwaReso
 #define EXPECT_RESOURCE(...) { SCOPED_TRACE(""); CheckResource(__VA_ARGS__); }
 #define EXPECT_OBJECT(...) { SCOPED_TRACE(""); CheckObject(__VA_ARGS__); }
 
-TEST_F(TestClientObjDefsMultipleFromFile, test_valid_file) {
+TEST_F(TestServerObjDefsMultipleFromFile, test_valid_file) {
 
     // check definition of object 7301
     EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
@@ -329,66 +329,67 @@ TEST_F(TestClientObjDefsMultipleFromFile, test_valid_file) {
 
 
 
-class TestClientObjDefsSingleFromFile : public TestClientWithConnectedSession {
+class TestServerObjDefsSingleFromFile : public TestServerWithConnectedSession {
 public:
-    TestClientObjDefsSingleFromFile() : objDefsFile_(detail::singleObjDefXML) {}
+    TestServerObjDefsSingleFromFile() : objDefsFile_(detail::singleObjDefXML) {}
     virtual void SetUp() {
         daemon_.SetAdditionalOptions({ "--objDefs", objDefsFile_.GetFilename()});
-        TestClientWithConnectedSession::SetUp();
+        TestServerWithConnectedSession::SetUp();
     }
 private:
     FileResource objDefsFile_;
 };
 
 
-TEST_F(TestClientObjDefsSingleFromFile, test_valid_file) {
+TEST_F(TestServerObjDefsSingleFromFile, test_valid_file) {
 
     EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
     EXPECT_RESOURCE(session_, 7301, 0,  "TestResource",  0, 1,          AwaResourceType_String,        AwaResourceOperations_ReadOnly);
 }
 
-class TestClientObjDefsFromFileNotFound : public TestClientWithConnectedSession {
+class TestServerObjDefsFromFileNotFound : public TestServerWithConnectedSession {
 public:
     virtual void SetUp() {
         daemon_.SetAdditionalOptions({ "--objDefs", "does_not_exist"});
-        TestClientWithConnectedSession::SetUp();
+        TestServerWithConnectedSession::SetUp();
     }
 };
 
 // Disabled: missing file causes daemon to abort, not able to test via API
-TEST_F(TestClientObjDefsFromFileNotFound, DISABLED_test_file_not_found) {
-    EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7301));
-    EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7302));
-    EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7303));
-    EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7304));
-    EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7310));
+TEST_F(TestServerObjDefsFromFileNotFound, DISABLED_test_file_not_found) {
+    EXPECT_EQ(NULL, AwaServerSession_GetObjectDefinition(session_, 7301));
+    EXPECT_EQ(NULL, AwaServerSession_GetObjectDefinition(session_, 7302));
+    EXPECT_EQ(NULL, AwaServerSession_GetObjectDefinition(session_, 7303));
+    EXPECT_EQ(NULL, AwaServerSession_GetObjectDefinition(session_, 7304));
+    EXPECT_EQ(NULL, AwaServerSession_GetObjectDefinition(session_, 7310));
 }
 
 
-class TestClientObjDefsFromMultipleFiles : public TestClientWithConnectedSession {
+class TestServerObjDefsFromMultipleFiles : public TestServerWithConnectedSession {
 public:
-    TestClientObjDefsFromMultipleFiles() : objDefsFiles_() {
+    TestServerObjDefsFromMultipleFiles() : objDefsFiles_() {
         auto contents = { detail::multipleFile1, detail::multipleFile2 };
         for (auto & it : contents)
         {
             auto p = FileResourcePtr(new FileResource(it));
             objDefsFiles_.push_back(std::move(p));
         }
-    }    virtual void SetUp() {
+    }
+    virtual void SetUp() {
         std::vector<std::string> additionalOptions;
         for (auto & it : objDefsFiles_) {
             additionalOptions.push_back("--objDefs");
             additionalOptions.push_back(it->GetFilename());
         }
         daemon_.SetAdditionalOptions(additionalOptions);
-        TestClientWithConnectedSession::SetUp();
+        TestServerWithConnectedSession::SetUp();
     }
 private:
     typedef std::unique_ptr<FileResource> FileResourcePtr;
     std::vector<FileResourcePtr> objDefsFiles_;
 };
 
-TEST_F(TestClientObjDefsFromMultipleFiles, multiple_files) {
+TEST_F(TestServerObjDefsFromMultipleFiles, multiple_files) {
 
     // check definition of object 7301
     EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);

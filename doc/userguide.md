@@ -128,10 +128,10 @@ Usage: ```awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filenam
 | --endPointName, -e | Use NAME as client end point name |  
 | --bootstrap, -b  | Use bootstrap server URI |  
 | --factoryBootstrap, -f | Load factory bootstrap information from FILE |  
+| --objDefs, -o | Load object definitions from FILE | 
 | --daemonise, -d | Detach process from terminal and run in the background |  
 | --verbose, -v | Generate verbose output |  
 | --logFile, -l | Log output to FILE | 
-| --objDefs, -o | Load object definitions from FILE | 
 | --version, -V | Print version and exit |
 | --help | Show usage |
 
@@ -170,15 +170,18 @@ Usage: ````awa_serverd [options] ````
 | --port, -p | port number for CoAP communications |  
 | --ipcPort, -i | port number for IPC communications |  
 | --contentType, -m | Content Type ID (default 1542 - TLV) |  
-| --logFile | log filename |  
+| --objDefs, -o | Load object definitions from FILE | 
 | --daemonise, -d | run as daemon |  
 | --verbose, -v | enable verbose output |  
+| --logFile | log filename |  
 | --help | show usage |
 
 
 Example: ````awa_serverd --interface eth0 --addressFamily 4 --port 5683 ````
 
 For examples of how to use the LWM2M server with the LWM2M client see the *LWM2M client usage* section below.
+
+Object definitions can be loaded into the server daemon before it attempts to accept registrations from LWM2M clients. See [Object Definition Files](object_definition_files.md) for details.
 
 [Back to the table of contents](userguide.md#contents)
 
