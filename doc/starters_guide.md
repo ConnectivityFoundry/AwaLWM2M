@@ -4,26 +4,26 @@
 ----
 
 
-# Awa LightweightM2M  
+# Awa LightweightM2M
 
 
 
 ----
 
-## Quick start guide  
+## Quick start guide
 
 
-### Building the code  
+### Building the code
 
 
-#### Building under Linux  
+#### Building under Linux
 
 Install the dependencies:
 
 
 ```
  sudo apt-get update
- sudo apt-get install build-essential gcc git mercurial python cmake python-nose python-lxml  
+ sudo apt-get install build-essential gcc git mercurial python cmake python-nose python-lxml
 ```
 
 Run make in the root directory of the Awa LWM2M repository
@@ -38,17 +38,17 @@ This will produce the following executable files:
 * build/core/src/server/awa_serverd
 * build/core/src/bootstrap/awa_bootstrapd
 
- 
+
 For usage information see the [User guide](userguide.md)
 
-##### Additional commands  
+##### Additional commands
 
 The variable `INSTALL_PREFIX` can be specified to modify the path where the build results will be installed *at configuration time*. For example:
 
-```$ make INSTALL_PREFIX=/usr``` 
+```$ make INSTALL_PREFIX=/usr```
 
 Note that this must be set at the very first invocation of make, or after `make clean`. Setting it later will not affect the install path.
- 
+
 By default, this is set to `/` which will result in build artefacts being installed into /bin, /lib and /include.
 
 The variable `DESTDIR` can be set at the time `make install` is called. The final path is a combination of `INSTALL_PREFIX` and `DESTDIR`.
@@ -58,7 +58,7 @@ For example, the following will build and install such that binaries are placed 
 ```
     $ make INSTALL_PREFIX=/usr
     $ make install DESTDIR=/tmp
-``` 
+```
 
 If you want to install Awa into /usr/local/bin, the following commands are suggested:
 
@@ -67,7 +67,7 @@ If you want to install Awa into /usr/local/bin, the following commands are sugge
     $ make install DESTDIR=/usr/local
 ```
 
-#### The cmake build  
+#### The cmake build
 
 
 The build can be created out-of-source, such that all build artefacts are placed in a dedicated directory.
@@ -107,4 +107,3 @@ Cmake options can be passed to cmake from the top-level makefile with the variab
 ----
 
 ----
-
