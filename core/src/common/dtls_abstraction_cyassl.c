@@ -117,22 +117,22 @@ void XFREE(void *p, void* heap, int type)
 #ifdef DEBUG_WOLFSSL
 void WOLFSSL_ENTER(const char* msg)
 {
-	Lwm2m_Info("%s\n", msg);
+    Lwm2m_Info("%s\n", msg);
 }
 
 void WOLFSSL_LEAVE(const char* msg, int ret)
 {
-	Lwm2m_Info("%s %d\n", msg, ret);
+    Lwm2m_Info("%s %d\n", msg, ret);
 }
 
 void WOLFSSL_ERROR(int error)
 {
-	Lwm2m_Info("%d\n", error);
+    Lwm2m_Info("%d\n", error);
 }
 
 void WOLFSSL_MSG(const char* msg)
 {
-	Lwm2m_Info("%s\n", msg);
+    Lwm2m_Info("%s\n", msg);
 }
 
 void WOLFSSL_BUFFER(byte* buffer, word32 length)
@@ -236,9 +236,9 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             session->UserContext = context;
             CyaSSL_SetIOSend(session->Context, SSLSendCallBack);
             if (session->Client)
-			{
+            {
                 session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
-			}
+            }
             else
                 session->SessionEstablished = (CyaSSL_accept(session->Session) == SSL_SUCCESS);
             if (session->SessionEstablished)
@@ -307,24 +307,24 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
             if (certificateFormat == CertificateFormat_ASN1)
                 format = SSL_FILETYPE_ASN1 ;
 
-			uint8_t * privateKey = certificate;
-			int privateKeyLength = certificateLength;
+            uint8_t * privateKey = certificate;
+            int privateKeyLength = certificateLength;
 
-			uint8_t * certificatePart = certificate;
-			int certificatePartLength = certificateLength;
-			if (format == SSL_FILETYPE_PEM)
-			{
-				char * foundPosition = strstr(certificate ,"-----BEGIN CERTIFICATE-----");
-				if (foundPosition)
-				{
-					char * endPosition = strstr(foundPosition, "-----END CERTIFICATE-----");
-					if (endPosition)
-					{
-						certificatePart = foundPosition;
-						certificatePartLength = (endPosition-foundPosition) + 25;
-					}
-				}
-			}
+            uint8_t * certificatePart = certificate;
+            int certificatePartLength = certificateLength;
+            if (format == SSL_FILETYPE_PEM)
+            {
+                char * foundPosition = strstr(certificate ,"-----BEGIN CERTIFICATE-----");
+                if (foundPosition)
+                {
+                    char * endPosition = strstr(foundPosition, "-----END CERTIFICATE-----");
+                    if (endPosition)
+                    {
+                        certificatePart = foundPosition;
+                        certificatePartLength = (endPosition-foundPosition) + 25;
+                    }
+                }
+            }
 
             CyaSSL_CTX_use_certificate_buffer(session->Context, certificatePart, certificatePartLength, format);
             CyaSSL_CTX_use_PrivateKey_buffer(session->Context, privateKey, privateKeyLength, format);
@@ -339,12 +339,12 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                 CyaSSL_CTX_use_psk_identity_hint(session->Context, pskIdentity);
             }
         }
-		if (certificate &&  pskIdentity)
-			CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES ":" PSKCIPHERSUITES );
-		else if (certificate)
-			CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES);
-		else if (pskIdentity)
-			CyaSSL_CTX_set_cipher_list(session->Context, PSKCIPHERSUITES);
+        if (certificate &&  pskIdentity)
+            CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES ":" PSKCIPHERSUITES );
+        else if (certificate)
+            CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES);
+        else if (pskIdentity)
+            CyaSSL_CTX_set_cipher_list(session->Context, PSKCIPHERSUITES);
 //        if (caCertificate)
 //        {
 //            CyaSSL_CTX_load_verify_buffer(session->Context, caCertificate, caCertificateSize, SSL_FILETYPE_PEM);
