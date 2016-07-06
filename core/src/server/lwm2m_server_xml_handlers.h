@@ -29,6 +29,7 @@
 #include "lwm2m_object_store.h"
 #include "lwm2m_util.h"
 #include "lwm2m_definition.h"
+#include "lwm2m_xml_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +37,8 @@ extern "C" {
 
 void xmlif_RegisterHandlers(void);
 TreeNode xmlif_ConstructObjectDefinitionNode(const DefinitionRegistry * definitions, const ObjectDefinition * objFormat, int objectID);
+
+DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode content);
 
 #ifdef __cplusplus
 }

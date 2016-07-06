@@ -21,9 +21,11 @@
 ************************************************************************************************************************/
 
 #include <gtest/gtest.h>
+#include <memory>
 
 #include "awa/client.h"
 #include "support/support.h"
+#include "support/file_resource.h"
 
 namespace Awa {
 
@@ -201,30 +203,53 @@ static const char * badObjDefXML = R"(
 )";
 #endif //0
 
+static const char * multipleFile1 = R"(
+<ObjectDefinitions>
+  <Items>
+    <ObjectDefinition>
+      <ObjectID>7301</ObjectID>
+      <Name>Test Object 1</Name>
+      <SerialisationName>TestObject1</SerialisationName>
+      <Singleton>True</Singleton>
+      <IsMandatory>True</IsMandatory>
+      <Properties>
+        <PropertyDefinition>
+          <PropertyID>0</PropertyID>
+          <Name>Test Resource</Name>
+          <SerialisationName>TestResource</SerialisationName>
+          <DataType>String</DataType>
+          <IsCollection>False</IsCollection>
+          <IsMandatory>False</IsMandatory>
+          <Access>Read</Access>
+        </PropertyDefinition>
+      </Properties>
+    </ObjectDefinition>
+  </Items>
+</ObjectDefinitions>
+)";
+
+static const char * multipleFile2 = R"(
+    <ObjectDefinition>
+      <ObjectID>7302</ObjectID>
+      <Name>Test Object 2</Name>
+      <SerialisationName>TestObject2</SerialisationName>
+      <Singleton>False</Singleton>
+      <IsMandatory>False</IsMandatory>
+      <Properties>
+        <PropertyDefinition>
+          <PropertyID>100</PropertyID>
+          <Name>Test Resource 100</Name>
+          <SerialisationName>TestResource100</SerialisationName>
+          <DataType>Integer</DataType>
+          <IsCollection>False</IsCollection>
+          <IsMandatory>False</IsMandatory>
+          <Access>ReadWrite</Access>
+        </PropertyDefinition>
+      </Properties>
+    </ObjectDefinition>
+)";
+
 } // namespace detail
-
-class ObjDefsFile {
-public:
-    explicit ObjDefsFile(const char * content) : filename_(TempFilename().GetFilename()) {
-        // save objDefs to a temporary file
-        std::ofstream file(filename_, std::ios::out);
-        file << content << std::endl;
-        file.close();
-    }
-    ~ObjDefsFile() {
-//        if (std::remove(filename_.c_str()) < 0)
-//        {
-//            std::perror("Error deleting file");
-//        }
-    }
-
-    std::string GetFilename() const { return filename_; }
-
-private:
-    std::string filename_;
-};
-
-
 
 class TestClientObjDefsMultipleFromFile : public TestClientWithConnectedSession {
 public:
@@ -234,7 +259,7 @@ public:
         TestClientWithConnectedSession::SetUp();
     }
 private:
-    ObjDefsFile objDefsFile_;
+    FileResource objDefsFile_;
 };
 
 static size_t CountResources(const AwaObjectDefinition * obj) {
@@ -312,7 +337,7 @@ public:
         TestClientWithConnectedSession::SetUp();
     }
 private:
-    ObjDefsFile objDefsFile_;
+    FileResource objDefsFile_;
 };
 
 
@@ -339,5 +364,39 @@ TEST_F(TestClientObjDefsFromFileNotFound, DISABLED_test_file_not_found) {
     EXPECT_EQ(NULL, AwaClientSession_GetObjectDefinition(session_, 7310));
 }
 
+
+class TestClientObjDefsFromMultipleFiles : public TestClientWithConnectedSession {
+public:
+    TestClientObjDefsFromMultipleFiles() : objDefsFiles_() {
+        auto contents = { detail::multipleFile1, detail::multipleFile2 };
+        for (auto & it : contents)
+        {
+            auto p = FileResourcePtr(new FileResource(it));
+            objDefsFiles_.push_back(std::move(p));
+        }
+    }    virtual void SetUp() {
+        std::vector<std::string> additionalOptions;
+        for (auto & it : objDefsFiles_) {
+            additionalOptions.push_back("--objDefs");
+            additionalOptions.push_back(it->GetFilename());
+        }
+        daemon_.SetAdditionalOptions(additionalOptions);
+        TestClientWithConnectedSession::SetUp();
+    }
+private:
+    typedef std::unique_ptr<FileResource> FileResourcePtr;
+    std::vector<FileResourcePtr> objDefsFiles_;
+};
+
+TEST_F(TestClientObjDefsFromMultipleFiles, multiple_files) {
+
+    // check definition of object 7301
+    EXPECT_OBJECT(session_, 7301, "TestObject1", 1, 1, 1);
+    EXPECT_RESOURCE(session_, 7301, 0,  "TestResource",  0, 1,          AwaResourceType_String,        AwaResourceOperations_ReadOnly);
+
+    // check definition of object 7302
+    EXPECT_OBJECT(session_, 7302, "TestObject2", 0, AWA_MAX_ID, 1);
+    EXPECT_RESOURCE(session_, 7302, 100,  "TestResource100",  0, 1,     AwaResourceType_Integer,        AwaResourceOperations_ReadWrite);
+}
 
 } // namespace Awa

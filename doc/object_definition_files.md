@@ -6,15 +6,18 @@
 
 ## What are Object Definition files?
 
-Object Definition files may be used to load object and resource definitions into the Client daemon. This is useful when object definitions need to be in place before the client daemon connects to a LWM2M bootstrap server or LWM2M server. The files are loaded at the time the daemon starts.
+Object Definition files may be used to load object and resource definitions into the Client or Server daemon. This is useful when object definitions need to be in place before the client daemon connects to a LWM2M bootstrap server or LWM2M server, or before clients register with the LWM2M server. The files are loaded at the time the daemon starts.
 
-*Note:* it is not possible to use this feature to extend existing objects - only new objects can be defined at this time.
+*Note:* it is not possible to use this feature to extend objects that are already defined, for example by attempting to add resources to an existing object. Only new objects can be defined at this time.
 
 ## How are Object Definition files used?
 
-The client daemon can load an object definition file with the `--objDefs/-o` option, for example:
+The client or server daemon can load an object definition file with the `--objDefs/-o` option, for example:
 
+    $ awa_serverd --objDefs myObjects.xml
     $ awa_clientd --bootstrap coap://bootstrap:15683 --objDefs myObjects.xml
+
+The bootstrap server cannot load object definition files, nor does it need to.
 
 ## What do Object Definition files look like?
 

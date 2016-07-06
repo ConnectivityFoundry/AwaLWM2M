@@ -88,29 +88,6 @@ namespace detail {
 #define CURRENT_TEST_DESCRIPTION \
 ( std::string(CURRENT_TEST_CASE_NAME) + std::string(".") + std::string(CURRENT_TEST_NAME) )
 
-/**
- * @brief Class to determine a unique temporarily filename.
- */
-class TempFilename {
-public:
-    TempFilename() : filename_(nullptr) {
-        filename_ = strdup("/tmp/tmpfileXXXXXX");
-        int fd = mkstemp(filename_);
-        if (fd != -1)
-        {
-            close(fd);  // close immediately
-        }
-        else
-        {
-            perror("mkstemp");
-        }
-    }
-    ~TempFilename() { free(filename_); filename_ = nullptr; }
-    std::string GetFilename() const { return std::string(filename_); }
-private:
-    char * filename_;
-};
-
 bool WaitForRegistration(AwaServerSession * serverSession, const std::vector<std::string> & clientIDs, int timeoutMs);
 
 /*********************************************************************

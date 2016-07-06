@@ -21,7 +21,7 @@ This example shows how to:
 * Create the above application *client-static-tutorial* in a Contiki simulated environment.
 * Use the Server daemon tools to create the same object model and read/write resources in the *client-static-tutorial* application.
 
-The *client-static-tutorial* application makes use of the Awa Static API to define objects and resources and to expose them via LwM2M:
+The *client-static-tutorial* application makes use of the Awa Static API to define objects and resources and to expose them via LWM2M:
 
 ![](Awa_client_tutorial_static_api.png)
 

@@ -39,6 +39,7 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "awa_bootstrapd_cmdline.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "dtls_abstraction.h"
@@ -48,23 +49,22 @@
 #include "bootstrap/lwm2m_bootstrap_cert.h"
 #include "bootstrap/lwm2m_bootstrap_psk.h"
 
-
 #define DEFAULT_IP_ADDRESS          "0.0.0.0"
-#define MAX_BOOTSTRAP_CONFIG_FILES  (2)
+#define MAX_BOOTSTRAP_CONFIG_FILES  (4)
 
 typedef struct
 {
-    int Port;
-    bool Verbose;
-    bool Daemonise;
-    char * LogFile;
-    const char * Config[MAX_BOOTSTRAP_CONFIG_FILES];
-    int ConfigCount;
     char * IPAddress;
     char * InterfaceName;
     int AddressFamily;
-    bool Version;
+    int CoapPort;
+    const char * ConfigFiles[MAX_BOOTSTRAP_CONFIG_FILES];
+    int NumConfigFiles;
     bool Secure;
+    bool Daemonise;
+    bool Verbose;
+    char * LogFile;
+    bool Version;
 } Options;
 
 static FILE * logFile;
@@ -163,12 +163,12 @@ static int Bootstrap_Start(Options * options)
     Lwm2m_Info("  Process ID     : %d\n", getpid());
     Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
     Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
-    Lwm2m_Info("  CoAP port      : %d\n", options->Port);
-    Lwm2m_Info("  Secure         : %s\n", options->Secure ? "true": "false");
+    Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
+    Lwm2m_Info("  CoAP Security  : %s\n", options->Secure ? "DTLS": "None");
 
     if (options->InterfaceName != NULL)
     {
-        Lwm2m_Info("  Interface      : %s [IPv%d]\n", options->InterfaceName, options->AddressFamily == AF_INET? 4 : 6);
+        Lwm2m_Info("  Interface      : %s [IPv%d]\n", options->InterfaceName, options->AddressFamily == AF_INET ? 4 : 6);
     }
     else if (strcmp(DEFAULT_IP_ADDRESS, options->IPAddress) != 0)
     {
@@ -191,7 +191,7 @@ static int Bootstrap_Start(Options * options)
         ipAddress[NI_MAXHOST - 1] = '\0';  // Defensive
     }
 
-    CoapInfo * coap = coap_Init(ipAddress, options->Port, options->Secure, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init(ipAddress, options->CoapPort, options->Secure, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         printf("Unable to map address to network interface\n");
@@ -210,14 +210,14 @@ static int Bootstrap_Start(Options * options)
     // must happen after coap_Init()
     Lwm2m_RegisterObjectTypes(context);
 
-    if (!Lwm2mBootstrap_BootStrapInit(context, options->Config, options->ConfigCount))
+    if (!Lwm2mBootstrap_BootStrapInit(context, options->ConfigFiles, options->NumConfigFiles))
     {
-        printf("Failed to initialise boostrap\n");
+        printf("Failed to initialise bootstrap\n");
         result = 1;
         goto error_destroy;
     }
 
-    // wait for messages on both the "IPC" and coap interfaces
+    // wait for messages on both the IPC and CoAP interfaces
     while (!quit)
     {
         int loop_result;
@@ -268,138 +268,77 @@ error_close_log:
     return result;
 }
 
-static void PrintUsage(void)
-{
-    printf("Awa LWM2M Bootstrap Server, version %s\n", version);
-    printf("Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies.\n\n");
-
-    printf("Usage: awa_bootstrapd [options]\n\n");
-
-    printf("Options:\n");
-    printf("  --ip, -a ADDR           : Accept client bootstrap requests on IP address ADDR\n");
-    printf("  --interface, -e IF      : Accept client bootstrap requests on network interface IF\n");
-    printf("  --addressFamily, -f AF  : Address family for network interface. AF=4 for IPv4, AF=6 for IPv6\n");
-    printf("  --port, -p PORT         : Use port number PORT for CoAP communications\n");
-    printf("  --config, -c FILE       : Load server list configuration from FILE\n");
-    printf("  --daemonize, -d         : Detach process from terminal and run in the background\n");
-    printf("  --verbose, -v           : Generate verbose output\n");
-    printf("  --logFile, -l FILE      : Log output to FILE\n");
-    printf("  --version, -V           : Print version and exit\n");
-    printf("  --secure, -s            : Communications are secured with TLS\n");
-    printf("  --help, -h              : Show usage\n\n");
-
-    printf("Example:\n");
-    printf("    awa_bootstrapd --port 15685 --config bootstrap.config\n\n");
-
-}
-
 static void PrintOptions(const Options * options)
 {
     printf("Options provided:\n");
     printf("  IPAddress      (--ip)             : %s\n", options->IPAddress);
-    printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName);
+    printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName ? options->InterfaceName : "");
     printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily == AF_INET? 4 : 6);
-    printf("  Port           (--port)           : %d\n", options->Port);
+    printf("  Port           (--port)           : %d\n", options->CoapPort);
     int i;
-    for (i = 0; i < options->ConfigCount; ++i)
+    for (i = 0; i < options->NumConfigFiles; ++i)
     {
-        printf("  Config         (--config)         : %s\n", options->Config[i]);
+        printf("  Config         (--config)         : %s\n", options->ConfigFiles[i]);
     }
+    printf("  Secure         (--secure)         : %d\n", options->Secure);
     printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
     printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
-    printf("  LogFile        (--logFile)        : %s\n", options->LogFile);
-    printf("  Secure        (--secure)          : %s\n", options->Secure ? "true": "false");
+    printf("  LogFile        (--logFile)        : %s\n", options->LogFile ? options->LogFile : "");
+    printf("  Version        (--version)        : %d\n", options->Version);
 }
 
-static int ParseOptions(int argc, char ** argv, Options * options)
+static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai, Options * options)
 {
-    while (1)
+    int result = EXIT_SUCCESS;
+    if (cmdline_parser(argc, argv, ai) == 0)
     {
-        int optionIndex = 0;
-
-        static struct option longOptions[] =
+        options->IPAddress = ai->ip_arg;
+        options->InterfaceName = ai->interface_arg;
+        options->AddressFamily = ai->addressFamily_arg == 4 ? AF_INET : AF_INET6;
+        options->CoapPort = ai->port_arg;
+        int i;
+        for (i = 0; i < ai->config_given; ++i)
         {
-            {"ip",            required_argument,      0, 'a'},
-            {"interface",     required_argument,      0, 'e'},
-            {"addressFamily", required_argument,      0, 'f'},
-            {"port",          required_argument,      0, 'p'},
-            {"config",        required_argument,      0, 'c'},
-            {"verbose",       no_argument,            0, 'v'},
-            {"daemonize",     no_argument,            0, 'd'},
-            {"logFile",       required_argument,      0, 'l'},
-            {"secure",        no_argument,            0, 's'},
-            {"version",       no_argument,            0, 'V'},
-            {"help",          no_argument,            0, 'h'},
-            {0,               0,                      0,  0 }
-        };
-
-        int c = getopt_long(argc, argv, "a:p:c:vdl:Vh", longOptions, &optionIndex);
-        if (c == -1)
-            break;
-
-        switch (c)
-        {
-            case 'a':
-                options->IPAddress = optarg;
-                break;
-            case 'e':
-                options->InterfaceName = optarg;
-                break;
-            case 'f':
-                options->AddressFamily = (atoi(optarg) == 4) ? AF_INET : AF_INET6;
-                break;
-            case 'p':
-                options->Port = atoi(optarg);
-                break;
-            case 'c':
-                options->Config[options->ConfigCount++] = optarg;
-                break;
-            case 'd':
-                options->Daemonise = true;
-                break;
-            case 'v':
-                options->Verbose = true;
-                break;
-            case 'l':
-                options->LogFile = optarg;
-                break;
-            case 's':
-                options->Secure = true;
-                break;
-            case 'V':
-                options->Version = true;
-                break;
-            case 'h':
-            default:
-                PrintUsage();
-                exit(EXIT_FAILURE);
+            options->ConfigFiles[i] = ai->config_arg[i];
         }
+        options->NumConfigFiles = ai->config_given;
+        options->Secure = ai->secure_flag;
+        options->Daemonise = ai->daemonize_flag;
+        options->Verbose = ai->verbose_flag;
+        options->LogFile = ai->logFile_arg;
+        options->Version = ai->version_flag;
     }
-    return 0;
+    else
+    {
+        result = EXIT_FAILURE;
+    }
+    return result;
 }
 
 int main(int argc, char ** argv)
 {
+    int result = EXIT_FAILURE;
+    struct gengetopt_args_info ai;
     Options options =
     {
-        .Port = 15685,
-        .Verbose = false,
-        .Daemonise = false,
-        .LogFile = NULL,
-        .Config = {0},
-        .ConfigCount = 0,
-        .IPAddress = DEFAULT_IP_ADDRESS,
+        .IPAddress = NULL,
         .InterfaceName = NULL,
-        .AddressFamily = AF_INET,
-        .Version = false,
+        .AddressFamily = AF_UNSPEC,
+        .CoapPort = 0,
+        .ConfigFiles = {0},
+        .NumConfigFiles = 0,
         .Secure = false,
+        .Daemonise = false,
+        .Verbose = false,
+        .LogFile = NULL,
+        .Version = false,
     };
 
-    if (ParseOptions(argc, argv, &options) == 0)
+    if (ParseOptions(argc, argv, &ai, &options) == EXIT_SUCCESS)
     {
-        Bootstrap_Start(&options);
+        result = Bootstrap_Start(&options);
     }
-
-    exit(EXIT_SUCCESS);
+    cmdline_parser_free(&ai);
+    exit(result);
 }
 

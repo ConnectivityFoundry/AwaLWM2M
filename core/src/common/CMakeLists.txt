@@ -14,6 +14,7 @@ set (awa_common_SOURCES
   lwm2m_types.c
   ipc_session.c
   lwm2m_events.c
+  objdefs.c
 )
 
 if (WITH_LIBCOAP)
@@ -87,6 +88,10 @@ endif ()
 
 if (WITH_GNUTLS)
   list (APPEND awa_common_LIBS gnutls)
+endif ()
+
+if (WITH_CYASSL)
+  list (APPEND awa_common_LIBS wolfssl)
 endif ()
 
 if (WITH_TINYDTLS)

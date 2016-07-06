@@ -61,7 +61,6 @@ void xmlif_DestroyExecuteHandlers(void);
 
 DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode content);
 
-
 #ifdef __cplusplus
 }
 #endif

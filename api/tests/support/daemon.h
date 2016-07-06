@@ -37,6 +37,7 @@
 
 #include "process.h"
 #include "log.h"
+#include "file_resource.h"
 
 namespace Awa {
 
@@ -64,9 +65,8 @@ const char * const coapClientPath      = "lib/libcoap/examples/coap-client";
 const char * const clientDaemonPath    = "core/src/client/awa_clientd";
 const char * const serverDaemonPath    = "core/src/server/awa_serverd";
 const char * const bootstrapServerDaemonPath = "core/src/bootstrap/awa_bootstrapd";
-const char * const bootstrapServerConfig     = "../api/tests/bootstrap-gtest.config";
+const char * const bootstrapServerConfig     = "../api/tests/gtest.bsc";
 const char * const objectDefinitionsFile     = "../api/tests/object-defs-gtest.xml";
-
 
 } // namespace defaults
 
@@ -236,12 +236,14 @@ public:
         Daemon(),
         coapPort_(global::serverCoapPort),
         ipcPort_(global::serverIpcPort),
-        logFile_(global::serverLogFile) {}
+        logFile_(global::serverLogFile),
+        additionalOptions_() {}
     AwaServerDaemon(int coapPort, int ipcPort, std::string logFile) :
         Daemon(),
         coapPort_(coapPort),
         ipcPort_(ipcPort),
-        logFile_(logFile) {}
+        logFile_(logFile),
+        additionalOptions_() {}
     virtual ~AwaServerDaemon() {}
 
     void SetCoapPort(int port)
@@ -256,15 +258,27 @@ public:
     {
         logFile_ = logFile;
     }
-
+    void SetAdditionalOptions(const std::vector<std::string> & options)
+    {
+        additionalOptions_ = options;
+    }
     virtual bool Start()
     {
-        pid_ = StartAwaServer(global::serverDaemonPath, coapPort_, ipcPort_, logFile_.c_str());
+        pid_ = StartAwaServer(global::serverDaemonPath, coapPort_, ipcPort_, logFile_.c_str(), additionalOptions_);
         global::testLog << "Spawned Awa Server: "
              << "pid " << pid_
              << ", CoAP port " << coapPort_
              << ", IPC port " << ipcPort_
-             << ", logging to " << logFile_ << std::endl;
+             << ", logging to " << logFile_;
+        if (additionalOptions_.size() > 0)
+        {
+            global::testLog << ", [ ";
+            for (auto x : additionalOptions_) {
+                global::testLog << x << ", ";
+            }
+            global::testLog << "]";
+        }
+        global::testLog << std::endl;
         return pid_ >= 0;
     }
     virtual void SkipStart()
@@ -289,6 +303,7 @@ private:
     int coapPort_;
     int ipcPort_;
     std::string logFile_;
+    std::vector<std::string> additionalOptions_;
 };
 
 class AwaBootstrapServerDaemon : public Daemon

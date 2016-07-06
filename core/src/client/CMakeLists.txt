@@ -1,4 +1,5 @@
 set (awa_clientd_SOURCES
+  awa_clientd_cmdline.c
   lwm2m_registration.c
   lwm2m_bootstrap.c
   lwm2m_connectivity_object.c
@@ -95,6 +96,9 @@ set_target_properties (awa_static_shared PROPERTIES OUTPUT_NAME "awa_static")
 target_include_directories (awa_static_shared PUBLIC ${awa_clientd_INCLUDE_DIRS})
 set_property (TARGET awa_static_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries (awa_static_shared awa_common_static libb64_static libhmac_static)
+
+# disable -Wall warnings for _cmdline.c files
+set_source_files_properties (awa_clientd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)
 
 add_executable (awa_clientd lwm2m_client.c)
 target_include_directories (awa_clientd PRIVATE ${awa_clientd_INCLUDE_DIRS})

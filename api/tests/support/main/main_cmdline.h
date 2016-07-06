@@ -69,7 +69,7 @@ struct gengetopt_args_info
   char * bootstrapDaemonPath_arg;	/**< @brief Path to LWM2M bootstrap daemon (default='core/src/bootstrap/awa_bootstrapd').  */
   char * bootstrapDaemonPath_orig;	/**< @brief Path to LWM2M bootstrap daemon original value given at command line.  */
   const char *bootstrapDaemonPath_help; /**< @brief Path to LWM2M bootstrap daemon help description.  */
-  char * bootstrapConfig_arg;	/**< @brief Path to bootstrap config file (default='../api/tests/bootstrap-gtest.config').  */
+  char * bootstrapConfig_arg;	/**< @brief Path to bootstrap config file (default='../api/tests/gtest.bsc').  */
   char * bootstrapConfig_orig;	/**< @brief Path to bootstrap config file original value given at command line.  */
   const char *bootstrapConfig_help; /**< @brief Path to bootstrap config file help description.  */
   char * objectDefinitions_arg;	/**< @brief Path to object definitions file (default='../api/tests/object-defs-gtest.xml').  */

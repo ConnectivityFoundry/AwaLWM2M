@@ -33,6 +33,7 @@
 #include "lwm2m_definition.h"
 #include "xmltree.h"
 #include "ipc_session.h"
+#include "objdefs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +49,12 @@ typedef struct
     void * Client;
 } RequestInfoType;
 
+typedef struct {
+    size_t NumObjectsOK;
+    size_t NumObjectsFailed;
+    size_t NumResourcesOK;
+    size_t NumResourcesFailed;
+} DefinitionCount;
 
 typedef int (*XmlRequestHandler)(RequestInfoType *, TreeNode);
 
@@ -77,13 +84,6 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
                                    ObjectOperationHandlers * objectOperationHandlers,
                                    ResourceOperationHandlers * resourceOperationHandlers,
                                    ResourceOperationHandlers * executeOperationHandlers);
-
-typedef struct {
-    size_t NumObjectsOK;
-    size_t NumObjectsFailed;
-    size_t NumResourcesOK;
-    size_t NumResourcesFailed;
-} DefinitionCount;
 
 DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * context,
                                                         TreeNode objectDefinitionNode,

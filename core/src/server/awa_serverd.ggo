@@ -1,0 +1,24 @@
+# gengetopt configuration file
+package "awa_serverd"
+purpose "Awa LWM2M Server"
+versiontext "Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies."
+args "--no-version"
+
+option "ip"               a "Accept client registration requests on IP address ADDR"      string optional default="0.0.0.0"          typestr="ADDR"
+option "interface"        e "Accept client registration requests on network interface IF" string optional                            typestr="IF"
+option "addressFamily"    f "Address family for network interface. AF=4 for IPv4, AF=6 for IPv6"
+                                                                                          int    optional default="4"                typestr="AF"    values="4","6"
+option "port"             p "Use port number PORT for CoAP communications"                int    optional default="5683"             typestr="PORT"
+option "ipcPort"          i "Use port number PORT for IPC communications"                 int    optional default="54321"            typestr="PORT"
+option "contentType"      m "Use Content Type ID (TLV=1542, JSON=50)"                     int    optional default="1542"             typestr="ID"    values="50","1542"
+option "secure"           s "CoAP communications are secured with DTLS"                   flag off
+option "objDefs"          o "Load object and resource definitions from FILE"              string optional                            typestr="FILE"  multiple(1-16)
+option "daemonize"        d "Detach process from terminal and run in the background"      flag off
+option "verbose"          v "Generate verbose output"                                     flag off
+option "logFile"          l "Log output to FILE"                                          string optional                            typestr="FILE"
+option "version"          V "Print version and exit"                                      flag off
+
+text "\n"
+text "Example:\n"
+text "    awa_serverd --interface eth0 --addressFamily 4 --port 5683\n"
+text "\n"
