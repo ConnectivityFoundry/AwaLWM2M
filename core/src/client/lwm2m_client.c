@@ -59,6 +59,7 @@
 #include "lwm2m_client_cert.h"
 #include "lwm2m_client_psk.h"
 
+#define MAX_OBJDEFS_FILES (16)
 
 typedef struct
 {
@@ -68,7 +69,8 @@ typedef struct
     char * EndPointName;
     char * BootStrap;
     const char * FactoryBootstrapFile;
-    char * ObjDefsFile;
+    const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
+    size_t NumObjDefsFiles;
     bool Daemonise;
     bool Verbose;
     char * LogFile;
@@ -315,11 +317,12 @@ static int Lwm2mClient_Start(Options * options)
     // bootstrap information has been loaded, no need to hang onto this anymore
     BootstrapInformation_DeleteBootstrapInfo(factoryBootstrapInfo);
 
-    if (options->ObjDefsFile)
+    int i;
+    for (i = 0; i < options->NumObjDefsFiles; ++i)
     {
-        if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFile) != 0)
+        if (LoadObjectDefinitionsFromFile(context, options->ObjDefsFiles[i]) != 0)
         {
-            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFile);
+            Lwm2m_Error("Failed to load object definitions from file \'%s\'\n", options->ObjDefsFiles[i]);
             goto error_core;
         }
     }
@@ -402,7 +405,11 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName ? options->EndPointName : "");
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap ? options->BootStrap : "");
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile ? options->FactoryBootstrapFile : "");
-    printf("  ObjectDefinitions    (--objDefs)          : %s\n", options->ObjDefsFile ? options->ObjDefsFile : "");
+    int i;
+    for (i = 0; i < options->NumObjDefsFiles; ++i)
+    {
+        printf("  ObjectDefinitions    (--objDefs)          : %s\n", options->ObjDefsFiles[i]);
+    }
     printf("  Daemonize            (--daemonize)        : %d\n", options->Daemonise);
     printf("  Verbose              (--verbose)          : %d\n", options->Verbose);
     printf("  LogFile              (--logFile)          : %s\n", options->LogFile ? options->LogFile : "");
@@ -420,7 +427,12 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->EndPointName = ai->endPointName_arg;
         options->BootStrap = ai->bootstrap_arg;
         options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
-        options->ObjDefsFile = ai->objDefs_arg;
+        int i;
+        for (i = 0; i < ai->objDefs_given; ++i)
+        {
+            options->ObjDefsFiles[i] = ai->objDefs_arg[i];
+        }
+        options->NumObjDefsFiles = ai->objDefs_given;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
         options->LogFile = ai->logFile_arg;
@@ -452,7 +464,8 @@ int main(int argc, char ** argv)
         .EndPointName = NULL,
         .BootStrap = NULL,
         .FactoryBootstrapFile = NULL,
-        .ObjDefsFile = NULL,
+        .ObjDefsFiles = {0},
+        .NumObjDefsFiles = 0,
         .Daemonise = false,
         .Verbose = false,
         .LogFile = NULL,
