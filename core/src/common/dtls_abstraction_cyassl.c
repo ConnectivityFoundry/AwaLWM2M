@@ -35,9 +35,6 @@
 #endif
 
 #ifdef MICROCHIP_PIC32
-#ifndef XMALLOC_USER
-#define XMALLOC_USER
-#endif
 #include <tcpip/berkeley_api.h>
 #endif // MICROCHIP_PIC32
 
@@ -84,6 +81,10 @@ static unsigned int PSKCallBack(CYASSL *sslSession, const char* hint, char* iden
 static unsigned int ServerPSKCallBack(WOLFSSL *sslSessioon, const char* identity, unsigned char* key, unsigned int key_max_len);
 static int SSLSendCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
 
+
+#define CERTCIPHERSUITES "ECDHE-ECDSA-AES128-CCM-8:ECDHE-ECDSA-AES128-SHA256"
+#define PSKCIPHERSUITES "PSK-AES128-CCM-8:PSK-AES128-CBC-SHA256"
+
 #ifdef MICROCHIP_PIC32
 #ifndef wolfDTLSv1_2_client_method
 WOLFSSL_METHOD* wolfDTLSv1_2_client_method(void);
@@ -91,7 +92,6 @@ WOLFSSL_METHOD* wolfDTLSv1_2_client_method(void);
 #endif
 
 #ifdef XMALLOC_USER
-
 void *XMALLOC(size_t n, void* heap, int type)
 {
     (void)heap;
@@ -114,11 +114,41 @@ void XFREE(void *p, void* heap, int type)
 }
 #endif
 
+#ifdef DEBUG_WOLFSSL
+void WOLFSSL_ENTER(const char* msg)
+{
+    Lwm2m_Info("%s\n", msg);
+}
+
+void WOLFSSL_LEAVE(const char* msg, int ret)
+{
+    Lwm2m_Info("%s %d\n", msg, ret);
+}
+
+void WOLFSSL_ERROR(int error)
+{
+    Lwm2m_Info("%d\n", error);
+}
+
+void WOLFSSL_MSG(const char* msg)
+{
+    Lwm2m_Info("%s\n", msg);
+}
+
+void WOLFSSL_BUFFER(byte* buffer, word32 length)
+{
+
+}
+#endif
+
+
 void DTLS_Init(void)
 {
     memset(sessions,0,sizeof(DTLS_Session) * MAX_DTLS_SESSIONS);
     CyaSSL_Init();
+#ifdef DEBUG_WOLFSSL
     CyaSSL_Debugging_ON();
+#endif
     //CYASSL_API int  CyaSSL_dtls(CYASSL* ssl);
     //CyaSSL_SetAllocators(Flow_MemAlloc, Flow_MemSafeFree, Flow_MemRealloc);
 }
@@ -206,7 +236,9 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             session->UserContext = context;
             CyaSSL_SetIOSend(session->Context, SSLSendCallBack);
             if (session->Client)
+            {
                 session->SessionEstablished = (CyaSSL_connect(session->Session) == SSL_SUCCESS);
+            }
             else
                 session->SessionEstablished = (CyaSSL_accept(session->Session) == SSL_SUCCESS);
             if (session->SessionEstablished)
@@ -268,14 +300,34 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
         session->Context =  CyaSSL_CTX_new(CyaDTLSv1_2_server_method());
     if (session->Context)
     {
-        CyaSSL_CTX_set_cipher_list(session->Context, "ECDHE-ECDSA-AES128-CCM-8:ECDHE-ECDSA-AES128-SHA256:PSK-AES128-CCM-8:PSK-AES128-CBC-SHA256");
+
         if (certificate)
         {
             int format = SSL_FILETYPE_PEM;
             if (certificateFormat == CertificateFormat_ASN1)
                 format = SSL_FILETYPE_ASN1 ;
-            CyaSSL_CTX_use_certificate_buffer(session->Context, certificate, certificateLength, format);
-            CyaSSL_CTX_use_PrivateKey_buffer(session->Context, certificate, certificateLength, format);
+
+            uint8_t * privateKey = certificate;
+            int privateKeyLength = certificateLength;
+
+            uint8_t * certificatePart = certificate;
+            int certificatePartLength = certificateLength;
+            if (format == SSL_FILETYPE_PEM)
+            {
+                char * foundPosition = strstr(certificate ,"-----BEGIN CERTIFICATE-----");
+                if (foundPosition)
+                {
+                    char * endPosition = strstr(foundPosition, "-----END CERTIFICATE-----");
+                    if (endPosition)
+                    {
+                        certificatePart = foundPosition;
+                        certificatePartLength = (endPosition-foundPosition) + 25;
+                    }
+                }
+            }
+
+            CyaSSL_CTX_use_certificate_buffer(session->Context, certificatePart, certificatePartLength, format);
+            CyaSSL_CTX_use_PrivateKey_buffer(session->Context, privateKey, privateKeyLength, format);
         }
         if (pskIdentity)
         {
@@ -287,9 +339,15 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                 CyaSSL_CTX_use_psk_identity_hint(session->Context, pskIdentity);
             }
         }
-//        if (controlBlock->TLSCertificateData)
+        if (certificate &&  pskIdentity)
+            CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES ":" PSKCIPHERSUITES );
+        else if (certificate)
+            CyaSSL_CTX_set_cipher_list(session->Context, CERTCIPHERSUITES);
+        else if (pskIdentity)
+            CyaSSL_CTX_set_cipher_list(session->Context, PSKCIPHERSUITES);
+//        if (caCertificate)
 //        {
-//            CyaSSL_CTX_load_verify_buffer(session->Context, controlBlock->TLSCertificateData, controlBlock->TLSCertificateSize, SSL_FILETYPE_PEM);
+//            CyaSSL_CTX_load_verify_buffer(session->Context, caCertificate, caCertificateSize, SSL_FILETYPE_PEM);
 //            CyaSSL_CTX_set_verify(session->Context, SSL_VERIFY_PEER, NULL);
 //        }
 //        else
