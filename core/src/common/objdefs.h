@@ -13,35 +13,26 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#ifndef OBJDEFS_H
+#define OBJDEFS_H
 
-#ifndef LWM2M_SERVER_XML_HANDLERS_H
-#define LWM2M_SERVER_XML_HANDLERS_H
-
-#include <xmltree.h>
-
-#include "lwm2m_object_store.h"
-#include "lwm2m_util.h"
-#include "lwm2m_definition.h"
-#include "lwm2m_xml_interface.h"
+#include "lwm2m_context.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void xmlif_RegisterHandlers(void);
-TreeNode xmlif_ConstructObjectDefinitionNode(const DefinitionRegistry * definitions, const ObjectDefinition * objFormat, int objectID);
-
-DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode content);
+int LoadObjectDefinitionsFromFiles(Lwm2mContextType * context, const char ** filenames, size_t numFilenames);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // LWM2M_SERVER_XML_HANDLERS_H
+#endif // OBJDEFS_H

@@ -2008,3 +2008,28 @@ static void xmlif_HandlerSuccessfulExecuteResponse(IpcCoapRequestContext * reque
     xmlif_HandlerDefaultSuccessfulResponse(requestContext, responsePath, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
 }
 
+// Can handle <ObjectDefinitions><Items>... or <ObjectDefinition>...
+DefinitionCount xmlif_ParseObjDefDeviceServerXml(Lwm2mContextType * context, TreeNode rootNode)
+{
+    DefinitionCount result = { 0 };
+    TreeNode itemsNode = TreeNode_Navigate(rootNode, "ObjectDefinitions/Items");
+    TreeNode objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, 0) : rootNode;
+    int objectDefinitionIndex = 1;
+
+    while (objectDefinition != NULL)
+    {
+        DefinitionCount definitionCount = xmlif_RegisterObjectFromDeviceServerXML(context,
+                                                                                  objectDefinition,
+                                                                                  NULL,
+                                                                                  NULL,
+                                                                                  NULL);
+        result.NumObjectsOK += definitionCount.NumObjectsOK;
+        result.NumObjectsFailed += definitionCount.NumObjectsFailed;
+        result.NumResourcesOK += definitionCount.NumResourcesOK;
+        result.NumResourcesFailed += definitionCount.NumResourcesFailed;
+
+        objectDefinition = (itemsNode != NULL) ? TreeNode_GetChild(itemsNode, objectDefinitionIndex++) : NULL;
+    }
+
+    return result;
+}

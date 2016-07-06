@@ -14,6 +14,7 @@ set (awa_common_SOURCES
   lwm2m_types.c
   ipc_session.c
   lwm2m_events.c
+  objdefs.c
 )
 
 if (WITH_LIBCOAP)

@@ -354,7 +354,7 @@ static int WaitForLwM2MServerIpc(int ipcPort, int timeout /*seconds*/)
     return WaitForIpc(ipcPort, timeout, request, strlen(request));
 }
 
-pid_t StartAwaServer(const char * serverDaemonPath, int iCoapPort, int iIpcPort, const char * logFile)
+pid_t StartAwaServer(const char * serverDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const std::vector<std::string> & additionalOptions)
 {
     // unfortunately, execvp requires char * not const char * parameters
     std::string sCoapPort = std::to_string(iCoapPort);
@@ -379,6 +379,11 @@ pid_t StartAwaServer(const char * serverDaemonPath, int iCoapPort, int iIpcPort,
         "--ipcPort", cIpcPort,
         "--logFile", cLogFile };
 #pragma GCC diagnostic pop
+
+    // append additional options
+    for (auto & x : additionalOptions) {
+        commandVector.push_back(x.c_str());
+    }
 
     // don't wait for process to finish
     int rc = SpawnProcess(commandVector, false, false);

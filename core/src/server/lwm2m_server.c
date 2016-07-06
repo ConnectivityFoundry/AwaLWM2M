@@ -39,6 +39,7 @@
 #include <signal.h>
 
 #include "awa_serverd_cmdline.h"
+#include "objdefs.h"
 #include "lwm2m_object_store.h"
 #include "coap_abstraction.h"
 #include "dtls_abstraction.h"
@@ -52,6 +53,7 @@
 #include "lwm2m_server_psk.h"
 
 #define DEFAULT_IP_ADDRESS "0.0.0.0"
+#define MAX_OBJDEFS_FILES  (16)
 
 typedef struct
 {
@@ -62,6 +64,8 @@ typedef struct
     int IpcPort;
     int ContentType;
     bool Secure;
+    const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
+    size_t NumObjDefsFiles;
     bool Daemonise;
     bool Verbose;
     char * LogFile;
@@ -213,6 +217,12 @@ static int Lwm2mServer_Start(Options * options)
     // must happen after coap_Init()
     Lwm2m_RegisterObjectTypes(context);
 
+    // load any specified objDef files
+    if (LoadObjectDefinitionsFromFiles(context, options->ObjDefsFiles, options->NumObjDefsFiles) != 0)
+    {
+        goto error_close_log;
+    }
+
     // listen for UDP packets on IPC port
     xmlFd = xmlif_init(context, options->IpcPort);
     if (xmlFd < 0)
@@ -282,17 +292,22 @@ error_close_log:
 static void PrintOptions(const Options * options)
 {
     printf("Options specified or defaulted:\n");
-    printf("  IPAddress      (--ip)             : %s\n", options->IPAddress? options->IPAddress : "");
-    printf("  InterfaceName  (--interface)      : %s\n", options->InterfaceName ? options->InterfaceName : "");
-    printf("  AddressFamily  (--addressFamily)  : %d\n", options->AddressFamily == AF_INET? 4 : 6);
-    printf("  CoapPort       (--port)           : %d\n", options->CoapPort);
-    printf("  IpcPort        (--ipcPort)        : %d\n", options->IpcPort);
-    printf("  ContentType    (--content)        : %d\n", options->ContentType);
-    printf("  Secure         (--secure)         : %d\n", options->Secure);
-    printf("  Daemonize      (--daemonize)      : %d\n", options->Daemonise);
-    printf("  Verbose        (--verbose)        : %d\n", options->Verbose);
-    printf("  LogFile        (--logFile)        : %s\n", options->LogFile ? options->LogFile : "");
-    printf("  Version        (--version)        : %d\n", options->Version);
+    printf("  IPAddress         (--ip)             : %s\n", options->IPAddress? options->IPAddress : "");
+    printf("  InterfaceName     (--interface)      : %s\n", options->InterfaceName ? options->InterfaceName : "");
+    printf("  AddressFamily     (--addressFamily)  : %d\n", options->AddressFamily == AF_INET? 4 : 6);
+    printf("  CoapPort          (--port)           : %d\n", options->CoapPort);
+    printf("  IpcPort           (--ipcPort)        : %d\n", options->IpcPort);
+    printf("  ContentType       (--content)        : %d\n", options->ContentType);
+    printf("  Secure            (--secure)         : %d\n", options->Secure);
+    int i;
+    for (i = 0; i < options->NumObjDefsFiles; ++i)
+    {
+        printf("  ObjectDefinitions (--objDefs)          : %s\n", options->ObjDefsFiles[i]);
+    }
+    printf("  Daemonize         (--daemonize)      : %d\n", options->Daemonise);
+    printf("  Verbose           (--verbose)        : %d\n", options->Verbose);
+    printf("  LogFile           (--logFile)        : %s\n", options->LogFile ? options->LogFile : "");
+    printf("  Version           (--version)        : %d\n", options->Version);
 }
 
 static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai, Options * options)
@@ -307,6 +322,12 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->IpcPort = ai->ipcPort_arg;
         options->ContentType = ai->contentType_arg;
         options->Secure = ai->secure_flag;
+        int i;
+        for (i = 0; i < ai->objDefs_given; ++i)
+        {
+            options->ObjDefsFiles[i] = ai->objDefs_arg[i];
+        }
+        options->NumObjDefsFiles = ai->objDefs_given;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
         options->LogFile = ai->logFile_arg;
@@ -332,6 +353,8 @@ int main(int argc, char ** argv)
         .IpcPort = 0,
         .ContentType = 0,
         .Secure = false,
+        .ObjDefsFiles = {0},
+        .NumObjDefsFiles = 0,
         .Daemonise = false,
         .Verbose = false,
         .LogFile = NULL,
