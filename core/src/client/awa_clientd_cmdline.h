@@ -56,6 +56,8 @@ struct gengetopt_args_info
   char * factoryBootstrap_arg;	/**< @brief Load factory bootstrap information from FILE.  */
   char * factoryBootstrap_orig;	/**< @brief Load factory bootstrap information from FILE original value given at command line.  */
   const char *factoryBootstrap_help; /**< @brief Load factory bootstrap information from FILE help description.  */
+  int secure_flag;	/**< @brief CoAP communications are secured with DTLS (default=off).  */
+  const char *secure_help; /**< @brief CoAP communications are secured with DTLS help description.  */
   char ** objDefs_arg;	/**< @brief Load object and resource definitions from FILE.  */
   char ** objDefs_orig;	/**< @brief Load object and resource definitions from FILE original value given at command line.  */
   unsigned int objDefs_min; /**< @brief Load object and resource definitions from FILE's minimum occurreces */
@@ -78,6 +80,7 @@ struct gengetopt_args_info
   unsigned int endPointName_given ;	/**< @brief Whether endPointName was given.  */
   unsigned int bootstrap_given ;	/**< @brief Whether bootstrap was given.  */
   unsigned int factoryBootstrap_given ;	/**< @brief Whether factoryBootstrap was given.  */
+  unsigned int secure_given ;	/**< @brief Whether secure was given.  */
   unsigned int objDefs_given ;	/**< @brief Whether objDefs was given.  */
   unsigned int daemonize_given ;	/**< @brief Whether daemonize was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */

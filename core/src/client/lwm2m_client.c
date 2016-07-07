@@ -195,7 +195,7 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
-    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false /* not a server */, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
@@ -203,6 +203,7 @@ static int Lwm2mClient_Start(Options * options)
         goto error_close_log;
     }
 
+    // always set key
     coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
     coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
 
