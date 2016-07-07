@@ -310,9 +310,9 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
  *        This function is optional. It should only be called @e after ::AwaStaticClient_Init and before ::AwaStaticClient_Process.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] certificate A pointer to a certificate which is in @format.
- * @param[in] certificateLength Size of @certificate
- * @param[in] format Whether @certificate is in either ASN1 or PEM format
+ * @param[in] certificate A pointer to a certificate which is in format.
+ * @param[in] certificateLength Size of certificate.
+ * @param[in] format Whether certificate is in either ASN1 or PEM format.
  */
 void AwaStaticClient_SetCertificate(AwaStaticClient * client, const uint8_t * certificate, int certificateLength, AwaCertificateFormat format);
 
@@ -322,9 +322,9 @@ void AwaStaticClient_SetCertificate(AwaStaticClient * client, const uint8_t * ce
  *        This function is optional. It should only be called @e after ::AwaStaticClient_Init and before ::AwaStaticClient_Process.
  *
  * @param[in] client A pointer to a valid Awa Static Client.
- * @param[in] identity A pointer to a NULL terminated string to identify client @key.
+ * @param[in] identity A pointer to a NULL terminated string to identify client key.
  * @param[in] key A pointer to shared key.
- * @param[in] keyLength Size of @key
+ * @param[in] keyLength Size of key
  */
 void AwaStaticClient_SetPSK(AwaStaticClient * client, const char * identity, const uint8_t * key, int keyLength);
 
