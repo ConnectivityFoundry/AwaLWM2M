@@ -201,7 +201,7 @@ static int Bootstrap_Start(Options * options)
 
     if (options->Secure)
     {
-        coap_SetCertificate(bootsrapCert, sizeof(bootsrapCert), CertificateFormat_PEM);
+        coap_SetCertificate(bootsrapCert, sizeof(bootsrapCert), AwaCertificateFormat_PEM);
         coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
     }
 

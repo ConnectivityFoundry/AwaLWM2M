@@ -64,7 +64,7 @@ static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
 static uint8_t * certificate = NULL;
 static int certificateLength = 0;
-static CertificateFormat certificateFormat;
+static AwaCertificateFormat certificateFormat;
 
 static const char * pskIdentity = NULL;
 static const uint8_t * pskKey = NULL;
@@ -158,7 +158,7 @@ void DTLS_Shutdown(void)
     CyaSSL_Cleanup();
 }
 
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
     certificate = (uint8_t *)cert;
     certificateLength = certLength;
@@ -304,7 +304,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
         if (certificate)
         {
             int format = SSL_FILETYPE_PEM;
-            if (certificateFormat == CertificateFormat_ASN1)
+            if (certificateFormat == AwaCertificateFormat_ASN1)
                 format = SSL_FILETYPE_ASN1 ;
 
             uint8_t * privateKey = certificate;

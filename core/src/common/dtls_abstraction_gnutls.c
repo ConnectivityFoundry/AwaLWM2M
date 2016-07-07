@@ -61,7 +61,7 @@ DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
 uint8_t * certificate = NULL;
 int certificateLength = 0;
-CertificateFormat certificateFormat;
+AwaCertificateFormat certificateFormat;
 
 const char * pskIdentity = NULL;
 
@@ -120,7 +120,7 @@ void DTLS_Shutdown(void)
     gnutls_global_deinit();
 }
 
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
     certificate = (uint8_t *)cert;
     certificateLength = certLength;
@@ -286,7 +286,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                     certificateData.data = certificate;
                     certificateData.size = certificateLength;
                     int format = GNUTLS_X509_FMT_PEM;
-                    if (certificateFormat == CertificateFormat_ASN1)
+                    if (certificateFormat == AwaCertificateFormat_ASN1)
                         format = GNUTLS_X509_FMT_DER;
     //                if (client)
     //                    gnutls_certificate_set_x509_trust_mem(session->Credentials, &certificateData, format);

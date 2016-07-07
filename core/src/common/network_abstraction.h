@@ -32,12 +32,6 @@ extern "C" {
 
 #include "lwm2m_types.h"
 
-typedef enum
-{
-    CertificateFormat_NotSet,
-    CertificateFormat_ASN1,
-    CertificateFormat_PEM,
-} CertificateFormat;
 
 typedef enum
 {
@@ -76,7 +70,7 @@ NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket);
 
 int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket);
 
-void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format);
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format);
 
 void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength);
 

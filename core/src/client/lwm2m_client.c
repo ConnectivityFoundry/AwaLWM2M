@@ -203,7 +203,7 @@ static int Lwm2mClient_Start(Options * options)
         goto error_close_log;
     }
 
-    coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
+    coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
     coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
 
     // if required read the bootstrap information from a file

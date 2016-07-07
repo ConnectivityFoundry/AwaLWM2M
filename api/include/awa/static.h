@@ -305,6 +305,30 @@ AwaError AwaStaticClient_SetBootstrapServerURI(AwaStaticClient * client, const c
 AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client, const AwaFactoryBootstrapInfo * factoryBootstrapInformation);
 
 /**
+ * @brief Configure default certificate to use when Awa Static Client connects to a secure Server/Bootstrap.
+ *
+ *        This function is optional. It should only be called @e after ::AwaStaticClient_Init and before ::AwaStaticClient_Process.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] certificate A pointer to a certificate which is in @format.
+ * @param[in] certificateLength Size of @certificate
+ * @param[in] format Whether @certificate is in either ASN1 or PEM format
+ */
+void AwaStaticClient_SetCertificate(AwaStaticClient * client, const uint8_t * certificate, int certificateLength, AwaCertificateFormat format);
+
+/**
+ * @brief Configure default PSK to use when Awa Static Client connects to a secure Server/Bootstrap.
+ *
+ *        This function is optional. It should only be called @e after ::AwaStaticClient_Init and before ::AwaStaticClient_Process.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @param[in] identity A pointer to a NULL terminated string to identify client @key.
+ * @param[in] key A pointer to shared key.
+ * @param[in] keyLength Size of @key
+ */
+void AwaStaticClient_SetPSK(AwaStaticClient * client, const char * identity, const uint8_t * key, int keyLength);
+
+/**
  * @brief Set a user-specified application context which is accessible to
  *        any defined callback handler owned by the Awa Static Client with
  *        ::AwaStaticClient_GetApplicationContext.

@@ -1176,7 +1176,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     return &coapInfo;
 }
 
-void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
 	(void)cert;
 	(void)certLength;

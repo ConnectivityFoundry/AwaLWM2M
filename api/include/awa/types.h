@@ -156,6 +156,16 @@ typedef enum
     AwaLogLevel_Debug,      /**< Low-level information is reported, in addition to Verbose. */
 } AwaLogLevel;
 
+/**
+ * Supported Certificate formats
+ */
+typedef enum
+{
+    AwaCertificateFormat_None, /**< Not set. */
+    AwaCertificateFormat_ASN1, /**< Raw ASN1 sequence. */
+    AwaCertificateFormat_PEM,  /**< PEM format. */
+} AwaCertificateFormat;
+
 #ifdef __cplusplus
 }
 #endif
