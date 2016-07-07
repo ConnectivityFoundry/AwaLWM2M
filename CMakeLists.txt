@@ -14,15 +14,15 @@ enable_testing ()
 
 
 # Options for supported CoAP and DTLS libraries:
-option (WITH_LIBCOAP "Enable libcoap CoAP support)" ON)
-option (WITH_ERBIUM "Enable Erbium CoAP support)" OFF)
+option (WITH_LIBCOAP "Enable libcoap CoAP support)" OFF)
+option (WITH_ERBIUM "Enable Erbium CoAP support)" ON)
 option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
 option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
 option (WITH_TINYDTLS "Enable TinyDTLS DTLS support" OFF)
 
-if (WITH_ERBIUM)
-  message (WARNING "Disabling libcoap support")
-  set (WITH_LIBCOAP OFF)
+if (WITH_LIBCOAP)
+  message (WARNING "Disabling erbium support")
+  set (WITH_ERBIUM OFF)
 endif ()
 
 if ((WITH_GNUTLS AND WITH_CYASSL) OR (WITH_GNUTLS AND WITH_TINYDTLS) OR (WITH_CYASSL AND WITH_TINYDTLS))
