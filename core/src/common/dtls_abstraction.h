@@ -53,7 +53,7 @@ void DTLS_Init(void);
 
 void DTLS_Shutdown(void);
 
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format);
+void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format);
 
 void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback);
 

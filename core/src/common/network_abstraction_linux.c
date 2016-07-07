@@ -468,7 +468,7 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
     return result;
 }
 
-void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format)
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
     DTLS_SetCertificate(cert, certLength, format);
 }

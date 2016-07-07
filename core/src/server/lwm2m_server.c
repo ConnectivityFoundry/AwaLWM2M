@@ -208,7 +208,7 @@ static int Lwm2mServer_Start(Options * options)
 
     if (options->Secure)
     {
-    	coap_SetCertificate(serverCert, sizeof(serverCert), CertificateFormat_PEM);
+    	coap_SetCertificate(serverCert, sizeof(serverCert), AwaCertificateFormat_PEM);
         coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
     }
 

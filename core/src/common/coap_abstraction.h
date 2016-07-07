@@ -77,7 +77,7 @@ extern const char * coap_LibraryName;
 
 CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel);
 
-void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format);
+void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format);
 void coap_SetPSK(const char * identity, const uint8_t * key, int keyLength);
 
 int coap_Destroy(void);
