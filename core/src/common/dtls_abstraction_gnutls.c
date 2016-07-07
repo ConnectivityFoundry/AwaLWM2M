@@ -57,17 +57,17 @@ typedef struct
 
 const char * DTLS_LibraryName = "GnuTLS";
 
-DTLS_Session sessions[MAX_DTLS_SESSIONS];
+static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
-uint8_t * certificate = NULL;
-int certificateLength = 0;
-AwaCertificateFormat certificateFormat;
+static uint8_t * certificate = NULL;
+static int certificateLength = 0;
+static CertificateFormat certificateFormat;
 
-const char * pskIdentity = NULL;
+static const char * pskIdentity = NULL;
 
-gnutls_datum_t pskKey;
+static  gnutls_datum_t pskKey;
 
-DTLS_NetworkSendCallback NetworkSend = NULL;
+static  DTLS_NetworkSendCallback NetworkSend = NULL;
 
 //Comment out as init of DH params takes a while
 //static gnutls_dh_params_t _DHParameters;

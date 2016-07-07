@@ -319,6 +319,16 @@ void NetworkAddress_Free(NetworkAddress ** address)
     }
 }
 
+bool NetworkAddress_IsSecure(const NetworkAddress * address)
+{
+    bool result = false;
+    if (address)
+    {
+        result = address->Secure;
+    }
+    return result;
+}
+
 static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength)
 {
     if (address)

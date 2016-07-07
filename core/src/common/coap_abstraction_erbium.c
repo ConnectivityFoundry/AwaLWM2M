@@ -353,6 +353,12 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType 
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
 
+    if ((strcmp(DTLS_LibraryName, "None") == 0) && NetworkAddress_IsSecure(remoteAddress))
+    {
+        Lwm2m_Error("Cannot send request to %s - not built with DTLS support\n\n", uri);
+        return;
+    }
+
     coap_getPathQueryFromURI(uri, path, query);
 
     Lwm2m_Info("Coap request: %s\n", uri);
