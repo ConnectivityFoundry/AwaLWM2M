@@ -70,7 +70,6 @@ typedef struct
     char * EndPointName;
     char * BootStrap;
     const char * FactoryBootstrapFile;
-    bool Secure;
     const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
     size_t NumObjDefsFiles;
     bool Daemonise;
@@ -193,11 +192,10 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("  DTLS library   : %s\n", DTLS_LibraryName);
     Lwm2m_Info("  CoAP library   : %s\n", coap_LibraryName);
     Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
-    Lwm2m_Info("  CoAP Security  : %s\n", options->Secure ? "DTLS": "None");
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
-    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, options->Secure, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false /* not a server */, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
@@ -205,11 +203,9 @@ static int Lwm2mClient_Start(Options * options)
         goto error_close_log;
     }
 
-    if (options->Secure)
-    {
-        coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
-        coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
-    }
+    // always set key
+    coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
+    coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
 
     // if required read the bootstrap information from a file
     const BootstrapInfo * factoryBootstrapInfo;
@@ -331,7 +327,6 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName ? options->EndPointName : "");
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap ? options->BootStrap : "");
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile ? options->FactoryBootstrapFile : "");
-    printf("  Secure               (--secure)           : %d\n", options->Secure);
     int i;
     for (i = 0; i < options->NumObjDefsFiles; ++i)
     {
@@ -354,7 +349,6 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->EndPointName = ai->endPointName_arg;
         options->BootStrap = ai->bootstrap_arg;
         options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
-        options->Secure = ai->secure_flag;
         int i;
         for (i = 0; i < ai->objDefs_given; ++i)
         {
@@ -392,7 +386,6 @@ int main(int argc, char ** argv)
         .EndPointName = NULL,
         .BootStrap = NULL,
         .FactoryBootstrapFile = NULL,
-        .Secure = false,
         .ObjDefsFiles = {0},
         .NumObjDefsFiles = 0,
         .Daemonise = false,

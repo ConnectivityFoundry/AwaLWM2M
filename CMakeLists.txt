@@ -25,7 +25,7 @@ if (WITH_ERBIUM)
   set (WITH_LIBCOAP OFF)
 endif ()
 
-if (WITH_GNUTLS AND (WITH_CYASSL OR WITH_TINYDTLS))
+if ((WITH_GNUTLS AND WITH_CYASSL) OR (WITH_GNUTLS AND WITH_TINYDTLS) OR (WITH_CYASSL AND WITH_TINYDTLS))
   message (FATAL_ERROR "WITH_GNUTLS, WITH_CYASSL and WITH_TINYDTLS are mutually exclusive and cannot be specified together." )
 endif ()
 

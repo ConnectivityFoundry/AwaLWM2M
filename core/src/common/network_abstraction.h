@@ -70,6 +70,8 @@ void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addre
 
 void NetworkAddress_Free(NetworkAddress ** address);
 
+bool NetworkAddress_IsSecure(const NetworkAddress * address);
+
 NetworkSocket * NetworkSocket_New(NetworkSocketType socketType, uint16_t port);
 
 NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket);
