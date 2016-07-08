@@ -61,7 +61,7 @@ static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
 static uint8_t * certificate = NULL;
 static int certificateLength = 0;
-static CertificateFormat certificateFormat;
+static AwaCertificateFormat certificateFormat;
 
 static const char * pskIdentity = NULL;
 
