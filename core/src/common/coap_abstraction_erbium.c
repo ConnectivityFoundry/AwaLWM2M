@@ -94,6 +94,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     Lwm2m_Info("Bind port: %d\n", port);
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     memset(Observations, 0, sizeof(Observations));
+    coap_init_connection(port);
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     DTLS_Init();
