@@ -207,7 +207,7 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
                 session->SessionEstablished = (acceptResult == SSL_SUCCESS);
             }
             if (session->SessionEstablished)
-                Lwm2m_Info("Session established");
+                Lwm2m_Info("DTLS session established\n");
         }
     }
     return result;
@@ -242,7 +242,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             else
                 session->SessionEstablished = (CyaSSL_accept(session->Session) == SSL_SUCCESS);
             if (session->SessionEstablished)
-                Lwm2m_Info("Session established");
+                Lwm2m_Info("DTLS session established\n");
         }
     }
     else
