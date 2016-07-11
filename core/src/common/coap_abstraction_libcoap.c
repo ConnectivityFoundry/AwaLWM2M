@@ -94,6 +94,11 @@ static void * context = NULL;
 static CoapInfo coapInfo;
 static RequestHandler requestHandler = NULL;
 
+
+void coap_Reset(const char * uri)
+{
+}
+
 void coap_SetContext(void * ctxt)
 {
     context = ctxt;

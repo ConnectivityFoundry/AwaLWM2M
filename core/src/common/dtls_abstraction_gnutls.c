@@ -120,6 +120,15 @@ void DTLS_Shutdown(void)
     gnutls_global_deinit();
 }
 
+void DTLS_Reset(NetworkAddress * address)
+{
+    DTLS_Session * session = GetSession(address);
+    if (session)
+    {
+        FreeSession(session);
+    }
+}
+
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
     certificate = (uint8_t *)cert;

@@ -54,6 +54,10 @@ static RequestHandler requestHandler = NULL;
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
 
+void coap_Reset(const char * uri)
+{
+}
+
 int coap_WaitMessage(int timeout, int fd)
 {
     // No wait in Contiki

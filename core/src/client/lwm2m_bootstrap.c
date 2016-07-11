@@ -71,6 +71,8 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
     sprintf(uri, "%s%s%s", serverPath, uriPath, uriQuery);
     Lwm2m_Info("Bootstrap with %s\n", uri);
 
+    coap_Reset(uri);
+
     coap_PostRequest(context, uri, ContentType_None, NULL, 0, HandleBootstrapResponse);
 }
 
