@@ -112,6 +112,16 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     return &coapInfo;
 }
 
+
+void coap_Reset(const char * uri)
+{
+    NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
+    if (remoteAddress)
+    {
+        DTLS_Reset(remoteAddress);
+    }
+}
+
 void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
 	NetworkSocket_SetCertificate(networkSocket, cert, certLength, format);

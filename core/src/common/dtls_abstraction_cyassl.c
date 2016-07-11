@@ -74,6 +74,7 @@ static DTLS_NetworkSendCallback NetworkSend = NULL;
 
 static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context);
 static DTLS_Session * GetSession(NetworkAddress * address);
+static void FreeSession(DTLS_Session * session);
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
 static int DecryptCallBack(CYASSL *sslSessioon, char *recieveBuffer, int receiveBufferLegth, void *vp);
 static int EncryptCallBack(CYASSL *sslSessioon, char *sendBuffer, int sendBufferLength, void *vp);
@@ -155,7 +156,25 @@ void DTLS_Init(void)
 
 void DTLS_Shutdown(void)
 {
+    int index;
+    for (index = 0;index < MAX_DTLS_SESSIONS; index++)
+    {
+        if (sessions[index].Context)
+        {
+            FreeSession(&sessions[index]);
+        }
+    }
     CyaSSL_Cleanup();
+}
+
+
+void DTLS_Reset(NetworkAddress * address)
+{
+    DTLS_Session * session = GetSession(address);
+    if (session)
+    {
+        FreeSession(session);
+    }
 }
 
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
@@ -288,6 +307,24 @@ static DTLS_Session * GetSession(NetworkAddress * address)
     }
     return result;
 }
+
+static void FreeSession(DTLS_Session * session)
+{
+    if (session)
+    {
+        if (session->Session)
+        {
+            CyaSSL_shutdown(session->Session);
+            CyaSSL_free(session->Session);
+        }
+        if (session->Context)
+        {
+            CyaSSL_CTX_free(session->Context);
+        }
+        memset(session,0, sizeof(DTLS_Session));
+    }
+}
+
 
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client)
 {
