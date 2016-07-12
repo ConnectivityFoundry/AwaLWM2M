@@ -58,6 +58,15 @@ struct gengetopt_args_info
   const char *factoryBootstrap_help; /**< @brief Load factory bootstrap information from FILE help description.  */
   int secure_flag;	/**< @brief CoAP communications are secured with DTLS (default=off).  */
   const char *secure_help; /**< @brief CoAP communications are secured with DTLS help description.  */
+  char * pskIdentity_arg;	/**< @brief Default Identity of associated pre-shared key for DTLS.  */
+  char * pskIdentity_orig;	/**< @brief Default Identity of associated pre-shared key for DTLS original value given at command line.  */
+  const char *pskIdentity_help; /**< @brief Default Identity of associated pre-shared key for DTLS help description.  */
+  char * pskKey_arg;	/**< @brief Default pre-shared key for DTLS.  */
+  char * pskKey_orig;	/**< @brief Default pre-shared key for DTLS original value given at command line.  */
+  const char *pskKey_help; /**< @brief Default pre-shared key for DTLS help description.  */
+  char * certificate_arg;	/**< @brief Load client certificate from FILE.  */
+  char * certificate_orig;	/**< @brief Load client certificate from FILE original value given at command line.  */
+  const char *certificate_help; /**< @brief Load client certificate from FILE help description.  */
   char ** objDefs_arg;	/**< @brief Load object and resource definitions from FILE.  */
   char ** objDefs_orig;	/**< @brief Load object and resource definitions from FILE original value given at command line.  */
   unsigned int objDefs_min; /**< @brief Load object and resource definitions from FILE's minimum occurreces */
@@ -81,6 +90,9 @@ struct gengetopt_args_info
   unsigned int bootstrap_given ;	/**< @brief Whether bootstrap was given.  */
   unsigned int factoryBootstrap_given ;	/**< @brief Whether factoryBootstrap was given.  */
   unsigned int secure_given ;	/**< @brief Whether secure was given.  */
+  unsigned int pskIdentity_given ;	/**< @brief Whether pskIdentity was given.  */
+  unsigned int pskKey_given ;	/**< @brief Whether pskKey was given.  */
+  unsigned int certificate_given ;	/**< @brief Whether certificate was given.  */
   unsigned int objDefs_given ;	/**< @brief Whether objDefs was given.  */
   unsigned int daemonize_given ;	/**< @brief Whether daemonize was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */

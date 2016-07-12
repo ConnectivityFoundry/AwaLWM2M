@@ -131,9 +131,12 @@ void DTLS_Reset(NetworkAddress * address)
 
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
-    certificate = (uint8_t *)cert;
-    certificateLength = certLength;
-    certificateFormat = format;
+    if (certificateLength > 0)
+    {
+        certificate = (uint8_t *)cert;
+        certificateLength = certLength;
+        certificateFormat = format;
+    }
 }
 
 void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
@@ -143,9 +146,12 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
 
 void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
-    pskIdentity = identity;
-    pskKey.data = (unsigned char *)key;
-    pskKey.size = keyLength;
+    if (keyLength > 0)
+    {
+        pskIdentity = identity;
+        pskKey.data = (unsigned char *)key;
+        pskKey.size = keyLength;
+    }
 }
 
 
