@@ -126,7 +126,7 @@ Applications may communicate with the LWM2M Client and Server daemons through th
 
 In addition, a notification channel is set up that enables asynchronous reception of notifications, including those related to LWM2M observations, and server events such as client registration.
 
-The IPC XML format is documented in [IPC](doc/ipc.md).
+The IPC XML format is documented in [IPC](ipc.md).
 
 ##### IPC Handlers  
 
