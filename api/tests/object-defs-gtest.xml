@@ -10,16 +10,15 @@
 		            <PropertyID>0</PropertyID>
 		            <SerialisationName>Manufacturer</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>Read</Access>
-		            <DefaultValue>SW1hZ2luYXRpb24gVGVjaG5vbG9naWVz</DefaulValue>
 		       </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>1</PropertyID>
 		            <SerialisationName>ModelNumber</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>Read</Access>
 		            <DefaultValue>QXdhIENsaWVudA==</DefaulValue>
@@ -28,19 +27,17 @@
 		            <PropertyID>2</PropertyID>
 		            <SerialisationName>SerialNumber</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>Read</Access>
-		            <DefaultValue>U04xMjM0NTY3OA==</DefaulValue>
 		       </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>3</PropertyID>
 		            <SerialisationName>FirmwareVersion</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>Read</Access>
-		            <DefaultValue>MC4xYQ==</DefaulValue>
 		       </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>4</PropertyID>
@@ -62,19 +59,9 @@
 		            <PropertyID>6</PropertyID>
 		            <SerialisationName>AvailablePowerSources</SerialisationName>
 		            <DataType>Integer</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>True</IsCollection>
 		            <Access>Read</Access>
-		            <DefaultValueArray>
-						<ResourceInstance>
-							<ID>0</ID>
-								<Value>1</Value>
-						</ResourceInstance>
-						<ResourceInstance>
-							<ID>1</ID>
-								<Value>5</Value>
-						</ResourceInstance>
-		           </DefaultValueArray>
 		        </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>7</PropertyID>
@@ -96,10 +83,9 @@
 		            <PropertyID>9</PropertyID>
 		            <SerialisationName>BatteryLevel</SerialisationName>
 		            <DataType>Integer</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>Read</Access>
-		            <DefaultValue>100</DefaultValue>
 		        </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>10</PropertyID>
@@ -129,28 +115,25 @@
 		            <PropertyID>13</PropertyID>
 		            <SerialisationName>CurrentTime</SerialisationName>
 		            <DataType>DateTime</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>ReadWrite</Access>
-		            <DefaultValue>2718619435</DefaultValue>
 		        </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>14</PropertyID>
 		            <SerialisationName>UTCOffset</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>ReadWrite</Access>
-		            <DefaultValue>KzEyOjAw</DefaultValue>
 		        </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>15</PropertyID>
 		            <SerialisationName>Timezone</SerialisationName>
 		            <DataType>String</DataType>
-		            <IsMandatory>True</IsMandatory>
+		            <IsMandatory>False</IsMandatory>
 		            <IsCollection>False</IsCollection>
 		            <Access>ReadWrite</Access>
-		            <DefaultValue>UGFjaWZpYy9XZWxsaW5ndG9u</DefaultValue>
 		        </PropertyDefinition>
 		       <PropertyDefinition>
 		            <PropertyID>16</PropertyID>
@@ -206,7 +189,7 @@
 		<ObjectDefinition>
 		    <ObjectID>4</ObjectID>
 		    <SerialisationName>ConnectivityMonitoring</SerialisationName>
-		    <IsMandatory>True</IsMandatory>
+		    <IsMandatory>False</IsMandatory>
 		    <Singleton>True</Singleton>
 		    <Properties>
 		       <PropertyDefinition>
@@ -299,6 +282,102 @@
 		        </PropertyDefinition>
 		    </Properties>
 		</ObjectDefinition>
+		<ObjectDefinition>
+            <ObjectID>5</ObjectID>
+            <Name>Firmware Update</Name>
+            <MIMEType>application/vnd.oma.lwm2m.firmwareupdate</MIMEType>
+            <SerialisationName>FirmwareUpdate</SerialisationName>
+            <Singleton>true</Singleton>
+            <Properties>
+                <PropertyDefinition>
+                    <PropertyID>0</PropertyID>
+                    <Name>Package</Name>
+                    <DataType>Opaque</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Write</Access>
+                    <SerialisationName>Package</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>1</PropertyID>
+                    <Name>Package URI</Name>
+                    <DataType>String</DataType>
+                    <DataTypeLength>255</DataTypeLength>
+                    <MinValue>0</MinValue>
+                    <MaxValue>255</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Write</Access>
+                    <SerialisationName>PackageURI</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>2</PropertyID>
+                    <Name>Update</Name>
+                    <DataType>NotSet</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>NoAccess</Access>
+                    <SerialisationName>Update</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>3</PropertyID>
+                    <Name>State</Name>
+                    <DataType>Integer</DataType>
+                    <DataTypeLength>1</DataTypeLength>
+                    <MinValue>1</MinValue>
+                    <MaxValue>3</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>State</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>4</PropertyID>
+                    <Name>Update Supported Objects</Name>
+                    <DataType>Boolean</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>ReadWrite</Access>
+                    <SerialisationName>UpdateSupportedObjects</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>5</PropertyID>
+                    <Name>Update Result</Name>
+                    <DataType>Integer</DataType>
+                    <DataTypeLength>1</DataTypeLength>
+                    <MinValue>0</MinValue>
+                    <MaxValue>6</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>UpdateResult</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>6</PropertyID>
+                    <Name>Package Name</Name>
+                    <DataType>String</DataType>
+                    <DataTypeLength>255</DataTypeLength>
+                    <MinValue>0</MinValue>
+                    <MaxValue>255</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>PackageName</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>7</PropertyID>
+                    <Name>Package Version</Name>
+                    <DataType>String</DataType>
+                    <DataTypeLength>255</DataTypeLength>
+                    <MinValue>0</MinValue>
+                    <MaxValue>255</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>PackageVersion</SerialisationName>
+                </PropertyDefinition>
+            </Properties>
+        </ObjectDefinition>
 	</Items>
 </ObjectDefinitions>
 

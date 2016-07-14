@@ -61,7 +61,7 @@ namespace Awa {
 
 namespace defaults {
     const int logLevel = 1;
-    const int timeout = 200;           // milliseconds
+    const int timeout = 500;           // milliseconds
     const int timeoutTolerance = 100;  // milliseconds
 
 } // namespace defaults
@@ -131,6 +131,42 @@ public:
         TestClientBase(),
         daemon_(global::clientLocalCoapPort, global::clientIpcPort, global::clientLogFile, global::clientEndpointName) {}
 
+    void SetClientObjectResourceDefaultValues(AwaClientSession * session)
+    {
+        AwaClientSetOperation * setOperation = AwaClientSetOperation_New(session);
+        EXPECT_TRUE(setOperation != NULL);
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/0"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/0", "Imagination Technologies"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/1"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/1", "Awa Client"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/2"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/2", "SN12345678"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/3"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/3", "0.1a"));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/6"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 0, 1));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddArrayValueAsInteger(setOperation, "/3/0/6", 1, 5));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/9"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsInteger(setOperation, "/3/0/9", 100));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/13"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsTime(setOperation, "/3/0/13", 2718619435));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/14"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/14", "+12:00"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateOptionalResource(setOperation, "/3/0/15"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/15", "Pacific/Wellington"));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/4/0"));
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/5/0"));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout * 5));
+
+        AwaClientSetOperation_Free(&setOperation);
+    }
+
 protected:
   virtual void SetUp() {
       TestClientBase::SetUp();
@@ -155,6 +191,7 @@ protected:
           daemon_.SkipStart();
       }
   }
+
   virtual void TearDown() {
 
       if (global::spawnClientDaemon)
@@ -186,6 +223,8 @@ protected:
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaClientSession_Connect(session_));
         global::testLog << "Client session " << AwaClientSession_GetSessionID(session_) << std::endl;
+
+        this->SetClientObjectResourceDefaultValues(session_);
     }
 
     virtual void Disconnect() {
@@ -318,7 +357,7 @@ protected:
 
 // Base class for tests that require both a server and client daemon to be spawned
 // Note: no sessions are created.
-class TestServerAndClientWithDaemonBase : public TestServerWithDaemonBase, TestClientWithDaemonBase
+class TestServerAndClientWithDaemonBase : public TestServerWithDaemonBase, public TestClientWithDaemonBase
 {
 protected:
   virtual void SetUp() {
@@ -351,6 +390,7 @@ protected:
     virtual void Connect() {
         ASSERT_EQ(AwaError_Success, AwaServerSession_Connect(server_session_));
         ASSERT_EQ(AwaError_Success, AwaClientSession_Connect(client_session_));
+        this->SetClientObjectResourceDefaultValues(client_session_);
     }
 
     virtual void Disconnect() {
