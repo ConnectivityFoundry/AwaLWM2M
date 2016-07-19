@@ -86,6 +86,7 @@ class Config(object):
             self._serverIpcPort = self._configurationClass.SERVER_IPC_PORT
             self._clientIpcPort = self._configurationClass.CLIENT_IPC_PORT
             self._bootstrapConfigFile = self._configurationClass.BOOTSTRAP_CONFIG_FILE
+            self._objectDefinitionsFile = self._configurationClass.OBJECT_DEFINITIONS_FILE
             #print "Config using single ports. Client IPC port: %d Server IPC port: %d" % (self._clientIpcPort, self._serverIpcPort)
 
     @property
@@ -127,6 +128,10 @@ class Config(object):
     @property
     def bootstrapConfigFile(self):
         return self._configurationClass.BOOTSTRAP_CONFIG_FILE
+
+    @property
+    def objectDefinitionsFile(self):
+        return self._configurationClass.OBJECT_DEFINITIONS_FILE
 
     @property
     def clientEndpointName(self):

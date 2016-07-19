@@ -226,7 +226,7 @@ class LWM2MServerDaemon(Daemon):
 
 
 class LWM2MClientDaemon(Daemon):
-    def __init__(self, ipcPort, coapPort, logFile, endpointName, bootstrapConfigFile):
+    def __init__(self, ipcPort, coapPort, logFile, endpointName, bootstrapConfigFile, objectDefinitionsFile):
         super(LWM2MClientDaemon, self).__init__()
         self._file = CLIENT_BINARY
         self._args = [ CLIENT_BINARY,
@@ -236,6 +236,7 @@ class LWM2MClientDaemon(Daemon):
                        "--logFile", logFile,
                        "--endPointName", endpointName,
                        "--factoryBootstrap", bootstrapConfigFile,
+                       "--objDefs", objectDefinitionsFile,
         ]
         self._ipcWaitRequest = "<Request><Type>Get</Type><Content><ObjectID>3</ObjectID><InstanceID>0</InstanceID><PropertyID>15</PropertyID></Content></Request>"
         self._ipcPort = ipcPort
@@ -261,7 +262,7 @@ class LWM2MClientDaemon(Daemon):
 def SpawnDaemons(config):
 
     server = LWM2MServerDaemon(config.daemonPath, config.serverIpcPort, config.serverCoapPort, config.serverLogFile)
-    client = LWM2MClientDaemon(config.daemonPath, config.clientIpcPort, config.clientCoapPort, config.clientLogFile, config.clientEndpointName, config.bootstrapConfigFile)
+    client = LWM2MClientDaemon(config.daemonPath, config.clientIpcPort, config.clientCoapPort, config.clientLogFile, config.clientEndpointName, config.bootstrapConfigFile, config.objectDefinitionsFile)
 
     server.spawn()
 

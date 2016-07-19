@@ -84,6 +84,8 @@ class DefaultTestConfiguration(object):
 
     BOOTSTRAP_CONFIG_FILE = "../test.bsc"
 
+    OBJECT_DEFINITIONS_FILE = "../object-defs-tools-test.xml" 
+
     CLIENT_ENDPOINT_NAME = "TestClient"
 
 class NoClientTestConfiguration(DefaultTestConfiguration):
@@ -251,6 +253,34 @@ class AwaTest(common.SpawnDaemonsTestCase):
                     createCommand += ["--create /%d/0/%d" % (obj.ID, resource.ID)]
                 result = test_awa_client_set.client_set(self.config, " ".join(createCommand))
                 self.assertEqual(0, result.code)
+
+        print "Setting defaults"
+
+        if self.config.spawnClientDaemon is True:
+            defaultsCommand = ["-c /3/0/0 /3/0/0=\"Imagination Technologies\""]
+            defaultsCommand += ["-c /3/0/1 /3/0/1=\"Awa Client\""]
+            defaultsCommand += ["-c /3/0/2 /3/0/2=\"SN12345678\""]
+            defaultsCommand += ["-c /3/0/3 /3/0/3=\"0.1a\""]
+            defaultsCommand += ["-c /3/0/5"]
+            defaultsCommand += ["-c /3/0/6 /3/0/6/0=1 /3/0/6/1=5"]
+            defaultsCommand += ["-c /3/0/7 /3/0/7/0=3800 /3/0/7/1=5000"]
+            defaultsCommand += ["-c /3/0/8 /3/0/8/0=125 /3/0/8/1=900"]
+            defaultsCommand += ["-c /3/0/9 /3/0/9=100"]
+            defaultsCommand += ["-c /3/0/10 /3/0/10=15"]
+            defaultsCommand += ["-c /3/0/13 /3/0/13=2718619435"]
+            defaultsCommand += ["-c /3/0/14 /3/0/14=\"+12:00\""]
+            defaultsCommand += ["-c /3/0/15 /3/0/15=\"Pacific/Wellington\""]
+            defaultsCommand += ["-c /3/0/17 /3/0/17=\"Awa Client\""]
+            defaultsCommand += ["-c /3/0/18 /3/0/18=\"0.0.0.1\""]
+            defaultsCommand += ["-c /3/0/19 /3/0/19=\"0.0.0.11\""]
+            defaultsCommand += ["-c /3/0/20 /3/0/20=2"]
+            defaultsCommand += ["-c /3/0/21 /3/0/21=42"]
+            defaultsCommand += ["-c /4/0"]
+            print "test"
+            print " ".join(defaultsCommand)
+            print "test"
+            result = test_awa_client_set.client_set(self.config, " ".join(defaultsCommand))
+            self.assertEqual(0, result.code)
 
 
 # avoid circular dependencies
