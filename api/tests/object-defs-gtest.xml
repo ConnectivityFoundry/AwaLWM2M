@@ -378,6 +378,153 @@
                 </PropertyDefinition>
             </Properties>
         </ObjectDefinition>
+        <ObjectDefinition>
+            <ObjectID>6</ObjectID>
+            <Name>Location</Name>
+            <MIMEType>application/vnd.oma.lwm2m.location</MIMEType>
+            <SerialisationName>Location</SerialisationName>
+            <Singleton>true</Singleton>
+            <Properties>
+                <PropertyDefinition>
+                    <PropertyID>0</PropertyID>
+                    <Name>Latitude</Name>
+                    <DataType>String</DataType>
+                    <Units>Deg</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Latitude</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>1</PropertyID>
+                    <Name>Longitude</Name>
+                    <DataType>String</DataType>
+                    <Units>Deg</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Longitude</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>2</PropertyID>
+                    <Name>Altitude</Name>
+                    <DataType>String</DataType>
+                    <Units>m</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Altitude</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>3</PropertyID>
+                    <Name>Uncertainty</Name>
+                    <DataType>String</DataType>
+                    <Units>m</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Uncertainty</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>4</PropertyID>
+                    <Name>Velocity</Name>
+                    <DataType>Opaque</DataType>
+                    <Units>Refers to 3GPP GAD specs</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Velocity</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>5</PropertyID>
+                    <Name>Timestamp</Name>
+                    <DataType>DateTime</DataType>
+                    <DataTypeLength>1</DataTypeLength>
+                    <MinValue>0</MinValue>
+                    <MaxValue>6</MaxValue>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>Timestamp</SerialisationName>
+                </PropertyDefinition>
+            </Properties>
+        </ObjectDefinition>
+        <ObjectDefinition>
+            <ObjectID>7</ObjectID>
+            <Name>Connectivity Statistics</Name>
+            <MIMEType>application/vnd.oma.lwm2m.connectivitystatistics</MIMEType>
+            <SerialisationName>ConnectivityStatistics</SerialisationName>
+            <Singleton>true</Singleton>
+            <Properties>
+                <PropertyDefinition>
+                    <PropertyID>0</PropertyID>
+                    <Name>SMS Tx Counter</Name>
+                    <DataType>Integer</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>SMSTxCounter</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>1</PropertyID>
+                    <Name>SMS Rx Counter</Name>
+                    <DataType>Integer</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>SMSRxCounter</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>2</PropertyID>
+                    <Name>Tx Data</Name>
+                    <DataType>Integer</DataType>
+                    <Units>Kilo-Bytes</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>TxData</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>3</PropertyID>
+                    <Name>Rx Data</Name>
+                    <DataType>Integer</DataType>
+                    <Units>Kilo-Bytes</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>RxData</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>4</PropertyID>
+                    <Name>Max Message Size</Name>
+                    <DataType>Integer</DataType>
+                    <Units>Byte</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>MaxMessageSize</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>5</PropertyID>
+                    <Name>Average Message Size</Name>
+                    <DataType>Integer</DataType>
+                    <Units>Byte</Units>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>false</IsMandatory>
+                    <Access>Read</Access>
+                    <SerialisationName>AverageMessageSize</SerialisationName>
+                </PropertyDefinition>
+                <PropertyDefinition>
+                    <PropertyID>6</PropertyID>
+                    <Name>StartOrReset</Name>
+                    <DataType>NotSet</DataType>
+                    <IsCollection>false</IsCollection>
+                    <IsMandatory>true</IsMandatory>
+                    <Access>NoAccess</Access>
+                    <SerialisationName>StartOrReset</SerialisationName>
+                </PropertyDefinition>
+            </Properties>
+        </ObjectDefinition>
 	</Items>
 </ObjectDefinitions>
 

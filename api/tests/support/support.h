@@ -160,7 +160,12 @@ public:
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_AddValueAsCString(setOperation, "/3/0/15", "Pacific/Wellington"));
 
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/4/0"));
+
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/5/0"));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/6/0"));
+
+        EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/7/0"));
 
         EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout * 5));
 
