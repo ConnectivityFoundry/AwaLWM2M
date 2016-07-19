@@ -1,5 +1,5 @@
 
-![Imagination Technologies Limited logo](img.png)
+![Imagination Technologies Limited logo](images/img.png)
 
 ----
 

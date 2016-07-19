@@ -1,5 +1,5 @@
 
-![](img.png)
+![](images/img.png)
 ----
 
 # The Awa Static API
@@ -14,7 +14,7 @@ The management of constrained devices requires efficient lightweight protocols s
 
 The Awa LightweightM2M client is a small footprint LWM2M client implementation written in C. Its purpose is to abstract LWM2M functionality while integrating the required data structures with the device's main application code. All Awa LightweightM2M client functionality is accessed via the **Awa Static API**, which provides an interface between a constrained device's application code and LWM2M Client services.
  
-![](Awa_static_API_constrained_device.png)
+![](images/Awa_static_API_constrained_device.png)
  
  
 The Awa Static API is ideally suited to devices that have a fixed configuration and dedicated functionality. It provides a concise solution that enables the C data structures in the device application code to be directly accessed by the LWM2M Client.
@@ -170,7 +170,7 @@ AwaError AwaStaticClient_SetResourceStorageWithPointer(AwaStaticClient * client,
 
 This results in fixed length resource instances being distributed continuously in memory as shown below:
  
-![](pointer_mode_uniform_resource_distribution.png)
+![](images/pointer_mode_uniform_resource_distribution.png)
 
 The parameters of the above function used to provide information about the location of each value in memory as shown in the diagram above are:
  
@@ -192,7 +192,7 @@ AwaError AwaStaticClient_SetResourceStorageWithPointerArray(AwaStaticClient * cl
  
 This results in fixed length resource instances being distributed arbitrarily in memory as shown below:
  
-![](pointer_mode_sparse_resource_distribution.png)
+![](images/pointer_mode_sparse_resource_distribution.png)
 
 The parameters that provide information about the location of each value in memory as shown in the diagram above are:
 

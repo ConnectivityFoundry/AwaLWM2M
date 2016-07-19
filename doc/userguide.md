@@ -1,5 +1,5 @@
 
-![](img.png)
+![](images/img.png)
 ----
 
 # Awa LightweightM2M
@@ -50,7 +50,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 ### Introduction
 
 
-![Awa application overview](Awa_application_overview.png)
+![Awa application overview](images/Awa_application_overview.png)
 
 
 LWM2M is a protocol that allows resources on a client to be accessed by a server. In the Awa library both the client and the server are daemon processes, each having its own respective API interface over an inter-process communication interface (IPC). The client API is for use exclusively with the client daemon, and the server API is for use exclusively with the server daemon.
@@ -62,7 +62,7 @@ A bootstrap server daemon is included that implements the LWM2M bootstrapping pr
 
 ----
 
-![LWM2M object model](LWM2M_object_referencing.png)
+![LWM2M object model](images/LWM2M_object_referencing.png)
 
 ----
 
@@ -120,7 +120,7 @@ The client provides two interfaces:
 * An IPC interface which provides a mechanism for applications to talk to the daemon
 
 
-![Awa LWM2M client interfaces](awa_client_interfaces.png)
+![Awa LWM2M client interfaces](images/awa_client_interfaces.png)
 
 
 The IPC interface allows the end user application to define new objects and to perform Get/Set/Delete/Subscribe operations on the client.
@@ -164,7 +164,7 @@ Object definitions can be loaded into the client daemon before it attempts to bo
 
 The LWM2M server runs as a daemon which provides an interface to perform LWM2M operations on connected LWM2M clients.
 
-![Awa LWM2M server interfaces](Awa_LWM2M_server_interfaces.png)
+![Awa LWM2M server interfaces](images/Awa_LWM2M_server_interfaces.png)
 
 The IPC interface allows the end user application to define new objects, list registered clients and perform Read/Write/Delete/Observe operations for a given LWM2M client registered with the server.
 Currently the IPC interface is implemented as a simple UDP channel, with an associated UDP port. It is recommended that only a single user application connect to the daemon's IPC interface at any time.
@@ -207,7 +207,7 @@ Object definitions can be loaded into the server daemon before it attempts to ac
 The LWM2M Bootstrap server runs as a daemon which provides a mechanism to bootstrap LWM2M clients.
 
 
-![](Awa_LWM2M_bootstrap_server-interfaces.png)
+![](images/Awa_LWM2M_bootstrap_server-interfaces.png)
 
 
 ### The Awa Bootstrap server daemon

@@ -1,5 +1,5 @@
 ﻿
-![](img.png)
+![](images/img.png)
 ----
 
 # LWM2M overview
