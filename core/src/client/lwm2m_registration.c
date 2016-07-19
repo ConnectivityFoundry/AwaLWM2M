@@ -138,6 +138,8 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
     sprintf(uri, "%s%s%s", serverUri, uriPath, uriQuery);
     Lwm2m_Debug("Register: POST %s\n", uri);
 
+    coap_Reset(uri);
+
     coap_PostRequest(server, uri, ContentType_ApplicationLinkFormat, payload, strlen(payload), HandleRegisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Registering;
 }

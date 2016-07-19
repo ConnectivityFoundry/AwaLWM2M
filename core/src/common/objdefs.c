@@ -56,32 +56,54 @@ static int LoadObjectDefinitionsFromFile(Lwm2mContextType * context, const char 
     FILE *f = fopen(filename, "rb");
     if (f != NULL)
     {
-        fseek(f, 0, SEEK_END);
-        long pos = ftell(f);
-        fseek(f, 0, SEEK_SET);
-        uint8_t * doc = malloc(pos);
-        if (doc != NULL)
+        if (fseek(f, 0, SEEK_END) == 0)
         {
-            size_t nmemb = fread(doc, pos, 1, f);
-            if (nmemb == 1)
+            long pos = ftell(f);
+            if (pos >= 0)
             {
-                Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
-                TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, pos, true);
-                count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
-                result = 0;
-                Tree_Delete(objectDefinitionsNode);
-                free(doc);
+                if (fseek(f, 0, SEEK_SET) == 0)
+                {
+                    uint8_t * doc = malloc((size_t)pos);
+                    if (doc != NULL)
+                    {
+                        size_t nmemb = fread(doc, (size_t)pos, 1, f);
+                        if (nmemb == 1)
+                        {
+                            Lwm2m_Debug("Parsing %s, %ld bytes\n", filename, pos);
+                            TreeNode objectDefinitionsNode = TreeNode_ParseXML(doc, (uint32_t)pos, true);
+                            count = xmlif_ParseObjDefDeviceServerXml(context, objectDefinitionsNode);
+                            result = 0;
+                            Tree_Delete(objectDefinitionsNode);
+                            free(doc);
+                        }
+                        else
+                        {
+                            perror("fread");
+                            result = -1;
+                            free(doc);
+                        }
+                    }
+                    else
+                    {
+                        Lwm2m_Error("Out of memory\n");
+                        result = -1;
+                    }
+                }
+                else
+                {
+                    perror("fseek");
+                    result = -1;
+                }
             }
             else
             {
-                perror("fread");
+                perror("ftell");
                 result = -1;
-                free(doc);
             }
         }
         else
         {
-            Lwm2m_Error("Out of memory\n");
+            perror("fseek");
             result = -1;
         }
         fclose(f);

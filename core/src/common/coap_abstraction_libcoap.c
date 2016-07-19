@@ -94,6 +94,11 @@ static void * context = NULL;
 static CoapInfo coapInfo;
 static RequestHandler requestHandler = NULL;
 
+
+void coap_Reset(const char * uri)
+{
+}
+
 void coap_SetContext(void * ctxt)
 {
     context = ctxt;
@@ -1176,7 +1181,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     return &coapInfo;
 }
 
-void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
 	(void)cert;
 	(void)certLength;

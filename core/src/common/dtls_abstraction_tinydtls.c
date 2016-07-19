@@ -76,7 +76,7 @@ static DTLS_Session sessions[MAX_DTLS_SESSIONS];
 
 static uint8_t * certificate = NULL;
 static int certificateLength = 0;
-static CertificateFormat certificateFormat;
+static AwaCertificateFormat certificateFormat;
 
 static const char * pskIdentity = NULL;
 static const uint8_t * pskKey = NULL;
@@ -118,11 +118,23 @@ void DTLS_Shutdown(void)
     }
 }
 
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void DTLS_Reset(NetworkAddress * address)
 {
-    certificate = (uint8_t *)cert;
-    certificateLength = certLength;
-    certificateFormat = format;
+    DTLS_Session * session = GetSession(address);
+    if (session)
+    {
+        FreeSession(session);
+    }
+}
+
+void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
+{
+    if (certificateLength > 0)
+    {
+        certificate = (uint8_t *)cert;
+        certificateLength = certLength;
+        certificateFormat = format;
+    }
 }
 
 void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
@@ -132,9 +144,12 @@ void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
 
 void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
-    pskIdentity = identity;
-    pskKey = key;
-    pskKeyLength = keyLength;
+    if (keyLength > 0)
+    {
+        pskIdentity = identity;
+        pskKey = key;
+        pskKeyLength = keyLength;
+    }
 }
 
 

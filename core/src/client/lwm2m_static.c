@@ -236,6 +236,24 @@ AwaError AwaStaticClient_SetFactoryBootstrapInformation(AwaStaticClient * client
     return result;
 }
 
+
+void AwaStaticClient_SetCertificate(AwaStaticClient * client, const uint8_t * certificate, int certificateLength, AwaCertificateFormat format)
+{
+    if (client != NULL)
+    {
+        coap_SetCertificate(certificate, certificateLength, format);
+    }
+}
+
+void AwaStaticClient_SetPSK(AwaStaticClient * client, const char * identity, const uint8_t * key, int keyLength)
+{
+    if (client != NULL)
+    {
+        coap_SetPSK(identity, key, keyLength);
+    }
+}
+
+
 AwaError AwaStaticClient_SetEndPointName(AwaStaticClient * client, const char * EndPointName)
 {
     AwaError result = AwaError_Unspecified;

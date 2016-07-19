@@ -319,6 +319,16 @@ void NetworkAddress_Free(NetworkAddress ** address)
     }
 }
 
+bool NetworkAddress_IsSecure(const NetworkAddress * address)
+{
+    bool result = false;
+    if (address)
+    {
+        result = address->Secure;
+    }
+    return result;
+}
+
 static void addCachedAddress(NetworkAddress * address, const char * uri, int uriLength)
 {
     if (address)
@@ -458,7 +468,7 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
     return result;
 }
 
-void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, CertificateFormat format)
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
     DTLS_SetCertificate(cert, certLength, format);
 }

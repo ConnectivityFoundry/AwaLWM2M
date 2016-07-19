@@ -52,7 +52,7 @@ typedef struct
     char * EndPointName;
 } Lwm2mBootstrapClient;
 
-static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS] = { 0 };
+static Lwm2mBootstrapClient bootStrapQueue[MAX_CLIENTS];
 
 static char * GetEndPointNameFromQuery(const char * query)
 {
@@ -237,6 +237,7 @@ bool Lwm2mBootstrap_BootStrapInit(Lwm2mContextType * context, const char ** conf
     bool success = true;
     int i = 0;
 
+    memset(bootStrapQueue, 0, sizeof(bootStrapQueue));
     Lwm2mCore_AddResourceEndPoint(context, "/bs", EndpointHandler);
 
     for (i = 0; i < configCount; i++)

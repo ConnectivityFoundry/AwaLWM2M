@@ -208,7 +208,7 @@ static int Lwm2mServer_Start(Options * options)
 
     if (options->Secure)
     {
-    	coap_SetCertificate(serverCert, sizeof(serverCert), CertificateFormat_PEM);
+    	coap_SetCertificate(serverCert, sizeof(serverCert), AwaCertificateFormat_PEM);
         coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
     }
 
@@ -332,6 +332,12 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->Verbose = ai->verbose_flag;
         options->LogFile = ai->logFile_arg;
         options->Version = ai->version_flag;
+
+        if (options->Secure && strcmp(DTLS_LibraryName, "None") == 0)
+        {
+            printf("Error: not built with DTLS support\n\n");
+            result = EXIT_FAILURE;
+        }
     }
     else
     {
