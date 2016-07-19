@@ -53,16 +53,17 @@ void DTLS_Init(void);
 
 void DTLS_Shutdown(void);
 
-void DTLS_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format);
-
-void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback);
-
-void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength);
-
 bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context);
 
 bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTextLength, uint8_t * encryptedBuffer, int encryptedBufferLength, int * encryptedLength, void *context);
 
+void DTLS_Reset(NetworkAddress * address);
+
+void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format);
+
+void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback);
+
+void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength);
 
 #ifdef __cplusplus
 }

@@ -69,6 +69,8 @@ typedef struct
     int IpcPort;
     char * EndPointName;
     char * BootStrap;
+    char * PskIdentity;
+    char * PskKey;
     const char * FactoryBootstrapFile;
     const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
     size_t NumObjDefsFiles;
@@ -140,6 +142,29 @@ static void Daemonise(bool verbose)
     close (STDERR_FILENO);
 }
 
+uint8_t HexToByte(const char *value)
+{
+    uint8_t result = 0;
+    if (value)
+    {
+        int count = 2;
+        while (count)
+        {
+            int hex = *value++;
+            if (hex >= '0' && hex <= '9')
+                result |= hex - '0';
+            else if (hex >= 'A' && hex <= 'F')
+                result |= 10 + (hex - 'A');
+            else if (hex >= 'a' && hex <= 'f')
+                result |= 10 + (hex - 'a');
+            count--;
+            if (count > 0)
+                result <<= 4;
+        }
+    }
+    return result;
+}
+
 static int Lwm2mClient_Start(Options * options)
 {
     int result = 0;
@@ -192,7 +217,7 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
-    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
+    CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false /* not a server */, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
     {
         Lwm2m_Error("Failed to initialise CoAP on port %d\n", options->CoapPort);
@@ -200,8 +225,30 @@ static int Lwm2mClient_Start(Options * options)
         goto error_close_log;
     }
 
-    coap_SetCertificate(clientCert, sizeof(clientCert), CertificateFormat_PEM);
-    coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
+    // always set key
+    coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
+
+    if (options->PskIdentity && options->PskKey)
+    {
+        int hexKeyLength = strlen(options->PskKey);
+        int keyLength = hexKeyLength / 2;
+        uint8_t * key = (uint8_t *)malloc(keyLength);
+        if (key)
+        {
+           char * value = options->PskKey;
+           int index;
+           for (index = 0; index < keyLength; index++)
+           {
+               key[index] = HexToByte(value);
+               value += 2;
+           }
+           coap_SetPSK(options->PskIdentity, key, keyLength);
+        }
+        else
+            coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
+    }
+    else
+        coap_SetPSK(pskIdentity, pskKey, sizeof(pskKey));
 
     // if required read the bootstrap information from a file
     const BootstrapInfo * factoryBootstrapInfo;
@@ -343,8 +390,16 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         options->AddressFamily = ai->addressFamily_arg == 4 ? AF_INET : AF_INET6;
         options->IpcPort = ai->ipcPort_arg;
         options->EndPointName = ai->endPointName_arg;
-        options->BootStrap = ai->bootstrap_arg;
-        options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
+        if (ai->bootstrap_given)
+            options->BootStrap = ai->bootstrap_arg;
+
+        if (ai->pskIdentity_given)
+            options->PskIdentity = ai->pskIdentity_arg;
+        if (ai->pskKey_given)
+            options->PskKey = ai->pskKey_arg;
+
+        if (ai->factoryBootstrap_given)
+            options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
         int i;
         for (i = 0; i < ai->objDefs_given; ++i)
         {
@@ -381,6 +436,8 @@ int main(int argc, char ** argv)
         .IpcPort = 0,
         .EndPointName = NULL,
         .BootStrap = NULL,
+        .PskIdentity = NULL,
+        .PskKey = NULL,
         .FactoryBootstrapFile = NULL,
         .ObjDefsFiles = {0},
         .NumObjDefsFiles = 0,

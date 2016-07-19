@@ -40,6 +40,10 @@ const char *gengetopt_args_info_help[] = {
   "  -e, --endPointName=NAME      Use NAME as client end point name  (default=`Awa\n                                 Client')",
   "  -b, --bootstrap=URI          Use bootstrap server URI",
   "  -f, --factoryBootstrap=FILE  Load factory bootstrap information from FILE",
+  "  -s, --secure                 CoAP communications are secured with DTLS\n                                 (default=off)",
+  "      --pskIdentity=IDENTITY   Default Identity of associated pre-shared key\n                                 for DTLS",
+  "      --pskKey=KEY             Default pre-shared key for DTLS",
+  "  -c, --certificate=FILE       Load client certificate from FILE",
   "  -o, --objDefs=FILE           Load object and resource definitions from FILE",
   "  -d, --daemonize              Detach process from terminal and run in the\n                                 background  (default=off)",
   "  -v, --verbose                Generate verbose output  (default=off)",
@@ -82,6 +86,10 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->endPointName_given = 0 ;
   args_info->bootstrap_given = 0 ;
   args_info->factoryBootstrap_given = 0 ;
+  args_info->secure_given = 0 ;
+  args_info->pskIdentity_given = 0 ;
+  args_info->pskKey_given = 0 ;
+  args_info->certificate_given = 0 ;
   args_info->objDefs_given = 0 ;
   args_info->daemonize_given = 0 ;
   args_info->verbose_given = 0 ;
@@ -105,6 +113,13 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->bootstrap_orig = NULL;
   args_info->factoryBootstrap_arg = NULL;
   args_info->factoryBootstrap_orig = NULL;
+  args_info->secure_flag = 0;
+  args_info->pskIdentity_arg = NULL;
+  args_info->pskIdentity_orig = NULL;
+  args_info->pskKey_arg = NULL;
+  args_info->pskKey_orig = NULL;
+  args_info->certificate_arg = NULL;
+  args_info->certificate_orig = NULL;
   args_info->objDefs_arg = NULL;
   args_info->objDefs_orig = NULL;
   args_info->daemonize_flag = 0;
@@ -127,13 +142,17 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->endPointName_help = gengetopt_args_info_help[4] ;
   args_info->bootstrap_help = gengetopt_args_info_help[5] ;
   args_info->factoryBootstrap_help = gengetopt_args_info_help[6] ;
-  args_info->objDefs_help = gengetopt_args_info_help[7] ;
+  args_info->secure_help = gengetopt_args_info_help[7] ;
+  args_info->pskIdentity_help = gengetopt_args_info_help[8] ;
+  args_info->pskKey_help = gengetopt_args_info_help[9] ;
+  args_info->certificate_help = gengetopt_args_info_help[10] ;
+  args_info->objDefs_help = gengetopt_args_info_help[11] ;
   args_info->objDefs_min = 1;
   args_info->objDefs_max = 16;
-  args_info->daemonize_help = gengetopt_args_info_help[8] ;
-  args_info->verbose_help = gengetopt_args_info_help[9] ;
-  args_info->logFile_help = gengetopt_args_info_help[10] ;
-  args_info->version_help = gengetopt_args_info_help[11] ;
+  args_info->daemonize_help = gengetopt_args_info_help[12] ;
+  args_info->verbose_help = gengetopt_args_info_help[13] ;
+  args_info->logFile_help = gengetopt_args_info_help[14] ;
+  args_info->version_help = gengetopt_args_info_help[15] ;
   
 }
 
@@ -274,6 +293,12 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->bootstrap_orig));
   free_string_field (&(args_info->factoryBootstrap_arg));
   free_string_field (&(args_info->factoryBootstrap_orig));
+  free_string_field (&(args_info->pskIdentity_arg));
+  free_string_field (&(args_info->pskIdentity_orig));
+  free_string_field (&(args_info->pskKey_arg));
+  free_string_field (&(args_info->pskKey_orig));
+  free_string_field (&(args_info->certificate_arg));
+  free_string_field (&(args_info->certificate_orig));
   free_multiple_string_field (args_info->objDefs_given, &(args_info->objDefs_arg), &(args_info->objDefs_orig));
   free_string_field (&(args_info->logFile_arg));
   free_string_field (&(args_info->logFile_orig));
@@ -375,6 +400,14 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bootstrap", args_info->bootstrap_orig, 0);
   if (args_info->factoryBootstrap_given)
     write_into_file(outfile, "factoryBootstrap", args_info->factoryBootstrap_orig, 0);
+  if (args_info->secure_given)
+    write_into_file(outfile, "secure", 0, 0 );
+  if (args_info->pskIdentity_given)
+    write_into_file(outfile, "pskIdentity", args_info->pskIdentity_orig, 0);
+  if (args_info->pskKey_given)
+    write_into_file(outfile, "pskKey", args_info->pskKey_orig, 0);
+  if (args_info->certificate_given)
+    write_into_file(outfile, "certificate", args_info->certificate_orig, 0);
   write_multiple_into_file(outfile, args_info->objDefs_given, "objDefs", args_info->objDefs_orig, 0);
   if (args_info->daemonize_given)
     write_into_file(outfile, "daemonize", 0, 0 );
@@ -1545,6 +1578,10 @@ cmdline_parser_internal (
         { "endPointName",	1, NULL, 'e' },
         { "bootstrap",	1, NULL, 'b' },
         { "factoryBootstrap",	1, NULL, 'f' },
+        { "secure",	0, NULL, 's' },
+        { "pskIdentity",	1, NULL, 0 },
+        { "pskKey",	1, NULL, 0 },
+        { "certificate",	1, NULL, 'c' },
         { "objDefs",	1, NULL, 'o' },
         { "daemonize",	0, NULL, 'd' },
         { "verbose",	0, NULL, 'v' },
@@ -1558,7 +1595,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hp:a:i:e:b:f:o:dvl:V", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hp:a:i:e:b:f:sc:o:dvl:V", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1646,6 +1683,28 @@ cmdline_parser_internal (
             goto failure;
         
           break;
+        case 's':	/* CoAP communications are secured with DTLS.  */
+        
+        
+          if (update_arg((void *)&(args_info->secure_flag), 0, &(args_info->secure_given),
+              &(local_args_info.secure_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "secure", 's',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* Load client certificate from FILE.  */
+        
+        
+          if (update_arg( (void *)&(args_info->certificate_arg), 
+               &(args_info->certificate_orig), &(args_info->certificate_given),
+              &(local_args_info.certificate_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "certificate", 'c',
+              additional_error))
+            goto failure;
+        
+          break;
         case 'o':	/* Load object and resource definitions from FILE.  */
         
           if (update_multiple_arg_temp(&objDefs_list, 
@@ -1699,6 +1758,36 @@ cmdline_parser_internal (
           break;
 
         case 0:	/* Long option with no short option */
+          /* Default Identity of associated pre-shared key for DTLS.  */
+          if (strcmp (long_options[option_index].name, "pskIdentity") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->pskIdentity_arg), 
+                 &(args_info->pskIdentity_orig), &(args_info->pskIdentity_given),
+                &(local_args_info.pskIdentity_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "pskIdentity", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Default pre-shared key for DTLS.  */
+          else if (strcmp (long_options[option_index].name, "pskKey") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->pskKey_arg), 
+                 &(args_info->pskKey_orig), &(args_info->pskKey_given),
+                &(local_args_info.pskKey_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "pskKey", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
+          break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
           goto failure;

@@ -94,6 +94,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     Lwm2m_Info("Bind port: %d\n", port);
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     memset(Observations, 0, sizeof(Observations));
+    coap_init_connection(port);
     coap_init_transactions();
     coap_set_service_callback(coap_HandleRequest);
     DTLS_Init();
@@ -111,7 +112,17 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     return &coapInfo;
 }
 
-void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+
+void coap_Reset(const char * uri)
+{
+    NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
+    if (remoteAddress)
+    {
+        DTLS_Reset(remoteAddress);
+    }
+}
+
+void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
 	NetworkSocket_SetCertificate(networkSocket, cert, certLength, format);
 }
@@ -352,6 +363,12 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType 
     { 0 };
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
+
+    if ((strcmp(DTLS_LibraryName, "None") == 0) && NetworkAddress_IsSecure(remoteAddress))
+    {
+        Lwm2m_Error("Cannot send request to %s - not built with DTLS support\n\n", uri);
+        return;
+    }
 
     coap_getPathQueryFromURI(uri, path, query);
 

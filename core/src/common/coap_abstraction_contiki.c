@@ -54,6 +54,10 @@ static RequestHandler requestHandler = NULL;
 int CurrentTransactionIndex = 0;
 TransactionType CurrentTransaction[MAX_COAP_TRANSACTIONS] = {{0}, {0}};
 
+void coap_Reset(const char * uri)
+{
+}
+
 int coap_WaitMessage(int timeout, int fd)
 {
     // No wait in Contiki
@@ -479,7 +483,7 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     return &coapInfo;
 }
 
-void coap_SetCertificate(const uint8_t * cert, int certLength, CertificateFormat format)
+void coap_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
 	(void)cert;
 	(void)certLength;

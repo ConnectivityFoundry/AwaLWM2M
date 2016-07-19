@@ -29,11 +29,9 @@ extern "C" {
 #endif
 
 
-const char * pskIdentity = "oFIrQFrW8EWcZ5u7eGfrkw";
+const char * pskIdentity = "";
 
-const uint8_t pskKey[] = {
-        0x7C, 0xCD, 0xE1, 0x4A, 0x5C, 0xF3, 0xB7, 0x1C, 0x0C, 0x08, 0xC8, 0xB7, 0xF9, 0xE5
-};
+const uint8_t pskKey[] = {};
 
 
 #ifdef __cplusplus
