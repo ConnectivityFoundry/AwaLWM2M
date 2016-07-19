@@ -103,11 +103,12 @@ bool WaitForRegistration(AwaServerSession * serverSession, const std::vector<std
 //    std::cerr << "WaitForRegistration:" << std::endl;
     do
     {
-        // short sleep to avoid spinning the IPC too fast
-        usleep(1000);
-
         AwaServerSession_Process(serverSession, global::timeout);
         AwaServerSession_DispatchCallbacks(serverSession);
+
+        // short sleep to avoid spinning the IPC too fast
+        usleep(10000);
+
         allRegistered = (chk.registeredIDs.size() == clientIDs.size()) && std::is_permutation(chk.registeredIDs.begin(), chk.registeredIDs.end(), clientIDs.begin());
 
         struct timeval currentTime;

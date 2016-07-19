@@ -426,6 +426,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
@@ -448,6 +454,14 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1", "TestClient2", "TestClient3" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient2", global::timeout));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient3", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
@@ -503,6 +517,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_AddPath(operation, "TestClient1", "/4/0"));
     EXPECT_EQ(AwaError_Success, AwaServerDeleteOperation_Perform(operation, global::timeout));
@@ -522,6 +542,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteRes
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -550,6 +576,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, DISABLED_AwaServer
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -585,6 +617,12 @@ TEST_F(TestServerDeleteOperationWithConnectedSessionNoClient, AwaServerDeleteOpe
     // start a client and wait for them to register with the server
     AwaClientDaemonHorde horde( { "TestClient1" }, 61000);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_CreateObjectInstance(writeInitialOperation, "/4/0"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, "TestClient1", global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     // now try to Delete the mandatory resource:
     AwaServerDeleteOperation * operation = AwaServerDeleteOperation_New(session_);

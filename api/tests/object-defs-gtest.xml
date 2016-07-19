@@ -316,7 +316,7 @@
                     <DataType>NotSet</DataType>
                     <IsCollection>false</IsCollection>
                     <IsMandatory>true</IsMandatory>
-                    <Access>NoAccess</Access>
+                    <Access>Execute</Access>
                     <SerialisationName>Update</SerialisationName>
                 </PropertyDefinition>
                 <PropertyDefinition>

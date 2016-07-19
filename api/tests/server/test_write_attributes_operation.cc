@@ -153,7 +153,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
@@ -168,8 +168,8 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "lt", -10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "lt", -10));
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
@@ -184,8 +184,8 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmin", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmax", 5));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "pmin", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "pmax", 5));
 
     ASSERT_EQ(AwaError_Response, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
@@ -200,8 +200,8 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmin", 5));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "pmax", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "pmin", 5));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "pmax", 10));
 
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
@@ -229,7 +229,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 {
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
 
     ASSERT_EQ(AwaError_OperationInvalid, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, -1));
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Free(&writeAttributesOperation));
@@ -246,7 +246,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     EXPECT_EQ(AwaError_Success, AwaServerSession_Connect(session));
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
 
     // Make the server unresponsive
     daemon_.Pause();
@@ -266,7 +266,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     // Test behaviour when parent session has been disconnected
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
 
     AwaServerSession_Disconnect(session_);
 
@@ -297,7 +297,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
 
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, NULL);
@@ -312,7 +312,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
 
     //haven't processed writeAttributes operation, so writeAttributes response should return NULL
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
@@ -331,7 +331,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
 
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
 
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
@@ -364,7 +364,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != writeAttributesResponse);
@@ -380,11 +380,11 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != writeAttributesResponse);
-    ASSERT_TRUE(AwaServerWriteAttributesResponse_ContainsPath(writeAttributesResponse, "/3/0/13"));
+    ASSERT_TRUE(AwaServerWriteAttributesResponse_ContainsPath(writeAttributesResponse, "/1/0/1"));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
 }
 
@@ -396,11 +396,11 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != writeAttributesResponse);
-    ASSERT_FALSE(AwaServerWriteAttributesResponse_ContainsPath(writeAttributesResponse, "/3/0/2"));
+    ASSERT_FALSE(AwaServerWriteAttributesResponse_ContainsPath(writeAttributesResponse, "/1/0/2"));
     AwaServerWriteAttributesOperation_Free(&writeAttributesOperation);
 }
 
@@ -417,7 +417,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_);
     ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName);
     ASSERT_TRUE(NULL != writeAttributesResponse);
@@ -427,7 +427,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 
     // call Next once before writeAttributesting values:
     EXPECT_EQ(true, AwaPathIterator_Next(iterator));
-    EXPECT_STREQ("/3/0/13", AwaPathIterator_Get(iterator));
+    EXPECT_STREQ("/1/0/1", AwaPathIterator_Get(iterator));
 
     // not expecting any more paths
     EXPECT_TRUE(false == AwaPathIterator_Next(iterator));
@@ -442,8 +442,8 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, AwaServerWriteAttribute
 TEST_F(TestWriteAttributesOperationWithConnectedSession, DISABLED_AwaServerWriteAttributesResponse_NewPathIterator_handles_valid_response_multiple_paths)
 {
     AwaServerWriteAttributesOperation * writeAttributesOperation = AwaServerWriteAttributesOperation_New(session_); ASSERT_TRUE(NULL != writeAttributesOperation);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/12", "gt", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/0", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(writeAttributesOperation, global::clientEndpointName, "/1/0/1", "gt", 10));
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(writeAttributesOperation, global::timeout));
     const AwaServerWriteAttributesResponse * writeAttributesResponse = AwaServerWriteAttributesOperation_GetResponse(writeAttributesOperation, global::clientEndpointName); ASSERT_TRUE(NULL != writeAttributesResponse);
 
@@ -452,10 +452,10 @@ TEST_F(TestWriteAttributesOperationWithConnectedSession, DISABLED_AwaServerWrite
 
     // call Next once before executing values:
     EXPECT_EQ(true, AwaPathIterator_Next(iterator));
-    EXPECT_STREQ("/3/0/12", AwaPathIterator_Get(iterator));
+    EXPECT_STREQ("/1/0/0", AwaPathIterator_Get(iterator));
 
     EXPECT_EQ(true, AwaPathIterator_Next(iterator));
-    EXPECT_STREQ("/3/0/13", AwaPathIterator_Get(iterator));
+    EXPECT_STREQ("/1/0/1", AwaPathIterator_Get(iterator));
 
     // not expecting any more paths
     EXPECT_TRUE(false == AwaPathIterator_Next(iterator));
@@ -485,7 +485,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, AwaServerWriteA
 {
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
     const char * clientID = "TestClient123";
-    const char * path = "/3/0/13";
+    const char * path = "/1/0/1";
     ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, clientID, path, "gt", 10));
     EXPECT_EQ(AwaError_Response, AwaServerWriteAttributesOperation_Perform(operation, global::timeout));
 
@@ -514,7 +514,7 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, AwaServerWriteA
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), global::timeout));
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, global::clientEndpointName, "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, global::clientEndpointName, "/1/0/1", "gt", 10));
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(operation, global::timeout));
 
     AwaClientIterator * iterator = AwaServerWriteAttributesOperation_NewClientIterator(operation);
@@ -537,9 +537,9 @@ TEST_F(TestWriteAttributesOperationWithConnectedSessionNoClient, DISABLED_AwaSer
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), global::timeout));
 
     AwaServerWriteAttributesOperation * operation = AwaServerWriteAttributesOperation_New(session_);
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient1", "/3/0/13", "gt", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient2", "/3/0/13", "gt", 10));
-    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient3", "/3/0/13", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient1", "/1/0/1", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient2", "/1/0/1", "gt", 10));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_AddAttributeAsInteger(operation, "TestClient3", "/1/0/1", "gt", 10));
 
     EXPECT_EQ(AwaError_Success, AwaServerWriteAttributesOperation_Perform(operation, global::timeout));
 

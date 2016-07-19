@@ -410,6 +410,7 @@ public:
         {
             DaemonPtr p(new AwaClientDaemon);
             p->SetIpcPort(startIpcPort++);
+            p->SetCoapPort(startIpcPort++);
             p->SetEndpointName(*it);
             global::testLog << "  - spawn " << *it << std::endl;
             p->Start();
