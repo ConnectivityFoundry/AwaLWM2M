@@ -1,5 +1,5 @@
 
-![](doc/img.png)
+![](doc/images/img.png)
 
 ----
 
