@@ -1,5 +1,5 @@
 
-![](img.png)
+![](images/img.png)
 
 ----
 
@@ -17,7 +17,7 @@ LWM2M also provides a *bootstrap* mechanism, which helps a client to locate and 
 
 LWM2M makes use of an *Object/Object Instance/Resource* (OIR) model to represent information. Objects are constructed from individual resource definitions, and each instance of an object is called an *Object Instance*.
 
-![OIR model](LWM2M_object_referencing.png)
+![OIR model](images/LWM2M_object_referencing.png)
 
 Refer to section [6.1 of the LWM2M technical specification](http://technical.openmobilealliance.org/Technical/technical-information/release-program/current-releases/oma-lightweightm2m-v1-0) for details.
 
@@ -61,7 +61,7 @@ The static client API is designed for cases where the configuration will not cha
 ### The client  
 The client consists of the *client core*, which coordinates the IPC layer (for communication with the client API), the static API, serialiser/deserialiser (*serdes*), CoAP, definition registry, data storage (*object tree*) and observer registry.
 
-![Awa client API structure](Awa_client_API_structure.png)
+![Awa client API structure](images/Awa_client_API_structure.png)
 
 #### The client core  
 

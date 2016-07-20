@@ -1,5 +1,5 @@
 
-![](img.png)
+![](images/img.png)
 
 ----
 
@@ -10,7 +10,7 @@
 
 ### Application overview
 
-![](Awa_client_tutorial_application_positioning_static_api.png)
+![](images/Awa_client_tutorial_application_positioning_static_api.png)
 
 This example shows how to:
 
@@ -23,7 +23,7 @@ This example shows how to:
 
 The *client-static-tutorial* application makes use of the Awa Static API to define objects and resources and to expose them via LWM2M:
 
-![](Awa_client_tutorial_static_api.png)
+![](images/Awa_client_tutorial_static_api.png)
 
 Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
