@@ -113,7 +113,7 @@ The object tree implements the LWM2M OIR data model by keeping track of all obje
 
 #### Observers  
 
-TODO
+Observers are either on the IPC or LWM2M interfaces, this allows notifications of changes to resources to be sent over the IPC or LWM2M to applications. 
 
 #### Endpoints  
 
