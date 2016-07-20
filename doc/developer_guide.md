@@ -117,7 +117,7 @@ Observers are either on the IPC or LWM2M interfaces, this allows notifications o
 
 #### Endpoints  
 
-TODO
+Endpoints provide the mapping between LWM2M operations and CoAP requests.
 
 #### IPC  
 
