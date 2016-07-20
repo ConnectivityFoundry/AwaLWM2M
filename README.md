@@ -1,6 +1,6 @@
 
 
-![Imagination Technologies Limited logo](doc/img.png)
+![Imagination Technologies Limited logo](doc/images/img.png)
 
 ----
 
@@ -16,7 +16,7 @@ The LWM2M protocol has been designed to be highly efficient in terms of data tra
 
 Awa LightweightM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards compliant device management solution to simplify the development of M2M applications by providing an intuitive API that enables customization without the need for an intimate knowledge of M2M protocols.
 
-![Awa application overview](doc/Awa_application_overview.png)
+![Awa application overview](doc/images/Awa_application_overview.png)
 
 Awa LightweightM2M is a development suite that provides a number of components and tools which can be combined in various ways depending on requirement. For example:
 
