@@ -105,8 +105,7 @@ The serialiser converts data from a Lwm2mTree, constructed from lwm2mTreeNode el
 
 #### The object store  
 
-TODO
-
+The object store contains the resource values for all object instances and resource instances in the Client daemon. 
 
 #### The object tree  
 
