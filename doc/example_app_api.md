@@ -1,5 +1,5 @@
 
-![](img.png)
+![](images/img.png)
 
 ----
 
@@ -10,7 +10,7 @@
 
 ### Application overview
 
-![](Awa_client_tutorial_application_positioning.png)
+![](images/Awa_client_tutorial_application_positioning.png)
 
 This example shows how to:
 
@@ -27,7 +27,7 @@ This example shows how to:
 
 The client-tutorial application makes use of the Awa API to define objects and resources and to register these with the client daemon:
 
-![](client-tutorial.png)
+![](images/client-tutorial.png)
 
 Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
@@ -69,7 +69,7 @@ all:
 
 Now is a good time to define our objects and resources:
 
-![](Awa_client_tutorial_object_description.png)
+![](images/Awa_client_tutorial_object_description.png)
 
 To create the above object model the following code goes into tutorial/*client-tutorial.c*:
 
@@ -287,7 +287,7 @@ So far our object definitions have remained local to the client. The next sectio
 
 Let's create a server side application that makes use of our new object.
 
-![](server-tutorial.png)
+![](images/server-tutorial.png)
 
 The following code registers our object definition with the LWM2M server daemon, allowing it to communicate with any LWM2M clients that support the same object.
 

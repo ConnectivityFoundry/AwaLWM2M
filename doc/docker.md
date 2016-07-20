@@ -1,4 +1,4 @@
-![](img.png)
+![](images/img.png)
 ----
 
 # Using Awa with Docker
