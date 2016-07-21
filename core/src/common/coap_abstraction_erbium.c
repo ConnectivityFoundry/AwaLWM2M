@@ -91,7 +91,7 @@ static int removeObserve(NetworkAddress * remoteAddress, char * path);
 
 CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
-    Lwm2m_Info("Bind port: %d\n", port);
+    CoapInfo * result = NULL;
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     memset(Observations, 0, sizeof(Observations));
     coap_init_connection(port);
@@ -99,17 +99,23 @@ CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel
     coap_set_service_callback(coap_HandleRequest);
     DTLS_Init();
     if (secure)
-    	networkSocket = NetworkSocket_New(NetworkSocketType_UDP | NetworkSocketType_Secure, port);
+    	networkSocket = NetworkSocket_New(ipAddress, NetworkSocketType_UDP | NetworkSocketType_Secure, port);
     else
-    	networkSocket = NetworkSocket_New(NetworkSocketType_UDP, port);
+    	networkSocket = NetworkSocket_New(ipAddress, NetworkSocketType_UDP, port);
     if (networkSocket)
     {
         if (NetworkSocket_StartListening(networkSocket))
         {
+            Lwm2m_Info("Bind port: %d\n", port);
             coapInfo.fd = NetworkSocket_GetFileDescriptor(networkSocket);
+            result = &coapInfo;
         }
     }
-    return &coapInfo;
+    else
+    {
+        Lwm2m_Error("Failed to bind port: %d\n", port);
+    }
+    return result;
 }
 
 

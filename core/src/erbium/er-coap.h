@@ -53,10 +53,19 @@
 #endif
 
 /* use Erbium CoAP for the REST Engine. Must come before include of rest-engine.h. */
-#define REST coap_rest_implementation
-#include "rest-engine.h"
+//#define REST coap_rest_implementation
+//#include "rest-engine.h"
+#include <stdint.h>
 
-typedef uip_ipaddr_t ipaddr_t
+typedef uip_ipaddr_t ipaddr_t;
+
+#define ERBIUM_DEBUG 0
+#if ERBIUM_DEBUG
+#define PRINTF printf
+#else
+#define PRINTF(...)
+#endif
+
 
 #else
 

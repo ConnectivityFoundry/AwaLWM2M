@@ -33,6 +33,7 @@ typedef int SOCKET;
 #define SOCKET_ERROR            (-1)
 #define closesocket close
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <linux/tcp.h>
 #include <linux/version.h>
 
@@ -59,6 +60,7 @@ struct _NetworkSocket
 {
     int Socket;
     int SocketIPv6;
+    NetworkAddress * BindAddress;
     NetworkSocketType SocketType;
     uint16_t Port;
     NetworkSocketError LastError;
@@ -98,6 +100,31 @@ uint8_t encryptBuffer[ENCRYPT_BUFFER_LENGTH];
 
 static NetworkTransmissionError SendDTLS(NetworkAddress * destAddress, const uint8_t * buffer, int bufferLength, void *context);
 
+NetworkAddress * NetworkAddress_FromIPAddress(const char * ipAddress, uint16_t port)
+{
+    NetworkAddress * result;
+    size_t size = sizeof(struct _NetworkAddress);
+    result = (NetworkAddress *)malloc(size);
+    memset(result, 0, size);
+    if (inet_pton(AF_INET, ipAddress, &result->Address.Sin.sin_addr) == 1)
+    {
+        result->Address.Sin.sin_family = AF_INET;
+        result->Address.Sin.sin_port = htons(port);
+    }
+    else if (inet_pton(AF_INET6, ipAddress, &result->Address.Sin6.sin6_addr) == 1)
+    {
+        result->Address.Sin6.sin6_family = AF_INET6;
+        result->Address.Sin6.sin6_port = htons(port);
+    }
+    else
+    {
+        free(result);
+        result = NULL;
+    }
+    return result;
+}
+
+
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
 {
     NetworkAddress * result = NULL;
@@ -108,6 +135,7 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             result = getCachedAddressByUri(uri, uriHostLength);
         if (!result)
         {
+            bool ip6Address = false;
             bool secure = false;
             int index = 0;
             int startIndex = 0;
@@ -146,25 +174,32 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                     if ((uri[index] == '[') )
                     {
                         index++;
+                        startIndex = index;
                         while (index < uriLength)
                         {
                             if (uri[index] == ']')
                             {
+                                ip6Address = true;
                                 break;
                             }
+                            hostname[hostnameLength] = uri[index];
+                            hostnameLength++;
                             index++;
                         }
                     }
                     else if ((uri[index] == ':') || (uri[index] == '/') )
                     {
-                        hostnameLength = index - startIndex;
-                        memcpy(&hostname, &uri[startIndex], hostnameLength);
                         hostname[hostnameLength] = 0;
                         if  (uri[index] == '/')
                             break;
                         state = UriParseState_Port;
                         port = 0;
                         startIndex = index + 1;
+                    }
+                    else
+                    {
+                        hostname[hostnameLength] = uri[index];
+                        hostnameLength++;
                     }
                     index++;
                 }
@@ -183,53 +218,60 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             }
             if (state == UriParseState_Hostname)
             {
-                hostnameLength = uriLength - startIndex;
-                memcpy(hostname, &uri[startIndex], hostnameLength);
                 hostname[hostnameLength] = 0;
             }
             if (hostnameLength > 0 && port > 0)
             {
-                struct hostent *resolvedAddress = gethostbyname(hostname);
-                if (resolvedAddress)
+                NetworkAddress * networkAddress = NULL;
+                if (ip6Address)
                 {
-                    size_t size = sizeof(struct _NetworkAddress);
-                    NetworkAddress * networkAddress = (NetworkAddress *)malloc(size);
-                    if (networkAddress)
+                    networkAddress = NetworkAddress_FromIPAddress(hostname, port);
+                }
+                else
+                {
+                    struct hostent *resolvedAddress = gethostbyname(hostname);
+                    if (resolvedAddress)
                     {
-                        memset(networkAddress, 0, size);
-                        networkAddress->Secure = secure;
-                        if (resolvedAddress->h_addrtype == AF_INET)
+                        size_t size = sizeof(struct _NetworkAddress);
+                        networkAddress = (NetworkAddress *) malloc(size);
+                        if (networkAddress)
                         {
-                            networkAddress->Address.Sin.sin_family = AF_INET;
-                            memcpy(&networkAddress->Address.Sin.sin_addr,*(resolvedAddress->h_addr_list),sizeof(struct in_addr));
-                            networkAddress->Address.Sin.sin_port = htons(port);
-                        }
-                        else if (resolvedAddress->h_addrtype == AF_INET6)
-                        {
-                            networkAddress->Address.Sin6.sin6_family = AF_INET6;
-                            memcpy(&networkAddress->Address.Sin6.sin6_addr,*(resolvedAddress->h_addr_list),sizeof(struct in6_addr));
-                            networkAddress->Address.Sin6.sin6_port = htons(port);
-                        }
-                        else
-                        {
-                            free(networkAddress);
-                            networkAddress = NULL;
-                        }
-                    }
-                    if (networkAddress)
-                    {
-                        result = getCachedAddress(networkAddress, uri, uriHostLength);
-                        if (result)
-                        {
-                            // Matched existing address
-                            free(networkAddress);
-                        }
-                        else
-                        {
-                            result = networkAddress;
+                            memset(networkAddress, 0, size);
+                            networkAddress->Secure = secure;
+                            if (resolvedAddress->h_addrtype == AF_INET)
+                            {
+                                networkAddress->Address.Sin.sin_family = AF_INET;
+                                memcpy(&networkAddress->Address.Sin.sin_addr, *(resolvedAddress->h_addr_list), sizeof(struct in_addr));
+                                networkAddress->Address.Sin.sin_port = htons(port);
+                            }
+                            else if (resolvedAddress->h_addrtype == AF_INET6)
+                            {
+                                networkAddress->Address.Sin6.sin6_family = AF_INET6;
+                                memcpy(&networkAddress->Address.Sin6.sin6_addr, *(resolvedAddress->h_addr_list), sizeof(struct in6_addr));
+                                networkAddress->Address.Sin6.sin6_port = htons(port);
+                            }
+                            else
+                            {
+                                free(networkAddress);
+                                networkAddress = NULL;
+                            }
                         }
                     }
                 }
+                if (networkAddress)
+                {
+                    result = getCachedAddress(networkAddress, uri, uriHostLength);
+                    if (result)
+                    {
+                        // Matched existing address
+                        free(networkAddress);
+                    }
+                    else
+                    {
+                        result = networkAddress;
+                    }
+                }
+
             }
         }
 
@@ -432,7 +474,7 @@ static int getUriHostLength(const char * uri, int uriLength)
 }
 
 
-NetworkSocket * NetworkSocket_New(NetworkSocketType socketType, uint16_t port)
+NetworkSocket * NetworkSocket_New(const char * ipAddress, NetworkSocketType socketType, uint16_t port)
 {
     size_t size = sizeof(struct _NetworkSocket);
     NetworkSocket * result = (NetworkSocket *)malloc(size);
@@ -442,6 +484,12 @@ NetworkSocket * NetworkSocket_New(NetworkSocketType socketType, uint16_t port)
         result->SocketType = socketType;
         result->Port = port;
         DTLS_SetNetworkSendCallback(SendDTLS);
+        if (ipAddress)
+        {
+            result->BindAddress = NetworkAddress_FromIPAddress(ipAddress, port);
+            if (!result->BindAddress)
+                NetworkSocket_Free(&result);
+        }
     }
     return result;
 }
@@ -493,18 +541,46 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             socketMode = SOCK_STREAM;
         }
 
-        networkSocket->Socket = socket(AF_INET, socketMode, protocol);
+        struct sockaddr_in * ip4Address = NULL;
+        struct sockaddr_in6 * ip6Address = NULL;
+        if (networkSocket->BindAddress)
+        {
+            if (networkSocket->BindAddress->Address.Sa.sa_family == AF_INET6)
+            {
+                ip6Address = &networkSocket->BindAddress->Address.Sin6;
+            }
+            else if (networkSocket->BindAddress->Address.Sa.sa_family == AF_INET)
+            {
+                ip4Address = &networkSocket->BindAddress->Address.Sin;
+            }
+        }
+        else
+        {
+
+            struct sockaddr_in ip4AnyAddress;
+            memset(&ip4AnyAddress, 0, sizeof(struct sockaddr_in));
+            ip4AnyAddress.sin_family = AF_INET;
+            ip4AnyAddress.sin_addr.s_addr = INADDR_ANY;
+            ip4AnyAddress.sin_port = htons(networkSocket->Port);
+            ip4Address = &ip4AnyAddress;
+
+            struct sockaddr_in6 ip6AnyAddress;
+            memset(&ip6AnyAddress, 0, sizeof(struct sockaddr_in6));
+            ip6AnyAddress.sin6_family = AF_INET6;
+            ip6AnyAddress.sin6_port = htons(networkSocket->Port);
+            ip6Address = &ip6AnyAddress;
+
+        }
+        if (ip4Address)
+            networkSocket->Socket = socket(AF_INET, socketMode, protocol);
+        else
+            networkSocket->Socket = SOCKET_ERROR;
         if (networkSocket->Socket != SOCKET_ERROR)
         {
             struct sockaddr *address = NULL;
             socklen_t addressLength = 0;
             addressLength = sizeof(struct sockaddr_in);
-            struct sockaddr_in ipAddress;
-            memset(&ipAddress, 0, addressLength);
-            ipAddress.sin_family = AF_INET;
-            ipAddress.sin_addr.s_addr = INADDR_ANY;
-            ipAddress.sin_port = htons(networkSocket->Port);
-            address = (struct sockaddr *)&ipAddress;
+            address = (struct sockaddr *)ip4Address;
             int flag = fcntl(networkSocket->Socket, F_GETFL);
             flag = flag | O_NONBLOCK;
             if (fcntl(networkSocket->Socket, F_SETFL, flag) < 0)
@@ -514,9 +590,13 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             if (bind(networkSocket->Socket, address, addressLength) != SOCKET_ERROR)
             {
                 result = true;
+
             }
         }
-        networkSocket->SocketIPv6 = socket(AF_INET6, socketMode, protocol);
+        if (ip6Address)
+            networkSocket->SocketIPv6 = socket(AF_INET6, socketMode, protocol);
+        else
+            networkSocket->SocketIPv6 = SOCKET_ERROR;
         if (networkSocket->SocketIPv6 != SOCKET_ERROR)
         {
 
@@ -526,11 +606,7 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
                 struct sockaddr *address = NULL;
                 socklen_t addressLength = 0;
                 addressLength = sizeof(struct sockaddr_in6);
-                struct sockaddr_in6 ipAddress;
-                memset(&ipAddress, 0, addressLength);
-                ipAddress.sin6_family = AF_INET6;
-                ipAddress.sin6_port = htons(networkSocket->Port);
-                address = (struct sockaddr *)&ipAddress;
+                address = (struct sockaddr *)ip6Address;
                 int flag = fcntl(networkSocket->SocketIPv6, F_GETFL);
                 flag = flag | O_NONBLOCK;
                 if (fcntl(networkSocket->SocketIPv6, F_SETFL, flag) < 0)
@@ -540,6 +616,10 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
                 if (bind(networkSocket->SocketIPv6, address, addressLength) != SOCKET_ERROR)
                 {
                     result = true;
+                }
+                else
+                {
+                    perror("bind error");
                 }
             }
         }

@@ -1,0 +1,17 @@
+erbium_src = er-coap.c \
+  er-coap-engine.c \
+  er-coap-transactions.c \
+  er-coap-separate.c \
+  er-coap-block1.c
+
+# Following not used
+#  er-coap-observe.c
+#  er-coap-res-well-known-core.c
+#  er-coap-observe-client.c
+
+
+CFLAGS += -DREST_MAX_CHUNK_SIZE=512 -DPOSIX -DUIP_CONF_BUFFER_SIZE=4096 -UWITH_JSON -Ucoap_rest_implementation
+
+
+
+

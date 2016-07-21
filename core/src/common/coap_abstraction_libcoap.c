@@ -824,48 +824,31 @@ int coap_DeregisterUri(const char * uri)
     return 0;
 }
 
-static coap_context_t * getContext(const char * ipAddress, const char *port)
+static coap_context_t * getContext(const char * ipAddress, int port)
 {
     coap_context_t *ctx = NULL;
-    int s;
-    struct addrinfo hints;
-    struct addrinfo *result, *rp;
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
-    hints.ai_socktype = SOCK_DGRAM; /* CoAP uses UDP */
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST | AI_NUMERICSERV | AI_ALL;
-
-    s = getaddrinfo(ipAddress, port, &hints, &result);
-    if (s != 0)
+    coap_address_t addr;
+    coap_address_init(&addr);
+    if (inet_pton(AF_INET, ipAddress, &addr.addr.sin.sin_addr) == 1)
     {
-        Lwm2m_Error("getaddrinfo: %s\n", gai_strerror(s));
-        return NULL;
+        ((struct sockaddr_in *)&addr.addr)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&addr.addr)->sin_port = htons(port);
+        addr.size = sizeof(struct sockaddr_in);
+        ctx = coap_new_context(&addr);
+    }
+    else if (inet_pton(AF_INET6, ipAddress, &addr.addr.sin6.sin6_addr) == 1)
+    {
+        ((struct sockaddr_in6 *)&addr.addr)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&addr.addr)->sin6_port = htons(port);
+        addr.size = sizeof(struct sockaddr_in6);
+        ctx = coap_new_context(&addr);
+    }
+    else
+    {
+        Lwm2m_Error("no context available for interface '%s'\n", ipAddress);
     }
 
-    // iterate through results until success
-    for (rp = result; rp != NULL; rp = rp->ai_next)
-    {
-        coap_address_t addr;
-
-        if (rp->ai_addrlen <= sizeof(addr.addr))
-        {
-            coap_address_init(&addr);
-            addr.size = rp->ai_addrlen;
-            memcpy(&addr.addr, rp->ai_addr, rp->ai_addrlen);
-
-            ctx = coap_new_context(&addr);
-            if (ctx != NULL)
-            {
-                goto finish;
-            }
-        }
-    }
-
-    Lwm2m_Error("no context available for interface '%s'\n", ipAddress);
-
-finish:
-    freeaddrinfo(result);
     return ctx;
 }
 
@@ -1158,13 +1141,11 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
 CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
-    char port_str[32];
 
     coap_SetLogLevel(logLevel);
 
-    sprintf(port_str, "%d", port);
 
-    coapContext = getContext(ipAddress != NULL ? ipAddress : "::", port_str);
+    coapContext = getContext(ipAddress != NULL ? ipAddress : "::", port);
     if (coapContext == NULL)
     {
         return NULL;
