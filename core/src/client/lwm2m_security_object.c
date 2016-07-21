@@ -540,7 +540,7 @@ bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortSer
     {
         if (!security->AddressResolved)
         {
-            security->AddressResolved = (coap_ResolveAddressByURI(security->ServerURI, &security->address) == 0);
+            security->AddressResolved = (coap_ResolveAddressByURI(security->ServerURI, &security->address) != -1);
         }
         result = security->AddressResolved;
     }

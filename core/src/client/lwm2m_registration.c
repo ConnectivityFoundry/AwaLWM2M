@@ -124,6 +124,7 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
 
     if (!Lwm2mCore_IsNetworkAddressRevolved(context, server->ShortServerID))
     {
+        Lwm2m_Debug("Registration: network address not yet revolved\n");
         return;
     }
 
