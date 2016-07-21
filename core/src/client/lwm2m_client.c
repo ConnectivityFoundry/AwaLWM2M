@@ -164,6 +164,8 @@ uint8_t HexToByte(const char *value)
 static int Lwm2mClient_Start(Options * options)
 {
     int result = 0;
+    uint8_t * key = NULL;
+
     if (options->Daemonise)
     {
         Daemonise(options->Verbose);
@@ -228,7 +230,7 @@ static int Lwm2mClient_Start(Options * options)
     {
         int hexKeyLength = strlen(options->PskKey);
         int keyLength = hexKeyLength / 2;
-        uint8_t * key = (uint8_t *)malloc(keyLength);
+        key = (uint8_t *)malloc(keyLength);
         if (key)
         {
            char * value = options->PskKey;
@@ -348,6 +350,10 @@ error_coap:
     coap_Destroy();
 
 error_close_log:
+    if (key)
+    {
+        free(key);
+    }
     Lwm2m_Info("Client exiting\n");
     if (logFile)
     {

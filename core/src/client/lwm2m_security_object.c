@@ -47,6 +47,7 @@ typedef struct
 
     char ServerURI[SERVER_URI_LEN];   //< Uniquely identifies the LWM2M server or Bootstrap server. i.e coap://host:port
     AddressType address;              //< Stores the host IP address and port
+    bool AddressResolved;
     bool IsBootstrapServer;
     LWM2MSecurityMode SecurityMode;
     char PublicKeyIdentity[SECURITY_STRING_LEN];         //< Stores the LWM2M client certificate, public key, or PSK identity
@@ -349,7 +350,8 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
                     memset(security->ServerURI, 0, sizeof(security->ServerURI));
                     memcpy(security->ServerURI, srcBuffer, srcBufferLen);
                     // Recalculate socket address from URI
-                    result = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+                    security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+                    result = srcBufferLen;
                 }
                 else
                 {
@@ -528,6 +530,21 @@ int Lwm2m_GetServerURI(Lwm2mContextType * context, int shortServerID, char * buf
     strncpy(buffer, security->ServerURI, len);
     buffer[len - 1] = '\0';  // Defensive
     return strlen(buffer);
+}
+
+bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortServerID)
+{
+    bool result = false;
+    LWM2MSecurityInfo * security = GetSecurityInfoForShortServerID(context, shortServerID);
+    if (security)
+    {
+        if (!security->AddressResolved)
+        {
+            security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+        }
+        result = security->AddressResolved;
+    }
+    return result;
 }
 
 int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff)

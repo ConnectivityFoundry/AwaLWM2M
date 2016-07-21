@@ -42,14 +42,14 @@ const char *gengetopt_args_info_help[] = {
   "  -f, --factoryBootstrap=FILE  Load factory bootstrap information from FILE",
   "  -s, --secure                 CoAP communications are secured with DTLS\n                                 (default=off)",
   "      --pskIdentity=IDENTITY   Default Identity of associated pre-shared key\n                                 for DTLS",
-  "      --pskKey=KEY             Default pre-shared key for DTLS",
+  "      --pskKey=KEY             Default pre-shared key for DTLS as a hex string",
   "  -c, --certificate=FILE       Load client certificate from FILE",
   "  -o, --objDefs=FILE           Load object and resource definitions from FILE",
   "  -d, --daemonize              Detach process from terminal and run in the\n                                 background  (default=off)",
   "  -v, --verbose                Generate verbose output  (default=off)",
   "  -l, --logFile=FILE           Log output to FILE",
   "  -V, --version                Print version and exit  (default=off)",
-  "\nExample:\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoap://[::1]:2134\n\n",
+  "\nExample:\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoap://[::1]:2134\n\nPSK Example:\n\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoaps://0.0.0.0:2134 --pskIdentity=myPskIdentity\n--pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F\n\n",
     0
 };
 
@@ -1772,7 +1772,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* Default pre-shared key for DTLS.  */
+          /* Default pre-shared key for DTLS as a hex string.  */
           else if (strcmp (long_options[option_index].name, "pskKey") == 0)
           {
           

@@ -122,12 +122,19 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
     char serverUri[255];
     char uri[1024];
 
+    if (!Lwm2mCore_IsNetworkAddressRevolved(context, server->ShortServerID))
+    {
+        Lwm2m_Debug("Registration: network address not yet revolved\n");
+        return;
+    }
+
     if (Lwm2m_GetServerURI(context, server->ShortServerID, serverUri, sizeof(serverUri)) < 0)
     {
         Lwm2m_Error("Registration: Server URI is not specified\n");
         server->RegistrationState = Lwm2mRegistrationState_RegisterFailed;
         return;
     }
+
 
     GetQueryString(context, server->ShortServerID, uriQuery, sizeof(uriQuery));
     Lwm2mCore_GetObjectList(context, NULL, payload, sizeof(payload), true);

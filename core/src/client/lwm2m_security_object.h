@@ -51,6 +51,8 @@ void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, const char * bootS
 int Lwm2m_GetServerURI(Lwm2mContextType * context, int shortServerID, char * buffer, int len);
 int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff);
 
+bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortServerID);
+
 bool Lwm2mCore_ServerIsBootstrap(Lwm2mContextType * context, AddressType * address);
 int Lwm2mSecurity_GetShortServerID(Lwm2mContextType * context, AddressType * address);
 
