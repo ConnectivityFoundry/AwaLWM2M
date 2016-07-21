@@ -140,6 +140,8 @@ Usage: `awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]
 | --endPointName, -e | Use NAME as client end point name |
 | --bootstrap, -b  | Use bootstrap server URI |
 | --factoryBootstrap, -f | Load factory bootstrap information from FILE |
+| --pskIdentity | Default Identity of associated pre-shared key for DTLS |
+| --pskKey | Default pre-shared key for DTLS as a hex string |
 | --objDefs, -o | Load object definitions from FILE |
 | --daemonise, -d | Detach process from terminal and run in the background |
 | --verbose, -v | Generate verbose output |
@@ -151,9 +153,14 @@ Example:
 
     awa_clientd --port 6000 --endPointName client1 --bootstrap coap://0.0.0.0:2134
 
+PSK Example:
+
+    awa_clientd --port 6000 --endPointName client1 --bootstrap coaps://0.0.0.0:2134 --pskIdentity=myPskIdentity --pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F
+
 The factory bootstrap information file contains the server information that would be written by a bootstrap server during the bootstrap process. The bootstrap server uses the same file format.
 
 Object definitions can be loaded into the client daemon before it attempts to bootstrap with a LWM2M bootstrap server, or register with a LWM2M server. See [Object Definition Files](object_definition_files.md) for details.
+
 
 [Back to the table of contents](userguide.md#contents)
 
