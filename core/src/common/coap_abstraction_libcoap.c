@@ -931,7 +931,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
 
     memcpy(&dst.addr, &addr.Addr, sizeof(addr.Addr));
 
-    dst.size = res;
+    dst.size = addr.Size;
     dst.addr.sin.sin_port = htons(uri.port);
 
     msgID = coap_new_message_id(coapContext);
@@ -1081,7 +1081,6 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     enum { BUFSIZE = 1024 };
     unsigned char _buf[BUFSIZE];
     unsigned char *buf = _buf;
-    int res;
     unsigned short msgID;
 
     coap_split_uri((char *)path, strlen(path), &uri);
@@ -1095,7 +1094,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
     memcpy(&dst.addr, &destAddr.Addr, sizeof(destAddr.Addr));
 
-    dst.size = res;
+    dst.size = destAddr.Size;
     dst.addr.sin.sin_port = htons(uri.port);
 
     msgID = coap_new_message_id(coapContext);
