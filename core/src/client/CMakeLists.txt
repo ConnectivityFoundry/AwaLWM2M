@@ -2,11 +2,7 @@ set (awa_clientd_SOURCES
   awa_clientd_cmdline.c
   lwm2m_registration.c
   lwm2m_bootstrap.c
-  lwm2m_connectivity_object.c
   lwm2m_security_object.c
-  lwm2m_device_object.c
-  lwm2m_location_object.c
-  lwm2m_firmware_object.c
   lwm2m_acl_object.c
   lwm2m_server_object.c
   lwm2m_client_xml_handlers.c

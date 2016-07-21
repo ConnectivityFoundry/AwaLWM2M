@@ -15,6 +15,8 @@ set (test_core_runner_SOURCES
   unit_support.cc
   test_object_tree.cc
   test_xml.cc
+  
+  lwm2m_device_object.c
 )
 
 set (test_core_runner_INCLUDE_DIRS

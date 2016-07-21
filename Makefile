@@ -108,7 +108,8 @@ TEST_PATHS=--clientDaemonPath=$(LWM2M_CLIENTD_BIN) \
   --serverDaemonPath=$(LWM2M_SERVERD_BIN) \
   --bootstrapDaemon=$(LWM2M_BOOTSTRAPD_BIN) \
   --coapClientPath=$(LIBCOAP_COAP_CLIENT) \
-  --bootstrapConfig=api/tests/gtest.bsc
+  --bootstrapConfig=api/tests/gtest.bsc \
+  --objectDefinitions=api/tests/object-defs-gtest.xml
 
 .PHONY: gtest_tests
 gtest_tests: $(TEST_SRC_BIN) $(TEST_API_BIN) $(TEST_TOOLS_BIN) $(TEST_STATIC_API_BIN)

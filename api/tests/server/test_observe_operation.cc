@@ -197,6 +197,14 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
+
     struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
@@ -258,6 +266,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
@@ -314,6 +328,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeInitialOperation, "/3/0/13", 2718619435));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -413,6 +433,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeInitialOperation, "/3/0/13", 2718619435));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -519,6 +545,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeInitialOperation, "/3/0/13", 2718619435));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
@@ -581,6 +613,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeInitialOperation, "/3/0/13", 2718619435));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -692,6 +730,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsTime(writeInitialOperation, "/3/0/13", 2718619435));
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
@@ -757,6 +801,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
@@ -796,7 +846,13 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
 {
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
-    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));\
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -841,6 +897,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
@@ -949,6 +1011,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_cancel
     // start a client
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     struct CallbackHandler1 : public ObserveWaitCondition
     {
@@ -1133,16 +1201,22 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_AddCancelObser
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
 
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
     ASSERT_TRUE(NULL != operation);
 
-    AwaServerObservation * changeObservation = AwaServerObservation_New(global::clientEndpointName, "/3/0/1", EmptyObserveCallback, NULL);
+    AwaServerObservation * changeObservation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", EmptyObserveCallback, NULL);
     ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddCancelObservation(operation, changeObservation));
 
     EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
     const AwaServerObserveResponse * response = AwaServerObserveOperation_GetResponse(operation, global::clientEndpointName);
     ASSERT_TRUE(NULL != response);
-    const AwaPathResult * result = AwaServerObserveResponse_GetPathResult(response, "/3/0/1");
+    const AwaPathResult * result = AwaServerObserveResponse_GetPathResult(response, "/3/0/15");
 
     EXPECT_EQ(AwaError_Success, AwaPathResult_GetError(result));
     ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&changeObservation));
@@ -1304,6 +1378,12 @@ TEST_F(TestObserveWithConnectedSession, AwaServerSession_AwaChangeSet_NewPathIte
     };
     AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
     ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
 
     ChangeCallbackHandler2 cbHandler(session_, 2);
 

@@ -72,6 +72,9 @@ struct gengetopt_args_info
   char * bootstrapConfig_arg;	/**< @brief Path to bootstrap config file (default='../api/tests/gtest.bsc').  */
   char * bootstrapConfig_orig;	/**< @brief Path to bootstrap config file original value given at command line.  */
   const char *bootstrapConfig_help; /**< @brief Path to bootstrap config file help description.  */
+  char * objectDefinitions_arg;	/**< @brief Path to object definitions file (default='../api/tests/object-defs-gtest.xml').  */
+  char * objectDefinitions_orig;	/**< @brief Path to object definitions file original value given at command line.  */
+  const char *objectDefinitions_help; /**< @brief Path to object definitions file help description.  */
   int defaultTimeout_arg;	/**< @brief Set default timeout in milliseconds for IPC operations.  */
   char * defaultTimeout_orig;	/**< @brief Set default timeout in milliseconds for IPC operations original value given at command line.  */
   const char *defaultTimeout_help; /**< @brief Set default timeout in milliseconds for IPC operations help description.  */
@@ -89,6 +92,7 @@ struct gengetopt_args_info
   unsigned int serverDaemonPath_given ;	/**< @brief Whether serverDaemonPath was given.  */
   unsigned int bootstrapDaemonPath_given ;	/**< @brief Whether bootstrapDaemonPath was given.  */
   unsigned int bootstrapConfig_given ;	/**< @brief Whether bootstrapConfig was given.  */
+  unsigned int objectDefinitions_given ;	/**< @brief Whether objectDefinitions was given.  */
   unsigned int defaultTimeout_given ;	/**< @brief Whether defaultTimeout was given.  */
 
 } ;
