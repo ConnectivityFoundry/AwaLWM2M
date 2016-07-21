@@ -147,18 +147,21 @@ int coap_WaitMessage(int timeout, int fd)
     return result;
 }
 
-int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
+bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
-    int result;
+    bool result;
     coap_uri_t uri;
     coap_split_uri(address, strlen(address), &uri);
 
-    result = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr);
+    if (Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr))
+    {
 #ifndef CONTIKI
-    addr->Addr.Sin.sin_port = uri.port;
+        addr->Addr.Sin.sin_port = uri.port;
 #else
-    addr->Port = uri.port;
+        addr->Port = uri.port;
 #endif
+        result = true;
+    }
     return result;
 }
 
@@ -920,8 +923,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
     coap_split_uri((char *)path, strlen(path), &uri);
 
     // resolve destination address where server should be sent
-    res = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &addr);
-    if (res < 0)
+    if (!Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &addr))
     {
         Lwm2m_Error("failed to resolve address\n");
         return;
@@ -1085,8 +1087,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     coap_split_uri((char *)path, strlen(path), &uri);
 
     // resolve destination address where server should be sent
-    res = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &destAddr);
-    if (res < 0)
+    if (!Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &destAddr))
     {
         Lwm2m_Error("failed to resolve address\n");
         return;

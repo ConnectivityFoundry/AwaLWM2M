@@ -66,11 +66,11 @@ const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
     return ipv6addr;
 }
 
-int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
+bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
 {
-    int len =-1;
+    int result = false;
     /* DNS look up not supported */
-    return len;
+    return result;
 }
 
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)

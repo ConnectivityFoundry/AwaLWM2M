@@ -350,7 +350,7 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
                     memset(security->ServerURI, 0, sizeof(security->ServerURI));
                     memcpy(security->ServerURI, srcBuffer, srcBufferLen);
                     // Recalculate socket address from URI
-                    security->AddressResolved = (coap_ResolveAddressByURI(security->ServerURI, &security->address) == 0);
+                    security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
                     result = srcBufferLen;
                 }
                 else
@@ -540,7 +540,7 @@ bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortSer
     {
         if (!security->AddressResolved)
         {
-            security->AddressResolved = (coap_ResolveAddressByURI(security->ServerURI, &security->address) != -1);
+            security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
         }
         result = security->AddressResolved;
     }

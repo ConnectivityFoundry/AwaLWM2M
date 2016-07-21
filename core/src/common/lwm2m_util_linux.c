@@ -121,9 +121,9 @@ const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
     return Lwm2mCore_DebugPrintSockAddr(&addr->Addr.Sa);
 }
 
-int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
+bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
 {
-    int len =-1;
+    bool result = false;
     struct addrinfo *res, *ainfo;
     struct addrinfo hints;
     static char addrstr[256];
@@ -148,34 +148,31 @@ int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, A
     if (error != 0)
     {
         Lwm2m_Error("getaddrinfo: %s\n", gai_strerror(error));
-        return error;
     }
-
-    for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next)
+    else
     {
-        switch (ainfo->ai_family)
+        for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next)
         {
-            case AF_INET6:
+            if  (ainfo->ai_family == AF_INET6)
+            {
                 addr->Addr.Sa.sa_family = ainfo->ai_family;
-                len = ainfo->ai_addrlen;
-                memcpy(&addr->Addr.Sin6, ainfo->ai_addr, len);
-                addr->Size = len;
-                goto finish;
-            case AF_INET:
-                addr->Addr.Sa.sa_family = ainfo->ai_family;
-                len = ainfo->ai_addrlen;
-                memcpy(&addr->Addr.Sin, ainfo->ai_addr, len);
-                addr->Size = len;
-                goto finish;
-            default:
+                addr->Size = ainfo->ai_addrlen;
+                memcpy(&addr->Addr.Sin6, ainfo->ai_addr, addr->Size);
+                result = true;
                 break;
+            }
+            else if  (ainfo->ai_family == AF_INET)
+            {
+                addr->Addr.Sa.sa_family = ainfo->ai_family;
+                addr->Size = ainfo->ai_addrlen;
+                memcpy(&addr->Addr.Sin, ainfo->ai_addr, addr->Size);
+                result = true;
+                break;
+            }
         }
+        freeaddrinfo(res);
     }
-
-finish:
-    freeaddrinfo(res);
-
-    return len;
+    return result;
 }
 
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)

@@ -301,9 +301,9 @@ bool coap_getPathQueryFromURI(const char * uri, char * path, char * query)
     return result;
 }
 
-int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
+bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
-    int result = -1;
+    bool result = false;
 
     Lwm2m_Debug("resolve address from Uri: %s\n", address);
     NetworkAddress * networkAddress = NetworkAddress_New(address, strlen(address));
@@ -311,7 +311,7 @@ int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
     {
         NetworkAddress_SetAddressType(networkAddress, addr);
         NetworkAddress_Free(&networkAddress);
-        result = 0;
+        result = true;
     }
     return result;
 }

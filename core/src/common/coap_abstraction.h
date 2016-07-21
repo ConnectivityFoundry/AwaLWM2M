@@ -100,7 +100,7 @@ void coap_SetRequestHandler(RequestHandler handler);
 
 int coap_WaitMessage(int timeout, int fd);
 
-int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr);
+bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr);
 
 int coap_RegisterUri(const char * uri);
 int coap_DeregisterUri(const char * uri);

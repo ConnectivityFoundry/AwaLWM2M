@@ -67,7 +67,7 @@ const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa);
 #endif
 const char * Lwm2mCore_DebugPrintAddress(AddressType * addr);
 
-int Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr);
+bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr);
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2);
 int Lwm2mCore_ComparePorts(AddressType * addr1, AddressType * addr2);
 int Lwm2mCore_GetIPAddressFromInterface(const char * interface, int addressFamily, char * destAddress, size_t destAddressLength);
