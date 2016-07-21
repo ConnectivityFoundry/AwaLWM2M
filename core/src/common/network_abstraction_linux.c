@@ -484,7 +484,7 @@ NetworkSocket * NetworkSocket_New(const char * ipAddress, NetworkSocketType sock
         result->SocketType = socketType;
         result->Port = port;
         DTLS_SetNetworkSendCallback(SendDTLS);
-        if (ipAddress)
+        if (ipAddress && (*ipAddress != '\0'))
         {
             result->BindAddress = NetworkAddress_FromIPAddress(ipAddress, port);
             if (!result->BindAddress)
@@ -587,7 +587,11 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             {
                 // ignore error
             }
-            if (bind(networkSocket->Socket, address, addressLength) != SOCKET_ERROR)
+            if (bind(networkSocket->Socket, address, addressLength) == SOCKET_ERROR)
+            {
+                Lwm2m_Debug("Failed to bind to ip4 socket\n");
+            }
+            else
             {
                 result = true;
 
@@ -613,13 +617,13 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
                 {
                     // ignore error
                 }
-                if (bind(networkSocket->SocketIPv6, address, addressLength) != SOCKET_ERROR)
+                if (bind(networkSocket->SocketIPv6, address, addressLength) == SOCKET_ERROR)
                 {
-                    result = true;
+                    Lwm2m_Debug("Failed to bind to ip6 socket\n");
                 }
                 else
                 {
-                    perror("bind error");
+                    result = true;
                 }
             }
         }
