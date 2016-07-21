@@ -237,7 +237,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                         if (networkAddress)
                         {
                             memset(networkAddress, 0, size);
-                            networkAddress->Secure = secure;
                             if (resolvedAddress->h_addrtype == AF_INET)
                             {
                                 networkAddress->Address.Sin.sin_family = AF_INET;
@@ -260,6 +259,7 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                 }
                 if (networkAddress)
                 {
+                    networkAddress->Secure = secure;
                     result = getCachedAddress(networkAddress, uri, uriHostLength);
                     if (result)
                     {
