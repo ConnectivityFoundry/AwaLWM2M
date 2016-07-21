@@ -96,7 +96,8 @@ class SpawnDaemonsTestCase(unittest.TestCase):
                                                             self.config.clientCoapPort,
                                                             self.config.clientLogFile,
                                                             self.config.clientEndpointName,
-                                                            self.config.bootstrapConfigFile)
+                                                            self.config.bootstrapConfigFile,
+                                                            self.config.objectDefinitionsFile)
             self.addCleanup(self._clientDaemon.terminate)
             self._clientDaemon.spawn()
 

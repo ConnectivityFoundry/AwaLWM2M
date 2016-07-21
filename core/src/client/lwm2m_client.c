@@ -47,12 +47,8 @@
 #include "xmltree.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
-#include "lwm2m_connectivity_object.h"
 #include "lwm2m_security_object.h"
-#include "lwm2m_device_object.h"
 #include "lwm2m_server_object.h"
-#include "lwm2m_firmware_object.h"
-#include "lwm2m_location_object.h"
 #include "lwm2m_acl_object.h"
 #include "lwm2m_client_xml_handlers.h"
 #include "lwm2m_xml_interface.h"
@@ -102,10 +98,7 @@ static void RegisterObjects(Lwm2mContextType * context, Options * options)
     }
     Lwm2m_RegisterServerObject(context);
     Lwm2m_RegisterACLObject(context);
-    Lwm2m_RegisterDeviceObject(context);
-    Lwm2m_RegisterConnectivityObjects(context);
-    Lwm2m_RegisterFirmwareObject(context);
-    Lwm2m_RegisterLocationObject(context);
+
 }
 
 // Fork off a daemon process, the parent will exit at this point

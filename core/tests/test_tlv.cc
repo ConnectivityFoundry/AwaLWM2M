@@ -39,7 +39,7 @@
 #include "client/lwm2m_core.h"
 #include "common/lwm2m_request_origin.h"
 #include "common/lwm2m_objects.h"
-#include "client/lwm2m_device_object.h"
+#include "lwm2m_device_object.h"
 
 class TlvTestSuite : public testing::Test
 {
