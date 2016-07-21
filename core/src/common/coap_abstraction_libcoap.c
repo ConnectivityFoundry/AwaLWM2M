@@ -149,7 +149,7 @@ int coap_WaitMessage(int timeout, int fd)
 
 bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
-    bool result;
+    bool result = false;
     coap_uri_t uri;
     coap_split_uri(address, strlen(address), &uri);
 

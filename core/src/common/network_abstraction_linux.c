@@ -845,6 +845,8 @@ void NetworkSocket_Free(NetworkSocket ** networkSocket)
             close((*networkSocket)->Socket);
         if ((*networkSocket)->SocketIPv6 != SOCKET_ERROR)
             close((*networkSocket)->SocketIPv6);
+        if ((*networkSocket)->BindAddress)
+            NetworkAddress_Free(&(*networkSocket)->BindAddress);
         free(*networkSocket);
         *networkSocket = NULL;
     }
