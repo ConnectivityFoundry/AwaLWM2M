@@ -125,6 +125,7 @@ void coap_Reset(const char * uri)
     if (remoteAddress)
     {
         DTLS_Reset(remoteAddress);
+        NetworkAddress_Free(&remoteAddress);
     }
 }
 
@@ -372,6 +373,7 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType 
 
     if ((strcmp(DTLS_LibraryName, "None") == 0) && NetworkAddress_IsSecure(remoteAddress))
     {
+        NetworkAddress_Free(&remoteAddress);
         Lwm2m_Error("Cannot send request to %s - not built with DTLS support\n\n", uri);
         return;
     }

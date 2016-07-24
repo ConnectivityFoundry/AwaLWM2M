@@ -540,6 +540,8 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             protocol = IPPROTO_TCP;
             socketMode = SOCK_STREAM;
         }
+        struct sockaddr_in ip4AnyAddress;
+        struct sockaddr_in6 ip6AnyAddress;
 
         struct sockaddr_in * ip4Address = NULL;
         struct sockaddr_in6 * ip6Address = NULL;
@@ -557,14 +559,12 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
         else
         {
 
-            struct sockaddr_in ip4AnyAddress;
             memset(&ip4AnyAddress, 0, sizeof(struct sockaddr_in));
             ip4AnyAddress.sin_family = AF_INET;
             ip4AnyAddress.sin_addr.s_addr = INADDR_ANY;
             ip4AnyAddress.sin_port = htons(networkSocket->Port);
             ip4Address = &ip4AnyAddress;
 
-            struct sockaddr_in6 ip6AnyAddress;
             memset(&ip6AnyAddress, 0, sizeof(struct sockaddr_in6));
             ip6AnyAddress.sin6_family = AF_INET6;
             ip6AnyAddress.sin6_port = htons(networkSocket->Port);
