@@ -251,7 +251,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
             break;
 
         case METHOD_DELETE:
-            coapRequest.contentType = ContentType_None;
+            coapRequest.contentType = AwaContentType_None;
             coapRequest.type = COAP_DELETE_REQUEST;
 
             Lwm2m_Debug("Coap DELETE for %s\n", uriBuf);
@@ -261,6 +261,8 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
         default:
             break;
         }
+
+        Lwm2m_Debug("Coap Response code %d\n", coapResponse.responseCode);
 
         if (coapResponse.responseContentLen > 0 && coapResponse.responseCode == 205)
         {
@@ -360,7 +362,7 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
     }
 }
 
-void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType contentType, ObserveState observeState,
+void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentType contentType, ObserveState observeState,
         const char * payload, int payloadLen, TransactionCallback callback, void * context)
 {
     coap_packet_t request;
@@ -391,7 +393,7 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType 
         coap_set_header_uri_query(&request, query);
     // TODO - REVIEW: Erbium must copy path/query from request - else mem out of scope
 
-    if (contentType != ContentType_None)
+    if (contentType != AwaContentType_None)
     {
         if ((method == COAP_POST) || (method == COAP_PUT))
         {
@@ -424,12 +426,12 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, ContentType 
         }
     }
 
-    if (CurrentTransaction[CurrentTransactionIndex].TransactionUsed && CurrentTransaction[CurrentTransactionIndex].TransactionPtr)
-    {
-        Lwm2m_Warning("Canceled previous transaction [%d]: %p\n", CurrentTransactionIndex,
-                CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
-        coap_clear_transaction(&CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
-    }
+//    if (CurrentTransaction[CurrentTransactionIndex].TransactionUsed && CurrentTransaction[CurrentTransactionIndex].TransactionPtr)
+//    {
+//        Lwm2m_Warning("Canceled previous transaction [%d]: %p\n", CurrentTransactionIndex,
+//                CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
+//        coap_clear_transaction(&CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
+//    }
 
     //if ((transaction = coap_new_transaction(request.mid, remote_ipaddr, uip_htons(remote_port))))
     if ((transaction = coap_new_transaction(networkSocket, request.mid, remoteAddress)))
@@ -479,18 +481,18 @@ void coap_HandleMessage(void)
     coap_receive(networkSocket);
 }
 
-void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback)
+void coap_GetRequest(void * context, const char * path, AwaContentType contentType, TransactionCallback callback)
 {
     coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_None, NULL, 0, callback, context);
 }
 
-void coap_PostRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen,
+void coap_PostRequest(void * context, const char * path, AwaContentType contentType, const char * payload, int payloadLen,
         TransactionCallback callback)
 {
     coap_createCoapRequest(COAP_POST, path, contentType, ObserveState_None, payload, payloadLen, callback, context);
 }
 
-void coap_PutRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen,
+void coap_PutRequest(void * context, const char * path, AwaContentType contentType, const char * payload, int payloadLen,
         TransactionCallback callback)
 {
     coap_createCoapRequest(COAP_PUT, path, contentType, ObserveState_None, payload, payloadLen, callback, context);
@@ -499,23 +501,23 @@ void coap_PutRequest(void * context, const char * path, ContentType contentType,
 // This is a dummy function - Delete requests are not required on the constrained device and are only used by the LWM2M Server.
 void coap_DeleteRequest(void * context, const char * path, TransactionCallback callback)
 {
-    coap_createCoapRequest(COAP_DELETE, path, ContentType_None, ObserveState_None, NULL, 0, callback, context);
+    coap_createCoapRequest(COAP_DELETE, path, AwaContentType_None, ObserveState_None, NULL, 0, callback, context);
 }
 
 // This is a dummy function - Observe requests are not required on the constrained device and are only used by the LWM2M Server.
-void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback callback,
+void coap_Observe(void * context, const char * path, AwaContentType contentType, TransactionCallback callback,
         NotificationFreeCallback notificationFreeCallback)
 {
     coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_Establish, NULL, 0, callback, context);
 }
 
 // This is a dummy function - Cancel Observe Requests are not required on the constrained device and are only used by the LWM2M Server.
-void coap_CancelObserve(void * context, const char * path, ContentType contentType, TransactionCallback callback)
+void coap_CancelObserve(void * context, const char * path, AwaContentType contentType, TransactionCallback callback)
 {
     coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_Cancel, NULL, 0, callback, context);
 }
 
-void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType,
+void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, AwaContentType contentType,
         const char * payload, int payloadLen, int sequence)
 {
     // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
@@ -529,7 +531,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
     coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
 
-    if (contentType != ContentType_None)
+    if (contentType != AwaContentType_None)
     {
         coap_set_header_content_format(&notify, contentType);
         coap_set_payload(&notify, payload, payloadLen);

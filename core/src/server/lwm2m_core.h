@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType);
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, AwaContentType contentType);
 
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
@@ -91,7 +91,7 @@ int Lwm2mCore_RemoveResourceEndPoint(Lwm2mContextType * context, const char * pa
 DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
 
 struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context);
-ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context);
+AwaContentType Lwm2mCore_GetContentType(Lwm2mContextType * context);
 int Lwm2mCore_GetLastLocation(Lwm2mContextType * context);
 struct ListHead * Lwm2mCore_GetEventRecordList(Lwm2mContextType * context);
 void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location);

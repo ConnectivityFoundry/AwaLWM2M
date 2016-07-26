@@ -855,7 +855,7 @@ error:
     return result;
 }
 
-int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int sequence, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * contextData)
+int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int sequence, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, AwaContentType contentType, void * contextData)
 {
     ObjectInstanceResourceKey key;
     RequestInfoType * request = (RequestInfoType *)malloc(sizeof(RequestInfoType));
@@ -883,7 +883,7 @@ static AwaResult xmlif_HandleObserve(void * context, RequestInfoType * request, 
     RequestInfoType * temp = malloc(sizeof(RequestInfoType));
     memcpy(temp, request, sizeof(RequestInfoType));
 
-    if (Lwm2mCore_Observe(context, &addr, NULL, 0, objectID, instanceID, resourceID, ContentType_ApplicationOmaLwm2mTLV, xmlif_Lwm2mNotificationCallback, (void*)temp) < 0)
+    if (Lwm2mCore_Observe(context, &addr, NULL, 0, objectID, instanceID, resourceID, AwaContentType_ApplicationOmaLwm2mTLV, xmlif_Lwm2mNotificationCallback, (void*)temp) < 0)
     {
         result = AwaResult_BadRequest;
         free(temp);

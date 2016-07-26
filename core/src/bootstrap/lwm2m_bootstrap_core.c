@@ -153,7 +153,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, request->path);
     if (endPoint == NULL)
     {
-        response->responseContentType = ContentType_None;
+        response->responseContentType = AwaContentType_None;
         response->responseContentLen = 0;
         response->responseCode = AwaResult_NotFound;
         return 0;

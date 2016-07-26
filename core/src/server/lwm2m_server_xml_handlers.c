@@ -95,23 +95,23 @@ static int xmlif_HandlerExecuteRequest(RequestInfoType * request, TreeNode conte
 static int xmlif_HandlerDiscoverRequest(RequestInfoType * request, TreeNode content);
 
 static void xmlif_HandlerReadResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                      int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                      int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerWriteResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                       int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                       int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerCreateResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                        int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                        int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerExecuteResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                         int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                         int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerDeleteResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                        int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                        int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                         int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                         int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerCancelObserveResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                               int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                               int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerDiscoverResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                          int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                          int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerWriteAttributesResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                                 int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen);
+                                                 int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 
 // send CoAP request handlers
 typedef bool (*SendCoapRequestHandler)(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
@@ -127,17 +127,17 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
 
 // successful response callbacks
 typedef void (*IpcCoapSuccessCallback)(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                       int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                       int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerDefaultSuccessfulResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                                int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerSuccessfulNotifyResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                  int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                                  int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerSuccessfulExecuteResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 static void xmlif_HandlerSuccessfulWriteAttributesResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                           int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen);
+                                                           int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen);
 
 static void xmlif_HandlerFreeIpcCoapRequestContext(void * ctxt);
 
@@ -674,7 +674,7 @@ static int xmlif_BackupPartiallyBuiltResponseTree(TreeNode responseContentNode, 
 }
 
 static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const char * responsePath, int coapResponseCode,
-                                 const char * type, const char * subType, ContentType contentType, char * payload, size_t payloadLen, IpcCoapSuccessCallback successCallback)
+                                 const char * type, const char * subType, AwaContentType contentType, char * payload, size_t payloadLen, IpcCoapSuccessCallback successCallback)
 {
     RequestInfoType * request = requestContext->Request;
 
@@ -816,7 +816,7 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
 }
 
 static void xmlif_HandlerDefaultSuccessfulResponse(IpcCoapRequestContext * requestContext, const char * responsePath,
-                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen)
+                                                   int coapResponseCode, TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IPC_AddResultTagToAllLeafNodes(pathNode, AwaError_Success);
 }
@@ -833,7 +833,7 @@ static int xmlif_HandleError(IpcCoapRequestContext * requestContext, Lwm2mClient
             requestContext->ResponseContentNode = NULL;
         }
         rc = -1;
-        callback(requestContext, NULL, NULL, rc, ContentType_None, NULL, 0);
+        callback(requestContext, NULL, NULL, rc, AwaContentType_None, NULL, 0);
     }
 
     return rc;
@@ -974,21 +974,21 @@ static int xmlif_HandlerReadRequest(RequestInfoType * request, TreeNode content)
 static bool xmlif_HandlerSendCoapReadRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
                                              ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
-    ContentType contentType = requestContext != NULL && 
+    AwaContentType contentType = requestContext != NULL && 
                               requestContext->Request != NULL && 
-                              requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
+                              requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : AwaContentType_ApplicationOmaLwm2mTLV;
     coap_GetRequest(requestContext, xmlif_GetURIForClient(client, key), contentType, xmlif_HandlerReadResponse);
     return true;
 }
 
-static void xmlif_HandlerReadResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerReadResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_READ, contentType, payload, payloadLen, xmlif_HandlerSuccessfulReadResponse);
 }
 
 static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestContext, const char * responsePath, int coapResponseCode, TreeNode pathNode,
-                                                const char * responseType, ContentType contentType, char * payload, size_t payloadLen)
+                                                const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     RequestInfoType * request = requestContext->Request;
     Lwm2mContextType * context = (Lwm2mContextType * )request->Context;
@@ -1063,9 +1063,9 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
                                                 ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
     bool result = true;
-    ContentType contentType = ((requestContext != NULL) &&
+    AwaContentType contentType = ((requestContext != NULL) &&
                               (requestContext->Request != NULL) &&
-                              (requestContext->Request->Context != NULL)) ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : ContentType_ApplicationOmaLwm2mTLV;
+                              (requestContext->Request->Context != NULL)) ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : AwaContentType_ApplicationOmaLwm2mTLV;
     TreeNode observeTypeNode = NULL;
     if ((observeTypeNode = Xml_Find(currentLeafNode, IPC_MESSAGE_TAG_OBSERVE)) != NULL)
     {
@@ -1097,7 +1097,7 @@ static void xmlif_HandlerFreeIpcCoapRequestContext(void * ctxt)
     free(requestContext);
 }
 
-static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     bool successfulResponse = (coapResponseCode >= 200) && (coapResponseCode < 300);
@@ -1118,13 +1118,13 @@ static void xmlif_HandlerObserveResponse(void * ctxt, AddressType* address, cons
 }
 
 static void xmlif_HandlerSuccessfulNotifyResponse(IpcCoapRequestContext * requestContext, const char * responsePath, int coapResponseCode,
-                                                  TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen)
+                                                  TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     xmlif_HandlerSuccessfulReadResponse(requestContext, responsePath, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
 }
 
 static void xmlif_HandlerCancelObserveResponse(void * ctxt, AddressType* address, const char * responsePath,
-                                               int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+                                               int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_OBSERVE, contentType, payload, payloadLen, xmlif_HandlerDefaultSuccessfulResponse);
@@ -1192,7 +1192,7 @@ error:
     return xmlif_HandleError(requestContext, client, xmlif_HandlerDeleteResponse, numCoapRequests);
 }
 
-static void xmlif_HandlerDeleteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerDeleteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_DELETE, contentType, payload, payloadLen, xmlif_HandlerDefaultSuccessfulResponse);
@@ -1207,7 +1207,7 @@ static int xmlif_HandlerDiscoverRequest(RequestInfoType * request, TreeNode cont
     result = xmlif_ParseRequest(request, content, &client, &key, NULL);
     if (result == AwaResult_Success)
     {
-        coap_GetRequest(request, xmlif_GetURIForClient(client, &key), ContentType_ApplicationLinkFormat, xmlif_HandlerDiscoverResponse);
+        coap_GetRequest(request, xmlif_GetURIForClient(client, &key), AwaContentType_ApplicationLinkFormat, xmlif_HandlerDiscoverResponse);
     }
     else
     {
@@ -1217,7 +1217,7 @@ static int xmlif_HandlerDiscoverRequest(RequestInfoType * request, TreeNode cont
     return result;
 }
 
-static void xmlif_HandlerDiscoverResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerDiscoverResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     xmlif_GenerateResponse(ctxt, address, responsePath, responseCode, IPC_MESSAGE_SUB_TYPE_DISCOVER);
     free(ctxt);
@@ -1379,7 +1379,7 @@ static int xmlif_SendCoapCreateRequest(RequestInfoType * request, Lwm2mClientTyp
     int objectID = 0;
 
     char payload[MAX_PAYLOAD_SIZE];
-    ContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : ContentType_ApplicationOmaLwm2mTLV;
+    AwaContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : AwaContentType_ApplicationOmaLwm2mTLV;
 
     // node can be either an object (no id specified - will be generated by client) or an object instance (id specified)
     if (Lwm2mTreeNode_GetType(Lwm2mTreeNode_GetParent(node)) == Lwm2mTreeNodeType_Root)
@@ -1423,7 +1423,7 @@ static int xmlif_SendCoapWriteRequest(RequestInfoType * request, Lwm2mClientType
         goto error;
     }
 
-    ContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : ContentType_ApplicationOmaLwm2mTLV;
+    AwaContentType contentType = request != NULL && request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)request->Context) : AwaContentType_ApplicationOmaLwm2mTLV;
 
     char payload[MAX_PAYLOAD_SIZE];
     if (Lwm2mTreeNode_GetChildCount(objectInstanceNode) == 1 && writeMode == AwaWriteMode_Replace)
@@ -1782,7 +1782,7 @@ error:
     return xmlif_HandleError(requestContext, client, xmlif_HandlerWriteResponse, numCoapRequests);
 }
 
-static void xmlif_HandlerCreateResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerCreateResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
 
@@ -1796,7 +1796,7 @@ static void xmlif_HandlerCreateResponse(void * ctxt, AddressType* address, const
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_WRITE, contentType, payload, payloadLen, xmlif_HandlerDefaultSuccessfulResponse);
 }
 
-static void xmlif_HandlerWriteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerWriteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_WRITE, contentType, payload, payloadLen, xmlif_HandlerDefaultSuccessfulResponse);
@@ -1917,7 +1917,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
     if (numValidAttributes > 0)
     {
         Lwm2m_Error("PUT attributes WITH QUERY %s\n", query);
-        coap_PutRequest(requestContext, query, ContentType_None, NULL, 0, xmlif_HandlerWriteAttributesResponse);
+        coap_PutRequest(requestContext, query, AwaContentType_None, NULL, 0, xmlif_HandlerWriteAttributesResponse);
         result = true;
     }
     else
@@ -1932,14 +1932,14 @@ error:
 }
 
 static void xmlif_HandlerWriteAttributesResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode,
-                                                 ContentType contentType, char * payload, size_t payloadLen)
+                                                 AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_WRITE_ATTRIBUTES, contentType, payload, payloadLen, xmlif_HandlerSuccessfulWriteAttributesResponse);
 }
 
 static void xmlif_HandlerSuccessfulWriteAttributesResponse(IpcCoapRequestContext * requestContext, const char * responsePath, int coapResponseCode, TreeNode pathNode,
-                                                           const char * responseType, ContentType contentType, char * payload, size_t payloadLen)
+                                                           const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     xmlif_HandlerDefaultSuccessfulResponse(requestContext, responsePath, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
 }
@@ -1982,7 +1982,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
             }
         }
 
-        coap_PostRequest(requestContext, xmlif_GetURIForClient(client, key), (dataLength > 0) ? ContentType_ApplicationOctetStream : ContentType_None, dataValue, dataLength, xmlif_HandlerExecuteResponse);
+        coap_PostRequest(requestContext, xmlif_GetURIForClient(client, key), (dataLength > 0) ? AwaContentType_ApplicationOctetStream : AwaContentType_None, dataValue, dataLength, xmlif_HandlerExecuteResponse);
         free(dataValue);
         result = true;
     }
@@ -1996,14 +1996,14 @@ error:
     return result;
 }
 
-static void xmlif_HandlerExecuteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void xmlif_HandlerExecuteResponse(void * ctxt, AddressType* address, const char * responsePath, int coapResponseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *) ctxt;
     xmlif_HandleResponse(requestContext, responsePath, coapResponseCode, IPC_MESSAGE_TYPE_RESPONSE, IPC_MESSAGE_SUB_TYPE_EXECUTE, contentType, payload, payloadLen, xmlif_HandlerSuccessfulExecuteResponse);
 }
 
 static void xmlif_HandlerSuccessfulExecuteResponse(IpcCoapRequestContext * requestContext, const char * responsePath, int coapResponseCode,
-                                                   TreeNode pathNode, const char * responseType, ContentType contentType, char * payload, size_t payloadLen)
+                                                   TreeNode pathNode, const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     xmlif_HandlerDefaultSuccessfulResponse(requestContext, responsePath, coapResponseCode, pathNode, responseType, contentType, payload, payloadLen);
 }

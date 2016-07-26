@@ -63,7 +63,12 @@ void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicat
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
 
+#if LWM2M_CLIENT
 
+AwaContentType Lwm2mCore_GetDefaultContentType();
+void Lwm2mCore_SetDefaultContentType(AwaContentType contentType);
+
+#endif
 
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation);
 
@@ -109,7 +114,7 @@ ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * co
 AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace);
 
 int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                      ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
+                      ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
 
 int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 

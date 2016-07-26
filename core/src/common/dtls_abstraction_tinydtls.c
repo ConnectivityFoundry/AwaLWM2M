@@ -86,6 +86,7 @@ static DTLS_NetworkSendCallback NetworkSend = NULL;
 
 
 static DTLS_Session * AllocateSession(NetworkAddress * address, bool client, void * context);
+static int DummySendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength);
 static DTLS_Session * GetSession(NetworkAddress * address);
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
 static void FreeSession(DTLS_Session * session);
@@ -222,6 +223,11 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
         {
             session->UserContext = context;
             session->Callbacks.write = SSLSendCallBack;
+            dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
+            if (!peer)
+            {
+                dtls_connect(session->Context, &session->Session);
+            }
         }
     }
     else
@@ -229,7 +235,11 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
         session = AllocateSession(destAddress, true, context);
         if (session)
         {
-            dtls_connect(session->Context, &session->Session);
+            dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
+            if (!peer)
+            {
+                dtls_connect(session->Context, &session->Session);
+            }
         }
     }
     return result;
@@ -299,6 +309,7 @@ static void FreeSession(DTLS_Session * session)
 {
     if (session->Context)
     {
+        session->Callbacks.write = DummySendCallBack;
         dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
         if (peer)
         {
@@ -456,3 +467,9 @@ static int CertificateVerify(struct dtls_context_t *ctx, const session_t *sessio
     return TINY_DTLS_SUCCESS;
 }
 #endif
+
+
+static int DummySendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength)
+{
+    return 0;
+}

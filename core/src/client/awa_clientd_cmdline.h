@@ -67,6 +67,9 @@ struct gengetopt_args_info
   char * certificate_arg;	/**< @brief Load client certificate from FILE.  */
   char * certificate_orig;	/**< @brief Load client certificate from FILE original value given at command line.  */
   const char *certificate_help; /**< @brief Load client certificate from FILE help description.  */
+  int defaultContentType_arg;	/**< @brief Default content type to use when a request doesn't specify one (TLV=1542, JSON=50) (default='0').  */
+  char * defaultContentType_orig;	/**< @brief Default content type to use when a request doesn't specify one (TLV=1542, JSON=50) original value given at command line.  */
+  const char *defaultContentType_help; /**< @brief Default content type to use when a request doesn't specify one (TLV=1542, JSON=50) help description.  */
   char ** objDefs_arg;	/**< @brief Load object and resource definitions from FILE.  */
   char ** objDefs_orig;	/**< @brief Load object and resource definitions from FILE original value given at command line.  */
   unsigned int objDefs_min; /**< @brief Load object and resource definitions from FILE's minimum occurreces */
@@ -93,6 +96,7 @@ struct gengetopt_args_info
   unsigned int pskIdentity_given ;	/**< @brief Whether pskIdentity was given.  */
   unsigned int pskKey_given ;	/**< @brief Whether pskKey was given.  */
   unsigned int certificate_given ;	/**< @brief Whether certificate was given.  */
+  unsigned int defaultContentType_given ;	/**< @brief Whether defaultContentType was given.  */
   unsigned int objDefs_given ;	/**< @brief Whether objDefs was given.  */
   unsigned int daemonize_given ;	/**< @brief Whether daemonize was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */

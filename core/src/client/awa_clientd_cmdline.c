@@ -33,22 +33,23 @@ const char *gengetopt_args_info_versiontext = "Copyright (c) 2016 Imagination Te
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help                   Print help and exit",
-  "  -p, --port=PORT              Use local port number PORT for CoAP\n                                 communications  (default=`6000')",
-  "  -a, --addressFamily=AF       Address family for network interface. AF=4 for\n                                 IPv4, AF=6 for IPv6  (possible values=\"4\",\n                                 \"6\" default=`4')",
-  "  -i, --ipcPort=PORT           Use port number PORT for IPC communications\n                                 (default=`12345')",
-  "  -e, --endPointName=NAME      Use NAME as client end point name  (default=`Awa\n                                 Client')",
-  "  -b, --bootstrap=URI          Use bootstrap server URI",
-  "  -f, --factoryBootstrap=FILE  Load factory bootstrap information from FILE",
-  "  -s, --secure                 CoAP communications are secured with DTLS\n                                 (default=off)",
-  "      --pskIdentity=IDENTITY   Default Identity of associated pre-shared key\n                                 for DTLS",
-  "      --pskKey=KEY             Default pre-shared key for DTLS as a hex string",
-  "  -c, --certificate=FILE       Load client certificate from FILE",
-  "  -o, --objDefs=FILE           Load object and resource definitions from FILE",
-  "  -d, --daemonize              Detach process from terminal and run in the\n                                 background  (default=off)",
-  "  -v, --verbose                Generate verbose output  (default=off)",
-  "  -l, --logFile=FILE           Log output to FILE",
-  "  -V, --version                Print version and exit  (default=off)",
+  "  -h, --help                    Print help and exit",
+  "  -p, --port=PORT               Use local port number PORT for CoAP\n                                  communications  (default=`6000')",
+  "  -a, --addressFamily=AF        Address family for network interface. AF=4 for\n                                  IPv4, AF=6 for IPv6  (possible values=\"4\",\n                                  \"6\" default=`4')",
+  "  -i, --ipcPort=PORT            Use port number PORT for IPC communications\n                                  (default=`12345')",
+  "  -e, --endPointName=NAME       Use NAME as client end point name\n                                  (default=`Awa Client')",
+  "  -b, --bootstrap=URI           Use bootstrap server URI",
+  "  -f, --factoryBootstrap=FILE   Load factory bootstrap information from FILE",
+  "  -s, --secure                  CoAP communications are secured with DTLS\n                                  (default=off)",
+  "      --pskIdentity=IDENTITY    Default Identity of associated pre-shared key\n                                  for DTLS",
+  "      --pskKey=KEY              Default pre-shared key for DTLS as a hex string",
+  "  -c, --certificate=FILE        Load client certificate from FILE",
+  "  -t, --defaultContentType=CONTENTTYPE\n                                Default content type to use when a request\n                                  doesn't specify one (TLV=1542, JSON=50)\n                                  (default=`0')",
+  "  -o, --objDefs=FILE            Load object and resource definitions from FILE",
+  "  -d, --daemonize               Detach process from terminal and run in the\n                                  background  (default=off)",
+  "  -v, --verbose                 Generate verbose output  (default=off)",
+  "  -l, --logFile=FILE            Log output to FILE",
+  "  -V, --version                 Print version and exit  (default=off)",
   "\nExample:\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoap://[::1]:2134\n\nPSK Example:\n\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoaps://0.0.0.0:2134 --pskIdentity=myPskIdentity\n--pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F\n\n",
     0
 };
@@ -90,6 +91,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->pskIdentity_given = 0 ;
   args_info->pskKey_given = 0 ;
   args_info->certificate_given = 0 ;
+  args_info->defaultContentType_given = 0 ;
   args_info->objDefs_given = 0 ;
   args_info->daemonize_given = 0 ;
   args_info->verbose_given = 0 ;
@@ -120,6 +122,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->pskKey_orig = NULL;
   args_info->certificate_arg = NULL;
   args_info->certificate_orig = NULL;
+  args_info->defaultContentType_arg = 0;
+  args_info->defaultContentType_orig = NULL;
   args_info->objDefs_arg = NULL;
   args_info->objDefs_orig = NULL;
   args_info->daemonize_flag = 0;
@@ -146,13 +150,14 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->pskIdentity_help = gengetopt_args_info_help[8] ;
   args_info->pskKey_help = gengetopt_args_info_help[9] ;
   args_info->certificate_help = gengetopt_args_info_help[10] ;
-  args_info->objDefs_help = gengetopt_args_info_help[11] ;
+  args_info->defaultContentType_help = gengetopt_args_info_help[11] ;
+  args_info->objDefs_help = gengetopt_args_info_help[12] ;
   args_info->objDefs_min = 1;
   args_info->objDefs_max = 16;
-  args_info->daemonize_help = gengetopt_args_info_help[12] ;
-  args_info->verbose_help = gengetopt_args_info_help[13] ;
-  args_info->logFile_help = gengetopt_args_info_help[14] ;
-  args_info->version_help = gengetopt_args_info_help[15] ;
+  args_info->daemonize_help = gengetopt_args_info_help[13] ;
+  args_info->verbose_help = gengetopt_args_info_help[14] ;
+  args_info->logFile_help = gengetopt_args_info_help[15] ;
+  args_info->version_help = gengetopt_args_info_help[16] ;
   
 }
 
@@ -299,6 +304,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->pskKey_orig));
   free_string_field (&(args_info->certificate_arg));
   free_string_field (&(args_info->certificate_orig));
+  free_string_field (&(args_info->defaultContentType_orig));
   free_multiple_string_field (args_info->objDefs_given, &(args_info->objDefs_arg), &(args_info->objDefs_orig));
   free_string_field (&(args_info->logFile_arg));
   free_string_field (&(args_info->logFile_orig));
@@ -408,6 +414,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "pskKey", args_info->pskKey_orig, 0);
   if (args_info->certificate_given)
     write_into_file(outfile, "certificate", args_info->certificate_orig, 0);
+  if (args_info->defaultContentType_given)
+    write_into_file(outfile, "defaultContentType", args_info->defaultContentType_orig, 0);
   write_multiple_into_file(outfile, args_info->objDefs_given, "objDefs", args_info->objDefs_orig, 0);
   if (args_info->daemonize_given)
     write_into_file(outfile, "daemonize", 0, 0 );
@@ -1582,6 +1590,7 @@ cmdline_parser_internal (
         { "pskIdentity",	1, NULL, 0 },
         { "pskKey",	1, NULL, 0 },
         { "certificate",	1, NULL, 'c' },
+        { "defaultContentType",	1, NULL, 't' },
         { "objDefs",	1, NULL, 'o' },
         { "daemonize",	0, NULL, 'd' },
         { "verbose",	0, NULL, 'v' },
@@ -1595,7 +1604,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hp:a:i:e:b:f:sc:o:dvl:V", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hp:a:i:e:b:f:sc:t:o:dvl:V", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1701,6 +1710,18 @@ cmdline_parser_internal (
               &(local_args_info.certificate_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "certificate", 'c',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 't':	/* Default content type to use when a request doesn't specify one (TLV=1542, JSON=50).  */
+        
+        
+          if (update_arg( (void *)&(args_info->defaultContentType_arg), 
+               &(args_info->defaultContentType_orig), &(args_info->defaultContentType_given),
+              &(local_args_info.defaultContentType_given), optarg, 0, "0", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "defaultContentType", 't',
               additional_error))
             goto failure;
         

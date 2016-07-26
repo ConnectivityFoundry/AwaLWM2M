@@ -32,7 +32,7 @@ extern "C" {
 #include "lwm2m_attributes.h"
 #include "lwm2m_list.h"
 
-typedef int (*Lwm2mNotificationCallback)(void * context, AddressType *, int, const char *, int, ObjectIDType, ObjectInstanceIDType, ResourceIDType, ContentType, void * ContextData);
+typedef int (*Lwm2mNotificationCallback)(void * context, AddressType *, int, const char *, int, ObjectIDType, ObjectInstanceIDType, ResourceIDType, AwaContentType, void * ContextData);
 
 typedef struct
 {
@@ -41,7 +41,7 @@ typedef struct
     ObjectIDType ObjectID;
     ObjectInstanceIDType ObjectInstanceID;
     ResourceIDType ResourceID;
-    ContentType ContentType;
+    AwaContentType ContentType;
     AddressType Address;
     Lwm2mNotificationCallback Callback;
     void * ContextData;
@@ -62,7 +62,7 @@ void Lwm2m_FreeObservers(void * ctxt);
 void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const void * newValue, size_t newValueLength);
 
 int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                  ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
+                  ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
 int Lwm2m_CancelObserve(void * ctxt, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 /* Free any observers in the observer list. this is called when a DELETE operation occurs for a specified object instance/resource.

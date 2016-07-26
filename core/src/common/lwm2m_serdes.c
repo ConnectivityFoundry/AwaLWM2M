@@ -36,7 +36,7 @@
 
 typedef struct
 {
-    ContentType Type;
+    AwaContentType Type;
     const SerialiserDeserialiser * Serdes;
 } SerdesMapEntry;
 
@@ -45,29 +45,28 @@ typedef struct
  */
 const static SerdesMapEntry serdesList[] =
 {
-        { ContentType_CustomPrettyPrint,         &ppSerDes        },
 
 #ifndef CONTIKI
 #ifdef WITH_JSON
-        { ContentType_ApplicationOmaLwm2mJson,   &jsonSerDes      },
+        { AwaContentType_ApplicationOmaLwm2mJson,   &jsonSerDes      },
 #endif // WITH_JSON
 #endif // CONTIKI
-        { ContentType_ApplicationOmaLwm2mTLV,    &tlvSerDes       },
-        { ContentType_ApplicationPlainText,      &plainTextSerDes },
-        { ContentType_ApplicationOctetStream,    &opaqueSerDes    },
+        { AwaContentType_ApplicationOmaLwm2mTLV,    &tlvSerDes       },
+        { AwaContentType_ApplicationPlainText,      &plainTextSerDes },
+        { AwaContentType_ApplicationOctetStream,    &opaqueSerDes    },
 
         // Mapping for old types
-        { ContentType_ApplicationOmaLwm2mText,   &plainTextSerDes },
+        { AwaContentType_ApplicationOmaLwm2mText,   &plainTextSerDes },
 #ifndef CONTIKI
 #ifdef WITH_JSON
-        { ContentType_ApplicationJson,           &jsonSerDes      },
+        { AwaContentType_ApplicationJson,           &jsonSerDes      },
 #endif // WITH_JSON
 #endif // CONTIKI
-        { ContentType_ApplicationOmaLwm2mOpaque, &opaqueSerDes    },
+        { AwaContentType_ApplicationOmaLwm2mOpaque, &opaqueSerDes    },
 };
 #define NUM_SERIALISERS (sizeof(serdesList)/sizeof(SerdesMapEntry))
 
-static SerialiserDeserialiser * GetSerialiserDeserialiser(ContentType type)
+static SerialiserDeserialiser * GetSerialiserDeserialiser(AwaContentType type)
 {
     int i;
     // lookup serialiser in serialiser list.
@@ -79,7 +78,7 @@ static SerialiserDeserialiser * GetSerialiserDeserialiser(ContentType type)
     return NULL;
 }
 
-int SerialiseObject(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len)
+int SerialiseObject(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len)
 {
     SerialiserDeserialiser * serdes = GetSerialiserDeserialiser(type);
     if ((serdes != NULL) && serdes->SerialiseObject)
@@ -91,7 +90,7 @@ int SerialiseObject(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectI
     return -1;
 }
 
-int SerialiseObjectInstance(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len)
+int SerialiseObjectInstance(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len)
 {
     SerialiserDeserialiser * serdes = GetSerialiserDeserialiser(type);
     if ((serdes != NULL) && serdes->SerialiseObjectInstance)
@@ -103,7 +102,7 @@ int SerialiseObjectInstance(ContentType type, Lwm2mTreeNode * node, ObjectIDType
     return -1;
 }
 
-int SerialiseResource(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID,
+int SerialiseResource(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID,
                       ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, char * buffer, int len)
 {
     SerialiserDeserialiser * serdes = GetSerialiserDeserialiser(type);
@@ -116,7 +115,7 @@ int SerialiseResource(ContentType type, Lwm2mTreeNode * node, ObjectIDType objec
     return -1;
 }
 
-int DeserialiseObject(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry,
+int DeserialiseObject(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry,
                       ObjectIDType objectID, const char * buffer, int bufferLen)
 {
     SerialiserDeserialiser * serdes = GetSerialiserDeserialiser(type);

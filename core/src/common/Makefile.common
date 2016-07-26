@@ -12,12 +12,12 @@ common_src = \
     lwm2m_result.c \
     lwm2m_types.c \
     lwm2m_bootstrap_config.c \
-    coap_abstraction_erbium.c \
-    dtls_abstraction_dummy.c
-  	
-  	
-# Below not needed for contiki  	
-#  ipc_session.c
-#  lwm2m_events.c
-#  objdefs.c
-  	
+    coap_abstraction_erbium.c 
+
+
+ifeq ($(TINYDTLS),)
+	common_src += dtls_abstraction_dummy.c
+else
+	common_src += dtls_abstraction_tinydtls.c
+endif
+    

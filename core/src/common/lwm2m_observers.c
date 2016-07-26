@@ -266,7 +266,7 @@ void Lwm2m_FreeObservers(void * ctxt)
 }
 
 int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                  ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData)
+                  ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData)
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int result = 0;

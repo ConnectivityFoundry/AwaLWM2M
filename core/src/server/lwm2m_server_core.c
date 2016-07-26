@@ -45,7 +45,7 @@ struct _Lwm2mContextType
     CoapInfo * Coap;                          // CoAP library context information
     struct ListHead ClientList;               // List of registered clients
     int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
-    ContentType ContentType;                  // Used to set CoAP content type
+    AwaContentType ContentType;                  // Used to set CoAP content type
     struct ListHead EventRecordList;          // Used to dispatch event callbacks
 };
 
@@ -110,7 +110,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     }
     else
     {
-        response->responseContentType = ContentType_None;
+        response->responseContentType = AwaContentType_None;
         response->responseContentLen = 0;
         response->responseCode = AwaResult_NotFound;
     }
@@ -138,7 +138,7 @@ struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context)
     return &context->ClientList;
 }
 
-ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context)
+AwaContentType Lwm2mCore_GetContentType(Lwm2mContextType * context)
 {
     return context->ContentType;
 }
@@ -158,7 +158,7 @@ void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location)
     context->LastLocation = location;
 }
 
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType)
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, AwaContentType contentType)
 {
     Lwm2m_Debug("Create object store\n");
 

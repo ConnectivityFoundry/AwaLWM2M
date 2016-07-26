@@ -39,7 +39,7 @@
 #define BOOTSTRAP_FINISHED_TIMEOUT (15000)
 
 
-static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 
 
 /*
@@ -73,10 +73,10 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
 
     coap_Reset(uri);
 
-    coap_PostRequest(context, uri, ContentType_None, NULL, 0, HandleBootstrapResponse);
+    coap_PostRequest(context, uri, AwaContentType_None, NULL, 0, HandleBootstrapResponse);
 }
 
-static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     Lwm2mContextType * context = ctxt;
 
@@ -108,7 +108,7 @@ static bool BootStrapFromFactory(Lwm2mContextType * context)
 }
 
 // Handler called when the server posts a "finished" message to /bs
-static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                          const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -143,8 +143,8 @@ static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, con
 // Handler for /bs
 static int BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
                                               const char * path, const char * query, const char * token, int tokenLength,
-                                              ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                              ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                              AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                              AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -152,7 +152,7 @@ static int BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
         case COAP_POST_REQUEST:
             return BootStrapPost(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContent, responseContentLen, responseCode);
         default:
-            *responseContentType = ContentType_None;
+            *responseContentType = AwaContentType_None;
             *responseContentLen = 0;
             *responseCode = AwaResult_MethodNotAllowed;
             break;

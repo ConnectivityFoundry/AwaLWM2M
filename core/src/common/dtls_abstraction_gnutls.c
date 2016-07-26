@@ -226,7 +226,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             gnutls_transport_set_push_function(session->Session, SSLSendCallBack);
             session->SessionEstablished = (gnutls_handshake(session->Session) == GNUTLS_E_SUCCESS);
             if (session->SessionEstablished)
-                Lwm2m_Info("Session established");
+                Lwm2m_Info("DTLS Session established\n");
         }
     }
     else

@@ -57,12 +57,12 @@ typedef struct
 static void DestroyObjectList(struct ListHead * objectList);
 
 static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
+                                       int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
+                                 int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static void Lwm2m_SplitUpQuery(const char * query, RegistrationQueryString * result)
 {
@@ -166,7 +166,7 @@ static void Lwm2m_ParseObjectList(Lwm2mClientType * client, const char * objectL
                     {
                         // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
                         // by including the content type in the root path link using the ct= link attribute.
-                        if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                        if ((contentType == AwaContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
                         {
                             client->SupportsJson = true;
                             Lwm2m_Info("Supports JSON\n");
@@ -308,7 +308,7 @@ static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, 
 }
 
 static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int lifeTime, BindingMode bindingMode,
-                              AddressType * addr, ContentType contentType, const char * objectList, int objectListLength,
+                              AddressType * addr, AwaContentType contentType, const char * objectList, int objectListLength,
                               RegistrationEventType registrationEventType)
 {
     int result = -1;
@@ -328,7 +328,7 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
 
         memcpy(&client->Address, addr, sizeof(AddressType));
 
-        if (contentType == ContentType_ApplicationLinkFormat)
+        if (contentType == AwaContentType_ApplicationLinkFormat)
         {
             Lwm2m_ParseObjectList(client, objectList, objectListLength);
         }
@@ -347,7 +347,7 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
 }
 
 static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPointName, int lifeTime, BindingMode bindingMode,
-                                AddressType * addr, ContentType contentType, const char * objectList, int objectListLength)
+                                AddressType * addr, AwaContentType contentType, const char * objectList, int objectListLength)
 {
     int result = -1;
     Lwm2mClientType * client = Lwm2m_LookupClientByName(context, endPointName);
@@ -408,7 +408,7 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
-                              const char * query, ContentType contentType, 
+                              const char * query, AwaContentType contentType, 
                               const char * requestContent, size_t requestContentLen,
                               char * responseContent, size_t * responseContentLen,
                               int * responseCode)
@@ -429,7 +429,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     }
 
     // Check object list is supplied, or at least an empty list with the type application-link
-    if (contentType != ContentType_ApplicationLinkFormat)
+    if (contentType != AwaContentType_ApplicationLinkFormat)
     {
         *responseContentLen = 0;
         *responseCode = AwaResult_BadRequest;
@@ -473,7 +473,7 @@ done:
 
 // handler called when a client puts to /rd/<location>
 static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
-                       const char * query, ContentType contentType,
+                       const char * query, AwaContentType contentType,
                        const char * requestContent, size_t requestContentLen,
                        char * responseContent, size_t * responseContentLen,
                        int * responseCode)
@@ -510,7 +510,7 @@ done:
 }
 
 // handler called when a client sends a deregister by sending a DELETE to /rd/X
-static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                           const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
@@ -547,8 +547,8 @@ done:
  * end points are handled here.
  */
 static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                 int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch(type)
     {
@@ -566,7 +566,7 @@ static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, cons
             break;
     }
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
     *responseCode = AwaResult_MethodNotAllowed;
     return 0;
@@ -574,8 +574,8 @@ static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, cons
 
 // This function is called when a CoAP request is made to /rd
 static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                       int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -585,7 +585,7 @@ static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr
             break;
     }
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
     *responseCode = AwaResult_MethodNotAllowed;
     return 0;

@@ -221,6 +221,22 @@ typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperati
 AwaStaticClient * AwaStaticClient_New();
 
 /**
+ * @brief Retrieve default content type to use when a request doesn't specify via accept header a preferred content type.
+ *
+ *        The default is initially AwaContentType_ApplicationPlainText.
+ *
+ * @return The default content type
+ */
+AwaContentType AwaStaticClient_GetDefaultContentType();
+
+/**
+ * @brief Set the default content type to use when a request doesn't specify via accept header a preferred content type.
+ *
+ * @param[in] contentType The default contentType eg AwaContentType_ApplicationOmaLwm2mTLV.
+ */
+void AwaStaticClient_SetDefaultContentType(AwaContentType contentType);
+
+/**
  * @brief Set the client log level. This function is not
  *        tied to an AwaStaticClient and has global effect.
  *        Only messages with level equal to or less than the current log level will
