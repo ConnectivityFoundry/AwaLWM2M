@@ -53,14 +53,14 @@ typedef struct
 
 } SerialiserDeserialiser;
 
-int SerialiseObject(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len);
-int SerialiseObjectInstance(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len);
-int SerialiseResource(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, char * buffer, int len);
+int SerialiseObject(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len);
+int SerialiseObjectInstance(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len);
+int SerialiseResource(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, char * buffer, int len);
 
-int DeserialiseObject(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID, const char * buffer, int bufferLen);
-int DeserialiseObjectInstance(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
+int DeserialiseObject(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID, const char * buffer, int bufferLen);
+int DeserialiseObjectInstance(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                               ObjectInstanceIDType objectInstanceID, const char * buffer, int bufferLen);
-int DeserialiseResource(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
+int DeserialiseResource(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                         ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const char * buffer, int bufferLen);
 
 #ifdef __cplusplus

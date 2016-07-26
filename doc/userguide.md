@@ -142,6 +142,7 @@ Usage: `awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]
 | --factoryBootstrap, -f | Load factory bootstrap information from FILE |
 | --pskIdentity | Default Identity of associated pre-shared key for DTLS |
 | --pskKey | Default pre-shared key for DTLS as a hex string |
+| --defaultContentType, -t | Default content type to use when a request doesn't specify one (TLV=1542, JSON=50) |
 | --objDefs, -o | Load object definitions from FILE |
 | --daemonise, -d | Detach process from terminal and run in the background |
 | --verbose, -v | Generate verbose output |

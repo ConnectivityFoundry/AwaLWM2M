@@ -129,6 +129,16 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     return result;
 }
 
+AwaContentType AwaStaticClient_GetDefaultContentType()
+{
+    return Lwm2mCore_GetDefaultContentType();
+}
+
+void AwaStaticClient_SetDefaultContentType(AwaContentType contentType)
+{
+    Lwm2mCore_SetDefaultContentType(contentType);
+}
+
 AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
 {
     AwaError result = AwaError_Unspecified;

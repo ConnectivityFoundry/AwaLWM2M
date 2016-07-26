@@ -430,10 +430,10 @@ NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket)
 int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
 {
     int result = -1;
-    if (networkSocket)
-    {
-        result = (int)networkSocket->Socket;
-    }
+//    if (networkSocket)
+//    {
+//        result = (int)networkSocket->Socket;
+//    }
     return result;
 }
 

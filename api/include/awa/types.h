@@ -166,6 +166,21 @@ typedef enum
     AwaCertificateFormat_PEM,  /**< PEM format. */
 } AwaCertificateFormat;
 
+
+typedef enum
+{
+    AwaContentType_None = -1,
+    AwaContentType_ApplicationPlainText      = 0,       // The new standard suggests to use PlainText
+    AwaContentType_ApplicationLinkFormat     = 40,      // Object link format
+    AwaContentType_ApplicationOctetStream    = 42,      // The new standard uses OctetStream, rather than omg.lwm2m+opaque
+    AwaContentType_ApplicationJson           = 50,      // The new standard uses Json, rather than omg.lwm2m+json
+    AwaContentType_ApplicationOmaLwm2mText   = 1541,    // application/vnd.oma.lwm2m+text (leshan uses 1541)
+    AwaContentType_ApplicationOmaLwm2mTLV    = 1542,    // application/vnd.oma.lwm2m+tlv (TBD)??
+    AwaContentType_ApplicationOmaLwm2mJson   = 1543,
+    AwaContentType_ApplicationOmaLwm2mOpaque = 1544,
+
+} AwaContentType;
+
 #ifdef __cplusplus
 }
 #endif

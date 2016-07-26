@@ -47,7 +47,7 @@ typedef struct
     const char * query;
     const char * token;
     int tokenLength;
-    ContentType contentType;
+    AwaContentType contentType;
     const char * requestContent;
     size_t requestContentLen;
 
@@ -55,7 +55,7 @@ typedef struct
 
 typedef struct
 {
-    ContentType responseContentType;
+    AwaContentType responseContentType;
     char * responseContent;
     size_t responseContentLen;
     char * responseLocation;
@@ -65,7 +65,7 @@ typedef struct
 } CoapResponse;
 
 typedef int (*RequestHandler)(CoapRequest * request, CoapResponse * response);
-typedef void (*TransactionCallback)(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+typedef void (*TransactionCallback)(void * context, AddressType * addr, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 typedef void (*NotificationFreeCallback)(void * context);
 
 typedef struct
@@ -87,13 +87,13 @@ void coap_HandleMessage(void);
 
 void coap_SetLogLevel(int logLevel);
 
-void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback);
-void coap_PostRequest(void * context, const char * uri, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);
-void coap_PutRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);
+void coap_GetRequest(void * context, const char * path, AwaContentType contentType, TransactionCallback callback);
+void coap_PostRequest(void * context, const char * uri, AwaContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);
+void coap_PutRequest(void * context, const char * path, AwaContentType contentType, const char * payload, int payloadLen, TransactionCallback callback);
 void coap_DeleteRequest(void * context, const char * path, TransactionCallback callback);
-void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback transactionCallback, NotificationFreeCallback notificationFreeCallback);
-void coap_CancelObserve(void * context, const char * path, ContentType contentType, TransactionCallback callback);
-void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType, const char * payload, int payloadLen, int sequence);
+void coap_Observe(void * context, const char * path, AwaContentType contentType, TransactionCallback transactionCallback, NotificationFreeCallback notificationFreeCallback);
+void coap_CancelObserve(void * context, const char * path, AwaContentType contentType, TransactionCallback callback);
+void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, AwaContentType contentType, const char * payload, int payloadLen, int sequence);
 
 void coap_SetContext(void * ctxt);
 void coap_SetRequestHandler(RequestHandler handler);

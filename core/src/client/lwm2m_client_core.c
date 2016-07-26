@@ -67,6 +67,8 @@ struct _Lwm2mContextType
 
 static Lwm2mContextType Lwm2mContext;
 
+static AwaContentType defaultContentType = AwaContentType_ApplicationPlainText;
+
 static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                   ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
                                   const void ** buffer, size_t * bufferLen);
@@ -81,8 +83,8 @@ static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType
 
 static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
                                           const char * path, const char * query, const char * token, int tokenLength,
-                                          ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                          ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
+                                          AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                          AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 ObjectOperationHandlers defaultObjectOperationHandlers =
 {
@@ -100,17 +102,17 @@ ResourceOperationHandlers defaultResourceOperationHandlers =
 
 
 // Serialise the Object referenced by OIR into the provided buffer. Return number of bytes serialised, negative on failure
-static int SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int oir[], int oirLength, ContentType * responseContentType, char * buffer, size_t size)
+static int SerialiseOIR(Lwm2mTreeNode * root, AwaContentType acceptContentType, int oir[], int oirLength, AwaContentType * responseContentType, char * buffer, size_t size)
 {
     int len = -1;
 
-    if (acceptContentType == ContentType_None)
+    if (acceptContentType == AwaContentType_None)
     {
         /* If the content type is not specified in the payload of a response message,
          * the default content type (text/plain) is assumed; otherwise the content type
          * MUST be specified in using one of the supported Media Types.
          */
-        acceptContentType = ContentType_ApplicationPlainText;
+        acceptContentType = defaultContentType;
     }
 
     if (oirLength == 1)
@@ -135,15 +137,15 @@ static int SerialiseOIR(Lwm2mTreeNode * root, ContentType acceptContentType, int
 }
 
 // Deserialise the encoded buffer provided into the Object references by OIR. Return number of bytes deserialised, negative on failure
-static int DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, size_t len)
+static int DeserialiseOIR(Lwm2mTreeNode ** dest, AwaContentType contentType, Lwm2mContextType * context, int oir[], int oirLength, const char * buffer, size_t len)
 {
     /* If the content type is not specified in the payload of a response message,
      * the default content type (text/plain) is assumed; otherwise the content type
      * MUST be specified in using one of the supported Media Types.
      */
-    if (contentType ==  ContentType_None)
+    if (contentType ==  AwaContentType_None)
     {
-        contentType = ContentType_ApplicationPlainText;
+        contentType = defaultContentType;
     }
 
     if (oirLength == 1)
@@ -163,6 +165,24 @@ static int DeserialiseOIR(Lwm2mTreeNode ** dest, ContentType contentType, Lwm2mC
     }
 
     return len;
+}
+
+
+AwaContentType Lwm2mCore_GetDefaultContentType()
+{
+    return defaultContentType;
+}
+
+void Lwm2mCore_SetDefaultContentType(AwaContentType contentType)
+{
+    if (contentType == AwaContentType_None)
+    {
+        Lwm2m_Error("Invalid default content type\n");
+    }
+    else
+    {
+        defaultContentType = contentType;
+    }
 }
 
 void Lwm2mCore_ObjectCreated(Lwm2mContextType * context, ObjectIDType objectID)
@@ -1039,7 +1059,7 @@ bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectI
 
 // Register an Observer of a specific resource. Return -1 on error, 0 on success.
 int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                      ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * contextData)
+                      ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * contextData)
 {
     return Lwm2m_Observe(context, addr, token, tokenLength, objectID, objectInstanceID, resourceID, contentType, callback, contextData);
 }
@@ -1290,7 +1310,7 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 #ifndef CONTIKI
 #ifdef WITH_JSON
         // Always add "ct" field for </> to signal we support JSON.
-        pos += snprintf(buffer + pos, len - pos, "<%s>;ct=%d", altPath ? altPath : "/", ContentType_ApplicationOmaLwm2mJson);
+        pos += snprintf(buffer + pos, len - pos, "<%s>;ct=%d", altPath ? altPath : "/", AwaContentType_ApplicationOmaLwm2mJson);
         first = false;
 #endif // WITH_JSON
 #endif // CONTIKI
@@ -1308,7 +1328,7 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 
 // Handler LwM2M Notifications and send them as CoAP messages. Return 0 on success, non-zero on error.
 static int HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength,
-                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ContentType contentType, void * ContextData)
+                              ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, AwaContentType contentType, void * ContextData)
 {
     Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
     int oir[3];
@@ -1316,7 +1336,7 @@ static int HandleNotification(void * ctxt, AddressType * addr, int sequence, con
     enum { PATH_LEN = 128 };
     char path[PATH_LEN] = {0};
     int matches;
-    ContentType payloadContentType;
+    AwaContentType payloadContentType;
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
     Lwm2mCore_AddressTypeToPath(path, PATH_LEN, addr);
@@ -1342,7 +1362,7 @@ static int HandleNotification(void * ctxt, AddressType * addr, int sequence, con
 
 // Handle CoAP GET Requests with Observe, Maps to LWM2M Observe. Return 0 on success, non-zero on error.
 static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, char * token, int tokenLength,
-                                ContentType contentType, const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+                                AwaContentType contentType, const char * requestContent, size_t requestContentLen, AwaContentType * responseContentType,
                                 char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1351,12 +1371,12 @@ static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * pa
 
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     AwaResult result = AwaResult_Unspecified;
 
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
 
-    if (contentType == ContentType_ApplicationLinkFormat)
+    if (contentType == AwaContentType_ApplicationLinkFormat)
     {
         // Do not support an Observe and Discover in the same request.
         *responseContentLen = 0;
@@ -1387,8 +1407,8 @@ static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * pa
 }
 
 // Handle CoAP GET Requests with Cancel Observe, Maps to LWM2M CancelObserve. Return 0 on success, non-zero on error.
-static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
-                                      const char * requestContent, size_t requestContentLen, ContentType * responseContentType,
+static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
+                                      const char * requestContent, size_t requestContentLen, AwaContentType * responseContentType,
                                       char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1397,7 +1417,7 @@ static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const cha
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
     AwaResult result = AwaResult_Unspecified;
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     if (matches > 0)
     {
@@ -1433,8 +1453,8 @@ static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const cha
 
 // Handler CoAP GET Requests, maps onto LWM2M READ and DISCOVER operations. Return 0 on success, non-zero on error.
 static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, const char * query,
-                            ContentType acceptContentType, const char * requestContent, size_t requestContentLen,
-                            ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                            AwaContentType acceptContentType, const char * requestContent, size_t requestContentLen,
+                            AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     int len = 0;
@@ -1442,11 +1462,11 @@ static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, 
     int oir[3] = { -1, -1, -1 };
     Lwm2mRequestOrigin origin = Lwm2mCore_ServerIsBootstrap(context, addr) ? Lwm2mRequestOrigin_BootstrapServer : Lwm2mRequestOrigin_Server;
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     matches = sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
     AwaResult result = AwaResult_Unspecified;
 
-    if (acceptContentType == ContentType_ApplicationLinkFormat)
+    if (acceptContentType == AwaContentType_ApplicationLinkFormat)
     {
         Lwm2m_Debug("Discover not supported\n");
     }
@@ -1475,7 +1495,7 @@ static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, 
 // Partial Update: adds or updates Resources or Resource Instances provided in the new value
 // and leaves other existing Resources or Resource Instances unchanged.
 // Return 0 on success, non-zero on error.
-static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                              const char * requestContent, int requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1605,7 +1625,7 @@ static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path,
 //   4.04 Not Found URI of “Write Attributes” operation is not found
 //   4.01 Unauthorized Access Right Permission Denied
 //   4.05 Method Not Allowed Target is not allowed for Write Attributes operation
-static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                                         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1769,13 +1789,13 @@ static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const c
     }
 
 error:
-    return ContentType_None;
+    return AwaContentType_None;
 }
 
 // Handle CoAP PUT Requests, maps onto LWM2M Replace WRITE and WRITE ATTRIBUTES operations.
 // LWM2M Spec 5.4.3: Replace: replaces the Object Instance or the Resource(s) with the new value provided in the “Write” operation.
 // Return 0 on success, non-zero on error.
-static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                             const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1861,7 +1881,7 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
 // in using a TLV or JSON formatted payload, to populate a LWM2M Client in a single message containing serveral instances of the
 // same object.
 // Return 0 on success, non-zero on error.
-static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                                      const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1914,7 +1934,7 @@ static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char
 }
 
 // Handle CoAP DELETE Requests, maps onto LWM2M DELETE operation. Return 0 on success, non-zero on error.
-static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                                const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
@@ -1930,8 +1950,8 @@ static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * pat
 // Handler for all "lwm2m" endpoints
 static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * addr,
                                                     const char * path, const char * query, const char * token, int tokenLength,
-                                                    ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                                    ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                                    AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                                    AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -1965,7 +1985,7 @@ static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * a
             return HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType, responseContent, responseContentLen, responseCode);
     }
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
     *responseCode = AwaResult_MethodNotAllowed;
     return 0;
@@ -1993,7 +2013,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
 
     if (endPoint == NULL)
     {
-        response->responseContentType = ContentType_None;
+        response->responseContentType = AwaContentType_None;
         response->responseContentLen = 0;
         response->responseCode = AwaResult_NotFound;
         return 0;
@@ -2194,19 +2214,9 @@ void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicat
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc. Returns the Context pointer.
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName)
 {
-    Lwm2mContextType * context = &Lwm2mContext;
-
-    ListInit(&context->ObserverList);
-    ListInit(&context->ServerList);
-    Lwm2mObjectTree_Init(&context->ObjectTree);
+    Lwm2mContextType * context = Lwm2mCore_New();
 
     context->Coap = coap;
-    context->Store = ObjectStore_Create();
-    context->Definitions = DefinitionRegistry_Create();
-    context->AttributeStore = AttributeStore_Create();
-    Lwm2mSecurity_Create(&context->SecurityObjectList);
-
-    Lwm2mEndPoint_InitEndPointList(&context->EndPointList);
 
     if (endPointName != NULL)
     {
