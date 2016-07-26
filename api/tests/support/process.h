@@ -62,7 +62,7 @@ bool IsUDPPortInUse(int port);
 int WaitForIpc(int ipcPort, int timeout /*seconds*/, const char * request, size_t requestLen);
 
 // Start an Awa Client process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID, or 0 if failed.
-pid_t StartAwaClient(const char * clientDaemonPath, int coapPort, int ipcPort, const char * logFile, const char * clientID, const char * bootstrapConfig, const char * bootstrapURI, const std::vector<std::string> & additionalOptions);
+pid_t StartAwaClient(const char * clientDaemonPath, int iCoapPort, int iIpcPort, const char * logFile, const char * endpointName, const char * bootstrapConfig, const char * bootstrapURI, const char * objectDefinitionsFile, const std::vector<std::string> & additionalOptions);
 
 // Start an Awa Server process on the specified CoAP and IPC port. Redirect output to logFile. Return process ID.
 pid_t StartAwaServer(const char * serverDaemonPath, int coapPort, int ipcPort, const char * logFile, const std::vector<std::string> & additionalOptions);

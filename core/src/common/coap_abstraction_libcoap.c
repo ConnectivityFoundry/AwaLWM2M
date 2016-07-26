@@ -147,18 +147,21 @@ int coap_WaitMessage(int timeout, int fd)
     return result;
 }
 
-int coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
+bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
-    int result;
+    bool result = false;
     coap_uri_t uri;
     coap_split_uri(address, strlen(address), &uri);
 
-    result = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr);
+    if (Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr))
+    {
 #ifndef CONTIKI
-    addr->Addr.Sin.sin_port = uri.port;
+        addr->Addr.Sin.sin_port = uri.port;
 #else
-    addr->Port = uri.port;
+        addr->Port = uri.port;
 #endif
+        result = true;
+    }
     return result;
 }
 
@@ -824,48 +827,31 @@ int coap_DeregisterUri(const char * uri)
     return 0;
 }
 
-static coap_context_t * getContext(const char * ipAddress, const char *port)
+static coap_context_t * getContext(const char * ipAddress, int port)
 {
     coap_context_t *ctx = NULL;
-    int s;
-    struct addrinfo hints;
-    struct addrinfo *result, *rp;
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
-    hints.ai_socktype = SOCK_DGRAM; /* CoAP uses UDP */
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST | AI_NUMERICSERV | AI_ALL;
-
-    s = getaddrinfo(ipAddress, port, &hints, &result);
-    if (s != 0)
+    coap_address_t addr;
+    coap_address_init(&addr);
+    if (inet_pton(AF_INET, ipAddress, &addr.addr.sin.sin_addr) == 1)
     {
-        Lwm2m_Error("getaddrinfo: %s\n", gai_strerror(s));
-        return NULL;
+        ((struct sockaddr_in *)&addr.addr)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&addr.addr)->sin_port = htons(port);
+        addr.size = sizeof(struct sockaddr_in);
+        ctx = coap_new_context(&addr);
+    }
+    else if (inet_pton(AF_INET6, ipAddress, &addr.addr.sin6.sin6_addr) == 1)
+    {
+        ((struct sockaddr_in6 *)&addr.addr)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&addr.addr)->sin6_port = htons(port);
+        addr.size = sizeof(struct sockaddr_in6);
+        ctx = coap_new_context(&addr);
+    }
+    else
+    {
+        Lwm2m_Error("no context available for interface '%s'\n", ipAddress);
     }
 
-    // iterate through results until success
-    for (rp = result; rp != NULL; rp = rp->ai_next)
-    {
-        coap_address_t addr;
-
-        if (rp->ai_addrlen <= sizeof(addr.addr))
-        {
-            coap_address_init(&addr);
-            addr.size = rp->ai_addrlen;
-            memcpy(&addr.addr, rp->ai_addr, rp->ai_addrlen);
-
-            ctx = coap_new_context(&addr);
-            if (ctx != NULL)
-            {
-                goto finish;
-            }
-        }
-    }
-
-    Lwm2m_Error("no context available for interface '%s'\n", ipAddress);
-
-finish:
-    freeaddrinfo(result);
     return ctx;
 }
 
@@ -937,8 +923,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
     coap_split_uri((char *)path, strlen(path), &uri);
 
     // resolve destination address where server should be sent
-    res = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &addr);
-    if (res < 0)
+    if (!Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &addr))
     {
         Lwm2m_Error("failed to resolve address\n");
         return;
@@ -946,7 +931,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
 
     memcpy(&dst.addr, &addr.Addr, sizeof(addr.Addr));
 
-    dst.size = res;
+    dst.size = addr.Size;
     dst.addr.sin.sin_port = htons(uri.port);
 
     msgID = coap_new_message_id(coapContext);
@@ -1096,14 +1081,12 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
     enum { BUFSIZE = 1024 };
     unsigned char _buf[BUFSIZE];
     unsigned char *buf = _buf;
-    int res;
     unsigned short msgID;
 
     coap_split_uri((char *)path, strlen(path), &uri);
 
     // resolve destination address where server should be sent
-    res = Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &destAddr);
-    if (res < 0)
+    if (!Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, &destAddr))
     {
         Lwm2m_Error("failed to resolve address\n");
         return;
@@ -1111,7 +1094,7 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
     memcpy(&dst.addr, &destAddr.Addr, sizeof(destAddr.Addr));
 
-    dst.size = res;
+    dst.size = destAddr.Size;
     dst.addr.sin.sin_port = htons(uri.port);
 
     msgID = coap_new_message_id(coapContext);
@@ -1158,13 +1141,11 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
 CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
-    char port_str[32];
 
     coap_SetLogLevel(logLevel);
 
-    sprintf(port_str, "%d", port);
 
-    coapContext = getContext(ipAddress != NULL ? ipAddress : "::", port_str);
+    coapContext = getContext(ipAddress != NULL ? ipAddress : "::", port);
     if (coapContext == NULL)
     {
         return NULL;

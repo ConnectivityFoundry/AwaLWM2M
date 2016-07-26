@@ -61,9 +61,9 @@ struct gengetopt_args_info
   char * pskIdentity_arg;	/**< @brief Default Identity of associated pre-shared key for DTLS.  */
   char * pskIdentity_orig;	/**< @brief Default Identity of associated pre-shared key for DTLS original value given at command line.  */
   const char *pskIdentity_help; /**< @brief Default Identity of associated pre-shared key for DTLS help description.  */
-  char * pskKey_arg;	/**< @brief Default pre-shared key for DTLS.  */
-  char * pskKey_orig;	/**< @brief Default pre-shared key for DTLS original value given at command line.  */
-  const char *pskKey_help; /**< @brief Default pre-shared key for DTLS help description.  */
+  char * pskKey_arg;	/**< @brief Default pre-shared key for DTLS as a hex string.  */
+  char * pskKey_orig;	/**< @brief Default pre-shared key for DTLS as a hex string original value given at command line.  */
+  const char *pskKey_help; /**< @brief Default pre-shared key for DTLS as a hex string help description.  */
   char * certificate_arg;	/**< @brief Load client certificate from FILE.  */
   char * certificate_orig;	/**< @brief Load client certificate from FILE original value given at command line.  */
   const char *certificate_help; /**< @brief Load client certificate from FILE help description.  */

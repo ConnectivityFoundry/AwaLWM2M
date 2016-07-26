@@ -298,7 +298,7 @@ TEST_F(TestListClientsOperationWithConnectedSession, AwaServerListClientsRespons
     // attempt to access iterator value without an initial Next should return NULL
     EXPECT_EQ(NULL, AwaRegisteredEntityIterator_GetPath(iterator));
 
-    std::vector<std::string> expectedPaths { /*"/0/1",*/ "/1/0", "/2/0", "/2/1", "/2/2", "/2/3", "/3/0", "/4/0", "/7", "/5/0", "/6/0" };
+    std::vector<std::string> expectedPaths { /*"/0/1",*/ "/1/0", "/2/0", "/2/1", "/2/2", "/2/3", "/3/0", "/4", "/5", "/6", "/7" };
     std::vector<std::string> actualPaths;
 
     while (AwaRegisteredEntityIterator_Next(iterator))

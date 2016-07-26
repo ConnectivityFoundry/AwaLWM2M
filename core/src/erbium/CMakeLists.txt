@@ -1,37 +1,4 @@
 set (awa_erbium_SOURCES
-  ${CORE_SRC_DIR}/common/lwm2m_list.c
-  ${CORE_SRC_DIR}/common/lwm2m_debug.c
-  ${CORE_SRC_DIR}/common/lwm2m_util.c
-  ${CORE_SRC_DIR}/common/lwm2m_util_linux.c
-  ${CORE_SRC_DIR}/common/lwm2m_object_store.c
-  ${CORE_SRC_DIR}/common/lwm2m_attributes.c
-  ${CORE_SRC_DIR}/common/lwm2m_definition.c
-  ${CORE_SRC_DIR}/common/lwm2m_tree_node.c
-  ${CORE_SRC_DIR}/common/lwm2m_endpoints.c
-  ${CORE_SRC_DIR}/common/lwm2m_result.c
-  ${CORE_SRC_DIR}/common/lwm2m_types.c
-
-  ${CORE_SRC_DIR}/client/lwm2m_registration.c
-  ${CORE_SRC_DIR}/client/lwm2m_bootstrap.c
-  ${CORE_SRC_DIR}/client/lwm2m_security_object.c
-  ${CORE_SRC_DIR}/client/lwm2m_acl_object.c
-  ${CORE_SRC_DIR}/client/lwm2m_server_object.c
-  ${CORE_SRC_DIR}/client/lwm2m_client_core.c
-  ${CORE_SRC_DIR}/client/lwm2m_static.c
-  ${CORE_SRC_DIR}/client/lwm2m_object_tree.c
-  ${CORE_SRC_DIR}/common/lwm2m_bootstrap_config.c
-  ${CORE_SRC_DIR}/common/lwm2m_serdes.c
-  ${CORE_SRC_DIR}/common/lwm2m_tlv.c
-  ${CORE_SRC_DIR}/common/lwm2m_plaintext.c
-  ${CORE_SRC_DIR}/common/lwm2m_prettyprint.c
-  ${CORE_SRC_DIR}/common/lwm2m_opaque.c
-  ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
-  ${CORE_SRC_DIR}/common/lwm2m_observers.c
-
-  ${CORE_SRC_DIR}/common/coap_abstraction_erbium.c
-  ${CORE_SRC_DIR}/common/network_abstraction_linux.c
-#  ${CORE_SRC_DIR}/common/dtls_abstraction_gnutls.c
-  ${CORE_SRC_DIR}/common/dtls_abstraction_dummy.c
   er-coap.c
   er-coap-engine.c
   er-coap-transactions.c

@@ -427,7 +427,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
         AwaStaticClient_ResourceChanged(awaClient, 1000, 0, 104);
 
         etimer_set(&et, (waitTime * CLOCK_SECOND) / 1000);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        PROCESS_YIELD();
         waitTime = 0;
     }
 

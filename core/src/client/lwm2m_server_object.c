@@ -223,12 +223,14 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
                 memcpy(&server->ShortServerID, srcBuffer, sizeof(server->ShortServerID));
                 result = sizeof(server->ShortServerID);
                 WarnOfInsufficientData(result, srcBufferLen);
+                *changed = true;
                 break;
 
             case LWM2M_SERVER_OBJECT_LIFETIME:
                 memcpy(&server->LifeTime, srcBuffer, sizeof(server->LifeTime));
                 result = sizeof(server->LifeTime);
                 WarnOfInsufficientData(result, srcBufferLen);
+                *changed = true;
                 break;
 
             case LWM2M_SERVER_OBJECT_MINIMUM_PERIOD:
@@ -244,6 +246,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
                     server->DefaultMinimumPeriod = temp;
                     result = sizeof(server->DefaultMinimumPeriod);
                     WarnOfInsufficientData(result, srcBufferLen);
+                    *changed = true;
                 }
                 break;
             }
@@ -261,6 +264,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
                     server->DefaultMaximumPeriod = temp;
                     result = sizeof(server->DefaultMaximumPeriod);
                     WarnOfInsufficientData(result, srcBufferLen);
+                    *changed = true;
                 }
                 break;
             }
@@ -269,12 +273,14 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
                 memcpy(&server->DisableTimeout, srcBuffer, sizeof(server->DisableTimeout));
                 result = sizeof(server->DisableTimeout);
                 WarnOfInsufficientData(result, srcBufferLen);
+                *changed = true;
                 break;
 
             case LWM2M_SERVER_OBJECT_NOTIFICATION_STORING:
                 memcpy(&server->NotificationStoring, srcBuffer, sizeof(server->NotificationStoring));
                 result = sizeof(server->NotificationStoring);
                 WarnOfInsufficientData(result, srcBufferLen);
+                *changed = true;
                 break;
 
             case LWM2M_SERVER_OBJECT_BINDING:
@@ -282,6 +288,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
                 memcpy(server->Binding, srcBuffer, srcBufferLen);
                 result = strlen(server->Binding);
                 WarnOfInsufficientData(result, srcBufferLen);
+                *changed = true;
                 break;
 
             default:

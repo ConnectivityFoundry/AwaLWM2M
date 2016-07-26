@@ -47,12 +47,8 @@
 #include "xmltree.h"
 #include "lwm2m_bootstrap.h"
 #include "lwm2m_registration.h"
-#include "lwm2m_connectivity_object.h"
 #include "lwm2m_security_object.h"
-#include "lwm2m_device_object.h"
 #include "lwm2m_server_object.h"
-#include "lwm2m_firmware_object.h"
-#include "lwm2m_location_object.h"
 #include "lwm2m_acl_object.h"
 #include "lwm2m_client_xml_handlers.h"
 #include "lwm2m_xml_interface.h"
@@ -102,10 +98,7 @@ static void RegisterObjects(Lwm2mContextType * context, Options * options)
     }
     Lwm2m_RegisterServerObject(context);
     Lwm2m_RegisterACLObject(context);
-    Lwm2m_RegisterDeviceObject(context);
-    Lwm2m_RegisterConnectivityObjects(context);
-    Lwm2m_RegisterFirmwareObject(context);
-    Lwm2m_RegisterLocationObject(context);
+
 }
 
 // Fork off a daemon process, the parent will exit at this point
@@ -171,6 +164,8 @@ uint8_t HexToByte(const char *value)
 static int Lwm2mClient_Start(Options * options)
 {
     int result = 0;
+    uint8_t * key = NULL;
+
     if (options->Daemonise)
     {
         Daemonise(options->Verbose);
@@ -235,7 +230,7 @@ static int Lwm2mClient_Start(Options * options)
     {
         int hexKeyLength = strlen(options->PskKey);
         int keyLength = hexKeyLength / 2;
-        uint8_t * key = (uint8_t *)malloc(keyLength);
+        key = (uint8_t *)malloc(keyLength);
         if (key)
         {
            char * value = options->PskKey;
@@ -355,6 +350,10 @@ error_coap:
     coap_Destroy();
 
 error_close_log:
+    if (key)
+    {
+        free(key);
+    }
     Lwm2m_Info("Client exiting\n");
     if (logFile)
     {
