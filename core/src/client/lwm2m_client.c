@@ -69,6 +69,7 @@ typedef struct
     char * PskKey;
     const char * FactoryBootstrapFile;
     const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
+    AwaContentType DefaultContentType;
     size_t NumObjDefsFiles;
     bool Daemonise;
     bool Verbose;
@@ -214,6 +215,8 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("  CoAP port      : %d\n", options->CoapPort);
     Lwm2m_Info("  IPC port       : %d\n", options->IpcPort);
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
+
+    Lwm2mCore_SetDefaultContentType(options->DefaultContentType);
 
     CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false /* not a server */, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
@@ -372,6 +375,23 @@ static void PrintOptions(const Options * options)
     printf("  EndPointName         (--endPointName)     : %s\n", options->EndPointName ? options->EndPointName : "");
     printf("  Bootstrap            (--bootstrap)        : %s\n", options->BootStrap ? options->BootStrap : "");
     printf("  FactoryBootstrapFile (--factoryBootstrap) : %s\n", options->FactoryBootstrapFile ? options->FactoryBootstrapFile : "");
+
+    printf("  DefaultContentType (--defaultContentType) : %d",  options->DefaultContentType);
+    switch (options->DefaultContentType)
+    {
+        case AwaContentType_ApplicationPlainText:
+            printf(" (Plain/Text)\n");
+            break;
+        case AwaContentType_ApplicationJson:
+            printf(" (Json)\n");
+            break;
+        case AwaContentType_ApplicationOmaLwm2mTLV:
+            printf(" (TLV)\n");
+            break;
+        default:
+            printf("\n");
+            break;
+    }
     int i;
     for (i = 0; i < options->NumObjDefsFiles; ++i)
     {
@@ -407,6 +427,10 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         {
             options->ObjDefsFiles[i] = ai->objDefs_arg[i];
         }
+        if (ai->defaultContentType_given)
+        {
+            options->DefaultContentType = (AwaContentType)ai->defaultContentType_arg;
+        }
         options->NumObjDefsFiles = ai->objDefs_given;
         options->Daemonise = ai->daemonize_flag;
         options->Verbose = ai->verbose_flag;
@@ -441,6 +465,7 @@ int main(int argc, char ** argv)
         .PskIdentity = NULL,
         .PskKey = NULL,
         .FactoryBootstrapFile = NULL,
+        .DefaultContentType = AwaContentType_ApplicationPlainText,
         .ObjDefsFiles = {0},
         .NumObjDefsFiles = 0,
         .Daemonise = false,
