@@ -140,7 +140,7 @@ void DTLS_Reset(NetworkAddress * address)
 
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
-    if (certificateLength > 0)
+    if (certLength > 0)
     {
         certificate = (uint8_t *)cert;
         certificateLength = certLength;
