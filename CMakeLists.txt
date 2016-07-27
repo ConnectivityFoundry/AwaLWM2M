@@ -36,6 +36,10 @@ option (RUN_TESTS "Enable tests" OFF)
 option (WITH_JSON "Enable JSON support" OFF)
 # cmdline: cmake -DBUILD_TESTS=ON -DRUN_TESTS=OFF ..
 
+# build examples
+option (BUILD_EXAMPLES "Build examples" ON)
+
+
 option (ENABLE_GCOV "Enable code coverage check" OFF)
 # cmake -DENABLE_GCOV=ON ..
 
