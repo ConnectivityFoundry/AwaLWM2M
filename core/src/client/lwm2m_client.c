@@ -79,7 +79,7 @@ typedef struct
 } Options;
 
 static FILE * logFile = NULL;
-static unsigned char * loadedClientCert = NULL;
+static uint8_t * loadedClientCert = NULL;
 static const char * version = VERSION; // from Makefile
 static volatile int quit = 0;
 
@@ -387,12 +387,12 @@ static void LoadCertificateFile(char * filename)
         long int fileSize = ftell (file);
         if (fileSize > 0)
         {
-            loadedClientCert = (unsigned char *)malloc(fileSize);
+            loadedClientCert = (uint8_t *)malloc(fileSize);
             if (loadedClientCert)
             {
                 rewind(file);
                 size_t totalRead = 0;
-                void * position = loadedClientCert;
+                uint8_t * position = loadedClientCert;
                 size_t read;
                 do
                 {
