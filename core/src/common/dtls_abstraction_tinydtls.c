@@ -101,10 +101,17 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
 static int SSLSendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength);
 
 
+#ifdef WITH_CONTIKI
+static dtls_context_t * dtlsContext;
+#endif
+
 void DTLS_Init(void)
 {
     memset(sessions,0,sizeof(DTLS_Session) * MAX_DTLS_SESSIONS);
     dtls_init();
+#ifdef WITH_CONTIKI
+    dtlsContext  = dtls_new_context(NULL);
+#endif
 }
 
 void DTLS_Shutdown(void)
@@ -117,6 +124,9 @@ void DTLS_Shutdown(void)
             FreeSession(&sessions[index]);
         }
     }
+#ifdef WITH_CONTIKI
+    dtls_free_context(dtlsContext);
+#endif
 }
 
 void DTLS_Reset(NetworkAddress * address)
@@ -169,6 +179,7 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
         session->Buffer = decryptBuffer;
         session->BufferLength = decryptBufferLength;
         bool hadSessionEstablished = session->SessionEstablished;
+        dtls_set_app_data(session->Context, session);
         if (dtls_handle_message(session->Context, &session->Session, encrypted, encryptedLength) == TINY_DTLS_SUCCESS)
         {
             *decryptedLength = decryptBufferLength - session->BufferLength;
@@ -212,6 +223,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             session->Callbacks.write = EncryptCallBack;
             session->Buffer = encryptedBuffer;
             session->BufferLength = encryptedBufferLength;
+            dtls_set_app_data(session->Context, session);
             int written = dtls_write(session->Context, &session->Session, plainText, plainTextLength);
             if (written >= 0)
             {
@@ -226,6 +238,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
             if (!peer)
             {
+                dtls_set_app_data(session->Context, session);
                 dtls_connect(session->Context, &session->Session);
             }
         }
@@ -238,6 +251,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
             if (!peer)
             {
+                dtls_set_app_data(session->Context, session);
                 dtls_connect(session->Context, &session->Session);
             }
         }
@@ -293,7 +307,11 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
     session->Callbacks.verify_ecdsa_key = CertificateVerify;
 #endif
     session->NetworkAddress = networkAddress;
+#ifdef WITH_CONTIKI
+    session->Context = dtlsContext;
+#else
     session->Context = dtls_new_context(session);
+#endif
     if (session->Context)
     {
         dtls_set_handler(session->Context, &session->Callbacks);
@@ -315,7 +333,9 @@ static void FreeSession(DTLS_Session * session)
         {
             dtls_reset_peer(session->Context, peer);
         }
+#ifndef WITH_CONTIKI
         dtls_free_context(session->Context);
+#endif
     }
     memset(session,0, sizeof(DTLS_Session));
 }
@@ -331,7 +351,7 @@ static int DecryptCallBack(struct dtls_context_t *context, session_t *session, u
 {
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
-    if (dtlsSession->BufferLength > 0)
+    if (dtlsSession && dtlsSession->BufferLength > 0)
     {
         if (receiveBufferLegth < dtlsSession->BufferLength)
         {
@@ -355,7 +375,7 @@ static int EncryptCallBack(struct dtls_context_t *context, session_t *session, u
 {
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
-    if (dtlsSession->BufferLength > 0)
+    if (dtlsSession && dtlsSession->BufferLength > 0)
     {
         if (sendBufferLength < dtlsSession->BufferLength)
         {
@@ -446,7 +466,7 @@ static int SSLSendCallBack(struct dtls_context_t *context, session_t *session, u
 {
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
-    if (NetworkSend)
+    if (dtlsSession && NetworkSend)
     {
         NetworkTransmissionError error = NetworkSend(dtlsSession->NetworkAddress, sendBuffer, sendBufferLength, dtlsSession->UserContext);
         if (error == NetworkTransmissionError_None)
