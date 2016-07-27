@@ -32,7 +32,7 @@
 #include <gnutls/x509.h>
 
 
-//GnuTLS Add DTLS in 2.99.1
+//GnuTLS added DTLS in 2.99.0
 #if ((GNUTLS_VERSION_MAJOR < 2) || ((GNUTLS_VERSION_MAJOR == 2) && (GNUTLS_VERSION_MINOR < 99)))
 #error "This version of GnuTLS does not support DTLS"
 #endif
