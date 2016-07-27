@@ -67,6 +67,7 @@ typedef struct
     char * BootStrap;
     char * PskIdentity;
     char * PskKey;
+    char * CertificateFile;
     const char * FactoryBootstrapFile;
     const char * ObjDefsFiles[MAX_OBJDEFS_FILES];
     AwaContentType DefaultContentType;
@@ -78,9 +79,11 @@ typedef struct
 } Options;
 
 static FILE * logFile = NULL;
+static unsigned char * loadedClientCert = NULL;
 static const char * version = VERSION; // from Makefile
 static volatile int quit = 0;
 
+static void LoadCertificateFile(char * certificateFilename);
 static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
@@ -227,7 +230,12 @@ static int Lwm2mClient_Start(Options * options)
     }
 
     // always set key
-    coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
+    if (options->CertificateFile)
+    {
+        LoadCertificateFile(options->CertificateFile);
+    }
+    else
+        coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
 
     if (options->PskIdentity && options->PskKey)
     {
@@ -353,6 +361,10 @@ error_coap:
     coap_Destroy();
 
 error_close_log:
+    if (loadedClientCert)
+    {
+        free(loadedClientCert);
+    }
     if (key)
     {
         free(key);
@@ -365,6 +377,37 @@ error_close_log:
 
     return result;
 }
+
+static void LoadCertificateFile(char * filename)
+{
+    FILE * file = fopen(filename, "r");
+    if (file)
+    {
+        fseek(file, 0, SEEK_END);
+        long int fileSize = ftell (file);
+        if (fileSize > 0)
+        {
+            loadedClientCert = (unsigned char *)malloc(fileSize);
+            if (loadedClientCert)
+            {
+                rewind(file);
+                size_t totalRead = 0;
+                void * position = loadedClientCert;
+                size_t read;
+                do
+                {
+                    read = fread(position, 1, fileSize-totalRead, file);
+                    totalRead += read;
+                    position += read;
+                } while ( (read != 0) && (totalRead < fileSize));
+                if (totalRead == fileSize)
+                    coap_SetCertificate(loadedClientCert, fileSize, AwaCertificateFormat_PEM);
+            }
+        }
+        fclose(file);
+    }
+}
+
 
 static void PrintOptions(const Options * options)
 {
@@ -420,6 +463,9 @@ static int ParseOptions(int argc, char ** argv, struct gengetopt_args_info * ai,
         if (ai->pskKey_given)
             options->PskKey = ai->pskKey_arg;
 
+        if (ai->certificate_given)
+            options->CertificateFile = ai->certificate_arg;
+
         if (ai->factoryBootstrap_given)
             options->FactoryBootstrapFile = ai->factoryBootstrap_arg;
         int i;
@@ -464,6 +510,7 @@ int main(int argc, char ** argv)
         .BootStrap = NULL,
         .PskIdentity = NULL,
         .PskKey = NULL,
+        .CertificateFile = NULL,
         .FactoryBootstrapFile = NULL,
         .DefaultContentType = AwaContentType_ApplicationPlainText,
         .ObjDefsFiles = {0},
