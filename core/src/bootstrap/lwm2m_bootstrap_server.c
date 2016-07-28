@@ -38,6 +38,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <signal.h>
+#include <time.h>
 
 #include "awa_bootstrapd_cmdline.h"
 #include "lwm2m_object_store.h"
@@ -190,6 +191,8 @@ static int Bootstrap_Start(Options * options)
         strncpy(ipAddress, options->IPAddress, NI_MAXHOST);
         ipAddress[NI_MAXHOST - 1] = '\0';  // Defensive
     }
+
+    srandom((int)time(NULL)*getpid());
 
     CoapInfo * coap = coap_Init(ipAddress, options->CoapPort, options->Secure, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)
