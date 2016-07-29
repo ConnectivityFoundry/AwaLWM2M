@@ -178,8 +178,18 @@ typedef enum
     AwaContentType_ApplicationOmaLwm2mTLV    = 1542,    // application/vnd.oma.lwm2m+tlv (TBD)??
     AwaContentType_ApplicationOmaLwm2mJson   = 1543,
     AwaContentType_ApplicationOmaLwm2mOpaque = 1544,
-
 } AwaContentType;
+
+typedef enum
+{
+    AwaClientRegistrationStatus_Invalid = -1,               /**< invalid client reference */
+    AwaClientRegistrationStatus_Bootstrap,                  /**< bootstrap in progress */
+    AwaClientRegistrationStatus_BootstrapFailed,            /**< bootstrap failed */
+    AwaClientRegistrationStatus_NotRegistered,              /**< not registered (to any server) */
+    AwaClientRegistrationStatus_Registering,                /**< register in progress (and not registered or failed on another server) */
+    AwaClientRegistrationStatus_Registered,                 /**< register complete (to at least one server) */
+    AwaClientRegistrationStatus_RegisterFailed,             /**< register failed (and not registered on another server) */
+} AwaClientRegistrationStatus;
 
 #ifdef __cplusplus
 }

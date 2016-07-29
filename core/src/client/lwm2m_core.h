@@ -75,6 +75,8 @@ void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapIn
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
 
+AwaClientRegistrationStatus Lwm2mCore_GetRegistrationStatus(Lwm2mContextType * context);
+
 int Lwm2mCore_SetEndPointClientName(Lwm2mContextType * context, const char * endpoint);
 int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len);
 

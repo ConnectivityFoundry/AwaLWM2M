@@ -358,6 +358,16 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
     return result;
 }
 
+AwaClientRegistrationStatus AwaStaticClient_GetRegistrationStatus(AwaStaticClient * client)
+{
+    AwaClientRegistrationStatus result = AwaClientRegistrationStatus_Invalid;
+    if (client != NULL)
+    {
+        result = Lwm2mCore_GetRegistrationStatus(client->Context);
+    }
+    return result;
+}
+
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
     int result = -1;

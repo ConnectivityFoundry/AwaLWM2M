@@ -404,3 +404,44 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
     }
     return 0;
 }
+
+// Return aggregated registration status for all servers in the serverList.
+AwaClientRegistrationStatus Lwm2m_GetRegistrationStatus(Lwm2mContextType * context)
+{
+    struct ListHead * i;
+    AwaClientRegistrationStatus result = AwaClientRegistrationStatus_Invalid;
+
+    ListForEach(i, Lwm2mCore_GetServerList(context))
+    {
+        Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
+        switch (server->RegistrationState)
+        {
+            case Lwm2mRegistrationState_NotRegistered:
+            case Lwm2mRegistrationState_Deregister:
+            case Lwm2mRegistrationState_Deregistering:
+                if (result == AwaClientRegistrationStatus_Invalid)
+                    result = AwaClientRegistrationStatus_NotRegistered;
+                break;
+
+            case Lwm2mRegistrationState_Register:
+            case Lwm2mRegistrationState_Registering:
+                if (result != AwaClientRegistrationStatus_Registered && result != AwaClientRegistrationStatus_RegisterFailed)
+                    result = AwaClientRegistrationStatus_Registering;
+                break;
+
+            case Lwm2mRegistrationState_Registered:
+            case Lwm2mRegistrationState_UpdatingRegistration:
+                result = AwaClientRegistrationStatus_Registered;
+                break;
+
+            case Lwm2mRegistrationState_RegisterFailedRetry:
+            case Lwm2mRegistrationState_RegisterFailed:
+                if (result != AwaClientRegistrationStatus_Registered)
+                    result = AwaClientRegistrationStatus_RegisterFailed;
+                break;
+        }
+    }
+    return result;
+}
+
+

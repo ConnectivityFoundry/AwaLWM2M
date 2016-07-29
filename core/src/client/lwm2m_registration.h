@@ -54,6 +54,7 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context);
 
 void Lwm2m_SetUpdateRegistration(Lwm2mContextType * context);
 
+AwaClientRegistrationStatus Lwm2m_GetRegistrationStatus(Lwm2mContextType * context);
 
 #ifdef __cplusplus
 }
