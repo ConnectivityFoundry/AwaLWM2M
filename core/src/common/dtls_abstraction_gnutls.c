@@ -324,24 +324,27 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                 gnutls_credentials_set(session->Session, GNUTLS_CRD_CERTIFICATE, _CertCredentials);
             }
         }
-        else if (pskIdentity)
+        if (pskIdentity)
         {
             if (client)
             {
-                gnutls_psk_client_credentials_t credentials;
-                if (gnutls_psk_allocate_client_credentials(&credentials) == GNUTLS_E_SUCCESS)
+                if (!certificate)
                 {
-                    if (gnutls_psk_set_client_credentials(credentials, pskIdentity, &pskKey, GNUTLS_PSK_KEY_RAW) == GNUTLS_E_SUCCESS)
+                    gnutls_psk_client_credentials_t credentials;
+                    if (gnutls_psk_allocate_client_credentials(&credentials) == GNUTLS_E_SUCCESS)
                     {
-                        gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
-                        session->Credentials = credentials;
-                        session->CredentialType = CredentialType_ClientPSK;
-                    }
-                    else
-                    {
-                        gnutls_psk_set_client_credentials_function(credentials, PSKClientCallBack);
-                        session->Credentials = credentials;
-                        session->CredentialType = CredentialType_ClientPSK;
+                        if (gnutls_psk_set_client_credentials(credentials, pskIdentity, &pskKey, GNUTLS_PSK_KEY_RAW) == GNUTLS_E_SUCCESS)
+                        {
+                            gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
+                            session->Credentials = credentials;
+                            session->CredentialType = CredentialType_ClientPSK;
+                        }
+                        else
+                        {
+                            gnutls_psk_set_client_credentials_function(credentials, PSKClientCallBack);
+                            session->Credentials = credentials;
+                            session->CredentialType = CredentialType_ClientPSK;
+                        }
                     }
                 }
             }
