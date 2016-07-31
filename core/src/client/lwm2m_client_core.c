@@ -2082,6 +2082,25 @@ int Lwm2mCore_Process(Lwm2mContextType * context)
     return nextTick;
 }
 
+AwaClientRegistrationStatus Lwm2mCore_GetRegistrationStatus(Lwm2mContextType * context)
+{
+    AwaClientRegistrationStatus result = AwaClientRegistrationStatus_Invalid;
+
+    if (context->BootStrapState == Lwm2mBootStrapState_BootStrapped)
+    {
+        result = Lwm2m_GetRegistrationStatus(context);
+    }
+    else if (context->BootStrapState == Lwm2mBootStrapState_BootStrapFailed)
+    {
+        result = AwaClientRegistrationStatus_BootstrapFailed;
+    }
+    else
+    {
+        result = AwaClientRegistrationStatus_Bootstrap;
+    }
+    return result;
+}
+
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation)
 {
     if (BootstrapInformation_Apply(context, factoryBootstrapInformation) == 0)
