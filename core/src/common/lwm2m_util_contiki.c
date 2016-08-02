@@ -73,9 +73,26 @@ bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, 
     return result;
 }
 
+static int comparePorts(int x, int y)
+{
+    int result;
+    if (x == y)
+        result = 0;
+    else if  (x > y)
+        result = 1;
+    else
+        result = -1;
+    return result;
+}
+
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)
 {
-    return memcmp(&addr1->Addr.u16, &addr2->Addr.u16, sizeof(addr2->Addr.u16));
+    int result = memcmp(&addr1->Addr.u16, &addr2->Addr.u16, sizeof(addr2->Addr.u16));
+    if (result == 0)
+    {
+        result = comparePorts(addr1->Port, addr2->Port);
+    }
+    return result;
 }
 
 int Lwm2mCore_ComparePorts(AddressType * addr1, AddressType * addr2)

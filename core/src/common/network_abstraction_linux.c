@@ -287,6 +287,18 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
     return result;
 }
 
+static int comparePorts(in_port_t x, in_port_t y)
+{
+    int result;
+    if (x == y)
+        result = 0;
+    else if  (x > y)
+        result = 1;
+    else
+        result = -1;
+    return result;
+}
+
 int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
 {
     int result = -1;
@@ -299,7 +311,7 @@ int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
             result = memcmp(&address1->Address.Sin.sin_addr.s_addr, &address2->Address.Sin.sin_addr.s_addr, sizeof(address2->Address.Sin.sin_addr.s_addr));
             if (result == 0)
             {
-                result = address1->Address.Sin.sin_port - address2->Address.Sin.sin_port;
+                result = comparePorts(address1->Address.Sin.sin_port, address2->Address.Sin.sin_port);
             }
         }
         else if (address1->Address.Sa.sa_family == AF_INET6)
@@ -307,7 +319,7 @@ int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
             result = memcmp(&address1->Address.Sin6.sin6_addr, &address2->Address.Sin6.sin6_addr, sizeof(address2->Address.Sin6.sin6_addr));
             if (result == 0)
             {
-                result = address1->Address.Sin6.sin6_port - address2->Address.Sin6.sin6_port;
+                result = comparePorts(address1->Address.Sin6.sin6_port, address2->Address.Sin6.sin6_port);
             }
         }
     }

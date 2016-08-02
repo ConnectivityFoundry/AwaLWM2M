@@ -175,25 +175,46 @@ bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, 
     return result;
 }
 
+static int comparePorts(in_port_t x, in_port_t y)
+{
+    int result;
+    if (x == y)
+        result = 0;
+    else if  (x > y)
+        result = 1;
+    else
+        result = -1;
+    return result;
+}
+
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)
 {
+    int result = -1;
     if (addr1->Addr.Sa.sa_family != addr2->Addr.Sa.sa_family)
     {
-        return -1;
+        switch (addr1->Addr.Sa.sa_family)
+        {
+            case AF_INET:
+                result = memcmp(&addr1->Addr.Sin.sin_addr.s_addr, &addr2->Addr.Sin.sin_addr, sizeof(addr2->Addr.Sin.sin_addr));
+                if (result == 0)
+                {
+                    result = comparePorts(addr1->Addr.Sin.sin_port, addr2->Addr.Sin.sin_port);
+                }
+                break;
+            case AF_INET6:
+                result = memcmp(&addr1->Addr.Sin6.sin6_addr, &addr2->Addr.Sin6.sin6_addr, sizeof(addr2->Addr.Sin6.sin6_addr));
+                if (result == 0)
+                {
+                    result = comparePorts(addr1->Addr.Sin6.sin6_port, addr1->Addr.Sin6.sin6_port);
+                }
+                break;
+            default:
+                Lwm2m_Error("Unsupported address family: %d\n", addr1->Addr.Sa.sa_family);
+                break;
+        }
     }
 
-    switch (addr1->Addr.Sa.sa_family)
-    {
-        case AF_INET:
-            return memcmp(&addr1->Addr.Sin.sin_addr.s_addr, &addr2->Addr.Sin.sin_addr, sizeof(addr2->Addr.Sin.sin_addr));
-        case AF_INET6:
-            return memcmp(&addr1->Addr.Sin6.sin6_addr, &addr2->Addr.Sin6.sin6_addr, sizeof(addr2->Addr.Sin6.sin6_addr));
-        default:
-            Lwm2m_Error("Unsupported address family: %d\n", addr1->Addr.Sa.sa_family);
-            break;
-    }
-
-    return -1;
+    return result;
 }
 
 int Lwm2mCore_ComparePorts(AddressType * addr1, AddressType * addr2)
