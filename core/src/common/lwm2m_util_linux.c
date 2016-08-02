@@ -190,7 +190,7 @@ static int comparePorts(in_port_t x, in_port_t y)
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)
 {
     int result = -1;
-    if (addr1->Addr.Sa.sa_family != addr2->Addr.Sa.sa_family)
+    if (addr1->Addr.Sa.sa_family == addr2->Addr.Sa.sa_family)
     {
         switch (addr1->Addr.Sa.sa_family)
         {
