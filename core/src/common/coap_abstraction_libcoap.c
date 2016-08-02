@@ -150,16 +150,11 @@ int coap_WaitMessage(int timeout, int fd)
 bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
     bool result = false;
-    coap_uri_t uri;
-    coap_split_uri(address, strlen(address), &uri);
-
-    if (Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr))
+    NetworkAddress * networkAddress = NetworkAddress_New(address, strlen(address));
+    if (networkAddress)
     {
-#ifndef CONTIKI
-        addr->Addr.Sin.sin_port = uri.port;
-#else
-        addr->Port = uri.port;
-#endif
+        NetworkAddress_SetAddressType(networkAddress, addr);
+        NetworkAddress_Free(&networkAddress);
         result = true;
     }
     return result;
