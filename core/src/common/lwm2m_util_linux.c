@@ -205,7 +205,7 @@ int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)
                 result = memcmp(&addr1->Addr.Sin6.sin6_addr, &addr2->Addr.Sin6.sin6_addr, sizeof(addr2->Addr.Sin6.sin6_addr));
                 if (result == 0)
                 {
-                    result = comparePorts(addr1->Addr.Sin6.sin6_port, addr1->Addr.Sin6.sin6_port);
+                    result = comparePorts(addr1->Addr.Sin6.sin6_port, addr2->Addr.Sin6.sin6_port);
                 }
                 break;
             default:
