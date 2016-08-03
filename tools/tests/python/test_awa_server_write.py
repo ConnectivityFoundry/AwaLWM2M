@@ -294,14 +294,17 @@ Usage: awa-server-write [OPTIONS]... [PATHS]...
   -p, --ipcPort=PORT        Connect to Server IPC port  (default=`54321')
   -c, --clientID=ID         Client ID
   -o, --create=STRING       Create a new Object Instance or Optional Resource
+  -r, --replace             Replace existing resource (rather than update which
+                              is the default)  (default=off)
 
 Specify one or more object, object instance and resource paths
 and values in the format "/O/I/R/i=VALUE", separated by spaces.
 For example:
 
-    /3/0/0=Imagination
-    /3/0/7/1=4200
-    /4/0/3=3 /4/0/6=7
+    awa-server-write -o /3/0/0 /3/0/0=Imagination    (create and set)
+    awa-server-write /3/0/0=Imagination
+    awa-server-write /3/0/7/1=4200
+    awa-server-write /4/0/3=3 /4/0/6=7
 
 """
         expectedStderr = ""

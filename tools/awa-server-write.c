@@ -440,7 +440,10 @@ int main(int argc, char ** argv)
         goto cleanup;
     }
 
-    operation = AwaServerWriteOperation_New(session, AwaWriteMode_Update);
+    AwaWriteMode mode = AwaWriteMode_Update;
+    if (ai.replace_given)
+        mode = AwaWriteMode_Replace;
+    operation = AwaServerWriteOperation_New(session, mode);
     if (operation == NULL)
     {
         Error("AwaServerWriteOperation_New failed\n");

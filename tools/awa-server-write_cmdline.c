@@ -41,7 +41,8 @@ const char *gengetopt_args_info_help[] = {
   "  -p, --ipcPort=PORT        Connect to Server IPC port  (default=`54321')",
   "  -c, --clientID=ID         Client ID",
   "  -o, --create=STRING       Create a new Object Instance or Optional Resource",
-  "\nSpecify one or more object, object instance and resource paths\nand values in the format \"/O/I/R/i=VALUE\", separated by spaces.\nFor example:\n\n    /3/0/0=Imagination\n    /3/0/7/1=4200\n    /4/0/3=3 /4/0/6=7\n",
+  "  -r, --replace             Replace existing resource (rather than update which\n                              is the default)  (default=off)",
+  "\nSpecify one or more object, object instance and resource paths\nand values in the format \"/O/I/R/i=VALUE\", separated by spaces.\nFor example:\n\n    awa-server-write -o /3/0/0 /3/0/0=Imagination    (create and set)\n    awa-server-write /3/0/0=Imagination\n    awa-server-write /3/0/7/1=4200\n    awa-server-write /4/0/3=3 /4/0/6=7\n",
     0
 };
 
@@ -77,6 +78,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->ipcPort_given = 0 ;
   args_info->clientID_given = 0 ;
   args_info->create_given = 0 ;
+  args_info->replace_given = 0 ;
 }
 
 static
@@ -93,6 +95,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->clientID_orig = NULL;
   args_info->create_arg = NULL;
   args_info->create_orig = NULL;
+  args_info->replace_flag = 0;
   
 }
 
@@ -111,6 +114,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->create_help = gengetopt_args_info_help[7] ;
   args_info->create_min = 0;
   args_info->create_max = 0;
+  args_info->replace_help = gengetopt_args_info_help[8] ;
   
 }
 
@@ -306,6 +310,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
   if (args_info->clientID_given)
     write_into_file(outfile, "clientID", args_info->clientID_orig, 0);
   write_multiple_into_file(outfile, args_info->create_given, "create", args_info->create_orig, 0);
+  if (args_info->replace_given)
+    write_into_file(outfile, "replace", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -1463,6 +1469,7 @@ cmdline_parser_internal (
         { "ipcPort",	1, NULL, 'p' },
         { "clientID",	1, NULL, 'c' },
         { "create",	1, NULL, 'o' },
+        { "replace",	0, NULL, 'r' },
         { 0,  0, 0, 0 }
       };
 
@@ -1471,7 +1478,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVvda:p:c:o:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVvda:p:c:o:r", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1553,6 +1560,16 @@ cmdline_parser_internal (
           if (update_multiple_arg_temp(&create_list, 
               &(local_args_info.create_given), optarg, 0, 0, ARG_STRING,
               "create", 'o',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'r':	/* Replace existing resource (rather than update which is the default).  */
+        
+        
+          if (update_arg((void *)&(args_info->replace_flag), 0, &(args_info->replace_given),
+              &(local_args_info.replace_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "replace", 'r',
               additional_error))
             goto failure;
         
