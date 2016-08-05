@@ -57,7 +57,7 @@ typedef int (*ExecuteHandler)(void * context, ObjectIDType objectID, ObjectInsta
                               uint8_t * srcBuffer, size_t srcBufferLen);
 
 // handler to call to delete an object, or object instance and all associated resources
-typedef int (*DeleteHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+typedef int (*DeleteHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 // handler to call to create an object instance
 typedef int (*CreateInstanceHandler)(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);

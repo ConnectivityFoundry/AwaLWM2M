@@ -643,7 +643,7 @@ AwaError AwaStaticClient_DeleteResource(AwaStaticClient * client, AwaObjectID ob
 
     if (client != NULL)
     {
-        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, false) == AwaResult_SuccessDeleted)
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
 		{
 			result = AwaError_Success;
 		}
@@ -689,7 +689,7 @@ AwaError AwaStaticClient_DeleteObjectInstance(AwaStaticClient * client, AwaObjec
 
     if (client != NULL)
     {
-        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, AWA_INVALID_ID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
         {
             result = AwaError_Success;
         }

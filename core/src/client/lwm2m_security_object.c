@@ -78,7 +78,7 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
-static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 static int Lwm2mSecurity_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
@@ -214,7 +214,7 @@ static int Lwm2mSecurity_DeleteObjectInstance(Lwm2mContextType * context, Object
     return result;
 }
 
-static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
     // 8.2.2 Delete operation MAY target to “/” URI to delete all the existing Object Instances except LWM2M
     // Bootstrap Server Account in the LWM2M Client.
