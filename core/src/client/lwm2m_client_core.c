@@ -1855,26 +1855,26 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
                             ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, oir[0], oir[2]);
                             if (definition && IS_MULTIPLE_INSTANCE(definition))
                             {
-                                ResourceInstanceIDType resourceInstanceID = -1;
-                                bool found = false;
-                                while ((resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, oir[0], oir[1], oir[2], resourceInstanceID)) != -1)
+                                ResourceInstanceIDType resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, oir[0], oir[1], oir[2], -1);
+                                while (resourceInstanceID != -1)
                                 {
+                                   ResourceInstanceIDType toDeleteResourceInstanceID = resourceInstanceID;
                                    Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(root);
                                    while (resourceInstanceNode)
                                    {
                                        int id;
-
                                        Lwm2mTreeNode_GetID(resourceInstanceNode, &id);
                                        if (resourceInstanceID == id)
                                        {
-                                           found = true;
+                                           toDeleteResourceInstanceID = -1;
                                            break;
                                        }
                                        resourceInstanceNode = Lwm2mTreeNode_GetNextChild(root, resourceInstanceNode);
                                    }
-                                   if (!found)
+                                   resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, oir[0], oir[1], oir[2], resourceInstanceID);
+                                   if (toDeleteResourceInstanceID != -1)
                                    {
-                                       Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], resourceInstanceID, true);
+                                       Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], toDeleteResourceInstanceID, true);
                                    }
                                 }
                             }

@@ -445,7 +445,18 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
 
         rInst->Size = valueSize;
 
-        ListAdd(&rInst->list, &r->Instance);
+        struct ListHead * i;
+        struct ListHead * addPostion = &r->Instance;
+        ListForEach(i, &r->Instance)
+        {
+            ResourceInstance * resource = ListEntry(i, ResourceInstance, list);
+            if (resourceInstanceID < resource->ID)
+            {
+                break;
+            }
+            addPostion =  i;
+        }
+        ListInsertAfter(&rInst->list, addPostion);
     }
     else
     {
