@@ -77,7 +77,7 @@ static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, Object
                                    ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID,
                                    uint8_t * srcBuffer, size_t srcBufferLen, bool * changed);
 
-static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 static int ObjectStoreCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 static int ObjectStoreCreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
@@ -274,9 +274,9 @@ static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, Object
 
 // This function is called when a delete is performed for an object/object instance that uses the "default" handler.
 // Return -1 on error, or 0 on success.
-static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
-    return ObjectStore_Delete(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID);
+    return ObjectStore_Delete(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID);
 }
 
 // This function is called when a create instance is performed for an object that uses the "default" handler.
@@ -725,7 +725,7 @@ static AwaResult Lwm2mCore_ParseResourceNodeAndWriteToStore(Lwm2mContextType * c
     if (Lwm2mTreeNode_IsReplaceFlagSet(resourceNode))
     {
         // set from client IPC
-        Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, true);
+        Lwm2mCore_Delete(context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, -1, true);
         Lwm2mCore_CreateOptionalResource(context, objectID, objectInstanceID, resourceID);
     }
 
@@ -906,7 +906,7 @@ int Lwm2mCore_RegisterResourceTypeWithDefaultValue(Lwm2mContextType * context, c
  * @return AwaResult_SuccessDeleted on success
  * @return various errors on failure
  */
-AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace)
+AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, bool replace)
 {
     // According to the standard a DELETE must be O/I, not O/I/R,
     // only the client or bootstrap server has the authorisation to delete individual resources.
@@ -928,7 +928,7 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
             while ((objectID = Lwm2mCore_GetNextObjectID(context, objectID)) != -1)
             {
                 // Best effort attempt
-                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1, replace);
+                Lwm2mCore_Delete(context, requestOrigin, objectID, -1, -1, -1, replace);
             }
             return AwaResult_SuccessDeleted;
         }
@@ -985,7 +985,7 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
                 operation = AwaOperation_DeleteResource;
             }
 
-            result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, -1, NULL, NULL, NULL);
+            result = definition->Handler(Lwm2mCore_GetApplicationContext(context), operation, objectID, objectInstanceID, resourceID, resourceInstanceID, NULL, NULL, NULL);
 
             if (result != AwaResult_SuccessDeleted)
             {
@@ -997,13 +997,18 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
     }
     else
     {
-        ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID);
+        ret = definition->Handlers.Delete(context, objectID, objectInstanceID, resourceID, resourceInstanceID);
     }
 
     if (ret != -1)
     {
         char path[32];
-        if (resourceID != -1)
+        if (resourceInstanceID != -1)
+        {
+            Lwm2mObjectTree_DeleteResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
+            sprintf(path, "/%d/%d/%d/%d", objectID, objectInstanceID, resourceID, resourceInstanceID);
+        }
+        else if (resourceID != -1)
         {
             Lwm2mObjectTree_DeleteResource(&context->ObjectTree, objectID, objectInstanceID, resourceID);
             sprintf(path, "/%d/%d/%d", objectID, objectInstanceID, resourceID);
@@ -1035,7 +1040,10 @@ AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin reques
             }
         }
 
-        Lwm2m_RemoveAllObserversForOIR(context, objectID, objectInstanceID, resourceID);
+        if (resourceInstanceID == -1)
+        {
+            Lwm2m_RemoveAllObserversForOIR(context, objectID, objectInstanceID, resourceID);
+        }
 
         // The LWM2M specification does not specify how a client should notify a server
         // that an observed resource has been removed.
@@ -1829,7 +1837,7 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
                 case Lwm2mTreeNodeType_ObjectInstance:
                     if ((*responseCode = Lwm2mCore_CheckWritePermissionsForObjectInstanceNode(context, origin, root, oir[0], false)) == AwaResult_Success)
                     {
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == AwaResult_SuccessDeleted)
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], -1, true) == AwaResult_SuccessDeleted)
                         {
                             *responseCode = Lwm2mCore_ParseObjectInstanceNodeAndWriteToStore(context, root, oir[0], true, true, false, &oir[1]);
                         }
@@ -1842,9 +1850,36 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
                 case Lwm2mTreeNodeType_Resource:
                     if ((*responseCode = Lwm2mCore_CheckWritePermissionsForResourceNode(context, origin, root, oir[0], oir[1], false)) == AwaResult_Success)
                     {
-                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]) && Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], true) == AwaResult_SuccessDeleted)
+                        if (Lwm2mCore_Exists(context, oir[0], oir[1], oir[2]))
                         {
+                            ResourceDefinition * definition = Definition_LookupResourceDefinition(context->Definitions, oir[0], oir[2]);
+                            if (definition && IS_MULTIPLE_INSTANCE(definition))
+                            {
+                                ResourceInstanceIDType resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, oir[0], oir[1], oir[2], -1);
+                                while (resourceInstanceID != -1)
+                                {
+                                   ResourceInstanceIDType toDeleteResourceInstanceID = resourceInstanceID;
+                                   Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_GetFirstChild(root);
+                                   while (resourceInstanceNode)
+                                   {
+                                       int id;
+                                       Lwm2mTreeNode_GetID(resourceInstanceNode, &id);
+                                       if (resourceInstanceID == id)
+                                       {
+                                           toDeleteResourceInstanceID = -1;
+                                           break;
+                                       }
+                                       resourceInstanceNode = Lwm2mTreeNode_GetNextChild(root, resourceInstanceNode);
+                                   }
+                                   resourceInstanceID = Lwm2mCore_GetNextResourceInstanceID(context, oir[0], oir[1], oir[2], resourceInstanceID);
+                                   if (toDeleteResourceInstanceID != -1)
+                                   {
+                                       Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], toDeleteResourceInstanceID, true);
+                                   }
+                                }
+                            }
                             *responseCode = Lwm2mCore_ParseResourceNodeAndWriteToStore(context, root, oir[0], oir[1], true);
+
                         }
                         else
                         {
@@ -1943,7 +1978,7 @@ static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * pat
 
     *responseContentLen = 0;
     sscanf(path, "/%5d/%5d/%5d", &oir[0], &oir[1], &oir[2]);
-    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], false);
+    *responseCode = Lwm2mCore_Delete(context, origin, oir[0], oir[1], oir[2], -1, false);
     return 0;
 }
 

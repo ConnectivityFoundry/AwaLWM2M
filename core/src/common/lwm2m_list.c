@@ -39,6 +39,27 @@ void ListAdd(struct ListHead * newEntry, struct ListHead * head)
     next->Next     = newEntry;
 }
 
+
+void ListInsertAfter(struct ListHead * newEntry, struct ListHead * afterEntry)
+{
+
+    if (afterEntry->Prev == afterEntry->Next)
+    {
+        ListAdd(newEntry, afterEntry->Next);
+    }
+    else
+    {
+        newEntry->Next = afterEntry->Next;
+        newEntry->Prev = afterEntry;
+
+        afterEntry->Next = newEntry;
+        if (newEntry->Next->Prev == afterEntry)
+        {
+            newEntry->Next->Prev = newEntry;
+        }
+    }
+}
+
 void ListRemove(struct ListHead * entry)
 {
     struct ListHead * next = entry->Next;

@@ -72,6 +72,7 @@ struct ListHead
 #define LIST_INIT(list) { &(list), &(list) }
 
 void ListAdd(struct ListHead * newEntry, struct ListHead * head);
+void ListInsertAfter(struct ListHead * newEntry, struct ListHead * afterEntry);
 void ListRemove(struct ListHead * entry);
 void ListInit(struct ListHead * list);
 int ListCount(const struct ListHead * list);

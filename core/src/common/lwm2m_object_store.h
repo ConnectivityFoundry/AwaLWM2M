@@ -56,7 +56,7 @@ int ObjectStore_GetObjectNumInstances(ObjectStore * store, ObjectIDType objectID
 ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, int maxInstances);
 ResourceIDType ObjectStore_CreateResource(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
-int ObjectStore_Delete(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+int ObjectStore_Delete(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 ResourceIDType ObjectStore_GetNextResourceID(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 ObjectInstanceIDType ObjectStore_GetNextObjectInstanceID(ObjectStore * store, ObjectIDType  objectID, ObjectInstanceIDType objectInstanceID);
 ResourceInstanceIDType ObjectStore_GetNextResourceInstanceID(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,

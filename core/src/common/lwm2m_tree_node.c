@@ -249,7 +249,20 @@ int Lwm2mTreeNode_AddChild(Lwm2mTreeNode * node, Lwm2mTreeNode * child)
 
     _child->Parent = (struct _Lwm2mTreeNode *)node;
 
-    ListAdd(&_child->_List, &_node->Children);
+    struct ListHead * i;
+    struct ListHead * addPostion = &_node->Children;
+    ListForEach(i, &_node->Children)
+    {
+        _Lwm2mTreeNode * item = ListEntry(i, _Lwm2mTreeNode, _List);
+       if (_child->ID < item->ID)
+       {
+           break;
+       }
+       addPostion =  i;
+    }
+    ListInsertAfter(&_child->_List, addPostion);
+    //ListAdd(&_child->_List, &_node->Children);
+
     return 0;
 }
 

@@ -33,9 +33,7 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
 
 static int Lwm2mServer_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
-static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
-
-static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 static int Lwm2mServer_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
@@ -136,7 +134,7 @@ static int RemoveServerObject(Lwm2mContextType * context, int objectInstanceID)
     return result;
 }
 
-static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
     return RemoveServerObject(context, objectInstanceID);
 }

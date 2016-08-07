@@ -255,6 +255,30 @@ static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * objec
     return instance;
 }
 
+static int DeleteResourceInstance(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
+{
+    int result = -1;
+    Resource * resource = LookupResource(store, objectID, objectInstanceID, resourceID);
+
+    if (resource != NULL)
+    {
+        struct ListHead * pos, *n;
+        ListForEachSafe(pos, n, &resource->Instance)
+        {
+            ResourceInstance * rInst = ListEntry(pos, ResourceInstance, list);
+            if (rInst->ID == resourceInstanceID)
+            {
+                free(rInst->Value);
+                ListRemove(pos);
+                free(rInst);
+                result = 0;
+            }
+        }
+    }
+
+    return result;
+}
+
 static int DeleteResource(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
     Resource * resource = LookupResource(store, objectID, objectInstanceID, resourceID);
@@ -421,7 +445,18 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
 
         rInst->Size = valueSize;
 
-        ListAdd(&rInst->list, &r->Instance);
+        struct ListHead * i;
+        struct ListHead * addPostion = &r->Instance;
+        ListForEach(i, &r->Instance)
+        {
+            ResourceInstance * resource = ListEntry(i, ResourceInstance, list);
+            if (resourceInstanceID < resource->ID)
+            {
+                break;
+            }
+            addPostion =  i;
+        }
+        ListInsertAfter(&rInst->list, addPostion);
     }
     else
     {
@@ -658,9 +693,14 @@ ResourceInstanceIDType ObjectStore_GetNextResourceInstanceID(ObjectStore * store
     return -1;
 }
 
-int ObjectStore_Delete(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+int ObjectStore_Delete(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
-    if (resourceID != -1)
+
+    if (resourceInstanceID != -1)
+    {
+        return DeleteResourceInstance(store, objectID, objectInstanceID, resourceID, resourceInstanceID);
+    }
+    else if (resourceID != -1)
     {
         return DeleteResource(store, objectID, objectInstanceID, resourceID);
     }
