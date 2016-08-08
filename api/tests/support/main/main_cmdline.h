@@ -60,13 +60,13 @@ struct gengetopt_args_info
   char * coapClientPath_arg;	/**< @brief Path to libcoap coap-client tool (default='lib/libcoap/examples/coap-client').  */
   char * coapClientPath_orig;	/**< @brief Path to libcoap coap-client tool original value given at command line.  */
   const char *coapClientPath_help; /**< @brief Path to libcoap coap-client tool help description.  */
-  char * clientDaemonPath_arg;	/**< @brief Path to LWM2M client daemon (default='core/src/client/awa_clientd').  */
+  char * clientDaemonPath_arg;	/**< @brief Path to LWM2M client daemon (default='daemon/src/client/awa_clientd').  */
   char * clientDaemonPath_orig;	/**< @brief Path to LWM2M client daemon original value given at command line.  */
   const char *clientDaemonPath_help; /**< @brief Path to LWM2M client daemon help description.  */
-  char * serverDaemonPath_arg;	/**< @brief Path to LWM2M server daemon (default='core/src/server/awa_serverd').  */
+  char * serverDaemonPath_arg;	/**< @brief Path to LWM2M server daemon (default='daemon/src/server/awa_serverd').  */
   char * serverDaemonPath_orig;	/**< @brief Path to LWM2M server daemon original value given at command line.  */
   const char *serverDaemonPath_help; /**< @brief Path to LWM2M server daemon help description.  */
-  char * bootstrapDaemonPath_arg;	/**< @brief Path to LWM2M bootstrap daemon (default='core/src/bootstrap/awa_bootstrapd').  */
+  char * bootstrapDaemonPath_arg;	/**< @brief Path to LWM2M bootstrap daemon (default='daemon/src/bootstrap/awa_bootstrapd').  */
   char * bootstrapDaemonPath_orig;	/**< @brief Path to LWM2M bootstrap daemon original value given at command line.  */
   const char *bootstrapDaemonPath_help; /**< @brief Path to LWM2M bootstrap daemon help description.  */
   char * bootstrapConfig_arg;	/**< @brief Path to bootstrap config file (default='../api/tests/gtest.bsc').  */

@@ -35,7 +35,7 @@ $ bootstrap> ./bootstrap_server -p 15678
 ````
 Run the Imagination LWM2M client with the above bootstrap server address specified:
 ````
-$ build/core/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
+$ build/daemon/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
 ````
 Open http://leshan.eclipse.org/ in your web browser.
 
@@ -66,7 +66,7 @@ $ server> ./lwm2mserver
 ````
 Run the Awa LightweightM2M client:
 ````
-$ build/core/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
+$ build/daemon/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
 ````
 The Wakaama client will show the registration attempt.
 

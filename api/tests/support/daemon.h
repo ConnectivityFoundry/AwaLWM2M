@@ -62,9 +62,9 @@ const char * const bootstrapServerLogFile = "awa_bootstrapd.log";
 
 // assume binaries are run from directory 'build'
 const char * const coapClientPath      = "lib/libcoap/examples/coap-client";
-const char * const clientDaemonPath    = "core/src/client/awa_clientd";
-const char * const serverDaemonPath    = "core/src/server/awa_serverd";
-const char * const bootstrapServerDaemonPath = "core/src/bootstrap/awa_bootstrapd";
+const char * const clientDaemonPath    = "daemon/src/client/awa_clientd";
+const char * const serverDaemonPath    = "daemon/src/server/awa_serverd";
+const char * const bootstrapServerDaemonPath = "daemon/src/bootstrap/awa_bootstrapd";
 const char * const bootstrapServerConfig     = "../api/tests/gtest.bsc";
 const char * const objectDefinitionsFile     = "../api/tests/object-defs-gtest.xml";
 

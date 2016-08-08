@@ -100,9 +100,9 @@ If you have installed Awa on your system, or installed it as a Linux package, th
 
 If you are using the build instructions found in the [Starters Guide](starters_guide.md), you will find the Awa programs within the build directory:
 
-    build/core/src/client/awa_clientd
-    build/core/src/server/awa_serverd
-    build/core/src/bootstrap/awa_bootstrapd
+    build/daemon/src/client/awa_clientd
+    build/daemon/src/server/awa_serverd
+    build/daemon/src/bootstrap/awa_bootstrapd
     build/tools/awa-client-get, awa-server-read, etc
 
 ### The LWM2M client
