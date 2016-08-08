@@ -1,38 +1,13 @@
-set (awa_serverd_SOURCES
-  awa_serverd_cmdline.c
+set (awa_server_SOURCES
   lwm2m_server_core.c
-  lwm2m_server_xml_handlers.c
-  lwm2m_server_xml_events.c
-  lwm2m_server_xml_registered_entity_tree.c
   lwm2m_object_defs.c
   lwm2m_registration.c
-  lwm2m_server.c
-  ${CORE_SRC_DIR}/common/lwm2m_xml_interface.c
-  ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
   ${CORE_SRC_DIR}/common/lwm2m_serdes.c
   ${CORE_SRC_DIR}/common/lwm2m_tlv.c
   ${CORE_SRC_DIR}/common/lwm2m_plaintext.c
   ${CORE_SRC_DIR}/common/lwm2m_prettyprint.c
   ${CORE_SRC_DIR}/common/lwm2m_opaque.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_builder.c
-  ${CORE_SRC_DIR}/common/lwm2m_ipc.c
-
-  ######################## TODO REMOVE ########################
-  # TODO: extract components common to both Core and API
-  # FIXME: API_SRC_DIR is not in the cmake cache at the time this is read
-  #${API_SRC_DIR}/path.c
-  #${API_SRC_DIR}/objects_tree.c
-  #${API_SRC_DIR}/log.c
-  #${API_SRC_DIR}/error.c
-  #${API_SRC_DIR}/utils.c
-  ${CORE_SRC_DIR}/../../api/src/path.c
-  ${CORE_SRC_DIR}/../../api/src/objects_tree.c
-  ${CORE_SRC_DIR}/../../api/src/log.c
-  ${CORE_SRC_DIR}/../../api/src/error.c
-  ${CORE_SRC_DIR}/../../api/src/lwm2m_error.c
-  ${CORE_SRC_DIR}/../../api/src/utils.c
-  ${CORE_SRC_DIR}/../../api/src/write_mode.c
-  #############################################################
 )
 
 # fetch the INCLUDE_DIRECTORIES properties of non-linked dependencies:
@@ -40,7 +15,7 @@ set (awa_serverd_SOURCES
 get_property (LIB_XML_INCLUDE_DIR TARGET libxml_static PROPERTY INCLUDE_DIRECTORIES)
 get_property (LIB_B64_INCLUDE_DIR TARGET libb64_static PROPERTY INCLUDE_DIRECTORIES)
 
-set (awa_serverd_INCLUDE_DIRS
+set (awa_server_INCLUDE_DIRS
   ${LIB_XML_INCLUDE_DIR}
   ${LIB_B64_INCLUDE_DIR}
 
@@ -59,11 +34,11 @@ set (awa_serverd_INCLUDE_DIRS
 )
 
 if (WITH_JSON)
-  list (APPEND awa_serverd_SOURCES
+  list (APPEND awa_server_SOURCES
     ${CORE_SRC_DIR}/common/lwm2m_json.c
   )
   # LIBJSMN_INCLUDE_DIR is a global, as it's set by an imported target
-  list (APPEND awa_serverd_INCLUDE_DIRS
+  list (APPEND awa_server_INCLUDE_DIRS
     ${LIBJSMN_INCLUDE_DIR})
 endif ()
 
@@ -75,29 +50,14 @@ if (ENABLE_GCOV)
 endif ()
 
 # Virtual library to avoid building .o files twice:
-add_library (awa_serverd_object OBJECT ${awa_serverd_SOURCES})
-target_include_directories (awa_serverd_object PRIVATE ${awa_serverd_INCLUDE_DIRS})
-set_property (TARGET awa_serverd_object PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library (awa_server_object OBJECT ${awa_server_SOURCES})
+target_include_directories (awa_server_object PRIVATE ${awa_server_INCLUDE_DIRS})
+set_property (TARGET awa_server_object PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # static library liblwm2mserver.a
-add_library (awa_serverd_static STATIC $<TARGET_OBJECTS:awa_serverd_object>)
-set_target_properties (awa_serverd_static PROPERTIES OUTPUT_NAME "lwm2mserver")
+add_library (awa_server_static STATIC $<TARGET_OBJECTS:awa_server_object>)
+set_target_properties (awa_server_static PROPERTIES OUTPUT_NAME "lwm2mserver")
 
 # shared library liblwm2mserver.so
-add_library (awa_serverd_shared SHARED $<TARGET_OBJECTS:awa_serverd_object>)
-set_target_properties (awa_serverd_shared PROPERTIES OUTPUT_NAME "lwm2mserver")
-
-# disable -Wall warnings for _cmdline.c files
-set_source_files_properties (awa_serverd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno-all)
-
-add_executable (awa_serverd lwm2m_server.c)
-target_include_directories (awa_serverd PRIVATE ${awa_serverd_INCLUDE_DIRS})
-target_link_libraries (awa_serverd awa_serverd_static awa_common_static)
-
-if (ENABLE_GCOV)
-   target_link_libraries (awa_serverd gcov)
-endif ()
-
-install (TARGETS awa_serverd
-  RUNTIME DESTINATION bin
-)
+add_library (awa_server_shared SHARED $<TARGET_OBJECTS:awa_server_object>)
+set_target_properties (awa_server_shared PROPERTIES OUTPUT_NAME "lwm2mserver")

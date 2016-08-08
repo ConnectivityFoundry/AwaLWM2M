@@ -32,7 +32,7 @@
 #include "lwm2m_debug.h"
 #include "lwm2m_result.h"
 #include "lwm2m_types.h"
-#include "objdefs.h"
+//#include "objdefs.h"
 
 ObjectDefinition * Definition_LookupObjectDefinition(const DefinitionRegistry * registry, ObjectIDType objectID)
 {

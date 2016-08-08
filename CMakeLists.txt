@@ -68,6 +68,7 @@ add_subdirectory (lib)
 
 # build core daemons first, as API tests require them
 add_subdirectory (core)
+add_subdirectory (daemon)
 add_subdirectory (api)
 add_subdirectory (tools)
 

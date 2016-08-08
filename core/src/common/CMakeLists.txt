@@ -7,14 +7,10 @@ set (awa_common_SOURCES
   lwm2m_object_store.c
   lwm2m_attributes.c
   lwm2m_definition.c
-  xml.c
   lwm2m_tree_node.c
   lwm2m_endpoints.c
   lwm2m_result.c
   lwm2m_types.c
-  ipc_session.c
-  lwm2m_events.c
-  objdefs.c
 )
 
 if (WITH_LIBCOAP)

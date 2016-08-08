@@ -30,8 +30,6 @@
 #include "lwm2m_result.h"
 #include "lwm2m_endpoints.h"
 #include "server/lwm2m_registration.h"
-#include "lwm2m_events.h"
-#include "../../api/src/ipc_defs.h"
 
 #define QUERY_EP_NAME  "ep="
 #define QUERY_LIFETIME "lt="
@@ -436,9 +434,9 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         goto done;
     }
 
-    /* If the LWM2M Client sends a “Register” operation to the LWM2M Server even though the LWM2M Server has registration
+    /* If the LWM2M Client sends a "Register" operation to the LWM2M Server even though the LWM2M Server has registration
      * information of the LWM2M Client, the LWM2M Server removes the existing registration information and performs the
-     * new “Register” operation. This situation happens when the LWM2M Client forgets the state of the LWM2M Server (e.g., factory reset).
+     * new "Register" operation. This situation happens when the LWM2M Client forgets the state of the LWM2M Server (e.g., factory reset).
      */
     if ((client = Lwm2m_LookupClientByName(context, q.EndPointName)) != NULL)
     {
