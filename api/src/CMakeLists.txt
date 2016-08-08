@@ -64,14 +64,14 @@ set (Awa_SOURCES
 
   unsupported.c
 
-  ${CORE_SRC_DIR}/common/xml.c
+  ${DAEMON_SRC_DIR}/common/xml.c
   ${CORE_SRC_DIR}/common/lwm2m_definition.c
   ${CORE_SRC_DIR}/common/lwm2m_list.c
   ${CORE_SRC_DIR}/common/lwm2m_types.c
   ${CORE_SRC_DIR}/common/lwm2m_result.c
   ${CORE_SRC_DIR}/common/lwm2m_debug.c
   ${CORE_SRC_DIR}/common/lwm2m_tree_node.c
-  ${CORE_SRC_DIR}/common/lwm2m_xml_serdes.c
+  ${DAEMON_SRC_DIR}/common/lwm2m_xml_serdes.c
 )
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -D_GNU_SOURCE")
@@ -92,6 +92,8 @@ add_library (Awa_object OBJECT ${Awa_SOURCES})
 target_include_directories (Awa_object PUBLIC ${API_INCLUDE_DIR})
 target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR})
 target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR}/common)
+target_include_directories (Awa_object PRIVATE ${DAEMON_SRC_DIR})
+target_include_directories (Awa_object PRIVATE ${DAEMON_SRC_DIR}/common)
 target_include_directories (Awa_object PRIVATE ${CORE_SRC_DIR}/client)
 target_include_directories (Awa_object PRIVATE ${LIB_XML_INCLUDE_DIR})
 target_include_directories (Awa_object PRIVATE ${LIB_B64_INCLUDE_DIR})

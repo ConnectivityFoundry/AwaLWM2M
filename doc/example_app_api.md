@@ -129,7 +129,7 @@ Now build the application...
 Start the client daemon...
 
 ````
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
 ````
 
 And run the application...
@@ -256,7 +256,7 @@ And restart the client daemon:
 
 ```
 ~/AwaLWM2M$ killall awa_clientd
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
 ```
 
 Then restart the client application and set the temperature...
@@ -343,8 +343,8 @@ Restart the client/server daemon:
 ```
 ~/AwaLWM2M$ killall awa_serverd
 ~/AwaLWM2M$ killall awa_clientd
-~/AwaLWM2M$ build/core/src/server/awa_serverd --verbose --daemonise --logFile /tmp/awa_serverd.log
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/server/awa_serverd --verbose --daemonise --logFile /tmp/awa_serverd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
 ```
 
 And start the server application:

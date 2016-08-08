@@ -103,7 +103,7 @@ $ make valgrind_tests
 
 Some tests spawn and tear down instances of the LWM2M client and/or server daemon. Sometimes it is useful to run the tests against a standalone daemon, for example when debugging the daemon. Note that the standalone daemon is not torn down between tests, so some tests may not behave properly as daemon state is retained between tests.
 ````
-$ build/core/src/client/awa_clientd --ipcPort=22222
+$ build/daemon/src/client/awa_clientd --ipcPort=22222
 $ make tests TEST_OPTIONS=--clientIpcPort=22222
 ````
 

@@ -42,9 +42,9 @@ const char *gengetopt_args_info_help[] = {
   "      --bootstrapServerCoapPort=PORT\n                                External LWM2M Bootstrap Server CoAP Port",
   "      --logLevel=LEVEL          Awa API Log Level",
   "      --coapClientPath=STRING   Path to libcoap coap-client tool\n                                  (default=`lib/libcoap/examples/coap-client')",
-  "      --clientDaemonPath=STRING Path to LWM2M client daemon\n                                  (default=`core/src/client/awa_clientd')",
-  "      --serverDaemonPath=STRING Path to LWM2M server daemon\n                                  (default=`core/src/server/awa_serverd')",
-  "      --bootstrapDaemonPath=STRING\n                                Path to LWM2M bootstrap daemon\n                                  (default=`core/src/bootstrap/awa_bootstrapd')",
+  "      --clientDaemonPath=STRING Path to LWM2M client daemon\n                                  (default=`daemon/src/client/awa_clientd')",
+  "      --serverDaemonPath=STRING Path to LWM2M server daemon\n                                  (default=`daemon/src/server/awa_serverd')",
+  "      --bootstrapDaemonPath=STRING\n                                Path to LWM2M bootstrap daemon\n                                  (default=`daemon/src/bootstrap/awa_bootstrapd')",
   "      --bootstrapConfig=STRING  Path to bootstrap config file\n                                  (default=`../api/tests/gtest.bsc')",
   "      --objectDefinitions=STRING\n                                Path to object definitions file\n                                  (default=`../api/tests/object-defs-gtest.xml')",
   "      --defaultTimeout=TIMEOUT  Set default timeout in milliseconds for IPC\n                                  operations",
@@ -101,11 +101,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->logLevel_orig = NULL;
   args_info->coapClientPath_arg = gengetopt_strdup ("lib/libcoap/examples/coap-client");
   args_info->coapClientPath_orig = NULL;
-  args_info->clientDaemonPath_arg = gengetopt_strdup ("core/src/client/awa_clientd");
+  args_info->clientDaemonPath_arg = gengetopt_strdup ("daemon/src/client/awa_clientd");
   args_info->clientDaemonPath_orig = NULL;
-  args_info->serverDaemonPath_arg = gengetopt_strdup ("core/src/server/awa_serverd");
+  args_info->serverDaemonPath_arg = gengetopt_strdup ("daemon/src/server/awa_serverd");
   args_info->serverDaemonPath_orig = NULL;
-  args_info->bootstrapDaemonPath_arg = gengetopt_strdup ("core/src/bootstrap/awa_bootstrapd");
+  args_info->bootstrapDaemonPath_arg = gengetopt_strdup ("daemon/src/bootstrap/awa_bootstrapd");
   args_info->bootstrapDaemonPath_orig = NULL;
   args_info->bootstrapConfig_arg = gengetopt_strdup ("../api/tests/gtest.bsc");
   args_info->bootstrapConfig_orig = NULL;
@@ -1291,7 +1291,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->clientDaemonPath_arg), 
                  &(args_info->clientDaemonPath_orig), &(args_info->clientDaemonPath_given),
-                &(local_args_info.clientDaemonPath_given), optarg, 0, "core/src/client/awa_clientd", ARG_STRING,
+                &(local_args_info.clientDaemonPath_given), optarg, 0, "daemon/src/client/awa_clientd", ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "clientDaemonPath", '-',
                 additional_error))
@@ -1305,7 +1305,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->serverDaemonPath_arg), 
                  &(args_info->serverDaemonPath_orig), &(args_info->serverDaemonPath_given),
-                &(local_args_info.serverDaemonPath_given), optarg, 0, "core/src/server/awa_serverd", ARG_STRING,
+                &(local_args_info.serverDaemonPath_given), optarg, 0, "daemon/src/server/awa_serverd", ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "serverDaemonPath", '-',
                 additional_error))
@@ -1319,7 +1319,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->bootstrapDaemonPath_arg), 
                  &(args_info->bootstrapDaemonPath_orig), &(args_info->bootstrapDaemonPath_given),
-                &(local_args_info.bootstrapDaemonPath_given), optarg, 0, "core/src/bootstrap/awa_bootstrapd", ARG_STRING,
+                &(local_args_info.bootstrapDaemonPath_given), optarg, 0, "daemon/src/bootstrap/awa_bootstrapd", ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "bootstrapDaemonPath", '-',
                 additional_error))
