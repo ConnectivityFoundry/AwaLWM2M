@@ -30,10 +30,6 @@
 #include "lwm2m_device_object.h"
 #include "lwm2m_objects.h"
 
-#ifndef CONTIKI
-#  include "lwm2m_client_xml_handlers.h"
-#endif
-
 #define DEVICE_MANUFACTURER          "Imagination Technologies"
 #define DEVICE_MODEL_NUMBER          "Awa Client"
 #define DEVICE_SERIAL_NUMBER         "SN12345678"
@@ -62,10 +58,6 @@ static int DEVICE_MEMORY_TOTAL    =  42;
 static int executeReboot(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Reboot resource executed\n");
-#ifndef CONTIKI
-    // Fire IPC notifications to any subscribers.
-    xmlif_ExecuteResourceHandler(context, objectID, objectInstanceID, resourceID, inValueBuffer, inValueBufferLen);
-#endif
     return 0;
 }
 
@@ -78,10 +70,6 @@ static int createRebootResource(void * context, ObjectIDType objectID, ObjectIns
 static int executeFactoryReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Factory Reset resource executed\n");
-#ifndef CONTIKI
-    // Fire IPC notifications to any subscribers.
-    xmlif_ExecuteResourceHandler(context, objectID, objectInstanceID, resourceID, inValueBuffer, inValueBufferLen);
-#endif
     return 0;
 }
 
