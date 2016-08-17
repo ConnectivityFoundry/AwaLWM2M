@@ -28,6 +28,10 @@ Awa LightweightM2M is a development suite that provides a number of components a
 
 ----
 
+### News
+
+2016-08-17: Awa LightweightM2M is a finalist in the [New Zealand Open Source Awards](http://nzosa.org.nz/news-and-media/finalists-for-the-2016-new-zealand-open-source-awards/).
+
 ###  Getting started
 
 The easiest way to get started with Awa LightweightM2M is to use our [docker container](doc/docker.md).
@@ -120,7 +124,7 @@ A list of ongoing development tasks can be seen [here](https://github.com/FlowM2
 * Jsmn by Serge A. Zaitsev is licensed under the MIT license.
 
 ----
-
-
 ----
 ----
+
+Made in New Zealand.
