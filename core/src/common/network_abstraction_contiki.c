@@ -141,6 +141,7 @@ uip_ipaddr_t * getHostByName(const char *hostName)
 }
 
 
+
 NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
 {
     NetworkAddress * result = NULL;
@@ -189,25 +190,31 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                     if ((uri[index] == '[') )
                     {
                         index++;
+                        startIndex = index;
                         while (index < uriLength)
                         {
                             if (uri[index] == ']')
                             {
                                 break;
                             }
+                            hostname[hostnameLength] = uri[index];
+                            hostnameLength++;
                             index++;
                         }
                     }
                     else if ((uri[index] == ':') || (uri[index] == '/') )
                     {
-                        hostnameLength = index - startIndex;
-                        memcpy(&hostname, &uri[startIndex], hostnameLength);
                         hostname[hostnameLength] = 0;
                         if  (uri[index] == '/')
                             break;
                         state = UriParseState_Port;
                         port = 0;
                         startIndex = index + 1;
+                    }
+                    else
+                    {
+                        hostname[hostnameLength] = uri[index];
+                        hostnameLength++;
                     }
                     index++;
                 }
@@ -226,8 +233,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             }
             if (state == UriParseState_Hostname)
             {
-                hostnameLength = uriLength - startIndex;
-                memcpy(hostname, &uri[startIndex], hostnameLength);
                 hostname[hostnameLength] = 0;
             }
             if (hostnameLength > 0 && port > 0)
