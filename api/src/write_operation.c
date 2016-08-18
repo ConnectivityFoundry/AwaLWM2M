@@ -493,6 +493,21 @@ AwaError AwaServerWriteOperation_AddValueAsObjectLinkArray(AwaServerWriteOperati
     return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_ObjectLinkArray);
 }
 
+
+
+AwaError AwaServerWriteOperation_AddArrayValueAsInteger(AwaServerWriteOperation * operation, const char * path, int resourceInstanceID, AwaInteger value)
+{
+    AwaError result = AwaError_OutOfMemory;
+    AwaIntegerArray * array = AwaIntegerArray_New();
+    if (array)
+    {
+        AwaIntegerArray_SetValue(array, resourceInstanceID, value);
+        result = AwaServerWriteOperation_AddValueAsIntegerArray(operation, path, array);
+        AwaIntegerArray_Free(&array);
+    }
+    return result;
+}
+
 AwaClientIterator * AwaServerWriteOperation_NewClientIterator(const AwaServerWriteOperation * operation)
 {
     AwaClientIterator * iterator = NULL;

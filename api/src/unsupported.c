@@ -69,10 +69,6 @@ AwaError AwaServerWriteOperation_AddArrayValueAsCString(AwaServerWriteOperation 
     return LogErrorWithEnum(AwaError_Unsupported);
 }
 
-AwaError AwaServerWriteOperation_AddArrayValueAsInteger(AwaServerWriteOperation * operation, const char * path, int resourceInstanceID, AwaInteger value)
-{
-    return LogErrorWithEnum(AwaError_Unsupported);
-}
 
 AwaError AwaServerWriteOperation_AddArrayValueAsFloat(AwaServerWriteOperation * operation, const char * path, int resourceInstanceID, AwaFloat value)
 {
