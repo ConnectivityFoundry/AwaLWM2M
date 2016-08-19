@@ -175,6 +175,13 @@ const BootstrapInfo * BootstrapInformation_ReadConfigFile(const char * configFil
             }
             free(line);  // getline may allocate memory for characters before EOF
             fclose(f);
+
+            if (bootstrapInfo && (strlen(bootstrapInfo->SecurityInfo.ServerURI) == 0))
+            {
+                Lwm2m_Error("Configuration file error - must specify ServerURI.\n");
+                free(bootstrapInfo);
+                bootstrapInfo = NULL;
+            }
         }
     }
 
