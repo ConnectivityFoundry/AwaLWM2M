@@ -34,7 +34,7 @@ static bool ParseLine(BootstrapInfo * bootstrapInfo, char * line, size_t len)
 {
     if (len == 0)
     {
-        return false;
+        return true;
     }
 
     if (sscanf(line, "ServerURI=%254s", bootstrapInfo->SecurityInfo.ServerURI))
