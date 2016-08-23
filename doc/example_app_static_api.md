@@ -322,10 +322,8 @@ CFLAGS += -Wall -Wno-pointer-sign
 CFLAGS += -I$(LWM2M_DIR)/api/include -DLWM2M_CLIENT
 
 CFLAGS += -DUIP_CONF_BUFFER_SIZE=4096
-CFLAGS += -DREST_MAX_CHUNK_SIZE=512
 
-APPS += er-coap
-APPS += rest-engine
+APPS += erbium
 
 APPDIRS += $(LWM2M_DIR)/core/src
 APPS += client
