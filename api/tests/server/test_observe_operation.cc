@@ -260,6 +260,75 @@ TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handle
     ASSERT_TRUE(NULL == operation);
 }
 
+TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_put_with_valid_operation_with_callback)
+{
+    // start a client
+    AwaClientDaemonHorde horde( { global::clientEndpointName }, global::clientIpcPort);
+    ASSERT_TRUE(WaitForRegistration(session_, horde.GetClientIDs(), 1000));
+
+
+    AwaServerWriteOperation * writeInitialOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Update);
+    ASSERT_TRUE(NULL != writeInitialOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeInitialOperation, "/3/0/15", "Pacific/Wellington"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeInitialOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeInitialOperation);
+
+
+    struct CallbackHandler1 : public ObserveWaitCondition
+    {
+        int count;
+
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            ASSERT_TRUE(NULL != changeSet);
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3/0"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/3/0/15"));
+            EXPECT_FALSE(AwaChangeSet_ContainsPath(changeSet, "/3000/0/0"));
+            EXPECT_TRUE(AwaChangeSet_HasValue(changeSet, "/3/0/15"));
+            EXPECT_FALSE(AwaChangeSet_HasValue(changeSet, "/3000/0/0"));
+
+            // TODO: need to add support for the other cases
+            EXPECT_EQ(AwaChangeType_ResourceModified, AwaChangeSet_GetChangeType(changeSet, "/3/0/15"));
+
+            const char * value;
+            AwaChangeSet_GetValueAsCStringPointer(changeSet, "/3/0/15", &value);
+            EXPECT_STREQ(count == 1? "Pacific/Wellington" : "123414123", value);
+        }
+    };
+    CallbackHandler1 cbHandler(session_, 2);
+
+    AwaServerObserveOperation * operation = AwaServerObserveOperation_New(session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/3/0/15", ObserveCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
+
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
+
+    // set via server api to trigger notification.
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(session_, AwaWriteMode_Replace);
+    ASSERT_TRUE(NULL != writeOperation);
+    ASSERT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsCString(writeOperation, "/3/0/15", "123414123"));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    cbHandler.count = 0;
+    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_EQ(2, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
+    ASSERT_TRUE(NULL == observation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+}
+
 TEST_F(TestObserveWithConnectedSession, AwaServerObserveOperation_Perform_handles_wrong_session_type)
 {
     // start a client

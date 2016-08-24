@@ -48,6 +48,38 @@ class TestWriteOperationWithServerDaemon : public TestServerWithDaemonBase {};
 class TestWriteOperationWithConnectedSession : public TestServerWithConnectedSession {};
 class TestWriteOperationWithConnectedServerAndClientSession : public TestServerAndClientWithConnectedSession {};
 
+struct ObserveWaitCondition : public WaitCondition
+{
+
+    AwaServerSession * session;
+    int callbackCountMax;
+    int callbackCount;
+
+
+    ObserveWaitCondition(AwaServerSession * session, int callbackCountMax = 1) :
+        WaitCondition(),
+        session(session), callbackCountMax(callbackCountMax), callbackCount(0) {}
+
+    virtual ~ObserveWaitCondition() {}
+
+    virtual bool Check()
+    {
+        EXPECT_EQ(AwaError_Success, AwaServerSession_Process(session, global::timeout));
+        EXPECT_EQ(AwaError_Success, AwaServerSession_DispatchCallbacks(session));
+        return callbackCount >= callbackCountMax;
+    }
+
+    virtual void internalCallbackHandler(const AwaChangeSet * changeSet)
+    {
+        this->callbackCount++;
+        this->callbackHandler(changeSet);
+    };
+
+    virtual void callbackHandler(const AwaChangeSet * changeSet) = 0;
+};
+
+extern void ObserveCallbackRunner(const AwaChangeSet * changeSet, void * context);
+
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_New_returns_valid_operation_and_free_works)
 {
     // test that AwaServerWriteOperation_Free works via valgrind
@@ -693,6 +725,177 @@ TEST_F(TestWriteOperationWithConnectedSession, DISABLED_AwaServerWriteOperation_
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, clientID, global::timeout));
     AwaServerWriteOperation_Free(&writeOperation);
 }
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_existing_object_instance_with_observation_should_succeed)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(1, "Resource1", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(2, "Resource2", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    AwaInteger value = 5;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/2", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
+
+
+    struct CallbackHandler2 : public ObserveWaitCondition
+    {
+        int count;
+
+        CallbackHandler2(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            ASSERT_TRUE(NULL != changeSet);
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000/0"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000/0/1"));
+            EXPECT_FALSE(AwaChangeSet_ContainsPath(changeSet, "/3000/0/0"));
+            EXPECT_TRUE(AwaChangeSet_HasValue(changeSet, "/1000/0/1"));
+            EXPECT_FALSE(AwaChangeSet_HasValue(changeSet, "/3000/0/0"));
+
+            // TODO: need to add support for the other cases
+            EXPECT_EQ(AwaChangeType_ResourceModified, AwaChangeSet_GetChangeType(changeSet, "/1000/0/1"));
+
+            const AwaInteger * value = NULL;
+            AwaChangeSet_GetValueAsIntegerPointer(changeSet, "/1000/0/1", &value);
+            EXPECT_EQ(count == 1? 5 : 2, *value);
+        }
+    };
+    CallbackHandler2 cbHandler(server_session_, 2);
+
+    AwaServerObserveOperation * operation = AwaServerObserveOperation_New(server_session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/1000/0/1", ObserveCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
+
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
+
+
+    writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    value = 2;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    cbHandler.count = 0;
+    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_EQ(2, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
+    ASSERT_TRUE(NULL == observation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+
+}
+
+TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOperation_Perform_put_existing_object_instance_with_observation_on_unsupplied_mandatory_should_succeed)
+{
+    ObjectDescription object = { 1000, "Object1000", 0, 1,
+    {
+        ResourceDescription(0, "Resource0", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(1, "Resource1", AwaResourceType_Integer, 0, 1, AwaResourceOperations_ReadWrite),
+        ResourceDescription(2, "Resource2", AwaResourceType_Integer, 1, 1, AwaResourceOperations_ReadWrite),
+    }};
+    EXPECT_EQ(AwaError_Success, Define(client_session_, object));
+    EXPECT_EQ(AwaError_Success, Define(server_session_, object));
+
+    WaitForClientDefinition(AwaObjectDefinition_GetID(object.GetDefinition()));
+
+    //create the object instance on the client
+    AwaClientSetOperation * setOperation = AwaClientSetOperation_New(client_session_);
+    EXPECT_TRUE(setOperation != NULL);
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_CreateObjectInstance(setOperation, "/1000/0"));
+    EXPECT_EQ(AwaError_Success, AwaClientSetOperation_Perform(setOperation, global::timeout));
+    AwaClientSetOperation_Free(&setOperation);
+
+    AwaServerWriteOperation * writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    AwaInteger value = 5;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/2", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
+
+
+    struct CallbackHandler2 : public ObserveWaitCondition
+    {
+        int count;
+
+        CallbackHandler2(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
+
+        void callbackHandler(const AwaChangeSet * changeSet)
+        {
+            count ++;
+
+            ASSERT_TRUE(NULL != changeSet);
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000/0"));
+            EXPECT_TRUE(AwaChangeSet_ContainsPath(changeSet, "/1000/0/2"));
+            EXPECT_FALSE(AwaChangeSet_ContainsPath(changeSet, "/3000/0/0"));
+            EXPECT_TRUE(AwaChangeSet_HasValue(changeSet, "/1000/0/2"));
+            EXPECT_FALSE(AwaChangeSet_HasValue(changeSet, "/3000/0/0"));
+
+            // TODO: need to add support for the other cases
+            EXPECT_EQ(AwaChangeType_ResourceModified, AwaChangeSet_GetChangeType(changeSet, "/1000/0/2"));
+
+            const AwaInteger * value = NULL;
+            AwaChangeSet_GetValueAsIntegerPointer(changeSet, "/1000/0/2", &value);
+            EXPECT_EQ(count == 1? 5 : 0, *value);
+        }
+    };
+    CallbackHandler2 cbHandler(server_session_, 2);
+
+    AwaServerObserveOperation * operation = AwaServerObserveOperation_New(server_session_);
+    ASSERT_TRUE(NULL != operation);
+
+    AwaServerObservation * observation = AwaServerObservation_New(global::clientEndpointName, "/1000/0/2", ObserveCallbackRunner, &cbHandler);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_AddObservation(operation, observation));
+
+    EXPECT_EQ(AwaError_Success, AwaServerObserveOperation_Perform(operation, global::timeout));
+
+
+    writeOperation = AwaServerWriteOperation_New(server_session_, AwaWriteMode_Replace); ASSERT_TRUE(NULL != writeOperation);
+    value = 2;
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/0", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_AddValueAsInteger(writeOperation, "/1000/0/1", value));
+    EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
+    AwaServerWriteOperation_Free(&writeOperation);
+
+    cbHandler.count = 0;
+    ASSERT_TRUE(cbHandler.Wait());
+    ASSERT_EQ(2, cbHandler.count);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObservation_Free(&observation));
+    ASSERT_TRUE(NULL == observation);
+
+    ASSERT_EQ(AwaError_Success, AwaServerObserveOperation_Free(&operation));
+    ASSERT_TRUE(NULL == operation);
+
+}
+
 
 TEST_F(TestWriteOperationWithConnectedSession, AwaServerWriteOperation_Perform_handles_null_operation)
 {
