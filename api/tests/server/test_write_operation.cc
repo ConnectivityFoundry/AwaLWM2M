@@ -754,11 +754,11 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
     EXPECT_EQ(AwaError_Success, AwaServerWriteOperation_Perform(writeOperation, global::clientEndpointName, global::timeout));
 
 
-    struct CallbackHandler2 : public ObserveWaitCondition
+    struct CallbackHandler1 : public ObserveWaitCondition
     {
         int count;
 
-        CallbackHandler2(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) {};
+        CallbackHandler1(AwaServerSession * session, int max)  : ObserveWaitCondition(session, max), count(0) { };
 
         void callbackHandler(const AwaChangeSet * changeSet)
         {
@@ -780,7 +780,7 @@ TEST_F(TestWriteOperationWithConnectedServerAndClientSession, AwaServerWriteOper
             EXPECT_EQ(count == 1? 5 : 2, *value);
         }
     };
-    CallbackHandler2 cbHandler(server_session_, 2);
+    CallbackHandler1 cbHandler(server_session_, 2);
 
     AwaServerObserveOperation * operation = AwaServerObserveOperation_New(server_session_);
     ASSERT_TRUE(NULL != operation);

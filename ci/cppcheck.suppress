@@ -17,6 +17,7 @@ unusedFunction:*
 uninitMemberVar:api/tests/client/test_subscribe_operation.cc
 uninitMemberVar:api/tests/server/test_observe_operation.cc
 uninitMemberVar:api/tests/server/test_server_events.cc
+uninitMemberVar:api/tests/server/test_write_operation.cc
 
 // Erbium suppressions
 unreadVariable:core/src/erbium/er-coap.c
