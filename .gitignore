@@ -7,6 +7,8 @@ staging/
 *.a
 *.swp
 *.so
+*.orig
+*.rej
 awa_clientd
 awa_serverd
 awa_bootstrapd
@@ -26,6 +28,9 @@ build.openwrt/
 # PyDev
 .pydevproject
 .python-version
+
+# VSCode
+.vscode
 
 # log files
 daemon.log
