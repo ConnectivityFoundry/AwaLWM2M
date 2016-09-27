@@ -19,6 +19,7 @@ option (WITH_ERBIUM "Enable Erbium CoAP support)" ON)
 option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
 option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
 option (WITH_TINYDTLS "Enable TinyDTLS DTLS support" OFF)
+option (WITH_SYSTEMD "Install systemd service files" OFF)
 
 if (WITH_LIBCOAP)
   message (WARNING "Disabling erbium support")
@@ -73,7 +74,9 @@ add_subdirectory (api)
 add_subdirectory (tools)
 
 # install systemd files
-install (
-  DIRECTORY systemd/
-  DESTINATION /
-)
+if (WITH_SYSTEMD)
+  install (
+    DIRECTORY systemd/
+    DESTINATION /
+  )
+endif ()
