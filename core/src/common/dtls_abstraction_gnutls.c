@@ -103,7 +103,11 @@ void DTLS_Init(void)
     //    unsigned int bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_DH, GNUTLS_SEC_PARAM_LEGACY);
     //    gnutls_dh_params_init(&_DHParameters);
     //    gnutls_dh_params_generate2(_DHParameters, bits);
+#if ((GNUTLS_VERSION_MAJOR > 3) || ((GNUTLS_VERSION_MAJOR == 3) && (GNUTLS_VERSION_MINOR >= 4)))
     gnutls_priority_init(&_PriorityCache, "NONE:+VERS-ALL:+ECDHE-ECDSA:+ECDHE-PSK:+PSK:+CURVE-ALL:+AES-128-CCM-8:+AES-128-CBC:+MAC-ALL:-SHA1:+COMP-ALL:+SIGN-ALL:+CTYPE-X.509", NULL);
+#else
+    gnutls_priority_init(&_PriorityCache, "NONE:+VERS-TLS-ALL:+ECDHE-ECDSA:+ECDHE-PSK:+PSK:+CURVE-ALL:+AES-128-CBC:+MAC-ALL:-SHA1:+COMP-ALL:+SIGN-ALL:+CTYPE-X.509", NULL);
+#endif
 }
 
 void DTLS_Shutdown(void)
