@@ -341,12 +341,16 @@ static int TlvEncodeFloat(uint8_t * buffer, int bufferLen, int type, int id, dou
     if (floatSize == 4)
     {
         float f = value;
-        int32_t temp = htonl(*(uint32_t*)&f);
+        int32_t temp;
+        memcpy(&temp, &f, sizeof(temp));
+        temp = htonl(temp);
         memcpy(valueBuffer, &temp, floatSize);
     }
     else if (floatSize == 8)
     {
-        int64_t temp = htonll(*(uint64_t*)&value);
+        int64_t temp;
+        memcpy(&temp, &value, sizeof(temp));
+        temp = htonll(temp);
         memcpy(valueBuffer, &temp, floatSize);
     }
     // once encoded, we can just treat this as opaque
