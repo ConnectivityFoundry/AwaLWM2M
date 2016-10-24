@@ -1482,13 +1482,12 @@ static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content
     IpcCoapRequestContext * requestContext;
     Lwm2mClientType * client;
     int numCoapRequests = 0;
+    Lwm2mTreeNode * root = NULL;
 
     if (xmlif_HandleRequestHeader(request, content, &requestContext, &requestObjectsNode, &client) != 0)
     {
         goto error;
     }
-
-    Lwm2mTreeNode * root = NULL;
 
     TreeNode requestClientNode = TreeNode_GetParent(requestObjectsNode);
 
