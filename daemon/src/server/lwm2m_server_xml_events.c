@@ -64,7 +64,7 @@ void xmlif_HandleRegistrationEvent(RegistrationEventType eventType, void * conte
             msgType = IPC_MESSAGE_SUB_TYPE_CLIENT_DEREGISTER;
             break;
         default:
-            Lwm2m_Error("Unhandled eventType %d\n", eventType)
+            Lwm2m_Error("Unhandled eventType %d\n", eventType);
         }
 
         if (msgType != NULL)
