@@ -354,6 +354,7 @@ int Lwm2mObjectTree_DeleteResourceInstance(Lwm2mObjectTree * objectTree, ObjectI
 
 int Lwm2mObjectTree_InitIterator(Lwm2mObjectTreeIterator * iterator, Lwm2mObjectTree * objectTree, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
+    (void)objectTree;
     iterator->ObjectID = objectID;
     iterator->ObjectInstanceID = objectInstanceID;
     iterator->ResourceID = resourceID;

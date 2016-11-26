@@ -37,6 +37,10 @@
 static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * node, ObjectIDType objectID,
                                    ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * buffer, int len)
 {
+    (void)serdesContext;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     uint16_t resourceLength = 0;
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)
@@ -86,6 +90,9 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
 static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                                      ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const uint8_t * buffer, int bufferLen)
 {
+    (void)serdesContext;
+    (void)objectID;
+    (void)objectInstanceID;
     int result = -1;
     ResourceDefinition * definition;
 

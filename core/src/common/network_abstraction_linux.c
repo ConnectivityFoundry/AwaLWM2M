@@ -530,12 +530,13 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
 
 void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
+    (void)networkSocket;
     DTLS_SetCertificate(cert, certLength, format);
 }
 
 void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength)
 {
-
+    (void)networkSocket;
     DTLS_SetPSK(identity, key, keyLength);
 }
 

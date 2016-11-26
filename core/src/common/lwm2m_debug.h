@@ -44,7 +44,6 @@ typedef enum {
     DebugLevel_Debug
 } DebugLevel;
 
-#define DEBUG_FANCY
 
 // Host dependent directory slash
 #define DIR_SLASH '/'
@@ -53,7 +52,7 @@ typedef enum {
 #  define __attribute__(X)
 #endif // __GNUC__
 
-void Lwm2m_Printf(DebugLevel level, char const * format, ...) __attribute__ ((format (printf, 2, 3)));;
+void Lwm2m_Printf(DebugLevel level, char const * format, ...) __attribute__ ((format (printf, 2, 3)));
 void Lwm2m_vPrintf(DebugLevel level, char const * format, va_list argp);
 
 void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const * format, ...) __attribute__ ((format (printf, 4, 5)));
@@ -74,25 +73,6 @@ void Lwm2m_Log(DebugLevel level, const char * fileName, int lineNum, char const 
 #  define ANSI_COLOUR_BRIGHT_CYAN    "\x1b[36;01m"
 #  define ANSI_COLOUR_BRIGHT_WHITE   "\x1b[37;01m"
 #  define ANSI_COLOUR_RESET          "\x1b[0m"
-#else
-#  define ANSI_COLOUR_RED
-#  define ANSI_COLOUR_GREEN
-#  define ANSI_COLOUR_YELLOW
-#  define ANSI_COLOUR_BLUE
-#  define ANSI_COLOUR_MAGENTA
-#  define ANSI_COLOUR_CYAN
-#  define ANSI_COLOUR_WHITE
-#  define ANSI_COLOUR_BRIGHT_RED
-#  define ANSI_COLOUR_BRIGHT_GREEN
-#  define ANSI_COLOUR_BRIGHT_YELLOW
-#  define ANSI_COLOUR_BRIGHT_BLUE
-#  define ANSI_COLOUR_BRIGHT_MAGENTA
-#  define ANSI_COLOUR_BRIGHT_CYAN
-#  define ANSI_COLOUR_BRIGHT_WHITE
-#  define ANSI_COLOUR_RESET
-#endif
-
-void Lwm2m_PrintBanner(void);
 
 #define _Lwm2m_Log(COLOUR, level, format, ...) \
 { \
@@ -111,10 +91,45 @@ void Lwm2m_PrintBanner(void);
 #define Lwm2m_Info(format, ...) \
     _Lwm2m_Log(ANSI_COLOUR_CYAN, DebugLevel_Info, format, ##__VA_ARGS__)
 
+#else /* DEBUG_FANCY */
+
+#  define ANSI_COLOUR_RED
+#  define ANSI_COLOUR_GREEN
+#  define ANSI_COLOUR_YELLOW
+#  define ANSI_COLOUR_BLUE
+#  define ANSI_COLOUR_MAGENTA
+#  define ANSI_COLOUR_CYAN
+#  define ANSI_COLOUR_WHITE
+#  define ANSI_COLOUR_BRIGHT_RED
+#  define ANSI_COLOUR_BRIGHT_GREEN
+#  define ANSI_COLOUR_BRIGHT_YELLOW
+#  define ANSI_COLOUR_BRIGHT_BLUE
+#  define ANSI_COLOUR_BRIGHT_MAGENTA
+#  define ANSI_COLOUR_BRIGHT_CYAN
+#  define ANSI_COLOUR_BRIGHT_WHITE
+#  define ANSI_COLOUR_RESET
+
+
+#define Lwm2m_Debug(...) \
+    Lwm2m_Log(DebugLevel_Debug, __FILE__, __LINE__, ##__VA_ARGS__)
+
+#define Lwm2m_Error(...) \
+    Lwm2m_Log(DebugLevel_Error, __FILE__, __LINE__, ##__VA_ARGS__)
+
+#define Lwm2m_Warning(...) \
+    Lwm2m_Log(DebugLevel_Warning, __FILE__, __LINE__, ##__VA_ARGS__)
+
+#define Lwm2m_Info(...) \
+    Lwm2m_Log(DebugLevel_Info, __FILE__, __LINE__, ##__VA_ARGS__)
+
+#endif /* DEBUG_FANCY */
+
+void Lwm2m_PrintBanner(void);
+
 void Lwm2m_SetOutput(FILE * output);
 
 void Lwm2m_SetLogLevel(DebugLevel level);
-DebugLevel Lwm2m_GetLogLevel();
+DebugLevel Lwm2m_GetLogLevel(void);
 void Lwm2m_SetAwaLogLevel(AwaLogLevel level);
 
 #ifdef __cplusplus

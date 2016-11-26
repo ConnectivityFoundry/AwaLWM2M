@@ -54,7 +54,7 @@ extern "C" {
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
 
-Lwm2mContextType * Lwm2mCore_New();
+Lwm2mContextType * Lwm2mCore_New(void);
 void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap);
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context);
 void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context);
@@ -65,7 +65,7 @@ Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
 
 #if LWM2M_CLIENT
 
-AwaContentType Lwm2mCore_GetDefaultContentType();
+AwaContentType Lwm2mCore_GetDefaultContentType(void);
 void Lwm2mCore_SetDefaultContentType(AwaContentType contentType);
 
 #endif

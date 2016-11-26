@@ -99,7 +99,7 @@ void Lwm2m_SetLogLevel(DebugLevel level)
     debugLevel = level;
 }
 
-DebugLevel Lwm2m_GetLogLevel()
+DebugLevel Lwm2m_GetLogLevel(void)
 {
     return debugLevel;
 }

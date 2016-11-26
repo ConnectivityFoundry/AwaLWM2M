@@ -209,6 +209,7 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
 static int PPSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * node, ObjectIDType objectID,
                                ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * buffer, int len)
 {
+    (void)serdesContext;
     int resourceLength = 0;
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)

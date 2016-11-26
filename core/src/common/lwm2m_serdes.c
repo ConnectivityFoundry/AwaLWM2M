@@ -43,7 +43,7 @@ typedef struct
 /**
  * Map content type to serialiser/deserialisers
  */
-const static SerdesMapEntry serdesList[] =
+static const SerdesMapEntry serdesList[] =
 {
 
 #ifndef CONTIKI
@@ -68,7 +68,7 @@ const static SerdesMapEntry serdesList[] =
 
 static SerialiserDeserialiser * GetSerialiserDeserialiser(AwaContentType type)
 {
-    int i;
+    unsigned int i;
     // lookup serialiser in serialiser list.
     for (i = 0; i < NUM_SERIALISERS; i++)
     {

@@ -90,7 +90,7 @@ static uint32_t
 coap_parse_int_option(uint8_t *bytes, size_t length)
 {
     uint32_t var = 0;
-    int i = 0;
+    unsigned int i = 0;
 
     while(i < length)
     {
@@ -206,7 +206,7 @@ coap_serialize_array_option(unsigned int number, unsigned int current_number,
 
     if(split_char != '\0')
     {
-        int j;
+        unsigned int j;
         uint8_t *part_start = array;
         uint8_t *part_end = NULL;
         size_t temp_length;
@@ -310,6 +310,7 @@ coap_get_variable(const char *buffer, size_t length, const char *name,
 void
 coap_init_connection(uint16_t port)
 {
+    (void)port;
     /* new connection with remote host */
 //    udp_conn = udp_new(NULL, 0, NULL);
 //    udp_bind(udp_conn, port);
@@ -320,7 +321,7 @@ coap_init_connection(uint16_t port)
 }
 /*---------------------------------------------------------------------------*/
 uint16_t
-coap_get_mid()
+coap_get_mid(void)
 {
     return ++current_mid;
 }

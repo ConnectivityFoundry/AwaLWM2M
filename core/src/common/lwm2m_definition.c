@@ -436,7 +436,7 @@ int Definition_RegisterResourceType(DefinitionRegistry * registry, const char * 
 
     if (Operations_IsResourceTypeExecutable(operations) && maximumInstances > 1)
     {
-        Lwm2m_Error("Executable resource must be single-instance\n")
+        Lwm2m_Error("Executable resource must be single-instance\n");
         AwaResult_SetResult(AwaResult_BadRequest);
         goto error;
     }

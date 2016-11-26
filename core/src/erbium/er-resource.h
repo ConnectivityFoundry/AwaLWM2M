@@ -50,7 +50,7 @@ struct resource_s {
     struct periodic_resource_s *periodic; /* special data depending on flags */
     restful_trigger_handler trigger;
     restful_trigger_handler resume;
-  };
+  }restful_resource_handler;
 };
 typedef struct resource_s resource_t;
 

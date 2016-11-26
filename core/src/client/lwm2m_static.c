@@ -32,6 +32,7 @@
 #define MAX_ADDRESS_LENGTH           (50)
 #define DEFAULT_CLIENT_HOLD_OFF_TIME (30)
 
+
 struct _AwaStaticClient
 {
     Lwm2mContextType * Context;
@@ -47,7 +48,7 @@ struct _AwaStaticClient
     void * ApplicationContext;
 };
 
-AwaStaticClient * AwaStaticClient_New()
+AwaStaticClient * AwaStaticClient_New(void)
 {
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
 
@@ -129,7 +130,7 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     return result;
 }
 
-AwaContentType AwaStaticClient_GetDefaultContentType()
+AwaContentType AwaStaticClient_GetDefaultContentType(void)
 {
     return Lwm2mCore_GetDefaultContentType();
 }
@@ -389,6 +390,8 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                                 AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
                                 void ** dataPointer, size_t * dataSize, bool * changed)
 {
+    (void)resourceInstanceID;
+    (void)changed;
     AwaResult result;
 
     ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
@@ -469,7 +472,7 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
 
                     if (resourceDefinition->Type == AwaResourceType_String)
                     {
-                        *dataSize = strlen(offset);
+                        *dataSize = strlen((const char *)offset);
                     }
                     else
                     {

@@ -758,6 +758,10 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * node, const ObjectIDType objectID,
                                 ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * buffer, int len)
 {
+    (void)serdesContext;
+    (void)objectInstanceID;
+    (void)serdesContext;
+
     int resourceLength = 0;
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)
@@ -914,6 +918,8 @@ static int TlvSerialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode * nod
 static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                                           ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, int resID, const uint8_t * buffer, int len)
 {
+    (void)objectInstanceID;
+
     int result = -1;
 
     *dest = Lwm2mTreeNode_Create();
@@ -992,6 +998,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
 static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry,
                                   ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const uint8_t * buffer, int bufferLen)
 {
+    (void)serdesContext;
     int type, resourceLen, headerLen;
     uint16_t identifier;
     ResourceDefinition * definition;

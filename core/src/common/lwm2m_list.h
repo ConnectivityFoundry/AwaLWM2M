@@ -60,7 +60,7 @@ struct ListHead
  * type "type"
  */
 #define ListEntry(ptr, type, member) \
-    ({(type *)((char *)ptr - ((size_t) &((type*)0)->member));})
+    ((type *)((char *)ptr - ((size_t) &((type*)0)->member)));
 
 #define ListForEach(pos, head) \
     for (pos = (head)->Next; pos != (head); pos = (pos)->Next)

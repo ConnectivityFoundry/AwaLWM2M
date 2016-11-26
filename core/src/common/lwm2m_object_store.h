@@ -62,7 +62,7 @@ ObjectInstanceIDType ObjectStore_GetNextObjectInstanceID(ObjectStore * store, Ob
 ResourceInstanceIDType ObjectStore_GetNextResourceInstanceID(ObjectStore * store, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
                                                              ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
-ObjectStore * ObjectStore_Create();
+ObjectStore * ObjectStore_Create(void);
 void ObjectStore_Destroy(ObjectStore * store);
 
 #ifdef __cplusplus

@@ -33,7 +33,7 @@
 #include "lwm2m_debug.h"
 #include "lwm2m_result.h"
 
-const static AttributeCharacteristics AttributeCharacteristicsTable[] =
+static const AttributeCharacteristics AttributeCharacteristicsTable[] =
 {
     {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = AwaResourceType_Integer},
     {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = AwaResourceType_Integer},
@@ -46,7 +46,7 @@ const static AttributeCharacteristics AttributeCharacteristicsTable[] =
 const AttributeCharacteristics * Lwm2mAttributes_GetAttributeCharacteristics(char * coreLinkParam)
 {
     const AttributeCharacteristics * characteristics = NULL;
-    int i = 0;
+    unsigned int i = 0;
     for (; i < sizeof(AttributeCharacteristicsTable) / sizeof(AttributeCharacteristicsTable[0]); i++)
     {
         if (strcmp(coreLinkParam, AttributeCharacteristicsTable[i].CoRELinkParam) == 0)

@@ -187,17 +187,23 @@ static ResourceOperationHandlers securityResourceOperationHandlers =
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    (void)objectID;
     return (AddSecurityInfo(context, objectInstanceID) != NULL) ? objectInstanceID : -1;
 }
 
 static int Lwm2mSecurity_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     // No action
     return 0;
 }
 
 static int Lwm2mSecurity_DeleteObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    (void)objectID;
     int result = -1;
     LWM2MSecurityInfo * info = GetSecurityInfo(context, objectInstanceID);
     if (info != NULL)
@@ -216,6 +222,7 @@ static int Lwm2mSecurity_DeleteObjectInstance(Lwm2mContextType * context, Object
 
 static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
+    (void)resourceInstanceID;
     // 8.2.2 Delete operation MAY target to “/” URI to delete all the existing Object Instances except LWM2M
     // Bootstrap Server Account in the LWM2M Client.
 
@@ -245,6 +252,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                              ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
     LWM2MSecurityInfo * security = GetSecurityInfo(context, objectInstanceID);
 
     if (security != NULL)
@@ -337,6 +346,8 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                               ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
     int result = -1;
     LWM2MSecurityInfo * security =  GetSecurityInfo(context, objectInstanceID);
 
@@ -350,7 +361,7 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
                     memset(security->ServerURI, 0, sizeof(security->ServerURI));
                     memcpy(security->ServerURI, srcBuffer, srcBufferLen);
                     // Recalculate socket address from URI
-                    security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+                    security->AddressResolved = coap_ResolveAddressByURI((unsigned char *)security->ServerURI, &security->address);
                     result = srcBufferLen;
                 }
                 else
@@ -540,14 +551,14 @@ bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortSer
     {
         if (!security->AddressResolved)
         {
-            security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+            security->AddressResolved = coap_ResolveAddressByURI((unsigned char *)security->ServerURI, &security->address);
         }
         result = security->AddressResolved;
     }
     return result;
 }
 
-int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff)
+int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, uint32_t * clientHoldOff)
 {
     int result = -1;
     LWM2MSecurityInfo * security = GetSecurityInfoForShortServerID(context, shortServerID);
