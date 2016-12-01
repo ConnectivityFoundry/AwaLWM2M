@@ -64,11 +64,11 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
     char uri[1024];
 
     Lwm2mCore_GetEndPointClientName(context, buffer, sizeof(buffer));
-    sprintf(uriQuery, "?ep=%s", buffer);
+    snprintf(uriQuery, sizeof(uriQuery), "?ep=%s", buffer);
 
     Lwm2m_GetServerURI(context, shortServerID, serverPath, sizeof(serverPath));
 
-    sprintf(uri, "%s%s%s", serverPath, uriPath, uriQuery);
+    snprintf(uri, sizeof(uri), "%s%s%s", serverPath, uriPath, uriQuery);
     Lwm2m_Info("Bootstrap with %s\n", uri);
 
     coap_Reset(uri);
