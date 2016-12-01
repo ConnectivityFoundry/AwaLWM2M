@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ************************************************************************************************************************/
 
@@ -373,6 +373,11 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
 
+    if (!remoteAddress)
+    {
+        return;
+    }
+
     if ((strcmp(DTLS_LibraryName, "None") == 0) && NetworkAddress_IsSecure(remoteAddress))
     {
         NetworkAddress_Free(&remoteAddress);
@@ -521,30 +526,34 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
         const char * payload, int payloadLen, int sequence)
 {
     // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
-    coap_packet_t notify;
-    coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(path, strlen(path));
 
     Lwm2m_Debug("Coap notify: %s\n", path);
     //Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(&addr->Addr));
     //Lwm2m_Debug("Coap request port: %d\n", addr->Port);
 
-    coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
-
-    if (contentType != AwaContentType_None)
+    if (remoteAddress)
     {
-        coap_set_header_content_format(&notify, contentType);
-        coap_set_payload(&notify, payload, payloadLen);
-    }
+        coap_packet_t notify;
+        coap_transaction_t *transaction;
 
-    coap_set_token(&notify, token, tokenSize);
-    coap_set_header_observe(&notify, sequence);
+        coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
 
-    if ((transaction = coap_new_transaction(networkSocket, notify.mid, remoteAddress)))
-    {
-        transaction->packet_len = coap_serialize_message(&notify, transaction->packet);
+        if (contentType != AwaContentType_None)
+        {
+            coap_set_header_content_format(&notify, contentType);
+            coap_set_payload(&notify, payload, payloadLen);
+        }
 
-        coap_send_transaction(transaction); // for NON confirmable messages this will call coap_clear_transaction();
+        coap_set_token(&notify, token, tokenSize);
+        coap_set_header_observe(&notify, sequence);
+
+        if ((transaction = coap_new_transaction(networkSocket, notify.mid, remoteAddress)))
+        {
+            transaction->packet_len = coap_serialize_message(&notify, transaction->packet);
+
+            coap_send_transaction(transaction); // for NON confirmable messages this will call coap_clear_transaction();
+        }
     }
 }
 
