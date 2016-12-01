@@ -526,8 +526,6 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
         const char * payload, int payloadLen, int sequence)
 {
     // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
-    coap_packet_t notify;
-    coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(path, strlen(path));
 
     Lwm2m_Debug("Coap notify: %s\n", path);
@@ -536,6 +534,9 @@ void coap_SendNotify(AddressType * addr, const char * path, const char * token, 
 
     if (remoteAddress)
     {
+        coap_packet_t notify;
+        coap_transaction_t *transaction;
+
         coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
 
         if (contentType != AwaContentType_None)
