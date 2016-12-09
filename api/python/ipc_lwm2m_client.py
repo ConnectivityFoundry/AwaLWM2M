@@ -65,6 +65,10 @@ class SetRequest(IpcRequest):
 class SetResponse(IpcResponse):
     MessageType = "Set"
 
+class CreateRequest(IpcRequest):
+    MessageType = "Set"
+    PathLabel = "Create"
+
 ## Get
 class GetRequest(IpcRequest):
     MessageType = "Get"
