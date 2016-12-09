@@ -308,7 +308,7 @@ class TreeNode(object):
             s += "value %s, " % (self._value,)
         if self._children:
             s += "children "
-            for key, value in self._children.iteritems():
+            for key, value in self._children.items():  # iteritems in python 2
                 s += str(key) + ":%x" % (id(value),) + " "
         s += "]"
         return s
