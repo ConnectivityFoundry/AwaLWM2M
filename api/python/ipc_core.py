@@ -28,6 +28,13 @@ IPC Core Functionality
 #from lxml import etree
 import xml.etree.ElementTree as etree
 
+# Check python version
+from sys import version_info
+if version_info[0] >= 3:
+    PY_VERSION = 3
+else:
+    PY_VERSION = 2
+
 g_debug = True
 def debug(msg):
     if g_debug:
@@ -308,8 +315,12 @@ class TreeNode(object):
             s += "value %s, " % (self._value,)
         if self._children:
             s += "children "
-            for key, value in self._children.items():  # iteritems in python 2
-                s += str(key) + ":%x" % (id(value),) + " "
+            if PY_VERSION == 3:
+                for key, value in self._children.items():
+                    s += str(key) + ":%x" % (id(value),) + " "
+            elif PY_VERSION == 2:
+                for key, value in self._children.iteritems():
+                    s += str(key) + ":%x" % (id(value),) + " "
         s += "]"
         return s
 
