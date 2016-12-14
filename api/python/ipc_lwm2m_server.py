@@ -27,7 +27,7 @@ LWM2M Server IPC Interface
 # py-lxml is not yet available in openwrt
 #from lxml import etree
 import xml.etree.ElementTree as etree
-from awa import ipc_core
+import ipc_core
 
 class IpcError(Exception):
     pass

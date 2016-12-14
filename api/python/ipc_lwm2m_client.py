@@ -24,7 +24,7 @@
 LWM2M Client IPC Interface
 """
 import xml.etree.ElementTree # py-lxml is not yet available in openwrt
-from awa.ipc_core import IpcRequest, IpcResponse, IpcNotification, IpcContent, IpcError
+from ipc_core import IpcRequest, IpcResponse, IpcNotification, IpcContent, IpcError
 
 
 class DefineContent(IpcContent):
