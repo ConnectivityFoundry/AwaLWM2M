@@ -1626,8 +1626,6 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, OutputF
 {
     if (objectDefinition != NULL)
     {
-        AwaObjectID objectID = AwaObjectDefinition_GetID(objectDefinition);
-
         if (*lastObjectIDPrinted != objectID)
         {
             PrintObjectDefinitionHeader(objectDefinition, format);
