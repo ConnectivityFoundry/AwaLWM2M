@@ -1805,7 +1805,7 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
                         "            <IsMandatory>%s</IsMandatory>\n"
                         "            <IsCollection>%s</IsCollection>\n"
                         "            <Access>%s</Access>\n"
-                        "        </PropertyDefinition>\n";
+                        "       </PropertyDefinition>\n";
                 msprintf2(&id, "%d", resourceID);
                 msprintf2(&mandatory, "%s", AwaResourceDefinition_GetMinimumInstances(resourceDefinition) == 0 ? "False" : "True");
                 msprintf2(&collection, "%s", AwaResourceDefinition_GetMaximumInstances(resourceDefinition) <= 1 ? "False" : "True");
