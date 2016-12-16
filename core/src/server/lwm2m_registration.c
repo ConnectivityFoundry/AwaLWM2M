@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -406,7 +406,7 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
-                              const char * query, AwaContentType contentType, 
+                              const char * query, AwaContentType contentType,
                               const char * requestContent, size_t requestContentLen,
                               char * responseContent, size_t * responseContentLen,
                               int * responseCode)
@@ -453,7 +453,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         Lwm2mClientType * client = Lwm2m_LookupClientByName(context, q.EndPointName);
 
         sprintf(responseContent, "rd/%d", client->Location);
-    
+
         *responseContentLen = strlen(responseContent);  // no content
         *responseCode = AwaResult_SuccessCreated;
     }

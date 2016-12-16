@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -37,7 +37,7 @@
     #include <arpa/inet.h> // htons
 #endif
 #else
-  #include "net/ip/uip.h"  
+  #include "net/ip/uip.h"
   #define htonl(x) uip_htonl(x)
   #define ntohl(x) uip_ntohl(x)
 #endif
@@ -92,7 +92,7 @@
  *        Indicated by Bits 2-0
  *   01 - The Length field is 8-bits and Bits 2-0 MUST be ignored
  *   10 - The Length field is 16-bits and Bits 2-0 MUST be ignored
- *   11 - The Length field is 24-bits and Bits 2-0 MUST be ignored 
+ *   11 - The Length field is 24-bits and Bits 2-0 MUST be ignored
  */
 #define TLV_TYPE_LENGTH_MASK             (BIT4|BIT3)
 
@@ -246,7 +246,7 @@ static int TlvEncodeOpaque(uint8_t * buffer, int bufferLen, int type, int id, ui
  * @brief write a TLV encoded header followed by a TLV encoded integer
  *
  * TLV encoded integers are represented as a binary signed integer in network byte order,
- * where the first (most significant) bit is 0 for a positive integer and 1 for a negative integer. 
+ * where the first (most significant) bit is 0 for a positive integer and 1 for a negative integer.
  * The value may be 1 (8-bit), 2 (16-bit), 4 (32-bit) or 8 (64-bit) bytes long
  *
  * @param[out] buffer pointer to buffer to write encoded tlv header
@@ -256,15 +256,15 @@ static int TlvEncodeOpaque(uint8_t * buffer, int bufferLen, int type, int id, ui
  *                                              TLV_TYPE_IDENT_MULTIPLE_RESOURCE,
  *                                              TLV_TYPE_IDENT_RESOURCE_VALUE
  * @param[in] identifier identifier value 0-65535
- * @param[in] value integer 8-64 bit 
+ * @param[in] value integer 8-64 bit
  * @return int length of header + integer data
  */
 static int TlvEncodeInteger(uint8_t * buffer, int bufferLen, int type, int id, int64_t value)
 {
     uint8_t valueBuffer[sizeof(int64_t)] = {0};  // allow up to 64bit ints
     int intSize, i;
- 
-#ifdef LWM2M_V1_0   
+
+#ifdef LWM2M_V1_0
     bool negative = (value < 0);
 
     // remove any sign extension from value
@@ -317,7 +317,7 @@ static int TlvEncodeInteger(uint8_t * buffer, int bufferLen, int type, int id, i
 /**
  * @brief write a TLV encoded header followed by an encoded float
  *
- * TLV encoded floats are represented as an [IEEE 754-2008] [FLOAT] 
+ * TLV encoded floats are represented as an [IEEE 754-2008] [FLOAT]
  * binary floating point value. The value may use the binary32 (4 byte Length)
  * or binary64 (8 byte Length) format
  *
@@ -328,7 +328,7 @@ static int TlvEncodeInteger(uint8_t * buffer, int bufferLen, int type, int id, i
  *                                              TLV_TYPE_IDENT_MULTIPLE_RESOURCE,
  *                                              TLV_TYPE_IDENT_RESOURCE_VALUE
  * @param[in] identifier identifier value 0-65535
- * @param[in] value float/double 32 or 64 bit 
+ * @param[in] value float/double 32 or 64 bit
  * @return int length of header + integer data
  */
 static int TlvEncodeFloat(uint8_t * buffer, int bufferLen, int type, int id, double value)
@@ -360,7 +360,7 @@ static int TlvEncodeFloat(uint8_t * buffer, int bufferLen, int type, int id, dou
 /**
  * @brief write a TLV encoded header followed by a boolean to the buffer provided
  *
- * TLV encoded booleans are represented as an Integer with value 0, or 1. 
+ * TLV encoded booleans are represented as an Integer with value 0, or 1.
  * with a length of 1
  *
  * @param[out] buffer pointer to buffer to write encoded tlv header
@@ -382,7 +382,7 @@ static int TlvEncodeBoolean(uint8_t * buffer, int bufferLen, int type, int id, b
  * @brief write a TLV encoded header followed by an encoded objectlink value
  *
  * ObjectLink values are represented as 2 16-bits Integer one beside the other.
- *  The first one represents the ObjectID, and the second one represents the 
+ *  The first one represents the ObjectID, and the second one represents the
  * ObjectInstanceID. This value is always 4 bytes long.
  *
  *
@@ -429,7 +429,7 @@ static int TlvDecodeHeader(int * type, uint16_t * identifier, int * length, cons
         Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
-    
+
     if (bufferLen < 2)
     {
         Lwm2m_Error("Buffer length is too small\n");
@@ -585,7 +585,7 @@ static int TlvDecodeInteger(int64_t * dest, const uint8_t * buffer, int size)
     for (i = 1; i < size; i++)
     {
         *dest = (*dest << 8) | buffer[i];
-    } 
+    }
 
 #ifdef LWM2M_V1_0
     if (negative)
@@ -809,7 +809,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
 }
 
 /**
- * @brief write a TLV encoded instance to the buffer provided, 
+ * @brief write a TLV encoded instance to the buffer provided,
  * this function should be used to encode single instances only
  *
  * @param[in] node tree node containing object instance from the object store
@@ -905,7 +905,7 @@ static int TlvSerialiseObject(SerdesContext * serdesContext, Lwm2mTreeNode * nod
 }
 
 /**
- * @brief deserialise the TLV encoded data provided 
+ * @brief deserialise the TLV encoded data provided
  *
  * @param[in] buffer pointer to TLV serialised buffer
  * @param[in] length length of buffer
@@ -983,7 +983,7 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
 }
 
 /**
- * @brief deserialise the TLV encoded data provided 
+ * @brief deserialise the TLV encoded data provided
  *
  * @param[in] buffer pointer to TLV serialised buffer
  * @param[in] length length of buffer
@@ -1014,7 +1014,7 @@ static int TlvDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode *
         return -1;
     }
 
-    // peek in buffer to check to see if we are dealing with a resource, or multiple resource 
+    // peek in buffer to check to see if we are dealing with a resource, or multiple resource
     headerLen = TlvDecodeHeader(&type, &identifier, &resourceLen, buffer, bufferLen);
     if (headerLen == -1)
     {
@@ -1178,7 +1178,7 @@ static int TlvDeserialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTree
 }
 
 /**
- * @brief deserialise the TLV encoded data provided 
+ * @brief deserialise the TLV encoded data provided
  *
  * @param[in] buffer pointer to TLV serialised buffer
  * @param[in] length length of buffer

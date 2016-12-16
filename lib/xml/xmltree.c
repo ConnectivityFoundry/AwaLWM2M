@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -34,7 +34,7 @@
 #define Flow_MemAlloc malloc
 static inline void Flow_MemFree(void **buffer)
 {
-    if (*buffer) 
+    if (*buffer)
     {
         free(*buffer);
         *buffer = NULL;
@@ -119,7 +119,7 @@ bool TreeNode_AddChild(TreeNode node, TreeNode child)
 
         }
 
-        // Add the new child to the list        
+        // Add the new child to the list
         _node->Children[_node->ChildCount] = child;
         _node->ChildCount++;
         ((_treeNode)child)->ChildID = _node->ChildCount;
@@ -333,7 +333,7 @@ TreeNode TreeNode_Navigate(const TreeNode rootNode, const char* path)
     _treeNode _node = (_treeNode) rootNode;
 
     // Validate inputs (Check rootNode & path are not null)
-    // Assuming path is null-terminated 
+    // Assuming path is null-terminated
     if (rootNode && path)
     {
         char* _path = (char*) Flow_MemAlloc(sizeof(char) * (strlen((const char*) path)+1) );
@@ -419,7 +419,7 @@ bool TreeNode_SetName(const TreeNode node, const char* name, const uint32_t leng
         {
             if (length > 0)
                 memcpy(_node->Name, name, length);
-            
+
             _node->Name[length] = '\0';
             result = true;
         }
@@ -432,7 +432,7 @@ bool TreeNode_SetParent(const TreeNode node, const TreeNode parent)
     bool result = false;
     _treeNode _node = (_treeNode) node;
     if (_node)
-    {       
+    {
         _node->Parent = parent;
         result = true;
     }
@@ -453,7 +453,7 @@ bool TreeNode_SetValue(const TreeNode node, const uint8_t* value, const uint32_t
         {
             if (length > 0)
                 memcpy(_node->Value, value, length);
-            
+
             _node->Value[length] = '\0';
             result = true;
         }
@@ -530,7 +530,7 @@ bool Tree_Delete(TreeNode node)
                  currentNode->ChildID = 0;  // The node is no longer a child-node
             }
             // else, must be the 'root' node
-            
+
             // Free the curentNode's name, value & 'children' array
             if (currentNode->Name)
                 Flow_MemFree((void **) &currentNode->Name);
