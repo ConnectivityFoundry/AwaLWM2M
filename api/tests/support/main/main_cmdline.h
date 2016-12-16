@@ -78,7 +78,7 @@ struct gengetopt_args_info
   int defaultTimeout_arg;	/**< @brief Set default timeout in milliseconds for IPC operations.  */
   char * defaultTimeout_orig;	/**< @brief Set default timeout in milliseconds for IPC operations original value given at command line.  */
   const char *defaultTimeout_help; /**< @brief Set default timeout in milliseconds for IPC operations help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int clientIpcPort_given ;	/**< @brief Whether clientIpcPort was given.  */
@@ -182,7 +182,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */
