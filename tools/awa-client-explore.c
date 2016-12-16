@@ -50,34 +50,6 @@
 #include "tools_common.h"
 
 
-static void Explore(const AwaClientSession * session, const Target * target, AwaObjectID * lastObjectIDPrinted, OutputFormat outputFormat)
-{
-    if (session != NULL)
-    {
-        AwaObjectID objectID = AWA_INVALID_ID;
-        AwaResourceID resourceID = AWA_INVALID_ID;
-        if (AwaClientSession_PathToIDs(session, target->Path, &objectID, NULL, &resourceID) == AwaError_Success)
-        {
-            if (IsIDValid(objectID))
-            {
-                PrintDefinitionTarget(AwaClientSession_GetObjectDefinition(session, objectID), outputFormat, objectID, resourceID, lastObjectIDPrinted);
-            }
-            else
-            {
-                Error("Path %s is not valid\n", target->Path);
-            }
-        }
-        else
-        {
-            Error("PathToIDs failed\n");
-        }
-    }
-    else
-    {
-        Error("Session is NULL\n");
-    }
-}
-
 int main(int argc, char ** argv)
 {
     int result = 0;
@@ -126,18 +98,97 @@ int main(int argc, char ** argv)
         }
         else
         {
-            // Add target paths from command line
+            struct target
+            {
+                AwaObjectID objectID;
+                AwaResourceID resourceID;
+            };
+            struct target *targets = malloc(sizeof(struct target) * ai.inputs_num);
             int i = 0;
-            AwaObjectID lastObjectIDPrinted = AWA_INVALID_ID;
+            // Targets can point to objects or resources.
+            // Transform each path into objectID and resourceID
             for (i = 0; i < ai.inputs_num; ++i)
             {
                 Target * target = CreateTarget(ai.inputs[i]);
-                if (target != NULL)
+                if (!target)
                 {
-                    Explore(session, target, &lastObjectIDPrinted, outputFormat);
-                    FreeTarget(&target);
+                    continue;
+                }
+
+                if (AwaClientSession_PathToIDs(session, target->Path, &targets[i].objectID, NULL, &targets[i].resourceID) != AwaError_Success)
+                {
+                    continue;
+                }
+                if (!IsIDValid(targets[i].objectID))
+                {
+                    Error("Path %s is not valid\n", target->Path);
+                }
+
+                FreeTarget(&target);
+            }
+
+            // For each object, delete any resource that points to this object
+            for (i = 0; i < ai.inputs_num; ++i)
+            {
+                if (IsIDValid(targets[i].objectID)
+                && !IsIDValid(targets[i].resourceID))
+                {
+                    int j = 0;
+                    for (; j < ai.inputs_num; ++j)
+                    {
+                        if (IsIDValid(targets[j].objectID)
+                        && IsIDValid(targets[j].resourceID)
+                        && targets[j].objectID == targets[i].objectID)
+                        {
+                            targets[j].objectID = AWA_INVALID_ID;
+                        }
+                    }
                 }
             }
+
+            // Delete duplicate objects and resources
+            for (i = 0; i < ai.inputs_num; ++i)
+            {
+                int j = i+1;
+                for (; j < ai.inputs_num; ++j)
+                {
+                    if (targets[i].objectID == targets[j].objectID
+                    &&  targets[i].resourceID == targets[j].resourceID)
+                    {
+                        targets[j].objectID = AWA_INVALID_ID;
+                    }
+                }
+            }
+            for (i = 0; i < ai.inputs_num; ++i)
+            {
+                if (!IsIDValid(targets[i].objectID))
+                {
+                    continue;
+                }
+                AwaObjectID lastObjectID = AWA_INVALID_ID;
+                const AwaObjectDefinition *objectDefinition = AwaClientSession_GetObjectDefinition(session, targets[i].objectID);
+                PrintDefinitionTarget(objectDefinition, outputFormat, targets[i].objectID, targets[i].resourceID, &lastObjectID);
+
+                // If it is a resource
+                if (IsIDValid(targets[i].resourceID))
+                {
+                    int j = i+1;
+                    for (; j < ai.inputs_num; ++j)
+                    {
+                        if (IsIDValid(targets[j].resourceID)
+                        &&  targets[i].objectID == targets[j].objectID)
+                        {
+                            PrintDefinitionTarget(objectDefinition, outputFormat, targets[j].objectID, targets[j].resourceID, &lastObjectID);
+
+                            // Overwrite object ID to avoid printing it again
+                            targets[j].objectID = AWA_INVALID_ID;
+                        }
+                    }
+                    PrintObjectDefinitionFooter(objectDefinition, outputFormat);
+                }
+            }
+
+            free(targets);
         }
     }
     else
