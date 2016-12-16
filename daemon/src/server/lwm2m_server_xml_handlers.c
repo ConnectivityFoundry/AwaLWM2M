@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -702,12 +702,12 @@ static void xmlif_HandleResponse(IpcCoapRequestContext * requestContext, const c
                 {
                     strcpy(responsePathWithoutQueryString, responsePath);
                 }
-                else 
+                else
                 {
                     responsePathWithoutQueryString[0] = '/';
                     strcpy(&responsePathWithoutQueryString[1], responsePath);
                 }
-            
+
                 char * queryString = strchr(responsePathWithoutQueryString, '?');
                 if (queryString != NULL)
                 {
@@ -974,8 +974,8 @@ static int xmlif_HandlerReadRequest(RequestInfoType * request, TreeNode content)
 static bool xmlif_HandlerSendCoapReadRequest(IpcCoapRequestContext * requestContext, Lwm2mClientType * client,
                                              ObjectInstanceResourceKey * key, TreeNode currentLeafNode, TreeNode currentResponsePathNode)
 {
-    AwaContentType contentType = requestContext != NULL && 
-                              requestContext->Request != NULL && 
+    AwaContentType contentType = requestContext != NULL &&
+                              requestContext->Request != NULL &&
                               requestContext->Request->Context != NULL ? Lwm2mCore_GetContentType((Lwm2mContextType *)requestContext->Request->Context) : AwaContentType_ApplicationOmaLwm2mTLV;
     coap_GetRequest(requestContext, xmlif_GetURIForClient(client, key), contentType, xmlif_HandlerReadResponse);
     return true;

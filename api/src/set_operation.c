@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -346,17 +346,17 @@ AwaError AwaClientSetOperation_AddValueAsBoolean(AwaClientSetOperation * operati
 }
 
 AwaError AwaClientSetOperation_AddValueAsTime(AwaClientSetOperation * operation, const char * path, AwaTime value)
-{   
+{
     return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaTime), AwaResourceType_Time, SetArrayMode_Unspecified);
-} 
+}
 
 AwaError AwaClientSetOperation_AddValueAsOpaque(AwaClientSetOperation * operation, const char * path, AwaOpaque value)
-{   
+{
     return ClientSetOperation_AddValue(operation, path, 0, value.Data, value.Size, AwaResourceType_Opaque, SetArrayMode_Unspecified);
-} 
+}
 
 AwaError AwaClientSetOperation_AddValueAsObjectLink(AwaClientSetOperation * operation, const char * path, AwaObjectLink value)
-{   
+{
     return ClientSetOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLink, SetArrayMode_Unspecified);
 }
 

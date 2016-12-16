@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -65,7 +65,7 @@ static SubscriptionNode * g_subscriptionListHead = NULL;
 bool AddSubscription(AwaSubscribeType subscriptionType, void * subscription)
 {
     if (g_subscriptionListHead == NULL)
-    { 
+    {
          g_subscriptionListHead = (SubscriptionNode *)malloc(sizeof(SubscriptionNode));
          if (g_subscriptionListHead != NULL)
          {
@@ -154,7 +154,7 @@ void ExecuteCallback(const AwaExecuteArguments * arguments, void * context)
         for (i = 0; i < arguments->Size; i++)
         {
             printf("%02x ", ((uint8_t *)arguments->Data)[i]);
-        } 
+        }
         printf("]\n");
     }
     else
@@ -239,7 +239,7 @@ static bool SubscribeToTarget(AwaClientSession * session, AwaClientSubscribeOper
 }
 
 static void UnsubscribeFromTargets(AwaClientSession * session)
-{ 
+{
     AwaClientSubscribeOperation * operation = AwaClientSubscribeOperation_New(session);
     if (operation == NULL)
     {
