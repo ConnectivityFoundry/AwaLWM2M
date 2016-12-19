@@ -27,8 +27,6 @@
 #include "dtls_abstraction.h"
 
 #include <errno.h>
-
-
 #include <stdio.h>
 #define mbedtls_printf     printf
 #define mbedtls_fprintf    fprintf
@@ -56,7 +54,7 @@ typedef struct
     void * UserContext;
     uint8_t * Buffer;
     int BufferLength;
-}DTLS_Session;
+} DTLS_Session;
 
 #ifndef MAX_DTLS_SESSIONS
     #define MAX_DTLS_SESSIONS 3
@@ -74,8 +72,9 @@ static const char * pskIdentity = NULL;
 static const uint8_t * pskKey = NULL;
 static int pskKeyLength = 0;
 
-static  DTLS_NetworkSendCallback NetworkSend = NULL;
+static DTLS_NetworkSendCallback NetworkSend = NULL;
 
+static int supportedCipherSuites[6];
 
 static DTLS_Session * GetSession(NetworkAddress * address);
 static void SetupNewSession(int index, NetworkAddress * networkAddress, bool client);
@@ -86,25 +85,22 @@ static int PSKCallBack(void * parameter, mbedtls_ssl_context * context, const un
 static int SSLSendCallBack(void * context, const unsigned char * sendBuffer, size_t sendBufferLength);
 
 
-mbedtls_entropy_context entropy;
-mbedtls_ctr_drbg_context secureRandom;
-mbedtls_timing_delay_context timer;
-mbedtls_x509_crt cacert;
-mbedtls_pk_context privateKey;
-
-mbedtls_ssl_cookie_ctx cookie_context;
+static mbedtls_entropy_context entropy;
+static mbedtls_ctr_drbg_context secureRandom;
+static mbedtls_timing_delay_context timer;
+static mbedtls_x509_crt cacert;
+static mbedtls_pk_context privateKey;
+static mbedtls_ssl_cookie_ctx cookie_context;
 
 #define SUCCESS (0)
-
-int supportedCipherSuites[6];
 
 
 void DTLS_Init(void)
 {
-    memset(sessions,0,sizeof(DTLS_Session) * MAX_DTLS_SESSIONS);
+    memset(sessions, 0, sizeof(sessions));
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_init(&secureRandom);
-    mbedtls_ctr_drbg_seed(&secureRandom, mbedtls_entropy_func, &entropy,NULL,0);
+    mbedtls_ctr_drbg_seed(&secureRandom, mbedtls_entropy_func, &entropy, NULL, 0);
     mbedtls_x509_crt_init(&cacert);
     mbedtls_pk_init(&privateKey);
     mbedtls_ssl_cookie_init(&cookie_context);
@@ -293,7 +289,6 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
 
     if (!client)
     {
-        //mbedtls_ssl_conf_dtls_cookies(config, mbedtls_ssl_cookie_write, mbedtls_ssl_cookie_check, &cookie_context);
         mbedtls_ssl_conf_dtls_cookies(config, NULL, NULL, &cookie_context);
     }
 
@@ -333,15 +328,10 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
     supportedCipherSuites[cipherIndex] = 0;
     mbedtls_ssl_conf_ciphersuites(config, supportedCipherSuites);
     mbedtls_ssl_init(context);
-    if (mbedtls_ssl_setup(context, config)  == SUCCESS)
+    if (mbedtls_ssl_setup(context, config) == SUCCESS)
     {
         mbedtls_ssl_set_bio(context, session, SSLSendCallBack, DecryptCallBack, NULL);
         mbedtls_ssl_set_timer_cb(context, &timer, mbedtls_timing_set_delay, mbedtls_timing_get_delay);
-//        if (!client)
-//        {
-//            gnutls_certificate_server_set_request(session->Session, GNUTLS_CERT_REQUEST); // GNUTLS_CERT_IGNORE  Don't require Client Cert
-//        }
-
         session->InUse = true;
     }
 }
@@ -353,7 +343,6 @@ static void FreeSession(DTLS_Session * session)
     mbedtls_ssl_free(&session->Context);
     mbedtls_ssl_config_free(&session->Config);
     memset(session,0, sizeof(DTLS_Session));
-
 }
 
 static int DecryptCallBack(void * context, unsigned char * recieveBuffer, size_t receiveBufferLegth)
