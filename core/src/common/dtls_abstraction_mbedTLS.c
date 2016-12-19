@@ -138,15 +138,15 @@ void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFor
 {
     if (certLength > 0)
     {
-    	if (mbedtls_x509_crt_parse(&cacert, (const unsigned char *) cert, certLength) >= 0)
-    	{
-    		if (mbedtls_pk_parse_key(&privateKey, cert, certLength, NULL, 0) == 0)
-    		{
-    	    	certificate = (uint8_t *)cert;
-    	        certificateLength = certLength;
-    	        certificateFormat = format;
-    		}
-    	}
+        if (mbedtls_x509_crt_parse(&cacert, (const unsigned char *) cert, certLength) >= 0)
+        {
+            if (mbedtls_pk_parse_key(&privateKey, cert, certLength, NULL, 0) == 0)
+            {
+                certificate = (uint8_t *)cert;
+                certificateLength = certLength;
+                certificateFormat = format;
+            }
+        }
     }
 }
 
@@ -220,7 +220,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
     {
         if (session->SessionEstablished)
         {
-        	session->Context.f_send = EncryptCallBack;
+            session->Context.f_send = EncryptCallBack;
             session->Buffer = encryptedBuffer;
             session->BufferLength = encryptedBufferLength;
             int written = mbedtls_ssl_write(&session->Context, plainText, plainTextLength);
@@ -282,7 +282,7 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
 
     mbedtls_ssl_config_init(config);
     if (client)
-    	flags = MBEDTLS_SSL_IS_CLIENT;
+        flags = MBEDTLS_SSL_IS_CLIENT;
     else
     {
         flags = MBEDTLS_SSL_IS_SERVER;
@@ -293,62 +293,62 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
 
     if (!client)
     {
-    	//mbedtls_ssl_conf_dtls_cookies(config, mbedtls_ssl_cookie_write, mbedtls_ssl_cookie_check, &cookie_context);
-    	mbedtls_ssl_conf_dtls_cookies(config, NULL, NULL, &cookie_context);
+        //mbedtls_ssl_conf_dtls_cookies(config, mbedtls_ssl_cookie_write, mbedtls_ssl_cookie_check, &cookie_context);
+        mbedtls_ssl_conf_dtls_cookies(config, NULL, NULL, &cookie_context);
     }
 
     int cipherIndex = 0;
     if (certificate || !pskIdentity)
     {
-    	supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8;
-    	cipherIndex++;
-    	supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256;
-    	cipherIndex++;
-    	if (certificate)
-    	{
-    		mbedtls_ssl_conf_own_cert(config, &cacert, &privateKey);
-    	}
+        supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8;
+        cipherIndex++;
+        supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256;
+        cipherIndex++;
+        if (certificate)
+        {
+            mbedtls_ssl_conf_own_cert(config, &cacert, &privateKey);
+        }
         mbedtls_ssl_conf_authmode(config, MBEDTLS_SSL_VERIFY_OPTIONAL);
     }
     if (pskIdentity)
     {
-    	supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256;
-    	cipherIndex++;
-    	supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8;
-    	cipherIndex++;
-    	supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_PSK_WITH_AES_128_CBC_SHA256;
-    	cipherIndex++;
+        supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256;
+        cipherIndex++;
+        supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8;
+        cipherIndex++;
+        supportedCipherSuites[cipherIndex] = MBEDTLS_TLS_PSK_WITH_AES_128_CBC_SHA256;
+        cipherIndex++;
         if (client)
         {
             if (!certificate)
             {
-            	mbedtls_ssl_conf_psk(config,pskKey, pskKeyLength, pskIdentity, strlen(pskIdentity));
+                mbedtls_ssl_conf_psk(config,pskKey, pskKeyLength, pskIdentity, strlen(pskIdentity));
             }
         }
         else
         {
-        	mbedtls_ssl_conf_psk_cb(config, PSKCallBack, (void *)pskIdentity);
+            mbedtls_ssl_conf_psk_cb(config, PSKCallBack, (void *)pskIdentity);
         }
     }
-	supportedCipherSuites[cipherIndex] = 0;
-	mbedtls_ssl_conf_ciphersuites(config, supportedCipherSuites);
+    supportedCipherSuites[cipherIndex] = 0;
+    mbedtls_ssl_conf_ciphersuites(config, supportedCipherSuites);
     mbedtls_ssl_init(context);
     if (mbedtls_ssl_setup(context, config)  == SUCCESS)
     {
-    	mbedtls_ssl_set_bio(context, session, SSLSendCallBack, DecryptCallBack, NULL);
+        mbedtls_ssl_set_bio(context, session, SSLSendCallBack, DecryptCallBack, NULL);
         mbedtls_ssl_set_timer_cb(context, &timer, mbedtls_timing_set_delay, mbedtls_timing_get_delay);
 //        if (!client)
 //        {
 //            gnutls_certificate_server_set_request(session->Session, GNUTLS_CERT_REQUEST); // GNUTLS_CERT_IGNORE  Don't require Client Cert
 //        }
 
-    	session->InUse = true;
+        session->InUse = true;
     }
 }
 
 static void FreeSession(DTLS_Session * session)
 {
-	mbedtls_ssl_close_notify(&session->Context);
+    mbedtls_ssl_close_notify(&session->Context);
     mbedtls_ssl_session_reset(&session->Context);
     mbedtls_ssl_free(&session->Context);
     mbedtls_ssl_config_free(&session->Config);
@@ -383,7 +383,7 @@ static int DecryptCallBack(void * context, unsigned char * recieveBuffer, size_t
 
 static int EncryptCallBack(void * context, const unsigned char * sendBuffer, size_t sendBufferLength)
 {
-	int result;
+    int result;
     DTLS_Session * session = (DTLS_Session *)context;
     if (session->BufferLength > 0)
     {
