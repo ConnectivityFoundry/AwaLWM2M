@@ -364,14 +364,8 @@ error_coap:
     coap_Destroy();
 
 error_close_log:
-    if (loadedClientCert)
-    {
-        free(loadedClientCert);
-    }
-    if (key)
-    {
-        free(key);
-    }
+    free(loadedClientCert);
+    free(key);
     Lwm2m_Info("Client exiting\n");
     if (logFile)
     {

@@ -1342,8 +1342,7 @@ int update_arg(void *field, char **orig_field,
       if (no_free) {
         *orig_field = value;
       } else {
-        if (*orig_field)
-          free (*orig_field); /* free previous string */
+        free(*orig_field); /* free previous string */
         *orig_field = gengetopt_strdup (value);
       }
     }
@@ -1382,7 +1381,7 @@ int update_multiple_arg_temp(struct generic_list **list,
       if (update_arg((void *)&((*list)->arg), &((*list)->orig), 0,
           prev_given, multi_token, possible_values, default_value,
           arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
-        if (multi_token) free(multi_token);
+        free(multi_token);
         return 1; /* failure */
       }
 
@@ -1411,8 +1410,7 @@ void free_list(struct generic_list *list, short string_arg)
         tmp = list;
         if (string_arg && list->arg.string_arg)
           free (list->arg.string_arg);
-        if (list->orig)
-          free (list->orig);
+        free(list->orig);
         list = list->next;
         free (tmp);
       }

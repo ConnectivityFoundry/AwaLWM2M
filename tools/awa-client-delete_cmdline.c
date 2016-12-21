@@ -1031,8 +1031,7 @@ int update_arg(void *field, char **orig_field,
       if (no_free) {
         *orig_field = value;
       } else {
-        if (*orig_field)
-          free (*orig_field); /* free previous string */
+        free(*orig_field); /* free previous string */
         *orig_field = gengetopt_strdup (value);
       }
     }

@@ -629,10 +629,7 @@ static void DestroyObjectList(struct ListHead * objectList)
         ListForEachSafe(i, n, objectList)
         {
             ObjectListEntry * object = ListEntry(i, ObjectListEntry, list);
-            if (object != NULL)
-            {
-                free(object);
-            }
+            free(object);
         }
     }
 }

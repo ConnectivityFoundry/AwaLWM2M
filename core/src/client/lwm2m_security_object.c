@@ -101,10 +101,7 @@ static void DestroySecurityObjects(struct ListHead * securityObjectList)
     ListForEachSafe(i, n, securityObjectList)
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(i, LWM2MSecurityInfo, list);
-        if (securityInfo != NULL)
-        {
-            free(securityInfo);
-        }
+        free(securityInfo);
     }
 }
 
