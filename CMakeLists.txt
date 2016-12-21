@@ -19,6 +19,7 @@ option (WITH_ERBIUM "Enable Erbium CoAP support)" ON)
 option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
 option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
 option (WITH_TINYDTLS "Enable TinyDTLS DTLS support" OFF)
+option (WITH_MBEDTLS "Enable mbedTLS DTLS support" OFF)
 option (WITH_SYSTEMD "Install systemd service files" OFF)
 
 if (WITH_LIBCOAP)
