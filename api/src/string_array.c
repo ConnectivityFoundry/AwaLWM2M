@@ -62,7 +62,8 @@ void AwaStringArray_SetValueAsCString(AwaStringArray * array, AwaArrayIndex inde
         AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
         if (nulledStrings != NULL)
         {
-            Array_SetValue((AwaArray *)nulledStrings, index, (void *)value, strlen(value) + 1);
+            Array_SetValue((AwaArray *)nulledStrings, index, (void *)value,
+                           strlen(value) + 1);
         }
         Array_SetValue((AwaArray *)array, index, (void *)value, strlen(value));
     }
@@ -75,9 +76,11 @@ void AwaStringArray_DeleteValue(AwaStringArray * array, AwaArrayIndex index)
         AwaArray * nulledStrings = AwaArray_GetContext((AwaArray *)array);
         if (nulledStrings != NULL)
         {
-            Array_DeleteItem((AwaArray *)nulledStrings, index, AwaResourceType_StringArray);
+            Array_DeleteItem((AwaArray *)nulledStrings, index,
+                             AwaResourceType_StringArray);
         }
-        Array_DeleteItem((AwaArray *)array, index, AwaResourceType_StringArray);
+        Array_DeleteItem((AwaArray *)array, index,
+                         AwaResourceType_StringArray);
     }
 }
 
@@ -94,8 +97,10 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
 
             if (value == NULL)
             {
-                const char * nonNulledValue = Array_GetValue((AwaArray *)array, index);
-                int nonNulledLength = Array_GetValueLength((AwaArray *)array, index);
+                const char * nonNulledValue = Array_GetValue((AwaArray *)array,
+                                                             index);
+                int nonNulledLength = Array_GetValueLength((AwaArray *)array,
+                                                           index);
                 char *  nulledValue = (char *)malloc(nonNulledLength + 1);
 
                 if ((nonNulledValue != NULL) && (nulledValue != NULL) && (nonNulledLength >= 0))
@@ -104,7 +109,8 @@ const char * AwaStringArray_GetValueAsCString(const AwaStringArray * array, AwaA
                     nulledValue[nonNulledLength] = '\0';
                     Array_SetValue(nulledStrings, index, nulledValue, nonNulledLength + 1);
                     free(nulledValue);
-                    value = Array_GetValue((const AwaArray *)nulledStrings, index);
+                    value = Array_GetValue((const AwaArray *)nulledStrings,
+                                           index);
                 }
                 else
                 {

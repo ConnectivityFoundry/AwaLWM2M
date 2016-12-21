@@ -245,7 +245,8 @@ OperationCommon * ServerOperation_GetOperationCommon(const ServerOperation * ope
     {
         if (operation->OperationCommons != NULL)
         {
-            Map_Get(operation->OperationCommons, clientID, (void **)&clientOperation);
+            Map_Get(operation->OperationCommons, clientID,
+                    (void **)&clientOperation);
         }
         else
         {

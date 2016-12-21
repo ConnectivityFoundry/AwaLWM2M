@@ -94,10 +94,10 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                     switch(sessionType)
                     {
                         case SessionType_Client:
-                            sessionCommon = ClientSession_GetSessionCommon((AwaClientSession*)session);
+                            sessionCommon = ClientSession_GetSessionCommon((AwaClientSession *)session);
                             break;
                         case SessionType_Server:
-                            sessionCommon = ServerSession_GetSessionCommon((AwaServerSession*)session);
+                            sessionCommon = ServerSession_GetSessionCommon((AwaServerSession *)session);
                             break;
                         default:
                             result = LogErrorWithEnum(AwaError_Internal, "SessionType is invalid: %d\n", sessionType);
@@ -109,10 +109,12 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                         switch(sessionType)
                         {
                             case SessionType_Client:
-                                resourceDefinition = ClientSession_GetResourceDefinitionFromPath((AwaClientSession*)session, path);
+                                resourceDefinition = ClientSession_GetResourceDefinitionFromPath((AwaClientSession *)session,
+                                                                                                 path);
                                 break;
                             case SessionType_Server:
-                                resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession*)session, path);
+                                resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession *)session,
+                                                                                                 path);
                                 break;
                             default:
                                 result = LogErrorWithEnum(AwaError_Internal, "SessionType is invalid: %d\n", sessionType);

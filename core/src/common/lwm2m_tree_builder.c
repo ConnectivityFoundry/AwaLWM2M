@@ -61,7 +61,7 @@ static AwaResult ReadResourceInstanceFromStoreAndCreateTree(Lwm2mTreeNode ** des
 
     Lwm2m_Debug("Treebuilder length: %d\n", (int)valueLength);
 
-    if (Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)value, valueLength) != 0)
+    if (Lwm2mTreeNode_SetValue(*dest, (const uint8_t *)value, valueLength) != 0)
     {
         Lwm2m_Error("ERROR: Failed to set value for resource instance node\n");
         result = AwaResult_BadRequest;

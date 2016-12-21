@@ -126,7 +126,7 @@ TreeNode Xml_FindChildWithGrandchildValue(const TreeNode parentNode, const char 
             TreeNode grandchild;
             if ((grandchild = Xml_Find(child, grandchildName)) != NULL)
             {
-                const char * value = (const char * )TreeNode_GetValue(grandchild);
+                const char * value = (const char *)TreeNode_GetValue(grandchild);
                 if (value != NULL)
                 {
                     if (strcmp(grandchildValue, value) == 0)

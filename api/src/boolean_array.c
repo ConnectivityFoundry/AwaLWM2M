@@ -40,7 +40,8 @@ void AwaBooleanArray_Free(AwaBooleanArray ** array)
 
 void AwaBooleanArray_SetValue(AwaBooleanArray * array, AwaArrayIndex index, AwaBoolean value)
 {
-    Array_SetValue((AwaArray *)array, index, (void *)&value, sizeof(AwaBoolean));
+    Array_SetValue((AwaArray *)array, index, (void *)&value,
+                   sizeof(AwaBoolean));
 }
 
 void AwaBooleanArray_DeleteValue(AwaBooleanArray * array, AwaArrayIndex index)
@@ -69,7 +70,7 @@ size_t AwaBooleanArray_GetValueCount(const AwaBooleanArray * array)
 
 AwaBooleanArrayIterator * AwaBooleanArray_NewBooleanArrayIterator(const AwaBooleanArray * array)
 {
-    return (AwaBooleanArrayIterator*)ArrayIterator_New((const AwaArray *)array);
+    return (AwaBooleanArrayIterator *)ArrayIterator_New((const AwaArray *)array);
 }
 
 bool AwaBooleanArray_IsValid(const AwaBooleanArray * array, AwaArrayIndex index)

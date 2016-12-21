@@ -231,7 +231,7 @@ static void Lwm2m_ReleaseQueryString(RegistrationQueryString * queryString)
 {
     if (queryString != NULL)
     {
-        free((char*)queryString->EndPointName);
+        free((char *)queryString->EndPointName);
     }
 }
 
@@ -411,7 +411,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
                               char * responseContent, size_t * responseContentLen,
                               int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
     Lwm2mClientType * client;
 
@@ -476,7 +476,7 @@ static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
                        char * responseContent, size_t * responseContentLen,
                        int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
 
     int32_t location;
@@ -511,7 +511,7 @@ done:
 static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                           const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
 
     int32_t location;
 

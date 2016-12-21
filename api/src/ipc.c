@@ -295,7 +295,8 @@ InternalError IPCMessage_SetType(IPCMessage * message, const char * type, const 
 
             if (subTypeNode)
             {
-                TreeNode_SetValue(subTypeNode, (const uint8_t *)subType, strlen(subType));
+                TreeNode_SetValue(subTypeNode, (const uint8_t *)subType,
+                                  strlen(subType));
             }
             else
             {
@@ -459,7 +460,9 @@ InternalError IPCMessage_SetSessionID(IPCMessage * message, IPCSessionID session
                         {
                             if (sessionIDNode)
                             {
-                                TreeNode_SetValue(sessionIDNode, (const uint8_t *)value, strlen(value));
+                                TreeNode_SetValue(sessionIDNode,
+                                                  (const uint8_t *)value,
+                                                  strlen(value));
                                 result = InternalError_Success;
                             }
                             else

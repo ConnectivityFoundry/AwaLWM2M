@@ -45,7 +45,7 @@ static char *FlowString_DuplicateWithLength(const char *text, int textLength)
         char *result = NULL;
         if (text)
         {
-                result = (char*)Flow_MemAlloc(textLength+1);
+                result = (char *)Flow_MemAlloc(textLength+1);
                 if (result)
                 {
                         memcpy(result, text, textLength);
@@ -245,10 +245,11 @@ void runStartElementCallback(XMLParser_Context xmlParser)
     {
         xmlParser->State = XMLParserState_Running;
 
-        char** attributes = (char**) XMLParser_getAttributesArray(xmlParser);
+        char** attributes = (char **) XMLParser_getAttributesArray(xmlParser);
 
         if(xmlParser->StartHandler)
-            xmlParser->StartHandler(xmlParser->UserData, xmlParser->CurrentElement.ElementName, (const char**) attributes);
+            xmlParser->StartHandler(xmlParser->UserData, xmlParser->CurrentElement.ElementName,
+                                    (const char **) attributes);
 
         if(XMLParser_DestroyAttributesArray(attributes) )
         { /* No attributes were freed */ }
@@ -282,7 +283,7 @@ XMLParser_Context XMLParser_Create (void)
         /* Initialise dynamic string storage */
         newParser->DynamicStringSize = DEFAULT_DYNAMIC_STRING_BUFFER_SIZE;
         newParser->DynamicStringUsed = 0;
-        newParser->DynamicString = (char*) Flow_MemAlloc(sizeof(char) * (newParser->DynamicStringSize + 1));
+        newParser->DynamicString = (char *) Flow_MemAlloc(sizeof(char) * (newParser->DynamicStringSize + 1));
         if(!newParser->DynamicString)
             initError = true;
         // Initialise current element storage
@@ -377,7 +378,7 @@ const char** XMLParser_getAttributesArray(XMLParser_Context xmlParser)
             attribute = attribute->Next;
         }
     }
-    return (const char**) newArray;
+    return (const char **) newArray;
 }
 
 bool XMLParser_Parse(XMLParser_Context xmlParser, const char *doc, unsigned int len, bool lastChunk)

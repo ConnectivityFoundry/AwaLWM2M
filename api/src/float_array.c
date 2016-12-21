@@ -71,7 +71,7 @@ size_t AwaFloatArray_GetValueCount(const AwaFloatArray * array)
 
 AwaFloatArrayIterator * AwaFloatArray_NewFloatArrayIterator(const AwaFloatArray * array)
 {
-    return (AwaFloatArrayIterator*)ArrayIterator_New((AwaArray*)array);
+    return (AwaFloatArrayIterator *)ArrayIterator_New((AwaArray *)array);
 }
 
 bool AwaFloatArray_IsValid(const AwaFloatArray * array, AwaArrayIndex index)

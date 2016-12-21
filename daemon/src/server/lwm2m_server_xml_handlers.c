@@ -431,7 +431,7 @@ error:
 // Called to handle a request with the type "Connect". Returns 0 on success.
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context), request->SessionID);
     if ((response != NULL) &&
         (IPCSession_New(request->SessionID) == 0) &&
@@ -503,7 +503,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
 static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content)
 {
     int rc = 0;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
 
     TreeNode clientsNode = IPC_NewClientsNode();
 
@@ -534,7 +534,7 @@ static int xmlif_HandlerListClients(RequestInfoType * request, TreeNode content)
 
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
 
     TreeNode objectDefinitions = TreeNode_Navigate(content, "Content/ObjectDefinitions");
     TreeNode objectDefinition = (objectDefinitions) ? TreeNode_GetChild(objectDefinitions, 0) : TreeNode_Navigate(content, "Content/ObjectDefinition");
@@ -560,7 +560,7 @@ static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode conten
 static void xmlif_GenerateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, const char * responseType)
 {
     RequestInfoType * request = ctxt;
-    Lwm2mContextType * lwm2mContext = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * lwm2mContext = (Lwm2mContextType *)request->Context;
     TreeNode response = IPC_NewResponseNode(responseType, responseCode, request->SessionID);
 
     Lwm2mClientType * client = address? Lwm2m_LookupClientByAddress(lwm2mContext, address) : NULL;
@@ -585,7 +585,7 @@ static int xmlif_HandleRequestHeader(RequestInfoType * request, TreeNode content
 {
     int rc = -1;
 
-    *requestContext = (IpcCoapRequestContext * )malloc(sizeof(IpcCoapRequestContext));
+    *requestContext = (IpcCoapRequestContext *)malloc(sizeof(IpcCoapRequestContext));
     if (*requestContext == NULL)
     {
         Lwm2m_Error("Out of memory");
@@ -843,7 +843,7 @@ static int xmlif_HandleContentRequest(RequestInfoType * request, TreeNode conten
                                       SendCoapRequestHandler requestCallback, TransactionCallback responseCallback, AwaResourceOperations validOperations)
 {
     int numCoapRequests = 0;
-    Lwm2mContextType * context = (Lwm2mContextType * )request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = NULL;
     IpcCoapRequestContext * requestContext;
     Lwm2mClientType * client;
@@ -991,7 +991,7 @@ static void xmlif_HandlerSuccessfulReadResponse(IpcCoapRequestContext * requestC
                                                 const char * responseType, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     RequestInfoType * request = requestContext->Request;
-    Lwm2mContextType * context = (Lwm2mContextType * )request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     ObjectInstanceResourceKey key = UriToOir(responsePath);
     Lwm2mTreeNode * root = NULL;
 
@@ -1091,7 +1091,7 @@ static bool xmlif_HandlerSendCoapObserveRequest(IpcCoapRequestContext * requestC
 
 static void xmlif_HandlerFreeIpcCoapRequestContext(void * ctxt)
 {
-    IpcCoapRequestContext * requestContext = (IpcCoapRequestContext * )ctxt;
+    IpcCoapRequestContext * requestContext = (IpcCoapRequestContext *)ctxt;
     free(requestContext->Request);
     Tree_Delete(requestContext->ResponseContentNode);
     free(requestContext);
@@ -1229,7 +1229,7 @@ static int xmlif_DecodeValueNode(TreeNode source, Lwm2mTreeNode * destination, R
     const char * data;
     int dataLength;
     char * dataValue = NULL;
-    if ((data = (char*)TreeNode_GetValue(source)) == NULL)
+    if ((data = (char *)TreeNode_GetValue(source)) == NULL)
     {
         Lwm2m_Error("Missing value data for resource\n");
         result = AwaResult_BadRequest;
@@ -1477,7 +1477,7 @@ error:
 
 static int xmlif_HandlerWriteRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mContextType * context = (Lwm2mContextType * )request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = NULL;
     IpcCoapRequestContext * requestContext;
     Lwm2mClientType * client;
@@ -1823,9 +1823,9 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
         TreeNode valueNode = Xml_Find(attributeNode, "Value");
         TreeNode valueTypeNode = Xml_Find(attributeNode, "ValueType");
 
-        const char * linkString = (char*)TreeNode_GetValue(linkNode);
-        const char * encodedValueString = (char*)TreeNode_GetValue(valueNode);
-        const char * valueTypeString = (char*)TreeNode_GetValue(valueTypeNode);
+        const char * linkString = (char *)TreeNode_GetValue(linkNode);
+        const char * encodedValueString = (char *)TreeNode_GetValue(valueNode);
+        const char * valueTypeString = (char *)TreeNode_GetValue(valueTypeNode);
         AwaResourceType valueType = Lwm2mCore_ResourceTypeFromString(valueTypeString);
 
         if (linkString != NULL)
@@ -1847,7 +1847,7 @@ static bool xmlif_HandlerSendCoapWriteAttributesRequest(IpcCoapRequestContext * 
                 int dataLength = 0;
                 char * dataValue = NULL;
 
-                if ((encodedValueString = (char*)TreeNode_GetValue(valueNode)) == NULL)
+                if ((encodedValueString = (char *)TreeNode_GetValue(valueNode)) == NULL)
                 {
                     Lwm2m_Error("Missing value data for value node\n");
                     requestContext->Result = AwaResult_BadRequest;
@@ -1962,7 +1962,7 @@ static bool xmlif_HandlerSendCoapExecuteRequest(IpcCoapRequestContext * requestC
         {
             const char * data;
 
-            if ((data = (char*)TreeNode_GetValue(valueNode)) == NULL)
+            if ((data = (char *)TreeNode_GetValue(valueNode)) == NULL)
             {
                 Lwm2m_Error("Missing value data for value node\n");
                 requestContext->Result = AwaResult_BadRequest;

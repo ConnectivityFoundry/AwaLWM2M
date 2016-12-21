@@ -337,9 +337,9 @@ gengetopt_strdup (const char *s)
   if (!s)
     return result;
 
-  result = (char*)malloc(strlen(s) + 1);
-  if (result == (char*)0)
-    return (char*)0;
+  result = (char *)malloc(strlen(s) + 1);
+  if (result == (char *)0)
+    return (char *)0;
   strcpy(result, s);
   return result;
 }
@@ -1068,7 +1068,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     break;
-  };
+  }
 
   /* check numeric conversion */
   switch(arg_type) {
@@ -1080,7 +1080,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     ;
-  };
+  }
 
   /* store the original value */
   switch(arg_type) {
@@ -1095,7 +1095,7 @@ int update_arg(void *field, char **orig_field,
         *orig_field = gengetopt_strdup (value);
       }
     }
-  };
+  }
 
   return 0; /* OK */
 }
@@ -1191,11 +1191,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->clientIpcPort_arg),
-               &(args_info->clientIpcPort_orig), &(args_info->clientIpcPort_given),
-              &(local_args_info.clientIpcPort_given), optarg, 0, 0, ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "clientIpcPort", 'c',
-              additional_error))
+                         &(args_info->clientIpcPort_orig), &(args_info->clientIpcPort_given),
+                         &(local_args_info.clientIpcPort_given), optarg, 0, 0, ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "clientIpcPort", 'c',
+                         additional_error))
             goto failure;
 
           break;
@@ -1203,11 +1203,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->serverIpcPort_arg),
-               &(args_info->serverIpcPort_orig), &(args_info->serverIpcPort_given),
-              &(local_args_info.serverIpcPort_given), optarg, 0, 0, ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "serverIpcPort", 's',
-              additional_error))
+                         &(args_info->serverIpcPort_orig), &(args_info->serverIpcPort_given),
+                         &(local_args_info.serverIpcPort_given), optarg, 0, 0, ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "serverIpcPort", 's',
+                         additional_error))
             goto failure;
 
           break;
@@ -1219,11 +1219,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->clientLocalCoapPort_arg),
-                 &(args_info->clientLocalCoapPort_orig), &(args_info->clientLocalCoapPort_given),
-                &(local_args_info.clientLocalCoapPort_given), optarg, 0, 0, ARG_INT,
-                check_ambiguity, override, 0, 0,
-                "clientLocalCoapPort", '-',
-                additional_error))
+                           &(args_info->clientLocalCoapPort_orig), &(args_info->clientLocalCoapPort_given),
+                           &(local_args_info.clientLocalCoapPort_given), optarg, 0, 0, ARG_INT,
+                           check_ambiguity, override, 0, 0,
+                           "clientLocalCoapPort", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1233,11 +1233,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->serverCoapPort_arg),
-                 &(args_info->serverCoapPort_orig), &(args_info->serverCoapPort_given),
-                &(local_args_info.serverCoapPort_given), optarg, 0, 0, ARG_INT,
-                check_ambiguity, override, 0, 0,
-                "serverCoapPort", '-',
-                additional_error))
+                           &(args_info->serverCoapPort_orig), &(args_info->serverCoapPort_given),
+                           &(local_args_info.serverCoapPort_given), optarg, 0, 0, ARG_INT,
+                           check_ambiguity, override, 0, 0,
+                           "serverCoapPort", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1247,11 +1247,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->bootstrapServerCoapPort_arg),
-                 &(args_info->bootstrapServerCoapPort_orig), &(args_info->bootstrapServerCoapPort_given),
-                &(local_args_info.bootstrapServerCoapPort_given), optarg, 0, 0, ARG_INT,
-                check_ambiguity, override, 0, 0,
-                "bootstrapServerCoapPort", '-',
-                additional_error))
+                           &(args_info->bootstrapServerCoapPort_orig), &(args_info->bootstrapServerCoapPort_given),
+                           &(local_args_info.bootstrapServerCoapPort_given), optarg, 0, 0, ARG_INT,
+                           check_ambiguity, override, 0, 0,
+                           "bootstrapServerCoapPort", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1261,11 +1261,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->logLevel_arg),
-                 &(args_info->logLevel_orig), &(args_info->logLevel_given),
-                &(local_args_info.logLevel_given), optarg, 0, 0, ARG_INT,
-                check_ambiguity, override, 0, 0,
-                "logLevel", '-',
-                additional_error))
+                           &(args_info->logLevel_orig), &(args_info->logLevel_given),
+                           &(local_args_info.logLevel_given), optarg, 0, 0, ARG_INT,
+                           check_ambiguity, override, 0, 0,
+                           "logLevel", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1275,11 +1275,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->coapClientPath_arg),
-                 &(args_info->coapClientPath_orig), &(args_info->coapClientPath_given),
-                &(local_args_info.coapClientPath_given), optarg, 0, "lib/libcoap/examples/coap-client", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "coapClientPath", '-',
-                additional_error))
+                           &(args_info->coapClientPath_orig), &(args_info->coapClientPath_given),
+                           &(local_args_info.coapClientPath_given), optarg, 0, "lib/libcoap/examples/coap-client", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "coapClientPath", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1289,11 +1289,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->clientDaemonPath_arg),
-                 &(args_info->clientDaemonPath_orig), &(args_info->clientDaemonPath_given),
-                &(local_args_info.clientDaemonPath_given), optarg, 0, "daemon/src/client/awa_clientd", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "clientDaemonPath", '-',
-                additional_error))
+                           &(args_info->clientDaemonPath_orig), &(args_info->clientDaemonPath_given),
+                           &(local_args_info.clientDaemonPath_given), optarg, 0, "daemon/src/client/awa_clientd", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "clientDaemonPath", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1303,11 +1303,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->serverDaemonPath_arg),
-                 &(args_info->serverDaemonPath_orig), &(args_info->serverDaemonPath_given),
-                &(local_args_info.serverDaemonPath_given), optarg, 0, "daemon/src/server/awa_serverd", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "serverDaemonPath", '-',
-                additional_error))
+                           &(args_info->serverDaemonPath_orig), &(args_info->serverDaemonPath_given),
+                           &(local_args_info.serverDaemonPath_given), optarg, 0, "daemon/src/server/awa_serverd", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "serverDaemonPath", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1317,11 +1317,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->bootstrapDaemonPath_arg),
-                 &(args_info->bootstrapDaemonPath_orig), &(args_info->bootstrapDaemonPath_given),
-                &(local_args_info.bootstrapDaemonPath_given), optarg, 0, "daemon/src/bootstrap/awa_bootstrapd", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "bootstrapDaemonPath", '-',
-                additional_error))
+                           &(args_info->bootstrapDaemonPath_orig), &(args_info->bootstrapDaemonPath_given),
+                           &(local_args_info.bootstrapDaemonPath_given), optarg, 0, "daemon/src/bootstrap/awa_bootstrapd", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "bootstrapDaemonPath", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1331,11 +1331,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->bootstrapConfig_arg),
-                 &(args_info->bootstrapConfig_orig), &(args_info->bootstrapConfig_given),
-                &(local_args_info.bootstrapConfig_given), optarg, 0, "../api/tests/gtest.bsc", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "bootstrapConfig", '-',
-                additional_error))
+                           &(args_info->bootstrapConfig_orig), &(args_info->bootstrapConfig_given),
+                           &(local_args_info.bootstrapConfig_given), optarg, 0, "../api/tests/gtest.bsc", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "bootstrapConfig", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1345,11 +1345,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->objectDefinitions_arg),
-                 &(args_info->objectDefinitions_orig), &(args_info->objectDefinitions_given),
-                &(local_args_info.objectDefinitions_given), optarg, 0, "../api/tests/object-defs-gtest.xml", ARG_STRING,
-                check_ambiguity, override, 0, 0,
-                "objectDefinitions", '-',
-                additional_error))
+                           &(args_info->objectDefinitions_orig), &(args_info->objectDefinitions_given),
+                           &(local_args_info.objectDefinitions_given), optarg, 0, "../api/tests/object-defs-gtest.xml", ARG_STRING,
+                           check_ambiguity, override, 0, 0,
+                           "objectDefinitions", '-',
+                           additional_error))
               goto failure;
 
           }
@@ -1359,11 +1359,11 @@ cmdline_parser_internal (
 
 
             if (update_arg( (void *)&(args_info->defaultTimeout_arg),
-                 &(args_info->defaultTimeout_orig), &(args_info->defaultTimeout_given),
-                &(local_args_info.defaultTimeout_given), optarg, 0, 0, ARG_INT,
-                check_ambiguity, override, 0, 0,
-                "defaultTimeout", '-',
-                additional_error))
+                           &(args_info->defaultTimeout_orig), &(args_info->defaultTimeout_given),
+                           &(local_args_info.defaultTimeout_given), optarg, 0, 0, ARG_INT,
+                           check_ambiguity, override, 0, 0,
+                           "defaultTimeout", '-',
+                           additional_error))
               goto failure;
 
           }

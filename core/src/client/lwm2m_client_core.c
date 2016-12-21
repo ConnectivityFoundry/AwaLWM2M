@@ -254,8 +254,11 @@ static void Lwm2mCore_ResourceCreated(Lwm2mContextType * context, ObjectIDType o
 static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
         ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
-    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *) (context))->Store, objectID, objectInstanceID, resourceID,
-            resourceInstanceID, buffer, bufferLen);
+    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *) (context))->Store,
+                                                objectID, objectInstanceID,
+                                                resourceID,
+                                                resourceInstanceID, buffer,
+                                                bufferLen);
 }
 
 // This function is called when a write is performed for a resource that uses the "default" write handler. It is responsible
@@ -264,8 +267,12 @@ static int ObjectStoreReadHandler(void * context, ObjectIDType objectID, ObjectI
 static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
         ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
-    return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *) (context))->Store, objectID, objectInstanceID, resourceID,
-            resourceInstanceID, srcBufferLen, srcBuffer, 0, srcBufferLen, changed);
+    return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *) (context))->Store,
+                                                objectID, objectInstanceID,
+                                                resourceID,
+                                                resourceInstanceID,
+                                                srcBufferLen, srcBuffer, 0,
+                                                srcBufferLen, changed);
 }
 
 // This function is called when a delete is performed for an object/object instance that uses the "default" handler.
@@ -273,7 +280,9 @@ static int ObjectStoreWriteHandler(void * context, ObjectIDType objectID, Object
 static int ObjectStoreDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
         ResourceInstanceIDType resourceInstanceID)
 {
-    return ObjectStore_Delete(((Lwm2mContextType *) (context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID);
+    return ObjectStore_Delete(((Lwm2mContextType *) (context))->Store,
+                              objectID, objectInstanceID, resourceID,
+                              resourceInstanceID);
 }
 
 // This function is called when a create instance is performed for an object that uses the "default" handler.
@@ -1112,7 +1121,8 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
             if (definition->Handler != NULL )
             {
                 lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Write, objectID, objectInstanceID,
-                        resourceID, resourceInstanceID, (void **) &value, &valueSize, &changed);
+                        resourceID, resourceInstanceID, (void **) &value,
+                        &valueSize, &changed);
 
                 if (lwm2mResult == AwaResult_SuccessChanged)
                 {
@@ -1136,8 +1146,8 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
         }
         else
         {
-            if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t*) value, valueSize,
-                    &changed) >= 0)
+            if (definition->Handlers.Write(context, objectID, objectInstanceID, resourceID, resourceInstanceID, (uint8_t *) value, valueSize,
+                                           &changed) >= 0)
             {
                 Lwm2mObjectTree_AddResourceInstance(&context->ObjectTree, objectID, objectInstanceID, resourceID, resourceInstanceID);
                 if (changed)
@@ -1175,7 +1185,8 @@ static int ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, Ob
                 if (definition->Handler != NULL )
                 {
                     AwaResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Execute, objectID,
-                            objectInstanceID, resourceID, resourceInstanceID, (void **) &value, &valueSize, NULL );
+                            objectInstanceID, resourceID, resourceInstanceID,
+                            (void **) &value, &valueSize, NULL );
 
                     if (lwm2mResult == AwaResult_Success)
                     {
@@ -1191,7 +1202,9 @@ static int ResourceExecute(Lwm2mContextType * context, ObjectIDType objectID, Ob
             }
             else
             {
-                result = definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID, (uint8_t*) value, valueSize);
+                result = definition->Handlers.Execute(context, objectID, objectInstanceID, resourceID,
+                                                      (uint8_t *) value,
+                                                      valueSize);
             }
         }
         else
@@ -1266,7 +1279,8 @@ int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
         if (definition->Handler != NULL )
         {
             AwaResult lwm2mResult = definition->Handler(Lwm2mCore_GetApplicationContext(context), AwaOperation_Read, objectID,
-                    objectInstanceID, resourceID, resourceInstanceID, (void **) value, valueBufferSize, NULL );
+                    objectInstanceID, resourceID, resourceInstanceID,
+                    (void **) value, valueBufferSize, NULL );
 
             if (lwm2mResult == AwaResult_SuccessContent)
             {
@@ -1369,7 +1383,7 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 static int HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength, ObjectIDType objectID,
         ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, AwaContentType contentType, void * ContextData)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*) ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int oir[3];
     ObjectInstanceResourceKey key =
     { objectID, objectInstanceID, resourceID };
@@ -2172,8 +2186,11 @@ static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * a
                 responseContentLen, responseCode);
 
     case COAP_OBSERVE_REQUEST:
-        return HandleObserveRequest(ctxt, addr, path, query, (char*) token, tokenLength, contentType, requestContent, requestContentLen,
-                responseContentType, responseContent, responseContentLen, responseCode);
+        return HandleObserveRequest(ctxt, addr, path, query, (char *) token,
+                                    tokenLength, contentType, requestContent,
+                                    requestContentLen,
+                                    responseContentType, responseContent,
+                                    responseContentLen, responseCode);
 
     case COAP_CANCEL_OBSERVE_REQUEST:
         return HandleCancelObserveRequest(ctxt, addr, path, query, contentType, requestContent, requestContentLen, responseContentType,
@@ -2189,7 +2206,7 @@ static int DeviceManagmentEndpointHandler(int type, void * ctxt, AddressType * a
 // This function is called by the CoAP library to handle any requests.
 static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * response)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*) request->ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *) request->ctxt;
 
     // Look up the supplied path to determine what type of resource endpoint we are handling here.
     // There is a bit of a catch 22 here, because we need to lookup the endpoint type to determine how to lookup the endpoint

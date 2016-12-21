@@ -332,16 +332,26 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->objectName_arg));
   free_string_field (&(args_info->objectName_orig));
   free_string_field (&(args_info->objectInstances_orig));
-  free_multiple_field (args_info->resourceID_given, (void *)(args_info->resourceID_arg), &(args_info->resourceID_orig));
+  free_multiple_field (args_info->resourceID_given,
+                       (void *)(args_info->resourceID_arg),
+                       &(args_info->resourceID_orig));
   args_info->resourceID_arg = 0;
   free_multiple_string_field (args_info->resourceName_given, &(args_info->resourceName_arg), &(args_info->resourceName_orig));
-  free_multiple_field (args_info->resourceType_given, (void *)(args_info->resourceType_arg), &(args_info->resourceType_orig));
+  free_multiple_field (args_info->resourceType_given,
+                       (void *)(args_info->resourceType_arg),
+                       &(args_info->resourceType_orig));
   args_info->resourceType_arg = 0;
-  free_multiple_field (args_info->resourceInstances_given, (void *)(args_info->resourceInstances_arg), &(args_info->resourceInstances_orig));
+  free_multiple_field (args_info->resourceInstances_given,
+                       (void *)(args_info->resourceInstances_arg),
+                       &(args_info->resourceInstances_orig));
   args_info->resourceInstances_arg = 0;
-  free_multiple_field (args_info->resourceRequired_given, (void *)(args_info->resourceRequired_arg), &(args_info->resourceRequired_orig));
+  free_multiple_field (args_info->resourceRequired_given,
+                       (void *)(args_info->resourceRequired_arg),
+                       &(args_info->resourceRequired_orig));
   args_info->resourceRequired_arg = 0;
-  free_multiple_field (args_info->resourceOperations_given, (void *)(args_info->resourceOperations_arg), &(args_info->resourceOperations_orig));
+  free_multiple_field (args_info->resourceOperations_given,
+                       (void *)(args_info->resourceOperations_arg),
+                       &(args_info->resourceOperations_orig));
   args_info->resourceOperations_arg = 0;
 
 
@@ -495,9 +505,9 @@ gengetopt_strdup (const char *s)
   if (!s)
     return result;
 
-  result = (char*)malloc(strlen(s) + 1);
-  if (result == (char*)0)
-    return (char*)0;
+  result = (char *)malloc(strlen(s) + 1);
+  if (result == (char *)0)
+    return (char *)0;
   strcpy(result, s);
   return result;
 }
@@ -1430,7 +1440,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     break;
-  };
+  }
 
   /* check numeric conversion */
   switch(arg_type) {
@@ -1442,7 +1452,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     ;
-  };
+  }
 
   /* store the original value */
   switch(arg_type) {
@@ -1458,7 +1468,7 @@ int update_arg(void *field, char **orig_field,
         *orig_field = gengetopt_strdup (value);
       }
     }
-  };
+  }
 
   return 0; /* OK */
 }
@@ -1491,8 +1501,8 @@ int update_multiple_arg_temp(struct generic_list **list,
     {
       add_node (list);
       if (update_arg((void *)&((*list)->arg), &((*list)->orig), 0,
-          prev_given, multi_token, possible_values, default_value,
-          arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
+                     prev_given, multi_token, possible_values, default_value,
+                     arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
         free(multi_token);
         return 1; /* failure */
       }
@@ -1547,12 +1557,14 @@ void update_multiple_arg(void *field, char ***orig_field,
     switch(arg_type) {
     case ARG_INT:
     case ARG_ENUM:
-      *((int **)field) = (int *)realloc (*((int **)field), (field_given + prev_given) * sizeof (int)); break;
+      *((int **)field) = (int *)realloc (*((int **)field),
+                                         (field_given + prev_given) * sizeof (int)); break;
     case ARG_STRING:
-      *((char ***)field) = (char **)realloc (*((char ***)field), (field_given + prev_given) * sizeof (char *)); break;
+      *((char ***)field) = (char **)realloc (*((char ***)field),
+                                             (field_given + prev_given) * sizeof (char *)); break;
     default:
       break;
-    };
+    }
 
     for (i = (prev_given - 1); i >= 0; --i)
       {
@@ -1719,9 +1731,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
-              &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "verbose", 'v',
-              additional_error))
+                         &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "verbose", 'v',
+                         additional_error))
             goto failure;
 
           break;
@@ -1729,9 +1741,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->debug_flag), 0, &(args_info->debug_given),
-              &(local_args_info.debug_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "debug", 'd',
-              additional_error))
+                         &(local_args_info.debug_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "debug", 'd',
+                         additional_error))
             goto failure;
 
           break;
@@ -1739,11 +1751,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ipcAddress_arg),
-               &(args_info->ipcAddress_orig), &(args_info->ipcAddress_given),
-              &(local_args_info.ipcAddress_given), optarg, 0, "127.0.0.1", ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "ipcAddress", 'a',
-              additional_error))
+                         &(args_info->ipcAddress_orig), &(args_info->ipcAddress_given),
+                         &(local_args_info.ipcAddress_given), optarg, 0, "127.0.0.1", ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "ipcAddress", 'a',
+                         additional_error))
             goto failure;
 
           break;
@@ -1751,11 +1763,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ipcPort_arg),
-               &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
-              &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "ipcPort", 'p',
-              additional_error))
+                         &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
+                         &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "ipcPort", 'p',
+                         additional_error))
             goto failure;
 
           break;
@@ -1764,11 +1776,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->xmlFile_arg),
-               &(args_info->xmlFile_orig), &(args_info->xmlFile_given),
-              &(local_args_info.xmlFile_given), optarg, 0, 0, ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "xmlFile", 'x',
-              additional_error))
+                         &(args_info->xmlFile_orig), &(args_info->xmlFile_given),
+                         &(local_args_info.xmlFile_given), optarg, 0, 0, ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "xmlFile", 'x',
+                         additional_error))
             goto failure;
 
           break;
@@ -1777,11 +1789,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->objectID_arg),
-               &(args_info->objectID_orig), &(args_info->objectID_given),
-              &(local_args_info.objectID_given), optarg, 0, 0, ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "objectID", 'o',
-              additional_error))
+                         &(args_info->objectID_orig), &(args_info->objectID_given),
+                         &(local_args_info.objectID_given), optarg, 0, 0, ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "objectID", 'o',
+                         additional_error))
             goto failure;
 
           break;
@@ -1790,11 +1802,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->objectName_arg),
-               &(args_info->objectName_orig), &(args_info->objectName_given),
-              &(local_args_info.objectName_given), optarg, 0, 0, ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "objectName", 'j',
-              additional_error))
+                         &(args_info->objectName_orig), &(args_info->objectName_given),
+                         &(local_args_info.objectName_given), optarg, 0, 0, ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "objectName", 'j',
+                         additional_error))
             goto failure;
 
           break;
@@ -1803,9 +1815,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->objectMandatory_flag), 0, &(args_info->objectMandatory_given),
-              &(local_args_info.objectMandatory_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "objectMandatory", 'm',
-              additional_error))
+                         &(local_args_info.objectMandatory_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "objectMandatory", 'm',
+                         additional_error))
             goto failure;
 
           break;
@@ -1814,11 +1826,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->objectInstances_arg),
-               &(args_info->objectInstances_orig), &(args_info->objectInstances_given),
-              &(local_args_info.objectInstances_given), optarg, cmdline_parser_objectInstances_values, "single", ARG_ENUM,
-              check_ambiguity, override, 0, 0,
-              "objectInstances", 'y',
-              additional_error))
+                         &(args_info->objectInstances_orig), &(args_info->objectInstances_given),
+                         &(local_args_info.objectInstances_given), optarg, cmdline_parser_objectInstances_values, "single", ARG_ENUM,
+                         check_ambiguity, override, 0, 0,
+                         "objectInstances", 'y',
+                         additional_error))
             goto failure;
 
           break;
@@ -1896,29 +1908,35 @@ cmdline_parser_internal (
 
 
   update_multiple_arg((void *)&(args_info->resourceID_arg),
-    &(args_info->resourceID_orig), args_info->resourceID_given,
-    local_args_info.resourceID_given, 0,
-    ARG_INT, resourceID_list);
+                      &(args_info->resourceID_orig),
+                      args_info->resourceID_given,
+                      local_args_info.resourceID_given, 0,
+                      ARG_INT, resourceID_list);
   update_multiple_arg((void *)&(args_info->resourceName_arg),
-    &(args_info->resourceName_orig), args_info->resourceName_given,
-    local_args_info.resourceName_given, 0,
-    ARG_STRING, resourceName_list);
+                      &(args_info->resourceName_orig),
+                      args_info->resourceName_given,
+                      local_args_info.resourceName_given, 0,
+                      ARG_STRING, resourceName_list);
   update_multiple_arg((void *)&(args_info->resourceType_arg),
-    &(args_info->resourceType_orig), args_info->resourceType_given,
-    local_args_info.resourceType_given, 0,
-    ARG_ENUM, resourceType_list);
+                      &(args_info->resourceType_orig),
+                      args_info->resourceType_given,
+                      local_args_info.resourceType_given, 0,
+                      ARG_ENUM, resourceType_list);
   update_multiple_arg((void *)&(args_info->resourceInstances_arg),
-    &(args_info->resourceInstances_orig), args_info->resourceInstances_given,
-    local_args_info.resourceInstances_given, 0,
-    ARG_ENUM, resourceInstances_list);
+                      &(args_info->resourceInstances_orig),
+                      args_info->resourceInstances_given,
+                      local_args_info.resourceInstances_given, 0,
+                      ARG_ENUM, resourceInstances_list);
   update_multiple_arg((void *)&(args_info->resourceRequired_arg),
-    &(args_info->resourceRequired_orig), args_info->resourceRequired_given,
-    local_args_info.resourceRequired_given, 0,
-    ARG_ENUM, resourceRequired_list);
+                      &(args_info->resourceRequired_orig),
+                      args_info->resourceRequired_given,
+                      local_args_info.resourceRequired_given, 0,
+                      ARG_ENUM, resourceRequired_list);
   update_multiple_arg((void *)&(args_info->resourceOperations_arg),
-    &(args_info->resourceOperations_orig), args_info->resourceOperations_given,
-    local_args_info.resourceOperations_given, 0,
-    ARG_ENUM, resourceOperations_list);
+                      &(args_info->resourceOperations_orig),
+                      args_info->resourceOperations_given,
+                      local_args_info.resourceOperations_given, 0,
+                      ARG_ENUM, resourceOperations_list);
 
   args_info->resourceID_given += local_args_info.resourceID_given;
   local_args_info.resourceID_given = 0;

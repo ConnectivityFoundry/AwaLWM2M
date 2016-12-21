@@ -430,9 +430,9 @@ gengetopt_strdup (const char *s)
   if (!s)
     return result;
 
-  result = (char*)malloc(strlen(s) + 1);
-  if (result == (char*)0)
-    return (char*)0;
+  result = (char *)malloc(strlen(s) + 1);
+  if (result == (char *)0)
+    return (char *)0;
   strcpy(result, s);
   return result;
 }
@@ -1335,7 +1335,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     break;
-  };
+  }
 
   /* check numeric conversion */
   switch(arg_type) {
@@ -1347,7 +1347,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     ;
-  };
+  }
 
   /* store the original value */
   switch(arg_type) {
@@ -1363,7 +1363,7 @@ int update_arg(void *field, char **orig_field,
         *orig_field = gengetopt_strdup (value);
       }
     }
-  };
+  }
 
   return 0; /* OK */
 }
@@ -1396,8 +1396,8 @@ int update_multiple_arg_temp(struct generic_list **list,
     {
       add_node (list);
       if (update_arg((void *)&((*list)->arg), &((*list)->orig), 0,
-          prev_given, multi_token, possible_values, default_value,
-          arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
+                     prev_given, multi_token, possible_values, default_value,
+                     arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
         free(multi_token);
         return 1; /* failure */
       }
@@ -1451,12 +1451,14 @@ void update_multiple_arg(void *field, char ***orig_field,
 
     switch(arg_type) {
     case ARG_INT:
-      *((int **)field) = (int *)realloc (*((int **)field), (field_given + prev_given) * sizeof (int)); break;
+      *((int **)field) = (int *)realloc (*((int **)field),
+                                         (field_given + prev_given) * sizeof (int)); break;
     case ARG_STRING:
-      *((char ***)field) = (char **)realloc (*((char ***)field), (field_given + prev_given) * sizeof (char *)); break;
+      *((char ***)field) = (char **)realloc (*((char ***)field),
+                                             (field_given + prev_given) * sizeof (char *)); break;
     default:
       break;
-    };
+    }
 
     for (i = (prev_given - 1); i >= 0; --i)
       {
@@ -1583,11 +1585,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ip_arg),
-               &(args_info->ip_orig), &(args_info->ip_given),
-              &(local_args_info.ip_given), optarg, 0, "0.0.0.0", ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "ip", 'a',
-              additional_error))
+                         &(args_info->ip_orig), &(args_info->ip_given),
+                         &(local_args_info.ip_given), optarg, 0, "0.0.0.0", ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "ip", 'a',
+                         additional_error))
             goto failure;
 
           break;
@@ -1595,11 +1597,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->interface_arg),
-               &(args_info->interface_orig), &(args_info->interface_given),
-              &(local_args_info.interface_given), optarg, 0, 0, ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "interface", 'e',
-              additional_error))
+                         &(args_info->interface_orig), &(args_info->interface_given),
+                         &(local_args_info.interface_given), optarg, 0, 0, ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "interface", 'e',
+                         additional_error))
             goto failure;
 
           break;
@@ -1607,11 +1609,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->addressFamily_arg),
-               &(args_info->addressFamily_orig), &(args_info->addressFamily_given),
-              &(local_args_info.addressFamily_given), optarg, cmdline_parser_addressFamily_values, "4", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "addressFamily", 'f',
-              additional_error))
+                         &(args_info->addressFamily_orig), &(args_info->addressFamily_given),
+                         &(local_args_info.addressFamily_given), optarg, cmdline_parser_addressFamily_values, "4", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "addressFamily", 'f',
+                         additional_error))
             goto failure;
 
           break;
@@ -1619,11 +1621,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->port_arg),
-               &(args_info->port_orig), &(args_info->port_given),
-              &(local_args_info.port_given), optarg, 0, "5683", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "port", 'p',
-              additional_error))
+                         &(args_info->port_orig), &(args_info->port_given),
+                         &(local_args_info.port_given), optarg, 0, "5683", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "port", 'p',
+                         additional_error))
             goto failure;
 
           break;
@@ -1631,11 +1633,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ipcPort_arg),
-               &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
-              &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "ipcPort", 'i',
-              additional_error))
+                         &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
+                         &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "ipcPort", 'i',
+                         additional_error))
             goto failure;
 
           break;
@@ -1643,11 +1645,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->contentType_arg),
-               &(args_info->contentType_orig), &(args_info->contentType_given),
-              &(local_args_info.contentType_given), optarg, cmdline_parser_contentType_values, "1542", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "contentType", 'm',
-              additional_error))
+                         &(args_info->contentType_orig), &(args_info->contentType_given),
+                         &(local_args_info.contentType_given), optarg, cmdline_parser_contentType_values, "1542", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "contentType", 'm',
+                         additional_error))
             goto failure;
 
           break;
@@ -1655,9 +1657,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->secure_flag), 0, &(args_info->secure_given),
-              &(local_args_info.secure_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "secure", 's',
-              additional_error))
+                         &(local_args_info.secure_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "secure", 's',
+                         additional_error))
             goto failure;
 
           break;
@@ -1674,9 +1676,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->daemonize_flag), 0, &(args_info->daemonize_given),
-              &(local_args_info.daemonize_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "daemonize", 'd',
-              additional_error))
+                         &(local_args_info.daemonize_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "daemonize", 'd',
+                         additional_error))
             goto failure;
 
           break;
@@ -1684,9 +1686,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
-              &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "verbose", 'v',
-              additional_error))
+                         &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "verbose", 'v',
+                         additional_error))
             goto failure;
 
           break;
@@ -1694,11 +1696,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->logFile_arg),
-               &(args_info->logFile_orig), &(args_info->logFile_given),
-              &(local_args_info.logFile_given), optarg, 0, 0, ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "logFile", 'l',
-              additional_error))
+                         &(args_info->logFile_orig), &(args_info->logFile_given),
+                         &(local_args_info.logFile_given), optarg, 0, 0, ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "logFile", 'l',
+                         additional_error))
             goto failure;
 
           break;
@@ -1706,9 +1708,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->version_flag), 0, &(args_info->version_given),
-              &(local_args_info.version_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "version", 'V',
-              additional_error))
+                         &(local_args_info.version_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "version", 'V',
+                         additional_error))
             goto failure;
 
           break;
@@ -1726,9 +1728,9 @@ cmdline_parser_internal (
 
 
   update_multiple_arg((void *)&(args_info->objDefs_arg),
-    &(args_info->objDefs_orig), args_info->objDefs_given,
-    local_args_info.objDefs_given, 0,
-    ARG_STRING, objDefs_list);
+                      &(args_info->objDefs_orig), args_info->objDefs_given,
+                      local_args_info.objDefs_given, 0,
+                      ARG_STRING, objDefs_list);
 
   args_info->objDefs_given += local_args_info.objDefs_given;
   local_args_info.objDefs_given = 0;

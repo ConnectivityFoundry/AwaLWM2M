@@ -70,7 +70,7 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
         return -1;
     }
 
-    uint8_t * value = (uint8_t * )Lwm2mTreeNode_GetValue(child, &resourceLength);
+    uint8_t * value = (uint8_t *)Lwm2mTreeNode_GetValue(child, &resourceLength);
 
     if (len < resourceLength)
     {
@@ -78,7 +78,7 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
         return -1;
     }
 
-    memcpy(buffer, (char*)value, resourceLength);
+    memcpy(buffer, (char *)value, resourceLength);
 
     return resourceLength;
 }
@@ -117,7 +117,8 @@ static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNod
     Lwm2mTreeNode_SetID(resourceValueNode, 0);
     Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
-    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&buffer[0], bufferLen);
+    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                    (const uint8_t *)&buffer[0], bufferLen);
 
     if (result >= 0)
     {

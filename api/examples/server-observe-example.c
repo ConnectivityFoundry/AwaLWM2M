@@ -53,7 +53,7 @@
  */
 static void observeCallback(const AwaChangeSet * changeSet, void * context)
 {
-    int * notificationCount = (int*)context;
+    int * notificationCount = (int *)context;
     printf("Callback received, notification count = %d\n", *notificationCount);
 
     const char * value;
@@ -81,7 +81,8 @@ int main(void)
      */
 
     /* Create a new observation to resource /3/0/15 */
-    AwaServerObservation * observation = AwaServerObservation_New(CLIENT_ID, "/3/0/15", observeCallback, (void*)&notificationCount);
+    AwaServerObservation * observation = AwaServerObservation_New(CLIENT_ID, "/3/0/15", observeCallback,
+                                                                  (void *)&notificationCount);
 
     /* Start listening to notifications */
     AwaServerObserveOperation * observeOperation = AwaServerObserveOperation_New(session);

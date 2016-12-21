@@ -44,25 +44,25 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
        return -1;
     }
 
-    char * buf = (char*)buffer;
+    char * buf = (char *)buffer;
     int valueLength = -1;
     uint16_t size;
     uint8_t * value;
 
-    value = (uint8_t * )Lwm2mTreeNode_GetValue(node, &size);
+    value = (uint8_t *)Lwm2mTreeNode_GetValue(node, &size);
 
     switch (definition->Type)
     {
         case AwaResourceType_String:
             if (len >= size)
             {
-                memcpy(buf, (char*)value, size);
+                memcpy(buf, (char *)value, size);
                 buf[size] = '\0';
                 valueLength = strlen(buf);
             }
             break;
         case AwaResourceType_Boolean:
-            sprintf(buf, "%s", *(bool*)value ? "1" : "0");
+            sprintf(buf, "%s", *(bool *)value ? "1" : "0");
             valueLength = strlen(buf);
             break;
         case AwaResourceType_Time:
@@ -90,10 +90,10 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             switch (size)
             {
             case sizeof(float):
-                sprintf(buf, "%f", *(float*)value);
+                sprintf(buf, "%f", *(float *)value);
                 break;
             case sizeof(double):
-                sprintf(buf, "%f", *(double*)value);
+                sprintf(buf, "%f", *(double *)value);
                 break;
             default:
                 Lwm2m_Error("ERROR: invalid length for float\n");
@@ -188,10 +188,12 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
         case AwaResourceType_Time:
             {
                 int64_t temp = 0;
-                result = sscanf((char*)buffer, "%" SCNu64, &temp);
+                result = sscanf((char *)buffer, "%" SCNu64, &temp);
                 if (result > 0)
                 {
-                    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&temp, sizeof(temp));
+                    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                    (const uint8_t *)&temp,
+                                                    sizeof(temp));
                 }
             }
             break;
@@ -213,21 +215,26 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
 
                     if (result == 0)
                     {
-                        result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&temp, sizeof(temp));
+                        result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                        (const uint8_t *)&temp,
+                                                        sizeof(temp));
                     }
                     else
                     {
-                        Lwm2m_Error("ERROR: %s is not a valid boolean value\n", (char*)buffer);
+                        Lwm2m_Error("ERROR: %s is not a valid boolean value\n",
+                                    (char *)buffer);
                     }
                 }
                 break;
         case AwaResourceType_Float:
             {
                 double temp = 0;
-                result = sscanf((char*)buffer, "%24lf", &temp);
+                result = sscanf((char *)buffer, "%24lf", &temp);
                 if (result > 0)
                 {
-                    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&temp, sizeof(temp));
+                    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                    (const uint8_t *)&temp,
+                                                    sizeof(temp));
                 }
             }
             break;
@@ -236,17 +243,21 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
             break;
         case AwaResourceType_String:
             {
-                const uint8_t * str = buffer != NULL ? buffer : (uint8_t*)"";
+                const uint8_t * str = buffer != NULL ? buffer : (uint8_t *)"";
                 result = Lwm2mTreeNode_SetValue(resourceValueNode, str, bufferLen);
             }
             break;
         case AwaResourceType_ObjectLink:
             {
                 AwaObjectLink objectLink;
-                result = sscanf((char*)buffer, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
+                result = sscanf((char *)buffer, "%10d:%10d",
+                                &objectLink.ObjectID,
+                                &objectLink.ObjectInstanceID);
                 if (result > 0)
                 {
-                    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&objectLink, sizeof(objectLink));
+                    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                    (const uint8_t *)&objectLink,
+                                                    sizeof(objectLink));
                 }
             }
             break;

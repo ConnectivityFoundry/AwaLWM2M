@@ -165,11 +165,11 @@ static const Session * AwaChangeSet_GetSession(const AwaChangeSet * changeSet, S
 }
 const AwaClientSession * AwaChangeSet_GetClientSession(const AwaChangeSet * changeSet)
 {
-    return (const AwaClientSession * )AwaChangeSet_GetSession(changeSet, SessionType_Client);
+    return (const AwaClientSession *)AwaChangeSet_GetSession(changeSet, SessionType_Client);
 }
 const AwaServerSession * AwaChangeSet_GetServerSession(const AwaChangeSet * changeSet)
 {
-    return (const AwaServerSession * )AwaChangeSet_GetSession(changeSet, SessionType_Server);
+    return (const AwaServerSession *)AwaChangeSet_GetSession(changeSet, SessionType_Server);
 }
 
 AwaChangeType AwaChangeSet_GetChangeType(const AwaChangeSet * changeSet, const char * path)
@@ -284,37 +284,57 @@ TreeNode ChangeSet_GetObjectsTree(const AwaChangeSet * changeSet)
 
 AwaError AwaChangeSet_GetValueAsCStringPointer(const AwaChangeSet * changeSet, const char * path, const char ** value)
 {
-    return ResponseCommon_GetValuePointerWithNull(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_String, -1);
+    return ResponseCommon_GetValuePointerWithNull(changeSet->ResponseCommon, path,
+                                                  (const void **)value, NULL,
+                                                  AwaResourceType_String, -1);
 }
 
 AwaError AwaChangeSet_GetValueAsIntegerPointer(const AwaChangeSet * changeSet, const char * path, const AwaInteger ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Integer, sizeof(AwaInteger));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_Integer,
+                                          sizeof(AwaInteger));
 }
 
 AwaError AwaChangeSet_GetValueAsFloatPointer(const AwaChangeSet * changeSet, const char * path, const AwaFloat ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Float, sizeof(AwaFloat));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_Float,
+                                          sizeof(AwaFloat));
 }
 
 AwaError AwaChangeSet_GetValueAsBooleanPointer(const AwaChangeSet * changeSet, const char * path, const AwaBoolean ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Boolean, sizeof(AwaBoolean));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_Boolean,
+                                          sizeof(AwaBoolean));
 }
 
 AwaError AwaChangeSet_GetValueAsTimePointer(const AwaChangeSet * changeSet, const char * path, const AwaTime ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Time, sizeof(AwaTime));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_Time,
+                                          sizeof(AwaTime));
 }
 
 AwaError AwaChangeSet_GetValueAsObjectLinkPointer(const AwaChangeSet * changeSet, const char * path, const AwaObjectLink ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_ObjectLink, sizeof(AwaObjectLink));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_ObjectLink,
+                                          sizeof(AwaObjectLink));
 }
 
 AwaError AwaChangeSet_GetValueAsOpaquePointer(const AwaChangeSet * changeSet, const char * path, const AwaOpaque ** value)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)value, NULL, AwaResourceType_Opaque, sizeof(AwaOpaque));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)value, NULL,
+                                          AwaResourceType_Opaque,
+                                          sizeof(AwaOpaque));
 }
 
 AwaError AwaChangeSet_GetValueAsOpaque(const AwaChangeSet * changeSet, const char * path, AwaOpaque * value)
@@ -329,36 +349,57 @@ AwaError AwaChangeSet_GetValueAsObjectLink(const AwaChangeSet * changeSet, const
 
 AwaError AwaChangeSet_GetValuesAsStringArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaStringArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_StringArray, sizeof(AwaStringArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_StringArray,
+                                          sizeof(AwaStringArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsIntegerArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaIntegerArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_IntegerArray, sizeof(AwaIntegerArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_IntegerArray,
+                                          sizeof(AwaIntegerArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsFloatArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaFloatArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_FloatArray, sizeof(AwaFloatArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_FloatArray,
+                                          sizeof(AwaFloatArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsBooleanArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaBooleanArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_BooleanArray, sizeof(AwaBooleanArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_BooleanArray,
+                                          sizeof(AwaBooleanArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsTimeArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaTimeArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_TimeArray, sizeof(AwaTimeArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_TimeArray,
+                                          sizeof(AwaTimeArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsOpaqueArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaOpaqueArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_OpaqueArray, sizeof(AwaOpaqueArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_OpaqueArray,
+                                          sizeof(AwaOpaqueArray *));
 }
 
 AwaError AwaChangeSet_GetValuesAsObjectLinkArrayPointer(const AwaChangeSet * changeSet, const char * path, const AwaObjectLinkArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path, (const void **)valueArray, NULL, AwaResourceType_ObjectLinkArray, sizeof(AwaObjectLinkArray *));
+    return ResponseCommon_GetValuePointer(changeSet->ResponseCommon, path,
+                                          (const void **)valueArray, NULL,
+                                          AwaResourceType_ObjectLinkArray,
+                                          sizeof(AwaObjectLinkArray *));
 }
 

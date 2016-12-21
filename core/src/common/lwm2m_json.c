@@ -144,7 +144,7 @@ static int JsonEncodeOpaque(char * buffer, int bufferLen, char * id, char * valu
     }
 
     outLength = (((len + 2) * 4) / 3);
-    buf = (char * )malloc(outLength);
+    buf = (char *)malloc(outLength);
     if (buf == NULL)
     {
         return 0;
@@ -267,30 +267,36 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
        return -1;
     }
 
-    value = (uint8_t * )Lwm2mTreeNode_GetValue(node, &size);
+    value = (uint8_t *)Lwm2mTreeNode_GetValue(node, &size);
     switch (definition->Type)
     {
         case AwaResourceType_String:
-            valueLength = JsonEncodeString((char *)buffer, len, id, (char *)value, size, last);
+            valueLength = JsonEncodeString((char *)buffer, len, id,
+                                           (char *)value, size, last);
             break;
         case AwaResourceType_Boolean:
-            valueLength = JsonEncodeBoolean((char *)buffer, len, id, *(bool*)value, last);
+            valueLength = JsonEncodeBoolean((char *)buffer, len, id,
+                                            *(bool *)value, last);
             break;
         case AwaResourceType_Time:  // no break
         case AwaResourceType_Integer:
             switch (size)
             {
                case sizeof(int8_t):
-                   valueLength = JsonEncodeInteger((char *)buffer, len, id, ptrToInt8(value), last);
+                   valueLength = JsonEncodeInteger((char *)buffer, len, id,
+                                                   ptrToInt8(value), last);
                    break;
                case sizeof(int16_t):
-                   valueLength = JsonEncodeInteger((char *)buffer, len, id, ptrToInt16(value), last);
+                   valueLength = JsonEncodeInteger((char *)buffer, len, id,
+                                                   ptrToInt16(value), last);
                    break;
                case sizeof(int32_t):
-                   valueLength = JsonEncodeInteger((char *)buffer, len, id, ptrToInt32(value), last);
+                   valueLength = JsonEncodeInteger((char *)buffer, len, id,
+                                                   ptrToInt32(value), last);
                    break;
                case sizeof(int64_t):
-                   valueLength = JsonEncodeInteger((char *)buffer, len, id, ptrToInt64(value), last);
+                   valueLength = JsonEncodeInteger((char *)buffer, len, id,
+                                                   ptrToInt64(value), last);
                    break;
                default:
                    break;
@@ -300,10 +306,12 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
             switch (size)
             {
                 case sizeof(float):
-                    valueLength = JsonEncodeFloat((char *)buffer, len, id, *(float*)value, last);
+                    valueLength = JsonEncodeFloat((char *)buffer, len, id,
+                                                  *(float *)value, last);
                     break;
                 case sizeof(double):
-                    valueLength = JsonEncodeFloat((char *)buffer, len, id, *(double*)value, last);
+                    valueLength = JsonEncodeFloat((char *)buffer, len, id,
+                                                  *(double *)value, last);
                     break;
                 default:
                     Lwm2m_Error("ERROR: JSON - invalid length for float\n");
@@ -311,12 +319,16 @@ static int JsonSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinitio
             }
             break;
         case AwaResourceType_Opaque:
-            valueLength = JsonEncodeOpaque((char *)buffer, len, id, (char *)value, size, last);
+            valueLength = JsonEncodeOpaque((char *)buffer, len, id,
+                                           (char *)value, size, last);
             break;
         case AwaResourceType_ObjectLink:
            {
                AwaObjectLink * objectLink = (AwaObjectLink *) value;
-               valueLength = JsonEncodeObjectLink((char *)buffer, len, id, objectLink->ObjectID, objectLink->ObjectInstanceID, last);
+               valueLength = JsonEncodeObjectLink((char *)buffer, len, id,
+                                                  objectLink->ObjectID,
+                                                  objectLink->ObjectInstanceID,
+                                                  last);
                break;
            }
         default:
@@ -400,7 +412,8 @@ static int JsonSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * 
 
     if (context->uriLevel == RESOURCE_URI)
     {
-        resourceLength += JsonEndElement((char *)&buffer[resourceLength], len - resourceLength);
+        resourceLength += JsonEndElement((char *)&buffer[resourceLength],
+                                         len - resourceLength);
         JsonDestroySerdesContext(serdesContext);
     }
 
@@ -447,7 +460,8 @@ static int JsonSerialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTreeN
 
     if (context->uriLevel == INSTANCE_URI)
     {
-        instanceLength += JsonEndElement((char *)&buffer[instanceLength], len - instanceLength);
+        instanceLength += JsonEndElement((char *)&buffer[instanceLength],
+                                         len - instanceLength);
         JsonDestroySerdesContext(serdesContext);
     }
 
@@ -789,7 +803,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         {
                             // adjust time based on the basetime.
                             temp -= basetime;
-                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&temp, sizeof(temp));
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                            (const uint8_t *)&temp,
+                                                            sizeof(temp));
                         }
                     }
                     else
@@ -814,7 +830,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         result = sscanf((char *)value, "%24lf", &temp);
                         if (result > 0)
                         {
-                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&temp, sizeof(temp));
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                            (const uint8_t *)&temp,
+                                                            sizeof(temp));
                         }
                     }
                     else
@@ -823,7 +841,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         result = sscanf((char *)value, "%24" SCNu64, &temp);
                         if (result > 0)
                         {
-                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&temp, sizeof(temp));
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                            (const uint8_t *)&temp,
+                                                            sizeof(temp));
                         }
                     }
                     break;
@@ -832,7 +852,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                     if (jsonDataType == JSON_TYPE_BOOLEAN)
                     {
                         int64_t temp = (strcmp(value, "true")) ? 1: 0;
-                        result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&temp, sizeof(temp));
+                        result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                        (const uint8_t *)&temp,
+                                                        sizeof(temp));
                     }
                     else
                     {
@@ -859,7 +881,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         int decodedLength = b64Decode(decodedValue, outLength, value, strlen(value));
                         if (decodedLength >= 0)
                         {
-                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)decodedValue, decodedLength);
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                            (const uint8_t *)decodedValue,
+                                                            decodedLength);
                         }
                         else
                         {
@@ -876,7 +900,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         return -1;
                     }
 
-                    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&value[0], strlen(value) + 1);
+                    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                    (const uint8_t *)&value[0],
+                                                    strlen(value) + 1);
                     break;
 
                 case AwaResourceType_ObjectLink:
@@ -891,7 +917,9 @@ static int JsonDeserialise(Lwm2mTreeNode ** dest, const DefinitionRegistry * reg
                         result = sscanf(value, "%10d:%10d", &objectLink.ObjectID, &objectLink.ObjectInstanceID);
                         if (result > 0)
                         {
-                            result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t *)&objectLink, sizeof(objectLink));
+                            result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                                            (const uint8_t *)&objectLink,
+                                                            sizeof(objectLink));
                         }
                     }
                     break;

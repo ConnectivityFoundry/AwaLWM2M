@@ -41,7 +41,8 @@ void AwaIntegerArray_Free(AwaIntegerArray ** array)
 
 void AwaIntegerArray_SetValue(AwaIntegerArray * array, AwaArrayIndex index, AwaInteger value)
 {
-    Array_SetValue((AwaArray *)array, index, (void *)&value, sizeof(AwaInteger));
+    Array_SetValue((AwaArray *)array, index, (void *)&value,
+                   sizeof(AwaInteger));
 }
 
 void AwaIntegerArray_DeleteValue(AwaIntegerArray * array, AwaArrayIndex index)
@@ -54,7 +55,7 @@ AwaInteger AwaIntegerArray_GetValue(const AwaIntegerArray * array, AwaArrayIndex
     AwaInteger value = 0;
     AwaInteger * valuePtr = NULL;
 
-    valuePtr = Array_GetValue((const AwaArray*)array, index);
+    valuePtr = Array_GetValue((const AwaArray *)array, index);
 
     if (valuePtr != NULL)
     {

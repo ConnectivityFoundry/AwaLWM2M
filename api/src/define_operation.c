@@ -175,7 +175,9 @@ static TreeNode DefineOperation_ConstructObjectDefinitionNode(const DefinitionRe
 
                 if (defaultValue != NULL)
                 {
-                    char * value = xmlif_EncodeValue(resFormat->Type, (const char *)defaultValue, defaultValueLength);
+                    char * value = xmlif_EncodeValue(resFormat->Type,
+                                                     (const char *)defaultValue,
+                                                     defaultValueLength);
                     TreeNode_AddChild(property, Xml_CreateNodeWithValue("DefaultValue", value));
                     Awa_MemSafeFree(value);
                 }
@@ -204,7 +206,9 @@ static TreeNode DefineOperation_ConstructObjectDefinitionNode(const DefinitionRe
                     TreeNode_AddChild(resourceInstanceNode, Xml_CreateNodeWithValue("ID", "%d", resourceInstanceID));
                     if (defaultValue != NULL)
                     {
-                        char * value = xmlif_EncodeValue(resFormat->Type, (const char *)defaultValue, defaultValueLength);
+                        char * value = xmlif_EncodeValue(resFormat->Type,
+                                                         (const char *)defaultValue,
+                                                         defaultValueLength);
                         TreeNode_AddChild(resourceInstanceNode, Xml_CreateNodeWithValue("Value", value));
                         Awa_MemSafeFree(value);
                     }

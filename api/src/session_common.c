@@ -304,7 +304,10 @@ static bool SessionCommon_RegisterObjectFromXML(DefinitionRegistry * definitions
 
                 if (value)
                 {
-                    defaultValueLength = xmlif_DecodeValue((char **)&defaultValue, dataType, (const char *)value, strlen((const char *)value));
+                    defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                           dataType,
+                                                           (const char *)value,
+                                                           strlen((const char *)value));
                 }
 
                 Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
@@ -336,7 +339,10 @@ static bool SessionCommon_RegisterObjectFromXML(DefinitionRegistry * definitions
                         const uint8_t * defaultValue = NULL;
                         uint16_t defaultValueLength = 0;
 
-                        defaultValueLength = xmlif_DecodeValue((char **)&defaultValue, dataType, (const char *)value, strlen((const char *)value));
+                        defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                               dataType,
+                                                               (const char *)value,
+                                                               strlen((const char *)value));
 
                         Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
                         Lwm2mTreeNode_AddChild(defaultValueNode, resourceInstanceNode);

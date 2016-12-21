@@ -75,7 +75,8 @@ int main(void)
      * Create a new change subscription to resource /3/0/0.
      * Data can be provided to the callback function via the context pointer.
      */
-    AwaClientChangeSubscription * subscription = AwaClientChangeSubscription_New("/3/0/0", changeCallback, (void*)userData);
+    AwaClientChangeSubscription * subscription = AwaClientChangeSubscription_New("/3/0/0", changeCallback,
+                                                                                 (void *)userData);
 
     /* Start listening to notifications */
     AwaClientSubscribeOperation * subscribeOperation = AwaClientSubscribeOperation_New(session);

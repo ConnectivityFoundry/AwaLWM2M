@@ -290,9 +290,9 @@ gengetopt_strdup (const char *s)
   if (!s)
     return result;
 
-  result = (char*)malloc(strlen(s) + 1);
-  if (result == (char*)0)
-    return (char*)0;
+  result = (char *)malloc(strlen(s) + 1);
+  if (result == (char *)0)
+    return (char *)0;
   strcpy(result, s);
   return result;
 }
@@ -1052,7 +1052,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     break;
-  };
+  }
 
   /* check numeric conversion */
   switch(arg_type) {
@@ -1064,7 +1064,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     ;
-  };
+  }
 
   /* store the original value */
   switch(arg_type) {
@@ -1080,7 +1080,7 @@ int update_arg(void *field, char **orig_field,
         *orig_field = gengetopt_strdup (value);
       }
     }
-  };
+  }
 
   return 0; /* OK */
 }
@@ -1169,9 +1169,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
-              &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "verbose", 'v',
-              additional_error))
+                         &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "verbose", 'v',
+                         additional_error))
             goto failure;
 
           break;
@@ -1179,9 +1179,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->debug_flag), 0, &(args_info->debug_given),
-              &(local_args_info.debug_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "debug", 'd',
-              additional_error))
+                         &(local_args_info.debug_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "debug", 'd',
+                         additional_error))
             goto failure;
 
           break;
@@ -1189,9 +1189,9 @@ cmdline_parser_internal (
 
 
           if (update_arg((void *)&(args_info->quiet_flag), 0, &(args_info->quiet_given),
-              &(local_args_info.quiet_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "quiet", 'q',
-              additional_error))
+                         &(local_args_info.quiet_given), optarg, 0, 0, ARG_FLAG,
+                         check_ambiguity, override, 1, 0, "quiet", 'q',
+                         additional_error))
             goto failure;
 
           break;
@@ -1199,11 +1199,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ipcAddress_arg),
-               &(args_info->ipcAddress_orig), &(args_info->ipcAddress_given),
-              &(local_args_info.ipcAddress_given), optarg, 0, "127.0.0.1", ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "ipcAddress", 'a',
-              additional_error))
+                         &(args_info->ipcAddress_orig), &(args_info->ipcAddress_given),
+                         &(local_args_info.ipcAddress_given), optarg, 0, "127.0.0.1", ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "ipcAddress", 'a',
+                         additional_error))
             goto failure;
 
           break;
@@ -1211,11 +1211,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->ipcPort_arg),
-               &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
-              &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
-              check_ambiguity, override, 0, 0,
-              "ipcPort", 'p',
-              additional_error))
+                         &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
+                         &(local_args_info.ipcPort_given), optarg, 0, "54321", ARG_INT,
+                         check_ambiguity, override, 0, 0,
+                         "ipcPort", 'p',
+                         additional_error))
             goto failure;
 
           break;
@@ -1223,11 +1223,11 @@ cmdline_parser_internal (
 
 
           if (update_arg( (void *)&(args_info->clientID_arg),
-               &(args_info->clientID_orig), &(args_info->clientID_given),
-              &(local_args_info.clientID_given), optarg, 0, 0, ARG_STRING,
-              check_ambiguity, override, 0, 0,
-              "clientID", 'c',
-              additional_error))
+                         &(args_info->clientID_orig), &(args_info->clientID_given),
+                         &(local_args_info.clientID_given), optarg, 0, 0, ARG_STRING,
+                         check_ambiguity, override, 0, 0,
+                         "clientID", 'c',
+                         additional_error))
             goto failure;
 
           break;

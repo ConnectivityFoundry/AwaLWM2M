@@ -216,7 +216,8 @@ static AwaError ClientSubscribeOperation_Add(AwaClientSubscribeOperation * opera
         if (subscription != NULL)
         {
             AwaClientSubscription * existingSubscription = NULL;
-            Map_Get(operation->Subscribers, subscription->Path, (void **)&existingSubscription);
+            Map_Get(operation->Subscribers, subscription->Path,
+                    (void **)&existingSubscription);
             if (existingSubscription == NULL)
             {
                 if (Map_Put(operation->Subscribers, subscription->Path, subscription))
@@ -250,22 +251,30 @@ static AwaError ClientSubscribeOperation_Add(AwaClientSubscribeOperation * opera
 
 AwaError AwaClientSubscribeOperation_AddChangeSubscription(AwaClientSubscribeOperation * operation, AwaClientChangeSubscription * subscription)
 {
-    return ClientSubscribeOperation_Add(operation, (AwaClientSubscription *)subscription, false);
+    return ClientSubscribeOperation_Add(operation,
+                                        (AwaClientSubscription *)subscription,
+                                        false);
 }
 
 AwaError AwaClientSubscribeOperation_AddExecuteSubscription(AwaClientSubscribeOperation * operation, AwaClientExecuteSubscription * subscription)
 {
-    return ClientSubscribeOperation_Add(operation, (AwaClientSubscription *)subscription, false);
+    return ClientSubscribeOperation_Add(operation,
+                                        (AwaClientSubscription *)subscription,
+                                        false);
 }
 
 AwaError AwaClientSubscribeOperation_AddCancelChangeSubscription(AwaClientSubscribeOperation * operation, AwaClientChangeSubscription * subscription)
 {
-    return ClientSubscribeOperation_Add(operation, (AwaClientSubscription *)subscription, true);
+    return ClientSubscribeOperation_Add(operation,
+                                        (AwaClientSubscription *)subscription,
+                                        true);
 }
 
 AwaError AwaClientSubscribeOperation_AddCancelExecuteSubscription(AwaClientSubscribeOperation * operation, AwaClientExecuteSubscription * subscription)
 {
-    return ClientSubscribeOperation_Add(operation, (AwaClientSubscription *)subscription, true);
+    return ClientSubscribeOperation_Add(operation,
+                                        (AwaClientSubscription *)subscription,
+                                        true);
 }
 
 InternalError ClientSubscribe_AddAwaSubscribeType(TreeNode leafNode, AwaClientSubscription * subscription)
@@ -362,7 +371,8 @@ AwaError AwaClientSubscribeOperation_Perform(AwaClientSubscribeOperation * opera
             PerformAddPathCallbackContext addPathContext;
             addPathContext.OperationCommon = operation->Common;
             addPathContext.Result = AwaError_Success;
-            Map_ForEach(operation->Subscribers, ClientSubscribe_PerformAddPathCallback, (void *)&addPathContext);
+            Map_ForEach(operation->Subscribers, ClientSubscribe_PerformAddPathCallback,
+                        (void *)&addPathContext);
             result = addPathContext.Result;
 
             if (result != AwaError_Success)
@@ -408,7 +418,8 @@ AwaError AwaClientSubscribeOperation_Perform(AwaClientSubscribeOperation * opera
                                         successContext.Session = OperationCommon_GetSession(operation->Common, SessionType_Client);
                                         successContext.Response = operation->Response;
                                         successContext.Result = AwaError_Success;
-                                        Map_ForEach(operation->Subscribers, ClientSubscribe_PerformSuccessfulCallback, (void *)&successContext);
+                                        Map_ForEach(operation->Subscribers, ClientSubscribe_PerformSuccessfulCallback,
+                                                    (void *)&successContext);
 
                                         result = successContext.Result;
                                         LogDebug("Perform Subscribe Operation finished %s\n", (result == AwaError_Success? "successfully" : "with errors"));

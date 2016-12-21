@@ -83,7 +83,8 @@ int main(void)
      * Create a new execute subscription to resource /3/0/4.
      * Data can be provided to the callback function via the context pointer.
      */
-    AwaClientExecuteSubscription * subscription = AwaClientExecuteSubscription_New("/3/0/4", executeCallback, (void*)userData);
+    AwaClientExecuteSubscription * subscription = AwaClientExecuteSubscription_New("/3/0/4", executeCallback,
+                                                                                   (void *)userData);
 
     /* Start listening to notifications */
     AwaClientSubscribeOperation * subscribeOperation = AwaClientSubscribeOperation_New(clientSession);

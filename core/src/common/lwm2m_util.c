@@ -146,7 +146,7 @@ QueryPair * Lwm2mCore_SplitQuery(const char * query, int * numPairs)
                 {
                     int equalsPos = (int)(equals - token);
 
-                    pair->Key = (char*) malloc((equalsPos+1) * sizeof(char));
+                    pair->Key = (char *) malloc((equalsPos+1) * sizeof(char));
                     memcpy(pair->Key, token, equalsPos);
                     pair->Key[equalsPos] = '\0';
                     pair->Value = strdup(equals + 1);
