@@ -212,13 +212,15 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
             break;
 
         case AwaResourceType_ObjectLink:
-            AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
-            outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
-
-            if ((outLength <= 0) || (dataValue == NULL))
             {
-                AwaResult_SetResult(AwaResult_OutOfMemory);
-                goto error;
+                AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
+                outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
+
+                if ((outLength <= 0) || (dataValue == NULL))
+                {
+                    AwaResult_SetResult(AwaResult_OutOfMemory);
+                    goto error;
+                }
             }
             break;
 
