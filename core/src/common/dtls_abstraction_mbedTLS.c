@@ -134,14 +134,12 @@ void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFor
 {
     if (certLength > 0)
     {
-        if (mbedtls_x509_crt_parse(&cacert, (const unsigned char *) cert, certLength) >= 0)
+        if (mbedtls_pk_parse_key(&privateKey, (const unsigned char*)cert, certLength, NULL, 0) == 0
+        &&  mbedtls_x509_crt_parse(&cacert, (const unsigned char*)cert, certLength) == 0)
         {
-            if (mbedtls_pk_parse_key(&privateKey, cert, certLength, NULL, 0) == 0)
-            {
-                certificate = (uint8_t *)cert;
-                certificateLength = certLength;
-                certificateFormat = format;
-            }
+            certificate = (uint8_t *)cert;
+            certificateLength = certLength;
+            certificateFormat = format;
         }
     }
 }

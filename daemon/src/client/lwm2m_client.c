@@ -390,9 +390,13 @@ static void LoadCertificateFile(char * filename)
         long int fileSize = ftell (file);
         if (fileSize > 0)
         {
-            loadedClientCert = (uint8_t *)malloc(fileSize);
+            loadedClientCert = (uint8_t *)malloc(fileSize + 1);
             if (loadedClientCert)
             {
+                // Add null character at the end of buffer because
+                // mbedTLS requires it, otherwise it will get discarded.
+                loadedClientCert[fileSize] = '\0';
+
                 rewind(file);
                 size_t totalRead = 0;
                 uint8_t * position = loadedClientCert;
@@ -404,7 +408,7 @@ static void LoadCertificateFile(char * filename)
                     position += read;
                 } while ( (read != 0) && (totalRead < fileSize));
                 if (totalRead == fileSize)
-                    coap_SetCertificate(loadedClientCert, fileSize, AwaCertificateFormat_PEM);
+                    coap_SetCertificate(loadedClientCert, fileSize + 1, AwaCertificateFormat_PEM);
             }
         }
         fclose(file);
