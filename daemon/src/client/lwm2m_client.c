@@ -79,12 +79,10 @@ typedef struct
     bool Version;
 } Options;
 
-static FILE * logFile = NULL;
-static uint8_t * loadedClientCert = NULL;
 static const char * version = VERSION; // from Makefile
 static volatile int quit = 0;
 
-static void LoadCertificateFile(char * certificateFilename);
+static uint8_t* LoadCertificateFile(char * certificateFilename);
 static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
@@ -168,6 +166,8 @@ uint8_t HexToByte(const char *value)
 
 static int Lwm2mClient_Start(Options * options)
 {
+    FILE * logFile = NULL;
+    uint8_t * loadedClientCert = NULL;
     int result = 0;
     uint8_t * key = NULL;
 
@@ -235,7 +235,7 @@ static int Lwm2mClient_Start(Options * options)
     // always set key
     if (options->CertificateFile)
     {
-        LoadCertificateFile(options->CertificateFile);
+        loadedClientCert = LoadCertificateFile(options->CertificateFile);
     }
     else
         coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
@@ -381,8 +381,9 @@ error_close_log:
     return result;
 }
 
-static void LoadCertificateFile(char * filename)
+static uint8_t* LoadCertificateFile(char * filename)
 {
+    uint8_t *clientCertificate = NULL;
     FILE * file = fopen(filename, "r");
     if (file)
     {
@@ -390,16 +391,16 @@ static void LoadCertificateFile(char * filename)
         long int fileSize = ftell (file);
         if (fileSize > 0)
         {
-            loadedClientCert = (uint8_t *)malloc(fileSize + 1);
-            if (loadedClientCert)
+            clientCertificate = (uint8_t *)malloc(fileSize + 1);
+            if (clientCertificate)
             {
                 // Add null character at the end of buffer because
                 // mbedTLS requires it, otherwise it will get discarded.
-                loadedClientCert[fileSize] = '\0';
+                clientCertificate[fileSize] = '\0';
 
                 rewind(file);
                 size_t totalRead = 0;
-                uint8_t * position = loadedClientCert;
+                uint8_t * position = clientCertificate;
                 size_t read;
                 do
                 {
@@ -408,11 +409,13 @@ static void LoadCertificateFile(char * filename)
                     position += read;
                 } while ( (read != 0) && (totalRead < fileSize));
                 if (totalRead == fileSize)
-                    coap_SetCertificate(loadedClientCert, fileSize + 1, AwaCertificateFormat_PEM);
+                    coap_SetCertificate(clientCertificate, fileSize + 1, AwaCertificateFormat_PEM);
             }
         }
         fclose(file);
     }
+
+    return clientCertificate;
 }
 
 
