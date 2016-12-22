@@ -100,12 +100,14 @@ const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
     switch (sa->sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr,
+                           buffer, sizeof(buffer));
             port = ntohs(((struct sockaddr_in *)sa)->sin_port);
             sprintf(out, "%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+                           buffer, sizeof(buffer));
             port =  ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
             sprintf(out, "[%s]:%d", ip, port);
             break;

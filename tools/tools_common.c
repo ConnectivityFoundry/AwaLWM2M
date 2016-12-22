@@ -731,7 +731,8 @@ static char * EncodeOpaque(AwaOpaque * value)
                 if ((i <= OPAQUE_DISPLAY_LEN) || (i == value->Size - 1))
                 {
                     char hexValue[4] = {0};
-                    snprintf(hexValue, 4, "%02X ", ((uint8_t*)value->Data)[i]);
+                    snprintf(hexValue, 4, "%02X ",
+                             ((uint8_t *)value->Data)[i]);
                     strcat(resourceValue, hexValue);
                 }
                 else

@@ -641,15 +641,16 @@ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
         case COAP_OPTION_URI_PATH:
             /* coap_merge_multi_option() operates in-place on the IPBUF, but final packet field should be const string -> cast to string */
             coap_merge_multi_option((char **)&(coap_pkt->uri_path),
-                    &(coap_pkt->uri_path_len), current_option,
-                    option_length, '/');
+                                    &(coap_pkt->uri_path_len), current_option,
+                                    option_length, '/');
             PRINTF("Uri-Path [%.*s]\n", (int)coap_pkt->uri_path_len, coap_pkt->uri_path);
             break;
         case COAP_OPTION_URI_QUERY:
             /* coap_merge_multi_option() operates in-place on the IPBUF, but final packet field should be const string -> cast to string */
             coap_merge_multi_option((char **)&(coap_pkt->uri_query),
-                    &(coap_pkt->uri_query_len), current_option,
-                    option_length, '&');
+                                    &(coap_pkt->uri_query_len),
+                                    current_option,
+                                    option_length, '&');
             PRINTF("Uri-Query [%.*s]\n", (int)coap_pkt->uri_query_len,
                     coap_pkt->uri_query);
             break;
@@ -657,16 +658,18 @@ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
         case COAP_OPTION_LOCATION_PATH:
             /* coap_merge_multi_option() operates in-place on the IPBUF, but final packet field should be const string -> cast to string */
             coap_merge_multi_option((char **)&(coap_pkt->location_path),
-                    &(coap_pkt->location_path_len), current_option,
-                    option_length, '/');
+                                    &(coap_pkt->location_path_len),
+                                    current_option,
+                                    option_length, '/');
             PRINTF("Location-Path [%.*s]\n", (int)coap_pkt->location_path_len,
                     coap_pkt->location_path);
             break;
         case COAP_OPTION_LOCATION_QUERY:
             /* coap_merge_multi_option() operates in-place on the IPBUF, but final packet field should be const string -> cast to string */
             coap_merge_multi_option((char **)&(coap_pkt->location_query),
-                    &(coap_pkt->location_query_len), current_option,
-                    option_length, '&');
+                                    &(coap_pkt->location_query_len),
+                                    current_option,
+                                    option_length, '&');
             PRINTF("Location-Query [%.*s]\n", (int)coap_pkt->location_query_len,
                     coap_pkt->location_query);
             break;
@@ -746,7 +749,7 @@ coap_get_post_variable(void *packet, const char *name, const char **output)
     if(coap_pkt->payload_len)
     {
         return coap_get_variable((const char *)coap_pkt->payload,
-                coap_pkt->payload_len, name, output);
+                                 coap_pkt->payload_len, name, output);
     }
     return 0;
 }
@@ -894,7 +897,7 @@ int
 coap_get_header_if_none_match(void *packet)
 {
     return IS_OPTION((coap_packet_t *)packet,
-            COAP_OPTION_IF_NONE_MATCH) ? 1 : 0;
+                     COAP_OPTION_IF_NONE_MATCH) ? 1 : 0;
 }
 int
 coap_set_header_if_none_match(void *packet)

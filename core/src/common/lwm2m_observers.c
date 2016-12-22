@@ -379,7 +379,9 @@ void Lwm2m_UpdateObservers(void * ctxt)
             ((maximumPeriod != -1) && (elapsed > ((uint32_t)maximumPeriod * 1000))))
         {
             observer->Sequence ++;
-            observer->Callback(context, &observer->Address, observer->Sequence, (const char*)&observer->Token, observer->TokenLength,
+            observer->Callback(context, &observer->Address, observer->Sequence,
+                               (const char *)&observer->Token,
+                               observer->TokenLength,
                                observer->ObjectID, observer->ObjectInstanceID, observer->ResourceID, observer->ContentType, observer->ContextData);
             observer->Changed = false;
             observer->LastUpdate = now;

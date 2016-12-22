@@ -447,7 +447,7 @@ AwaError ResponseCommon_GetPathResult(const ResponseCommon * response, const cha
         {
             if (result)
             {
-                if (Map_Get(response->PathResults, path, (void**)result))
+                if (Map_Get(response->PathResults, path, (void **)result))
                 {
                     error = AwaError_Success;
                 }
@@ -649,7 +649,11 @@ AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, co
 {
     AwaObjectLink * storedObjectLink;
 
-    AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedObjectLink, NULL, AwaResourceType_ObjectLink, sizeof(*value));
+    AwaError result = ResponseCommon_GetValuePointer(response, path,
+                                                     (const void **)&storedObjectLink,
+                                                     NULL,
+                                                     AwaResourceType_ObjectLink,
+                                                     sizeof(*value));
 
     if ((result == AwaError_Success) && (value != NULL))
     {
@@ -663,7 +667,11 @@ AwaError ResponseCommon_GetValueAsOpaque(const ResponseCommon * response, const 
 {
     AwaOpaque * storedOpaque;
 
-    AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedOpaque, NULL, AwaResourceType_Opaque, sizeof(*value));
+    AwaError result = ResponseCommon_GetValuePointer(response, path,
+                                                     (const void **)&storedOpaque,
+                                                     NULL,
+                                                     AwaResourceType_Opaque,
+                                                     sizeof(*value));
 
     if ((result == AwaError_Success) && (value != NULL))
     {

@@ -77,7 +77,10 @@ int Lwm2mCore_SetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType 
         nullTerminator = 1;
     }
 
-    return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID,
+    return ObjectStore_SetResourceInstanceValue(((Lwm2mContextType *)(context))->Store,
+                                                objectID, objectInstanceID,
+                                                resourceID,
+                                                 resourceInstanceID,
                                                  valueSize + nullTerminator, value, 0, valueSize, &changed);
 }
 
@@ -106,7 +109,11 @@ int Lwm2mCore_CreateOptionalResource(Lwm2mContextType * context, ObjectIDType ob
 int Lwm2mCore_GetResourceInstanceValue(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                        ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
-    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store, objectID, objectInstanceID, resourceID, resourceInstanceID, buffer, bufferLen);
+    return ObjectStore_GetResourceInstanceValue(((Lwm2mContextType *)(context))->Store,
+                                                objectID, objectInstanceID,
+                                                resourceID,
+                                                resourceInstanceID, buffer,
+                                                bufferLen);
 }
 
 ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * context, ObjectIDType  objectID, ObjectInstanceIDType objectInstanceID)
@@ -149,7 +156,7 @@ bool Lwm2mCore_Exists(Lwm2mContextType * context, ObjectIDType objectID, ObjectI
 // This function is called by the CoAP library to handle any requests
 static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * response)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)request->ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->ctxt;
     ResourceEndPoint * endPoint = Lwm2mEndPoint_FindResourceEndPoint(&context->EndPointList, request->path);
     if (endPoint == NULL)
     {

@@ -198,7 +198,8 @@ const AwaServerListClientsResponse * AwaServerListClientsOperation_GetResponse(c
                 {
                     // look up existing Response in map, return it.
                     // if it doesn't exist, create new Response and add to map, return it.
-                    Map_Get(operation->ClientResponseMap, clientID, (void *)&listClientsResponse);
+                    Map_Get(operation->ClientResponseMap, clientID,
+                            (void *)&listClientsResponse);
                     if (listClientsResponse == NULL)
                     {
                         LogDebug("Create new AwaServerListClientsResponse");

@@ -176,7 +176,9 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                         {
                                             memcpy(stringValue, dataValue, (size_t)dataLength);
                                             stringValue[dataLength] = 0;
-                                            AwaStringArray_SetValueAsCString((AwaStringArray *)array, index, stringValue);
+                                            AwaStringArray_SetValueAsCString((AwaStringArray *)array,
+                                                                             index,
+                                                                             stringValue);
                                             Awa_MemSafeFree(stringValue);
                                             break;
                                         }
@@ -191,7 +193,8 @@ Value * Value_New(TreeNode rootNode, AwaResourceType type)
                                         AwaOpaque opaque;
                                         opaque.Data = dataLength > 0 ? dataValue : NULL;
                                         opaque.Size = dataLength;
-                                        AwaOpaqueArray_SetValue((AwaOpaqueArray *)array, index, opaque);
+                                        AwaOpaqueArray_SetValue((AwaOpaqueArray *)array,
+                                                                index, opaque);
                                         break;
                                     }
                                     default:
@@ -293,7 +296,7 @@ void Value_Free(Value ** value)
         {
             if ((*value)->Type == AwaResourceType_Opaque || (*value)->Type == AwaResourceType_None)
             {
-                AwaOpaque * opaque = (AwaOpaque * )((*value)->Data);
+                AwaOpaque * opaque = (AwaOpaque *)((*value)->Data);
                 free(opaque->Data);
             }
 

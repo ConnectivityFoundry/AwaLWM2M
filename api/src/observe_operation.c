@@ -185,7 +185,7 @@ AwaServerObservation * AwaServerObservation_New(const char * clientID, const cha
                     observation->Operations = List_New();
                     if (observation->Operations != NULL)
                     {
-                        observation->Callback = (void*)callback;
+                        observation->Callback = (void *)callback;
                         observation->Context = context;
                         observation->Session = NULL;
                     }
@@ -346,7 +346,8 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
             PerformAddPathCallbackContext addPathContext;
             addPathContext.ServerOperation = operation->ServerOperation;
             addPathContext.Result = AwaError_Success;
-            Map_ForEach(operation->Observers, ServerObserve_PerformAddPathCallback, (void *)&addPathContext);
+            Map_ForEach(operation->Observers, ServerObserve_PerformAddPathCallback,
+                        (void *)&addPathContext);
             result = addPathContext.Result;
 
             if (result != AwaError_Success)
@@ -387,10 +388,11 @@ AwaError AwaServerObserveOperation_Perform(AwaServerObserveOperation * operation
                                 if (operation->Response)
                                 {
                                     PerformSuccessfulCallbackContext successContext;
-                                    successContext.Session = (AwaServerSession*)ServerOperation_GetSession(operation->ServerOperation);
+                                    successContext.Session = (AwaServerSession *)ServerOperation_GetSession(operation->ServerOperation);
                                     successContext.Result = AwaError_Success;
                                     successContext.Operation = operation;
-                                    Map_ForEach(operation->Observers, ServerObserve_PerformSuccessfulCallback, (void *)&successContext);
+                                    Map_ForEach(operation->Observers, ServerObserve_PerformSuccessfulCallback,
+                                                (void *)&successContext);
 
                                     result = successContext.Result;
                                     LogDebug("Perform Observe Operation finished %s", result == AwaError_Success? "successfully" : "with errors");
@@ -446,7 +448,8 @@ static AwaError ServerObserveOperation_Add(AwaServerObserveOperation * operation
         if (observation != NULL)
         {
             AwaServerObservation * existingObservation = NULL;
-            Map_Get(operation->Observers, observation->Path, (void **)&existingObservation);
+            Map_Get(operation->Observers, observation->Path,
+                    (void **)&existingObservation);
             if (existingObservation == NULL)
             {
                 if (Map_Put(operation->Observers, observation->Path, observation))
@@ -509,7 +512,8 @@ const AwaPathResult * AwaServerObserveResponse_GetPathResult(const AwaServerObse
 {
     // AwaServerObserveResponse is an alias for ResponseCommon
     const PathResult * pathResult = NULL;
-    ResponseCommon_GetPathResult((const ResponseCommon *)response, path, &pathResult);
+    ResponseCommon_GetPathResult((const ResponseCommon *)response, path,
+                                 &pathResult);
     // AwaPathResult is an alias for PathResult
     return (AwaPathResult *)pathResult;
 }

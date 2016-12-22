@@ -95,7 +95,11 @@ static char * ResponseToCString(const AwaServerSession * session, const AwaServe
             do
             {
                 resourceInstanceID = GetNextTargetResourceInstanceIDFromPath(targets, numTargets, path, &targetIndex);
-                Server_AddPathToCString(&cstring, path, session, (void *)response, ResponseType_ReadResponse, quiet, &lastObjectID, &lastObjectInstanceID, resourceInstanceID);
+                Server_AddPathToCString(&cstring, path, session,
+                                        (void *)response,
+                                        ResponseType_ReadResponse, quiet,
+                                        &lastObjectID, &lastObjectInstanceID,
+                                        resourceInstanceID);
             } while (resourceInstanceID != AWA_INVALID_ID);
         }
         else

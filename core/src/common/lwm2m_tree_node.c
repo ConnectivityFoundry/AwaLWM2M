@@ -71,7 +71,7 @@ Lwm2mTreeNode * Lwm2mTreeNode_Create(void)
         return NULL;
     }
 
-    Lwm2mTreeNode_Init((Lwm2mTreeNode*)node);
+    Lwm2mTreeNode_Init((Lwm2mTreeNode *)node);
 
     return (Lwm2mTreeNode *)node;
 }
@@ -268,19 +268,19 @@ int Lwm2mTreeNode_AddChild(Lwm2mTreeNode * node, Lwm2mTreeNode * child)
 
 Lwm2mTreeNode * Lwm2mTreeNode_GetParent(Lwm2mTreeNode * node)
 {
-    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode*)node;
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
 
     if (node == NULL)
     {
         return NULL;
     }
 
-    return (Lwm2mTreeNode*)_node->Parent;
+    return (Lwm2mTreeNode *)_node->Parent;
 }
 
 bool Lwm2mTreeNode_HasChildren(Lwm2mTreeNode * node)
 {
-    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode*)node;
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
 
     if (node == NULL)
     {
@@ -297,7 +297,7 @@ bool Lwm2mTreeNode_HasChildren(Lwm2mTreeNode * node)
 
 Lwm2mTreeNode * Lwm2mTreeNode_GetFirstChild(Lwm2mTreeNode * node)
 {
-    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode*)node;
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
 
     if (node == NULL)
     {
@@ -309,13 +309,13 @@ Lwm2mTreeNode * Lwm2mTreeNode_GetFirstChild(Lwm2mTreeNode * node)
         return NULL;
     }
 
-    return (Lwm2mTreeNode*)ListEntry(_node->Children.Next, _Lwm2mTreeNode, _List);
+    return (Lwm2mTreeNode *)ListEntry(_node->Children.Next, _Lwm2mTreeNode, _List);
 }
 
 Lwm2mTreeNode * Lwm2mTreeNode_GetNextChild(Lwm2mTreeNode * node, Lwm2mTreeNode * child)
 {
-    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode*)node;
-    _Lwm2mTreeNode * _child = (_Lwm2mTreeNode*)child;
+    _Lwm2mTreeNode * _node = (_Lwm2mTreeNode *)node;
+    _Lwm2mTreeNode * _child = (_Lwm2mTreeNode *)child;
 
     if ((node == NULL) || (child == NULL))
     {
@@ -327,7 +327,7 @@ Lwm2mTreeNode * Lwm2mTreeNode_GetNextChild(Lwm2mTreeNode * node, Lwm2mTreeNode *
         return NULL;
     }
 
-    return (Lwm2mTreeNode*)ListEntry(_child->_List.Next, _Lwm2mTreeNode, _List);
+    return (Lwm2mTreeNode *)ListEntry(_child->_List.Next, _Lwm2mTreeNode, _List);
 }
 
 int Lwm2mTreeNode_GetChildCount(Lwm2mTreeNode * node)

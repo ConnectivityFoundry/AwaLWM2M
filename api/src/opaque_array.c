@@ -68,7 +68,8 @@ void AwaOpaqueArray_SetValue(AwaOpaqueArray * array, AwaArrayIndex index, AwaOpa
                 }
             }
 
-            Array_SetValue((AwaArray *)array, index, (void *)&copy, sizeof(copy));
+            Array_SetValue((AwaArray *)array, index, (void *)&copy,
+                           sizeof(copy));
         }
         else
         {
@@ -103,7 +104,7 @@ AwaOpaque AwaOpaqueArray_GetValue(const AwaOpaqueArray * array, AwaArrayIndex in
 
     if (valuePtr != NULL)
     {
-        AwaOpaque * storedOpaque = (AwaOpaque * )valuePtr;
+        AwaOpaque * storedOpaque = (AwaOpaque *)valuePtr;
         value.Data = storedOpaque->Data;
         value.Size = storedOpaque->Size;
     }
@@ -151,7 +152,7 @@ AwaOpaque AwaOpaqueArrayIterator_GetValue(const AwaOpaqueArrayIterator * iterato
 
     if (valuePtr != NULL)
     {
-        AwaOpaque * storedOpaque = (AwaOpaque * )valuePtr;
+        AwaOpaque * storedOpaque = (AwaOpaque *)valuePtr;
         value.Data = storedOpaque->Data;
         value.Size = storedOpaque->Size;
     }

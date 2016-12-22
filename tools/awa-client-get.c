@@ -104,7 +104,9 @@ static char * ResponseToCString(const AwaClientSession * session, const AwaClien
         }
         else
         {
-            Client_AddPathToCString(&cstring, path, session, (void *)response, ResponseType_GetResponse, quiet, &lastObjectID, &lastObjectInstanceID);
+            Client_AddPathToCString(&cstring, path, session, (void *)response,
+                                    ResponseType_GetResponse, quiet,
+                                    &lastObjectID, &lastObjectInstanceID);
         }
     }
     AwaPathIterator_Free(&iterator);

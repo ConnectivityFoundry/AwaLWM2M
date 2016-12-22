@@ -50,7 +50,7 @@
  */
 static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, void * context)
 {
-    int * eventCount = (int*)context;
+    int * eventCount = (int *)context;
     (*eventCount)++;
 
     /* Display client ID and registered entities */
@@ -78,7 +78,7 @@ static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, v
  */
 static void clientDeregisterCallback(const AwaServerClientDeregisterEvent * event, void * context)
 {
-    int * eventCount = (int*)context;
+    int * eventCount = (int *)context;
     (*eventCount)++;
 
     /* Display client ID */
@@ -99,7 +99,7 @@ static void clientDeregisterCallback(const AwaServerClientDeregisterEvent * even
  */
 static void clientUpdateCallback(const AwaServerClientUpdateEvent * event, void * context)
 {
-    int * eventCount = (int*)context;
+    int * eventCount = (int *)context;
     (*eventCount)++;
 
     /* Display client ID and registered entities */

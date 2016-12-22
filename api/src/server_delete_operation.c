@@ -234,7 +234,8 @@ const AwaPathResult * AwaServerDeleteResponse_GetPathResult(const AwaServerDelet
 {
     // AwaServerDeleteResponse is an alias for ResponseCommon
     const PathResult * pathResult = NULL;
-    ResponseCommon_GetPathResult((const ResponseCommon *)response, path, &pathResult);
+    ResponseCommon_GetPathResult((const ResponseCommon *)response, path,
+                                 &pathResult);
     // AwaPathResult is an alias for PathResult
     return (AwaPathResult *)pathResult;
 }

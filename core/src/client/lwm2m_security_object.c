@@ -101,10 +101,7 @@ static void DestroySecurityObjects(struct ListHead * securityObjectList)
     ListForEachSafe(i, n, securityObjectList)
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(i, LWM2MSecurityInfo, list);
-        if (securityInfo != NULL)
-        {
-            free(securityInfo);
-        }
+        free(securityInfo);
     }
 }
 
@@ -227,7 +224,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 
     if (objectInstanceID != -1)
     {
-        return Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context, objectID, objectInstanceID);
+        return Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context,
+                                                  objectID, objectInstanceID);
     }
     else
     {
@@ -236,7 +234,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
         while ((objectID = Lwm2mCore_GetNextObjectID(context, objectID)) != -1)
         {
             // Best effort attempt
-            Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context, objectID, objectInstanceID);
+            Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context,
+                                               objectID, objectInstanceID);
         }
         return 0;
     }

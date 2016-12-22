@@ -422,10 +422,7 @@ void Lwm2mCore_DestroyServerList(Lwm2mContextType * context)
         ListForEachSafe(i, n, Lwm2mCore_GetServerList(context))
         {
             Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
-            if (server != NULL)
-            {
-                free(server);
-            }
+            free(server);
         }
     }
 }

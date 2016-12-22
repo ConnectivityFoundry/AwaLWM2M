@@ -65,10 +65,7 @@ void IPCSession_Shutdown(void)
     ListForEachSafe(i, n, &sessionList)
     {
         IPCSession * session = ListEntry(i, IPCSession, list);
-        if (session != NULL)
-        {
-            free(session);
-        }
+        free(session);
     }
 }
 

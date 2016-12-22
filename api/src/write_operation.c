@@ -138,7 +138,7 @@ AwaError AwaServerWriteOperation_Perform(AwaServerWriteOperation * operation, co
             const Session * session = ServerOperation_GetSession(operation->ServerOperation);
             if (session != NULL)
             {
-                const AwaServerSession * serverSession = (AwaServerSession * )session;
+                const AwaServerSession * serverSession = (AwaServerSession *)session;
                 if (ServerSession_IsConnected(serverSession))
                 {
                     if (clientID != NULL)
@@ -419,7 +419,9 @@ AwaError AwaServerWriteOperation_AddValueAsCString(AwaServerWriteOperation * ope
     AwaError result = AwaError_Unspecified;
     if (value != NULL)
     {
-        result = ServerWriteOperation_AddValue(operation, path, 0, (void *)value, strlen(value), AwaResourceType_String);
+        result = ServerWriteOperation_AddValue(operation, path, 0,
+                                               (void *)value, strlen(value),
+                                               AwaResourceType_String);
     }
     else
     {
@@ -430,47 +432,65 @@ AwaError AwaServerWriteOperation_AddValueAsCString(AwaServerWriteOperation * ope
 
 AwaError AwaServerWriteOperation_AddValueAsStringArray(AwaServerWriteOperation * operation, const char * path, const AwaStringArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_StringArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_StringArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsInteger(AwaServerWriteOperation * operation, const char * path, AwaInteger value)
 {
-    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaInteger), AwaResourceType_Integer);
+    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value,
+                                         sizeof(AwaInteger),
+                                         AwaResourceType_Integer);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsIntegerArray(AwaServerWriteOperation * operation, const char * path, const AwaIntegerArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_IntegerArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_IntegerArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsFloat(AwaServerWriteOperation * operation, const char * path, AwaFloat value)
 {
-    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaFloat), AwaResourceType_Float);
+    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value,
+                                         sizeof(AwaFloat),
+                                         AwaResourceType_Float);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsFloatArray(AwaServerWriteOperation * operation, const char * path, const AwaFloatArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_FloatArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_FloatArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsBoolean(AwaServerWriteOperation * operation, const char * path, AwaBoolean value)
 {
-    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaBoolean), AwaResourceType_Boolean);
+    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value,
+                                         sizeof(AwaBoolean),
+                                         AwaResourceType_Boolean);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsBooleanArray(AwaServerWriteOperation * operation, const char * path, const AwaBooleanArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_BooleanArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_BooleanArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsTime(AwaServerWriteOperation * operation, const char * path, AwaTime value)
 {
-    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaTime), AwaResourceType_Time);
+    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value,
+                                         sizeof(AwaTime),
+                                         AwaResourceType_Time);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsTimeArray(AwaServerWriteOperation * operation, const char * path, const AwaTimeArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_TimeArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_TimeArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsOpaque(AwaServerWriteOperation * operation, const char * path, AwaOpaque value)
@@ -480,17 +500,23 @@ AwaError AwaServerWriteOperation_AddValueAsOpaque(AwaServerWriteOperation * oper
 
 AwaError AwaServerWriteOperation_AddValueAsOpaqueArray(AwaServerWriteOperation * operation, const char * path, const AwaOpaqueArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_OpaqueArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_OpaqueArray);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsObjectLink(AwaServerWriteOperation * operation, const char * path, AwaObjectLink value)
 {
-    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value, sizeof(AwaObjectLink), AwaResourceType_ObjectLink);
+    return ServerWriteOperation_AddValue(operation, path, 0, (void *)&value,
+                                         sizeof(AwaObjectLink),
+                                         AwaResourceType_ObjectLink);
 }
 
 AwaError AwaServerWriteOperation_AddValueAsObjectLinkArray(AwaServerWriteOperation * operation, const char * path, const AwaObjectLinkArray * array)
 {
-    return ServerWriteOperation_AddValues(operation, path, (const AwaArray *)array, AwaResourceType_ObjectLinkArray);
+    return ServerWriteOperation_AddValues(operation, path,
+                                          (const AwaArray *)array,
+                                          AwaResourceType_ObjectLinkArray);
 }
 
 
@@ -544,7 +570,8 @@ const AwaPathResult * AwaServerWriteResponse_GetPathResult(const AwaServerWriteR
 {
     // AwaServerWriteResponse is an alias for ResponseCommon
     const PathResult * pathResult = NULL;
-    ResponseCommon_GetPathResult((const ResponseCommon *)response, path, &pathResult);
+    ResponseCommon_GetPathResult((const ResponseCommon *)response, path,
+                                 &pathResult);
     // AwaPathResult is an alias for PathResult
     return (AwaPathResult *)pathResult;
 }

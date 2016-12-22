@@ -56,7 +56,8 @@ AwaClientIterator * AwaServerClientRegisterEvent_NewClientIterator(const AwaServ
 
 AwaRegisteredEntityIterator * AwaServerClientRegisterEvent_NewRegisteredEntityIterator(const AwaServerClientRegisterEvent * event, const char * clientID)
 {
-    return (AwaRegisteredEntityIterator *)ClientRegisterEvent_NewRegisteredEntityIterator((ClientRegisterEvent *)event, clientID);
+    return (AwaRegisteredEntityIterator *)ClientRegisterEvent_NewRegisteredEntityIterator((ClientRegisterEvent *)event,
+                                                                                          clientID);
 }
 
 AwaClientIterator * AwaServerClientDeregisterEvent_NewClientIterator(const AwaServerClientDeregisterEvent * event)
@@ -71,7 +72,8 @@ AwaClientIterator * AwaServerClientUpdateEvent_NewClientIterator(const AwaServer
 
 AwaRegisteredEntityIterator * AwaServerClientUpdateEvent_NewRegisteredEntityIterator(const AwaServerClientUpdateEvent * event, const char * clientID)
 {
-    return (AwaRegisteredEntityIterator *)ClientUpdateEvent_NewRegisteredEntityIterator((ClientUpdateEvent *)event, clientID);
+    return (AwaRegisteredEntityIterator *)ClientUpdateEvent_NewRegisteredEntityIterator((ClientUpdateEvent *)event,
+                                                                                        clientID);
 }
 
 
@@ -579,7 +581,8 @@ int ServerEventsCallbackInfo_InvokeClientRegisterCallback(ServerEventsCallbackIn
         {
             if (info->ClientRegisterEventCallback != NULL)
             {
-                info->ClientRegisterEventCallback((AwaServerClientRegisterEvent *)event, info->ClientRegisterEventContext);
+                info->ClientRegisterEventCallback((AwaServerClientRegisterEvent *)event,
+                                                  info->ClientRegisterEventContext);
             }
             else
             {
@@ -610,7 +613,8 @@ int ServerEventsCallbackInfo_InvokeClientDeregisterCallback(ServerEventsCallback
         {
             if (info->ClientDeregisterEventCallback != NULL)
             {
-                info->ClientDeregisterEventCallback((AwaServerClientDeregisterEvent *)event, info->ClientDeregisterEventContext);
+                info->ClientDeregisterEventCallback((AwaServerClientDeregisterEvent *)event,
+                                                    info->ClientDeregisterEventContext);
             }
             else
             {
@@ -641,7 +645,8 @@ int ServerEventsCallbackInfo_InvokeClientUpdateCallback(ServerEventsCallbackInfo
         {
             if (info->ClientUpdateEventCallback != NULL)
             {
-                info->ClientUpdateEventCallback((AwaServerClientUpdateEvent *)event, info->ClientUpdateEventContext);
+                info->ClientUpdateEventCallback((AwaServerClientUpdateEvent *)event,
+                                                info->ClientUpdateEventContext);
             }
             else
             {

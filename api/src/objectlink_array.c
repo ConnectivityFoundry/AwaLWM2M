@@ -40,12 +40,14 @@ void AwaObjectLinkArray_Free(AwaObjectLinkArray ** array)
 
 void AwaObjectLinkArray_SetValue(AwaObjectLinkArray * array, AwaArrayIndex index, AwaObjectLink value)
 {
-    Array_SetValue((AwaArray *)array, index, (void *)&value, sizeof(AwaObjectLink));
+    Array_SetValue((AwaArray *)array, index, (void *)&value,
+                   sizeof(AwaObjectLink));
 }
 
 void AwaObjectLinkArray_DeleteValue(AwaObjectLinkArray * array, AwaArrayIndex index)
 {
-    Array_DeleteItem((AwaArray *)array, index, AwaResourceType_ObjectLinkArray);
+    Array_DeleteItem((AwaArray *)array, index,
+                     AwaResourceType_ObjectLinkArray);
 }
 
 AwaObjectLink AwaObjectLinkArray_GetValue(const AwaObjectLinkArray * array, AwaArrayIndex index)

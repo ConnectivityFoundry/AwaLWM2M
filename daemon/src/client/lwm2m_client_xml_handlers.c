@@ -266,7 +266,7 @@ int xmlif_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, O
 // Called to handle a request with the type "Connect". Returns 0 on success.
 static int xmlif_HandlerConnectRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode response = xmlif_GenerateConnectResponse(Lwm2mCore_GetDefinitions(context), request->SessionID);
 
     if ((response != NULL) &&
@@ -333,7 +333,7 @@ static int xmlif_HandlerDisconnectRequest(RequestInfoType * request, TreeNode co
 // Called to handle a request with the type "Define". Returns 0 on success.
 static int xmlif_HandlerDefineRequest(RequestInfoType * request, TreeNode content)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
 
     TreeNode objectDefinitions = TreeNode_Navigate(content, "Content/ObjectDefinitions");
     TreeNode objectDefinition = (objectDefinitions != NULL) ? TreeNode_GetChild(objectDefinitions, 0) : TreeNode_Navigate(content, "Content/ObjectDefinition");
@@ -394,7 +394,9 @@ static AwaError AddResourceInstanceToGetResponse(Lwm2mContextType * context, int
     {
         size_t dataLength = 0;
 
-        outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID, (const void **)&buffer, &dataLength);
+        outLength = Lwm2mCore_GetResourceInstanceValue(context, objectID, instanceID, resourceID, resourceInstanceID,
+                                                       (const void **)&buffer,
+                                                       &dataLength);
         if (outLength < 0)
         {
             result = AwaError_PathNotFound;
@@ -494,7 +496,7 @@ static AwaError AddObjectInstancesToGetResponse(Lwm2mContextType * context, int 
 static int xmlif_HandlerGetRequest(RequestInfoType * request, TreeNode xmlRequestContent)
 {
     AwaResult result = AwaResult_Success;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContent, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
 
@@ -648,7 +650,7 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                                     const char * data;
                                     int dataLength;
                                     char * dataValue = NULL;
-                                    if ((data = (char*)xmlif_GetOpaque(xmlResourceNode, "Resource/Value")) == NULL)
+                                    if ((data = (char *)xmlif_GetOpaque(xmlResourceNode, "Resource/Value")) == NULL)
                                     {
                                         Lwm2m_Error("Missing value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
                                         Lwm2mTreeNode_DeleteRecursive(objectNode);
@@ -670,7 +672,9 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                                         goto error;
                                     }
 
-                                    Lwm2mTreeNode_SetValue(resourceInstanceNode, (const uint8_t*)dataValue, dataLength);
+                                    Lwm2mTreeNode_SetValue(resourceInstanceNode,
+                                                           (const uint8_t *)dataValue,
+                                                           dataLength);
                                     free(dataValue);
 
                                     Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
@@ -708,7 +712,7 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                                     const char * data;
                                     int dataLength;
                                     char * dataValue = NULL;
-                                    if ((data = (char*)xmlif_GetOpaque(xmlResourceInstanceNode, "ResourceInstance/Value")) == NULL)
+                                    if ((data = (char *)xmlif_GetOpaque(xmlResourceInstanceNode, "ResourceInstance/Value")) == NULL)
                                     {
                                         Lwm2m_Error("Missing value data for resource %d/%d/%d\n", objectID, instanceID, resourceID);
                                         Lwm2mTreeNode_DeleteRecursive(objectNode);
@@ -730,7 +734,9 @@ static Lwm2mTreeNode * xmlif_xmlObjectToLwm2mObject(Lwm2mContextType * context, 
                                         goto error;
                                     }
 
-                                    Lwm2mTreeNode_SetValue(resourceInstanceNode, (const uint8_t*)dataValue, dataLength);
+                                    Lwm2mTreeNode_SetValue(resourceInstanceNode,
+                                                           (const uint8_t *)dataValue,
+                                                           dataLength);
                                     free(dataValue);
 
                                     Lwm2mTreeNode_AddChild(resourceNode, resourceInstanceNode);
@@ -765,7 +771,7 @@ error:
 static int xmlif_HandlerSetRequest(RequestInfoType * request, TreeNode content)
 {
     AwaResult result = AwaResult_Success;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
 
@@ -866,7 +872,9 @@ int xmlif_Lwm2mNotificationCallback(void * context, AddressType * address, int s
 
     memcpy(request, contextData, sizeof(RequestInfoType));
 
-    xmlif_GenerateChangeNotification(request, NULL, (char*)OirToUri(key), AwaResult_Success, IPC_MESSAGE_SUB_TYPE_SERVER_CHANGE);
+    xmlif_GenerateChangeNotification(request, NULL, (char *)OirToUri(key),
+                                     AwaResult_Success,
+                                     IPC_MESSAGE_SUB_TYPE_SERVER_CHANGE);
 
     return 0;
 }
@@ -883,7 +891,7 @@ static AwaResult xmlif_HandleObserve(void * context, RequestInfoType * request, 
     RequestInfoType * temp = malloc(sizeof(RequestInfoType));
     memcpy(temp, request, sizeof(RequestInfoType));
 
-    if (Lwm2mCore_Observe(context, &addr, NULL, 0, objectID, instanceID, resourceID, AwaContentType_ApplicationOmaLwm2mTLV, xmlif_Lwm2mNotificationCallback, (void*)temp) < 0)
+    if (Lwm2mCore_Observe(context, &addr, NULL, 0, objectID, instanceID, resourceID, AwaContentType_ApplicationOmaLwm2mTLV, xmlif_Lwm2mNotificationCallback, (void *)temp) < 0)
     {
         result = AwaResult_BadRequest;
         free(temp);
@@ -898,7 +906,7 @@ error:;
 static int xmlif_HandlerSubscribeRequest(RequestInfoType * request, TreeNode xmlRequestContentNode)
 {
     AwaResult result = AwaResult_Success;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(xmlRequestContentNode, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
 
@@ -1060,7 +1068,7 @@ error:
 static void xmlif_GenerateChangeNotification(void * ctxt, AddressType* address, const char * responsePath, int responseCode, const char * responseType)
 {
     RequestInfoType * request = ctxt;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
 
     TreeNode content = NULL;
 
@@ -1161,7 +1169,7 @@ done:
 static int xmlif_HandlerDeleteRequest(RequestInfoType * request, TreeNode content)
 {
     AwaResult result = AwaResult_Success;
-    Lwm2mContextType * context = (Lwm2mContextType*)request->Context;
+    Lwm2mContextType * context = (Lwm2mContextType *)request->Context;
     TreeNode requestObjectsNode = TreeNode_Navigate(content, "Content/Objects");
     TreeNode responseObjectsTree = ObjectsTree_New();
 

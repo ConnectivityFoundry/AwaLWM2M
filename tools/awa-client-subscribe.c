@@ -135,7 +135,11 @@ static char * ChangeSetToCString(const AwaClientSession * session, const AwaChan
         PrintChanged(changeType, path);
         if ((changeType == AwaChangeType_ResourceCreated) || (changeType == AwaChangeType_ResourceModified))
         {
-            Client_AddPathToCString(&cstring, path, (const AwaClientSession *)session, (void *)changeSet, ResponseType_ChangeSet, quiet, &lastObjectID, &lastObjectInstanceID);
+            Client_AddPathToCString(&cstring, path,
+                                    (const AwaClientSession *)session,
+                                    (void *)changeSet, ResponseType_ChangeSet,
+                                    quiet, &lastObjectID,
+                                    &lastObjectInstanceID);
         }
     }
     AwaPathIterator_Free(&iterator);
@@ -169,7 +173,7 @@ void ChangeCallback(const AwaChangeSet * changeSet, void * context)
     Verbose("Notify %d:\n", g_notifyCount);
 
     const AwaClientSession * session = AwaChangeSet_GetClientSession(changeSet);
-    bool quiet = *((bool*)context);
+    bool quiet = *((bool *)context);
 
     char * output = ChangeSetToCString((void *)session, changeSet, quiet);
     if (output != NULL)

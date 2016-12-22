@@ -132,7 +132,8 @@ static AwaError ServerWriteAttributesOperation_AddAttribute(AwaServerWriteAttrib
                                 AwaObjectID objectID = Path_GetObjectID(path);
                                 AwaResourceID resourceID = Path_GetResourceID(path);
                                 const AwaObjectDefinition * objectDefinition = AwaServerSession_GetObjectDefinition(session, objectID);
-                                const AwaResourceDefinition * resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession*)session, path);
+                                const AwaResourceDefinition * resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession *)session,
+                                                                                                                               path);
 
                                 if (objectDefinition != NULL && (resourceDefinition != NULL || resourceID == -1))
                                 {
@@ -214,12 +215,18 @@ static AwaError ServerWriteAttributesOperation_AddAttribute(AwaServerWriteAttrib
 
 AwaError AwaServerWriteAttributesOperation_AddAttributeAsInteger(AwaServerWriteAttributesOperation * operation, const char * clientID, const char * path, const char * link, AwaInteger value)
 {
-    return ServerWriteAttributesOperation_AddAttribute(operation, clientID, path, link, (void *)&value, sizeof(AwaInteger), AwaResourceType_Integer);
+    return ServerWriteAttributesOperation_AddAttribute(operation, clientID, path, link,
+                                                       (void *)&value,
+                                                       sizeof(AwaInteger),
+                                                       AwaResourceType_Integer);
 }
 
 AwaError AwaServerWriteAttributesOperation_AddAttributeAsFloat(AwaServerWriteAttributesOperation * operation, const char * clientID, const char * path, const char * link, AwaFloat value)
 {
-    return ServerWriteAttributesOperation_AddAttribute(operation, clientID, path, link, (void *)&value, sizeof(AwaFloat), AwaResourceType_Float);
+    return ServerWriteAttributesOperation_AddAttribute(operation, clientID, path, link,
+                                                       (void *)&value,
+                                                       sizeof(AwaFloat),
+                                                       AwaResourceType_Float);
 }
 
 AwaError AwaServerWriteAttributesOperation_Perform(AwaServerWriteAttributesOperation * operation, AwaTimeout timeout)
@@ -356,7 +363,8 @@ const AwaPathResult * AwaServerWriteAttributesResponse_GetPathResult(const AwaSe
 {
     // AwaServerWriteAttributesResponse is an alias for ResponseCommon
     const PathResult * pathResult = NULL;
-    ResponseCommon_GetPathResult((const ResponseCommon *)response, path, &pathResult);
+    ResponseCommon_GetPathResult((const ResponseCommon *)response, path,
+                                 &pathResult);
     // AwaPathResult is an alias for PathResult
     return (AwaPathResult *)pathResult;
 }

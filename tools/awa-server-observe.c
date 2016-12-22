@@ -146,7 +146,12 @@ static char * ChangeSetToCString(const AwaServerSession * session, const AwaChan
             do
             {
                 resourceInstanceID = GetNextTargetResourceInstanceIDFromPath(targets, numTargets, path, &targetIndex);
-                Server_AddPathToCString(&cstring, path, (const AwaServerSession * )session, (void *)changeSet, ResponseType_ChangeSet, quiet, &lastObjectID, &lastObjectInstanceID, resourceInstanceID);
+                Server_AddPathToCString(&cstring, path,
+                                        (const AwaServerSession *)session,
+                                        (void *)changeSet,
+                                        ResponseType_ChangeSet, quiet,
+                                        &lastObjectID, &lastObjectInstanceID,
+                                        resourceInstanceID);
             } while (resourceInstanceID != AWA_INVALID_ID);
         }
     }

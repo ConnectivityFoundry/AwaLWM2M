@@ -526,13 +526,13 @@ static int TlvDecodeFloat(double * dest, const uint8_t * buffer, int size)
     if (size == 4)
     {
         float f;
-        int32_t temp = ntohl(*(uint32_t*)buffer);
+        int32_t temp = ntohl(*(uint32_t *)buffer);
         memcpy(&f, &temp, sizeof(temp));
         *dest = f;
     }
     else if (size == 8)
     {
-        int64_t temp = ntohll(*(uint64_t*)buffer);
+        int64_t temp = ntohll(*(uint64_t *)buffer);
         memcpy(dest, &temp, sizeof(temp));
     }
     else
@@ -579,7 +579,7 @@ static int TlvDecodeInteger(int64_t * dest, const uint8_t * buffer, int size)
     // read the first byte, mask out the signedness
     *dest = buffer[0] & 0x7f;
 #else
-    *dest = (*(int8_t*)&buffer[0]);
+    *dest = (*(int8_t *)&buffer[0]);
 #endif
 
     for (i = 1; i < size; i++)
@@ -685,7 +685,8 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
     {
 
         case AwaResourceType_Boolean:
-            valueLength = TlvEncodeBoolean(buffer, len, type, id, *(bool*)value);
+            valueLength = TlvEncodeBoolean(buffer, len, type, id,
+                                           *(bool *)value);
             break;
 
         case AwaResourceType_Time: // no break
@@ -713,10 +714,12 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
             switch (size)
             {
                 case sizeof(float):
-                    valueLength = TlvEncodeFloat(buffer, len, type, id, *(float*)value);
+                    valueLength = TlvEncodeFloat(buffer, len, type, id,
+                                                 *(float *)value);
                     break;
                 case sizeof(double):
-                    valueLength = TlvEncodeFloat(buffer, len, type, id, *(double*)value);
+                    valueLength = TlvEncodeFloat(buffer, len, type, id,
+                                                 *(double *)value);
                     break;
                 default:
                     Lwm2m_Error("Invalid length for float: %d\n", size);
@@ -726,7 +729,8 @@ static int TlvSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition
 
         case AwaResourceType_String:
         case AwaResourceType_Opaque:
-            valueLength = TlvEncodeOpaque(buffer, len, type, id, (uint8_t*)value, size);
+            valueLength = TlvEncodeOpaque(buffer, len, type, id,
+                                          (uint8_t *)value, size);
             break;
 
         case AwaResourceType_ObjectLink:
@@ -766,7 +770,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
        return -1;
     }
 
-    ResourceDefinition * definition = (ResourceDefinition*)Lwm2mTreeNode_GetDefinition(node);
+    ResourceDefinition * definition = (ResourceDefinition *)Lwm2mTreeNode_GetDefinition(node);
 
     if (definition == NULL)
     {
@@ -928,17 +932,20 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
         case AwaResourceType_Boolean:
             {
                 int64_t temp = 0;
-                result = TlvDecodeInteger((int64_t*)&temp, buffer, len);
+                result = TlvDecodeInteger((int64_t *)&temp, buffer, len);
                 if (result >= 0)
                 {
                     if (resourceType != AwaResourceType_Boolean)
                     {
-                        Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(int64_t));
+                        Lwm2mTreeNode_SetValue(*dest, (const uint8_t *)&temp,
+                                               sizeof(int64_t));
                     }
                     else
                     {
                         bool tempBool = temp == 0 ? false : true;
-                        Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&tempBool, sizeof(bool));
+                        Lwm2mTreeNode_SetValue(*dest,
+                                               (const uint8_t *)&tempBool,
+                                               sizeof(bool));
                     }
                 }
             }
@@ -946,10 +953,11 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
         case AwaResourceType_Float:
             {
                 double temp = 0;
-                result = TlvDecodeFloat((double*)&temp, buffer, len);
+                result = TlvDecodeFloat((double *)&temp, buffer, len);
                 if (result >= 0)
                 {
-                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(double));
+                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t *)&temp,
+                                           sizeof(double));
                 }
             }
             break;
@@ -970,7 +978,8 @@ static int TlvDeserialiseResourceInstance(Lwm2mTreeNode ** dest, const Definitio
 
                 if(result >= 0)
                 {
-                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t*)&temp, sizeof(AwaObjectLink));
+                    Lwm2mTreeNode_SetValue(*dest, (const uint8_t *)&temp,
+                                           sizeof(AwaObjectLink));
                 }
                 break;
             }

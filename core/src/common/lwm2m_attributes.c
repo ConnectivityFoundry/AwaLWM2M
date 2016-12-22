@@ -102,10 +102,7 @@ static void DestroyAttributesList(struct ListHead * serverNotificationAttributes
         ListForEachSafe(i, n, serverNotificationAttributesList)
         {
             NotificationAttributes * attributes = ListEntry(i, NotificationAttributes, list);
-            if (attributes != NULL)
-            {
-                free(attributes);
-            }
+            free(attributes);
         }
     }
 }

@@ -46,7 +46,7 @@ static char *FlowString_DuplicateWithLength(const char *text, int textLength)
     char *result = NULL;
     if (text)
     {
-        result = (char*)Flow_MemAlloc(textLength+1);
+        result = (char *)Flow_MemAlloc(textLength+1);
         if (result)
         {
             memcpy(result, text, textLength);
@@ -99,11 +99,11 @@ bool TreeNode_AddChild(TreeNode node, TreeNode child)
         // Check whether we need to resize the children list to add a new child
         if (_node->ChildSlots <= _node->ChildCount)
         {
-            TreeNodeImpl **oldChildrenList = (TreeNodeImpl**) _node->Children;
+            TreeNodeImpl **oldChildrenList = (TreeNodeImpl **) _node->Children;
 
             // Double list capacity
             uint32_t newChildrenListSize = sizeof(TreeNode) * (_node->ChildSlots * 2);
-            _node->Children = (struct TreeNodeImpl**) Flow_MemAlloc(newChildrenListSize);
+            _node->Children = (struct TreeNodeImpl **) Flow_MemAlloc(newChildrenListSize);
             if (_node->Children)
             {
                 _node->ChildSlots = (_node->ChildSlots * 2);
@@ -113,7 +113,7 @@ bool TreeNode_AddChild(TreeNode node, TreeNode child)
             }
             else
             {
-                _node->Children = (struct TreeNodeImpl**) oldChildrenList;
+                _node->Children = (struct TreeNodeImpl **) oldChildrenList;
                 goto error;
             }
 
@@ -172,8 +172,8 @@ bool TreeNode_AppendValue(const TreeNode node, const uint8_t* value, const uint3
     {
         if (_node->Value)
         {
-            int currentLength = strlen((const char*)_node->Value);
-            uint8_t* newBuffer = (uint8_t*)Flow_MemRealloc(_node->Value,currentLength+1+length);
+            int currentLength = strlen((const char *)_node->Value);
+            uint8_t* newBuffer = (uint8_t *)Flow_MemRealloc(_node->Value,currentLength+1+length);
             if (newBuffer)
             {
                 memcpy(&newBuffer[currentLength],value, length);
@@ -184,7 +184,8 @@ bool TreeNode_AppendValue(const TreeNode node, const uint8_t* value, const uint3
         }
         else
         {
-            _node->Value = (uint8_t *)FlowString_DuplicateWithLength((char *)value, length);
+            _node->Value = (uint8_t *)FlowString_DuplicateWithLength((char *)value,
+                                                                     length);
             if (_node->Value)
                 result = true;
         }
@@ -200,7 +201,7 @@ TreeNode TreeNode_Create(void)
         memset(node, 0 , sizeof(TreeNodeImpl));
 
         node->ChildSlots = INITIAL_TREENODE_CHILD_SLOTS;
-        node->Children = (struct TreeNodeImpl**) Flow_MemAlloc(sizeof(struct TreeNodeImpl*)*node->ChildSlots);
+        node->Children = (struct TreeNodeImpl **) Flow_MemAlloc(sizeof(struct TreeNodeImpl*)*node->ChildSlots);
         if (node->Children)
         {
             memset(node->Children, 0, sizeof(TreeNodeImpl*) * node->ChildSlots);
@@ -292,7 +293,7 @@ const char* TreeNode_GetName(const TreeNode node)
     _treeNode _node = (_treeNode) node;
     if (_node && _node->Name)
     {
-        return (const char*) _node->Name;
+        return (const char *) _node->Name;
     }
     return NULL;
 }
@@ -311,7 +312,7 @@ const uint8_t* TreeNode_GetValue(const TreeNode node)
     _treeNode _node = (_treeNode) node;
     if (_node && _node->Value)
     {
-        return (const uint8_t*) _node->Value;
+        return (const uint8_t *) _node->Value;
     }
     return NULL;
 }
@@ -336,27 +337,29 @@ TreeNode TreeNode_Navigate(const TreeNode rootNode, const char* path)
     // Assuming path is null-terminated
     if (rootNode && path)
     {
-        char* _path = (char*) Flow_MemAlloc(sizeof(char) * (strlen((const char*) path)+1) );
+        char* _path = (char *) Flow_MemAlloc(sizeof(char) * (strlen((const char *) path)+1) );
         if (_path)
         {
             // Design note: Need to make a copy of path ('_path') as Microchip's implementation
             // of strtok() appears to try to modify the string it's working on
-            memset((void*)_path, 0, (sizeof(char) * (strlen((const char*) path)+1) ));
-            memcpy((void*) _path, (void*) path, sizeof(char) * strlen((const char*) path) );
+            memset((void *)_path, 0,
+                   (sizeof(char) * (strlen((const char *) path)+1) ));
+            memcpy((void *) _path, (void *) path,
+                   sizeof(char) * strlen((const char *) path) );
 
             // Check for path separator '/' character
-            if (strchr((const char*) _path, '/') == NULL)
+            if (strchr((const char *) _path, '/') == NULL)
             {
-                if (strcmp((const char*) _node->Name, (const char*) _path) != 0)
+                if (strcmp((const char *) _node->Name, (const char *) _path) != 0)
                     currentNode = NULL;
             }
             else
             {
                 // Tokenise path and ensure first pathElement matches
-                char *pathElement = strtok((char*) _path, (const char*) "/");
+                char *pathElement = strtok((char *) _path, (const char *) "/");
                 if (pathElement)
                 {
-                    if (strcmp((const char*) currentNode->Name, (const char*) pathElement) == 0)
+                    if (strcmp((const char *) currentNode->Name, (const char *) pathElement) == 0)
                     {
                         bool childFound = false;
                         bool pathError = false;
@@ -372,7 +375,7 @@ TreeNode TreeNode_Navigate(const TreeNode rootNode, const char* path)
                                 {
                                     // For each token, check if a child's node name matches the next token in the path
                                     _treeNode thisChild = (_treeNode) currentNode->Children[childIndex];
-                                    if (strcmp((const char*) thisChild->Name, pathElement) == 0)
+                                    if (strcmp((const char *) thisChild->Name, pathElement) == 0)
                                     {
                                         currentNode = thisChild;
                                         childFound = true;
@@ -571,7 +574,7 @@ TreeNode TreeNode_ParseXML(uint8_t* doc, uint32_t length, bool wholeDoc)
             XMLParser_SetCharDataHandler(bodyParser, HTTP_xmlDOMBuilder_CharDataHandler);
             XMLParser_SetEndHandler(bodyParser, HTTP_xmlDOMBuilder_EndElementHandler);
             XMLParser_SetUserData(bodyParser, &root);
-            if (XMLParser_Parse(bodyParser, (const char*) doc, length, wholeDoc))
+            if (XMLParser_Parse(bodyParser, (const char *) doc, length, wholeDoc))
             {
                 // Parsed ok
             }
@@ -605,7 +608,7 @@ void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName
         }
         // Check if this is the root node
         if (currentTreeNode == NULL)
-            *(TreeNode*)userData = newNode;
+            *(TreeNode *)userData = newNode;
 
         // Connect the new node up to its parent
         TreeNode_AddChild(currentTreeNode, newNode);
@@ -626,7 +629,7 @@ void HTTP_xmlDOMBuilder_CharDataHandler(void *userData, const char *s, int len)
     {
         if (s)
         {
-            TreeNode_AppendValue(currentTreeNode, (const uint8_t*) s, len);
+            TreeNode_AppendValue(currentTreeNode, (const uint8_t *) s, len);
         }
         else
         {

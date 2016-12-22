@@ -649,7 +649,9 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
     struct sockaddr_storage sourceSocket;
     socklen_t sourceSocketLength = sizeof(struct sockaddr_storage);
     errno = 0;
-    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT, (struct sockaddr *)&sourceSocket, &sourceSocketLength);
+    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT,
+                           (struct sockaddr *)&sourceSocket,
+                           &sourceSocketLength);
     int lastError = errno;
     if (*readLength == SOCKET_ERROR)
     {
