@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -47,7 +47,7 @@ static int PPEncodeString(uint8_t * buffer, int bufferLen, char * value, int len
     {
         memcpy(temp, value, len);
         temp[len] = '\0';
-        result =  snprintf((char*)buffer, bufferLen, "%s", temp);
+        result =  snprintf((char *)buffer, bufferLen, "%s", temp);
         free(temp);
     }
 
@@ -56,7 +56,7 @@ static int PPEncodeString(uint8_t * buffer, int bufferLen, char * value, int len
 
 static int PPEncodeOpaque(uint8_t * buffer, int bufferLen, char * value, int len)
 {
-    char * valueBuffer = (char * )malloc((len*3)+1);
+    char * valueBuffer = (char *)malloc((len*3)+1);
     int result = 0;
 
     if (valueBuffer != NULL)
@@ -71,7 +71,7 @@ static int PPEncodeOpaque(uint8_t * buffer, int bufferLen, char * value, int len
             valuePos += 3;
         }
 
-        result = snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
+        result = snprintf((char *)buffer, bufferLen, "%s", valueBuffer);
 
         free(valueBuffer);
     }
@@ -85,7 +85,7 @@ static int PPEncodeInteger(uint8_t * buffer, int bufferLen, int64_t value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%" PRId64, value))
     {
-        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
+        return snprintf((char *)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -99,7 +99,7 @@ static int PPEncodeFloat(uint8_t * buffer, int bufferLen, double value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%f", value))
     {
-        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
+        return snprintf((char *)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -113,7 +113,7 @@ static int PPEncodeBoolean(uint8_t * buffer, int bufferLen, bool value)
 
     if (snprintf(valueBuffer, sizeof(valueBuffer), "%s", value ? "True" : "False"))
     {
-        return snprintf((char*)buffer, bufferLen, "%s", valueBuffer);
+        return snprintf((char *)buffer, bufferLen, "%s", valueBuffer);
     }
     else
     {
@@ -136,9 +136,11 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
     uint16_t size;
     uint8_t * value;
 
-    value = (uint8_t * )Lwm2mTreeNode_GetValue(node, &size);
+    value = (uint8_t *)Lwm2mTreeNode_GetValue(node, &size);
 
-    headerLen += snprintf((char*)buffer, len, "\t%s[%d/%d/%d/%d]: ", definition->ResourceName, objectID, objectInstanceID, resourceID, resourceInstanceID);
+    headerLen += snprintf((char *)buffer, len, "\t%s[%d/%d/%d/%d]: ",
+                          definition->ResourceName, objectID,
+                          objectInstanceID, resourceID, resourceInstanceID);
 
     if (headerLen <= 0)
     {
@@ -150,11 +152,13 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
     switch (definition->Type)
     {
         case AwaResourceType_String:
-            valueLength = PPEncodeString(valueBuffer, len - headerLen, (char*)value, size);
+            valueLength = PPEncodeString(valueBuffer, len - headerLen,
+                                         (char *)value, size);
             break;
 
         case AwaResourceType_Boolean:
-            valueLength = PPEncodeBoolean(valueBuffer, len - headerLen, *(bool*)value);
+            valueLength = PPEncodeBoolean(valueBuffer, len - headerLen,
+                                          *(bool *)value);
             break;
 
         case AwaResourceType_Time:  // no break
@@ -182,10 +186,12 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             switch (size)
             {
             case sizeof(float):
-                valueLength =  PPEncodeFloat(valueBuffer, len - headerLen, *(float*)value);
+                valueLength =  PPEncodeFloat(valueBuffer, len - headerLen,
+                                             *(float *)value);
                 break;
             case sizeof(double):
-                valueLength =  PPEncodeFloat(valueBuffer, len - headerLen, *(double*)value);
+                valueLength =  PPEncodeFloat(valueBuffer, len - headerLen,
+                                             *(double *)value);
                 break;
             default:
                 Lwm2m_Error("ERROR: prettyprint - invalid length for float\n");
@@ -194,14 +200,15 @@ static int PPSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
             break;
 
         case AwaResourceType_Opaque:
-            valueLength = PPEncodeOpaque(valueBuffer, len - headerLen, (char*)value, size);
+            valueLength = PPEncodeOpaque(valueBuffer, len - headerLen,
+                                         (char *)value, size);
             break;
         default:
             Lwm2m_Error("ERROR: unknown type: %d\n", definition->Type);
             break;
     }
 
-    strcat((char*)valueBuffer, "\n");
+    strcat((char *)valueBuffer, "\n");
 
     return valueLength + headerLen + 1;
 }
@@ -217,7 +224,7 @@ static int PPSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * no
        return -1;
     }
 
-    ResourceDefinition * definition = (ResourceDefinition*)Lwm2mTreeNode_GetDefinition(node);
+    ResourceDefinition * definition = (ResourceDefinition *)Lwm2mTreeNode_GetDefinition(node);
 
     Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
     while (child != NULL)
@@ -256,7 +263,9 @@ static int PPSerialiseObjectInstance(SerdesContext * serdesContext, Lwm2mTreeNod
     {
         return -1;
     }
-    instanceLength += snprintf((char*)buffer, len, "%s[%d/%d]:\n", definition->ObjectName, objectID, objectInstanceID);
+    instanceLength += snprintf((char *)buffer, len, "%s[%d/%d]:\n",
+                               definition->ObjectName, objectID,
+                               objectInstanceID);
 
     Lwm2mTreeNode * child = Lwm2mTreeNode_GetFirstChild(node);
     while (child != NULL)

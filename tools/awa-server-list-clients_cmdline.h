@@ -53,7 +53,7 @@ struct gengetopt_args_info
   const char *ipcPort_help; /**< @brief Connect to Client IPC port help description.  */
   int objects_flag;	/**< @brief Show registered objects (default=off).  */
   const char *objects_help; /**< @brief Show registered objects help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -152,7 +152,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

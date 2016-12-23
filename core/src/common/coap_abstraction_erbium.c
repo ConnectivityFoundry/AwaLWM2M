@@ -348,7 +348,8 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
                     memcpy(&uriBuf[1], transaction->Path, urlLen);
                 }
                 coap_get_header_content_format(response, &ContentType);
-                int payloadLen = coap_get_payload(response, (const uint8_t **) &payload);
+                int payloadLen = coap_get_payload(response,
+                                                  (const uint8_t **) &payload);
 
                 transaction->Callback(transaction->Context, &transaction->Address, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code),
                         ContentType, payload, payloadLen);
@@ -419,7 +420,8 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
             coap_set_header_observe(&request, 0);
             int token = addObserve(remoteAddress, path, callback, context);
             if (token != 0)
-                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+                coap_set_token(&request, (const uint8_t *) &token,
+                               sizeof(token));
 
         }
         else if (observeState == ObserveState_Cancel)
@@ -427,7 +429,8 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
             coap_set_header_observe(&request, 1);
             int token = removeObserve(remoteAddress, path);
             if (token != 0)
-                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+                coap_set_token(&request, (const uint8_t *) &token,
+                               sizeof(token));
         }
     }
 
@@ -665,7 +668,8 @@ void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * me
 
             NetworkAddress_SetAddressType(sourceAddress, &address);
             coap_get_header_content_format(message, &ContentType);
-            int payloadLen = coap_get_payload(message, (const uint8_t **) &payload);
+            int payloadLen = coap_get_payload(message,
+                                              (const uint8_t **) &payload);
 
             observation->Callback(observation->Context, &address, observation->Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
                     ContentType, payload, payloadLen);

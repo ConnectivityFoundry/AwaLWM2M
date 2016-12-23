@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -607,7 +607,9 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
 
                 if (value != NULL)
                 {
-                    defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                    defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                           dataType, value,
+                                                           strlen(value));
                 }
 
                 if (defaultValueLength >= 0)
@@ -625,7 +627,7 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
 
                 if (defaultValue != NULL)
                 {
-                    free((void*)defaultValue);
+                    free((void *)defaultValue);
                 }
             }
             else
@@ -646,7 +648,10 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
                         const uint8_t * defaultValue = NULL;
                         int defaultValueLength = 0;
 
-                        defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                        defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                               dataType,
+                                                               value,
+                                                               strlen(value));
                         if (defaultValueLength >= 0)
                         {
                             Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
@@ -659,7 +664,7 @@ int xmlif_RegisterObjectFromIPCXML(Lwm2mContextType * context,
                         {
                             Lwm2m_Error("xmlif_DecodeValue failed\n");
                         }
-                        free((void*)defaultValue);
+                        free((void *)defaultValue);
                     }
                 }
             }
@@ -849,7 +854,9 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
 
                 if (value != NULL)
                 {
-                    defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                    defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                           dataType, value,
+                                                           strlen(value));
                 }
 
                 if (defaultValueLength >= 0)
@@ -867,7 +874,7 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
 
                 if (defaultValue != NULL)
                 {
-                    free((void*)defaultValue);
+                    free((void *)defaultValue);
                 }
             }
             else
@@ -888,7 +895,10 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
                         const uint8_t * defaultValue = NULL;
                         int defaultValueLength = 0;
 
-                        defaultValueLength = xmlif_DecodeValue((char**)&defaultValue, dataType, value, strlen(value));
+                        defaultValueLength = xmlif_DecodeValue((char **)&defaultValue,
+                                                               dataType,
+                                                               value,
+                                                               strlen(value));
                         if (defaultValueLength >= 0)
                         {
                             Lwm2mTreeNode * resourceInstanceNode = Lwm2mTreeNode_Create();
@@ -901,7 +911,7 @@ DefinitionCount xmlif_RegisterObjectFromDeviceServerXML(Lwm2mContextType * conte
                         {
                             Lwm2m_Error("xmlif_DecodeValue failed\n");
                         }
-                        free((void*)defaultValue);
+                        free((void *)defaultValue);
                     }
                 }
             }

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -59,7 +59,6 @@ struct _NetworkSocket
 typedef struct
 {
     bool InUse;
-    char Uri[MAX_URI_LENGTH];
     NetworkAddress Address;
 } NetworkAddressCache;
 
@@ -80,10 +79,9 @@ static NetworkSocket networkSocket;
 
 static NetworkAddressCache networkAddressCache[MAX_NETWORK_ADDRESS_CACHE] = {{0}};
 
-static NetworkAddress * addCachedAddress(const char * uri, int uriLength);
-static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress, const char * uri, int uriLength);
-static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength);
-static int getUriHostLength(const char * uri, int uriLength);
+// Both functions require the port to be in network format
+static NetworkAddress * addCachedAddress(const uip_ipaddr_t * addr, uint16_t port, bool secure);
+static NetworkAddress * getCachedAddress(const uip_ipaddr_t * addr, uint16_t port);
 
 #ifndef ENCRYPT_BUFFER_LENGTH
 #define ENCRYPT_BUFFER_LENGTH 1024
@@ -147,9 +145,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
     NetworkAddress * result = NULL;
     if (uri && uriLength > 0)
     {
-        int uriHostLength = getUriHostLength(uri, uriLength);
-        if (uriHostLength > 0)
-            result = getCachedAddressByUri(uri, uriHostLength);
         if (!result)
         {
             bool secure = false;
@@ -238,19 +233,27 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             if (hostnameLength > 0 && port > 0)
             {
                 uip_ipaddr_t * resolvedAddress = getHostByName(hostname);
+                port = UIP_HTONS(port);
+
                 if (resolvedAddress)
                 {
-                    NetworkAddress * networkAddress = addCachedAddress(uri, uriHostLength);
+                    NetworkAddress * networkAddress = getCachedAddress(resolvedAddress, port);
+
+                    if(!networkAddress)
+                    {
+                        networkAddress = addCachedAddress(resolvedAddress, port, secure);
+                    }
+
                     if (networkAddress)
                     {
-                        memcpy(&networkAddress->Address, resolvedAddress, sizeof(uip_ipaddr_t));
-                        networkAddress->Secure = secure;
-                        networkAddress->useCount = 1;
-                        networkAddress->Port = UIP_HTONS(port);
                         result = networkAddress;
                     }
                 }
             }
+        }
+        if(result)
+        {
+            result->useCount++;
         }
     }
     return result;
@@ -294,15 +297,7 @@ void NetworkAddress_Free(NetworkAddress ** address)
             {
                 if (NetworkAddress_Compare(&networkAddressCache[index].Address, *address) == 0)
                 {
-                    if (networkAddressCache[index].Uri)
-                    {
-                        Lwm2m_Debug("Address free: %s\n", networkAddressCache[index].Uri);
-                        networkAddressCache[index].Uri[0] = '\0';
-                    }
-                    else
-                    {
-                        Lwm2m_Debug("Address free\n");
-                    }
+                    Lwm2m_Debug("Address free\n");
                     networkAddressCache[index].InUse = false;
                     break;
                 }
@@ -322,7 +317,7 @@ bool NetworkAddress_IsSecure(const NetworkAddress * address)
     return result;
 }
 
-static NetworkAddress * addCachedAddress(const char * uri, int uriLength)
+static NetworkAddress * addCachedAddress(const uip_ipaddr_t * addr, uint16_t port, bool secure)
 {
     NetworkAddress * result = NULL;
     int index;
@@ -330,13 +325,13 @@ static NetworkAddress * addCachedAddress(const char * uri, int uriLength)
     {
         if (!networkAddressCache[index].InUse)
         {
-            if (uri && uriLength > 0)
-            {
-                memcpy(networkAddressCache[index].Uri, uri, uriLength);
-                networkAddressCache[index].Uri[uriLength] = 0;
-                Lwm2m_Debug("Address add: %s\n", networkAddressCache[index].Uri);
-            }
+            NetworkAddress * networkAddress = &networkAddressCache[index].Address;
+
             networkAddressCache[index].InUse = true;
+            memcpy(&networkAddress->Address, addr, sizeof(uip_ipaddr_t));
+            networkAddress->Port = port;
+            networkAddress->Secure = secure;
+            networkAddress->useCount = 1;
             result = &networkAddressCache[index].Address;
             break;
         }
@@ -344,43 +339,22 @@ static NetworkAddress * addCachedAddress(const char * uri, int uriLength)
     return result;
 }
 
-
-
-static NetworkAddress * getCachedAddressByUri(const char * uri, int uriLength)
+static NetworkAddress * getCachedAddress(const uip_ipaddr_t * addr, uint16_t port)
 {
     NetworkAddress * result = NULL;
+    NetworkAddress matchAddress;
     int index;
-    for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
-    {
-        if (networkAddressCache[index].Uri && (memcmp(networkAddressCache[index].Uri, uri, uriLength) == 0))
-        {
-            //Lwm2m_Debug("Address uri matched: %s\n", networkAddressCache[index].uri);
-            result = &networkAddressCache[index].Address;
-            break;
-        }
-    }
-    return result;
-}
 
-static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress, const char * uri, int uriLength)
-{
-    NetworkAddress * result = NULL;
-    int index;
+    memcpy(&matchAddress.Address, addr, sizeof(uip_ipaddr_t));
+    matchAddress.Port = port;
+
     for (index = 0; index < MAX_NETWORK_ADDRESS_CACHE; index++)
     {
         NetworkAddress * address = &networkAddressCache[index].Address;
         if (address)
         {
-            if (NetworkAddress_Compare(matchAddress, address) == 0)
+            if (NetworkAddress_Compare(&matchAddress, address) == 0)
             {
-                if (uri && uriLength > 0 && networkAddressCache[index].Uri == NULL)
-                {
-                    // Add info to cached address
-                    address->Secure = matchAddress->Secure;
-                    memcpy(networkAddressCache[index].Uri, uri, uriLength);
-                    networkAddressCache[index].Uri[uriLength] = 0;
-                    Lwm2m_Debug("Address add uri: %s\n", networkAddressCache[index].Uri);
-                }
                 result = address;
                 break;
             }
@@ -388,28 +362,6 @@ static NetworkAddress * getCachedAddress(NetworkAddress * matchAddress, const ch
     }
     return result;
 }
-
-static int getUriHostLength(const char * uri, int uriLength)
-{
-    // Search for end of host + optional port
-    int result = uriLength;
-    char * pathStart = memchr(uri, '/', uriLength);
-    if (pathStart && pathStart[1] == '/' )
-    {
-        pathStart += 2;
-        int lengthRemaining = uriLength - (pathStart - uri);
-        if (lengthRemaining > 0)
-        {
-            pathStart = memchr(pathStart, '/', lengthRemaining);
-            if (pathStart)
-            {
-                result = pathStart - uri;
-            }
-        }
-    }
-    return result;
-}
-
 
 NetworkSocket * NetworkSocket_New(const char * ipAddress, NetworkSocketType socketType, uint16_t port)
 {
@@ -488,23 +440,18 @@ bool readUDP(NetworkSocket * networkSocket, uint8_t * buffer, int bufferLength, 
     }
     if (*readLength > 0)
     {
+        uip_ipaddr_t * address = &UIP_IP_BUF->srcipaddr;
+        uint16_t port = UIP_IP_BUF->srcport;
+        bool secure = (networkSocket->SocketType & NetworkSocketType_Secure) == NetworkSocketType_Secure;
+
         memcpy(buffer, uip_appdata, *readLength);
-        NetworkAddress * networkAddress = NULL;
-        NetworkAddress matchAddress;
-        size_t size = sizeof(struct _NetworkAddress);
-        memset(&matchAddress, 0, size);
-        memcpy(&matchAddress.Address, &UIP_IP_BUF->srcipaddr, sizeof(uip_ipaddr_t));
-        matchAddress.Port =  UIP_IP_BUF->srcport; //uip_ntohs(UIP_UDP_BUF->srcport);
-        matchAddress.Secure = (networkSocket->SocketType & NetworkSocketType_Secure) == NetworkSocketType_Secure;
-        networkAddress = getCachedAddress(&matchAddress, NULL, 0);
+        NetworkAddress * networkAddress = getCachedAddress(address, port);
 
         if (networkAddress == NULL)
         {
-            networkAddress = addCachedAddress(NULL, 0);
+            networkAddress = addCachedAddress(address, port, secure);
             if (networkAddress)
             {
-                // Add new address to cache (note: uri and secure is unknown)
-                memcpy(networkAddress, &matchAddress, size);
                 networkAddress->useCount++;         // TODO - ensure addresses are freed? (after t/o or transaction or DTLS session closed)
             }
         }

@@ -223,6 +223,7 @@ class DeleteResponse(IpcResponse):
 class ObserveRequest(IpcRequest):
     MessageType = "Observe"
     SupportedModelPaths = ( "O", "OI", "OIR" )
+    PathLabel = "Observe"
     def add(self, path, value=None):
         super(ObserveRequest, self).add(path, None)
 

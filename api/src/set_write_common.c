@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -94,10 +94,10 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                     switch(sessionType)
                     {
                         case SessionType_Client:
-                            sessionCommon = ClientSession_GetSessionCommon((AwaClientSession*)session);
+                            sessionCommon = ClientSession_GetSessionCommon((AwaClientSession *)session);
                             break;
                         case SessionType_Server:
-                            sessionCommon = ServerSession_GetSessionCommon((AwaServerSession*)session);
+                            sessionCommon = ServerSession_GetSessionCommon((AwaServerSession *)session);
                             break;
                         default:
                             result = LogErrorWithEnum(AwaError_Internal, "SessionType is invalid: %d\n", sessionType);
@@ -109,10 +109,12 @@ AwaError SetWriteCommon_AddValue(OperationCommon * operation, SessionType sessio
                         switch(sessionType)
                         {
                             case SessionType_Client:
-                                resourceDefinition = ClientSession_GetResourceDefinitionFromPath((AwaClientSession*)session, path);
+                                resourceDefinition = ClientSession_GetResourceDefinitionFromPath((AwaClientSession *)session,
+                                                                                                 path);
                                 break;
                             case SessionType_Server:
-                                resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession*)session, path);
+                                resourceDefinition = ServerSession_GetResourceDefinitionFromPath((AwaServerSession *)session,
+                                                                                                 path);
                                 break;
                             default:
                                 result = LogErrorWithEnum(AwaError_Internal, "SessionType is invalid: %d\n", sessionType);

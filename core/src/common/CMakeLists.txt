@@ -33,8 +33,11 @@ if (WITH_TINYDTLS)
   list (APPEND awa_common_SOURCES dtls_abstraction_tinydtls.c)
 endif ()
 
+if (WITH_MBEDTLS)
+  list (APPEND awa_common_SOURCES dtls_abstraction_mbedTLS.c)
+endif ()
 
-if (NOT WITH_GNUTLS AND NOT WITH_CYASSL AND NOT WITH_TINYDTLS)
+if (NOT WITH_GNUTLS AND NOT WITH_CYASSL AND NOT WITH_TINYDTLS AND NOT WITH_MBEDTLS)
   list (APPEND awa_common_SOURCES dtls_abstraction_dummy.c)
 endif ()
 
@@ -92,6 +95,10 @@ endif ()
 
 if (WITH_TINYDTLS)
   list (APPEND awa_common_LIBS tinydtls_static)
+endif ()
+
+if (WITH_MBEDTLS)
+  list (APPEND awa_common_LIBS mbedx509 mbedcrypto mbedtls)
 endif ()
 
 if (ENABLE_GCOV)

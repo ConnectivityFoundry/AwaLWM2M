@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -83,13 +83,13 @@ const char * xmlif_OperationToString(AwaResourceOperations operation)
 
 int xmlif_GetInteger(TreeNode content, const char * name)
 {
-    TreeNode node = TreeNode_Navigate(content, (char*)name);
+    TreeNode node = TreeNode_Navigate(content, (char *)name);
     if (node != NULL)
     {
         const uint8_t * value = TreeNode_GetValue(node);
         if (value != NULL)
         {
-            return atoi((const char*)value);
+            return atoi((const char *)value);
         }
     }
     return -1;
@@ -97,7 +97,7 @@ int xmlif_GetInteger(TreeNode content, const char * name)
 
 const char * xmlif_GetOpaque(TreeNode content, const char * name)
 {
-    TreeNode node = TreeNode_Navigate(content, (char*)name);
+    TreeNode node = TreeNode_Navigate(content, (char *)name);
     if (node != NULL)
     {
         return (const char *)TreeNode_GetValue(node);
@@ -137,7 +137,8 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
                 goto error;
             }
             dataValue[outLength] = '\0';
-            outLength = b64Encode(dataValue, outLength, (char*)buffer, bufferLength);
+            outLength = b64Encode(dataValue, outLength, (char *)buffer,
+                                  bufferLength);
             break;
 
         case AwaResourceType_Float:
@@ -171,16 +172,20 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
             switch (bufferLength)
             {
                 case sizeof(int8_t):
-                    outLength = asprintf(&dataValue, "%"PRId8, *(int8_t*)&buffer[0]);
+                    outLength = asprintf(&dataValue, "%"PRId8,
+                                         *(int8_t *)&buffer[0]);
                     break;
                 case sizeof(int16_t):
-                    outLength = asprintf(&dataValue, "%"PRId16, *(int16_t*)&buffer[0]);
+                    outLength = asprintf(&dataValue, "%"PRId16,
+                                         *(int16_t *)&buffer[0]);
                     break;
                 case sizeof(int32_t):
-                    outLength = asprintf(&dataValue, "%"PRId32, *(int32_t*)&buffer[0]);
+                    outLength = asprintf(&dataValue, "%"PRId32,
+                                         *(int32_t *)&buffer[0]);
                     break;
                 case sizeof(int64_t):
-                    outLength = asprintf(&dataValue, "%"PRId64, *(int64_t*)&buffer[0]);
+                    outLength = asprintf(&dataValue, "%"PRId64,
+                                         *(int64_t *)&buffer[0]);
                     break;
                 default:
                     outLength = -1;
@@ -196,7 +201,8 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
             break;
 
         case AwaResourceType_Boolean:
-            outLength = asprintf(&dataValue, "%s", (*(bool*)&buffer[0]) ? "True" : "False");
+            outLength = asprintf(&dataValue, "%s",
+                                 (*(bool *)&buffer[0]) ? "True" : "False");
 
             if ((outLength <= 0) || (dataValue == NULL))
             {
@@ -205,14 +211,16 @@ char * xmlif_EncodeValue(AwaResourceType dataType, const char * buffer, int buff
             }
             break;
 
-        case AwaResourceType_ObjectLink:;
-            AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
-            outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
-
-            if ((outLength <= 0) || (dataValue == NULL))
+        case AwaResourceType_ObjectLink:
             {
-                AwaResult_SetResult(AwaResult_OutOfMemory);
-                goto error;
+                AwaObjectLink * objectLink = (AwaObjectLink *) buffer;
+                outLength = asprintf(&dataValue, "%d:%d", objectLink->ObjectID, objectLink->ObjectInstanceID);
+
+                if ((outLength <= 0) || (dataValue == NULL))
+                {
+                    AwaResult_SetResult(AwaResult_OutOfMemory);
+                    goto error;
+                }
             }
             break;
 
@@ -235,7 +243,7 @@ int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * 
     switch(dataType)
     {
         case AwaResourceType_String:
-        case AwaResourceType_Opaque: 
+        case AwaResourceType_Opaque:
         case AwaResourceType_None: // TypeNone for Executable payload which is an Opaque
             outLength = ((bufferLength * 3) / 4);  // every 4 base encoded bytes are decoded to 3 bytes
             *dataValue = malloc(outLength);
@@ -244,7 +252,8 @@ int xmlif_DecodeValue(char ** dataValue, AwaResourceType dataType, const char * 
                 AwaResult_SetResult(AwaResult_OutOfMemory);
                 goto error;
             }
-            dataLength = b64Decode(*dataValue, outLength, (char*)buffer, bufferLength);
+            dataLength = b64Decode(*dataValue, outLength, (char *)buffer,
+                                   bufferLength);
             if (dataLength == -1)
             {
                 AwaResult_SetResult(AwaResult_BadRequest);
