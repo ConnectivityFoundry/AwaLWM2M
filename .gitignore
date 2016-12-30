@@ -17,6 +17,7 @@ valgrind/
 build/
 build.openwrt/
 .build_x86
+*.cmake
 
 # Eclipse
 .project
