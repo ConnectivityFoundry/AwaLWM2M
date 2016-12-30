@@ -430,6 +430,11 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
         {
             Lwm2m_Debug("got psk_identity_hint: '%.*s'\n", (int)id_len, id);
         }
+        if (!pskIdentity)
+        {
+            Lwm2m_Error("psk identity is not set\n");
+            return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+        }
         int pskIdentityLength = strlen(pskIdentity);
         if (result_length < pskIdentityLength)
         {
