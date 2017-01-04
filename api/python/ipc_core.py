@@ -24,7 +24,12 @@
 IPC Core Functionality
 """
 
-from lxml import etree
+try:
+    import lxml.etree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
+
+from future.utils import iteritems
 
 g_debug = True
 def debug(msg):
@@ -32,13 +37,13 @@ def debug(msg):
         print(msg)
 
 def _serialize(header, msgType, sessionID, content):
-    e_root = etree.Element(header)
+    e_root = ElementTree.Element(header)
     e_root.append(TElement("Type", str(msgType)))
     if sessionID is not None:
         e_root.append(TElement("SessionID", str(sessionID)))
     if content is not None:
         e_root.append(content)
-    return etree.tostring(e_root, pretty_print=True)
+    return ElementTree.tostring(e_root)
 
 def is_sequence(arg):
     """Test for sequence, excluding strings: http://stackoverflow.com/a/1835259/143397"""
@@ -76,7 +81,7 @@ class IpcContent(object):
         self._model.add(path, value, label)
 
     def getElement(self):
-        e_content = etree.Element("Content")
+        e_content = ElementTree.Element("Content")
         e_model = self._model.getElement()
         # strip the outer container
         for child in e_model.getchildren():
@@ -134,7 +139,7 @@ class IpcResponse(IpcMessage):
 
     def parseXml(self, xml):
         #debug("RECEIVED XML: %s\n" % (xml, ))
-        e_response = etree.fromstring(xml)
+        e_response = ElementTree.fromstring(xml)
         if e_response.tag != "Response":
             raise IpcError("Invalid response")
         try:
@@ -202,7 +207,7 @@ def TElement(tag, text=None, tail=None, parent=None, attrib={}, **extra):
     """Helper function to create an etree.Element with text and tail.
     Ensure that text is a string.
     """
-    element = etree.Element(tag, attrib, **extra)
+    element = ElementTree.Element(tag, attrib, **extra)
     if text is not None:
         assert isinstance(text, str), "text must be of type str"
         element.text = text
@@ -306,7 +311,7 @@ class TreeNode(object):
             s += "value %s, " % (self._value,)
         if self._children:
             s += "children "
-            for key, value in self._children.iteritems():
+            for key, value in iteritems(self._children):
                 s += str(key) + ":%x" % (id(value),) + " "
         s += "]"
         return s
@@ -377,7 +382,7 @@ class etreeProcessor(object):
 
     def _createElement(self, treeNode, e_parent, tag, IDTag, valueTag=None):
         # create a new element based on treeNode, and add to parentElement
-        e_element = etree.Element(tag)
+        e_element = ElementTree.Element(tag)
 
         ID = treeNode.getID()
         if ID is not None:
@@ -393,7 +398,7 @@ class etreeProcessor(object):
 
         label = treeNode.getLabel()
         if label is not None:
-            e_element.append(etree.Element(label))
+            e_element.append(ElementTree.Element(label))
 
         debug("Adding %s to %s" % (e_element, e_parent))
         e_parent.append(e_element)
@@ -474,8 +479,8 @@ class DataModel(object):
 
     def getElement(self):
         """Convert the data model into an Element."""
-        node = etree.Element("Model")
-        objects = etree.Element("Objects")
+        node = ElementTree.Element("Model")
+        objects = ElementTree.Element("Objects")
         node.append(objects)
         if self._root is not None:
             processor = etreeProcessor()
