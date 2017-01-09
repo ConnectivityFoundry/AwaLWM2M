@@ -32,6 +32,15 @@ $ docker build -t flowm2m/awalwm2m -f ci/Dockerfile .
 This will install all dependencies and build the Awa binaries and documentation, and run the unit tests within the docker
 image. It will also install Awa binaries into the image.
 
+The above docker image will have default options, which currently doesn't include support for DTLS.  Awa is capable
+of supporting several different DTLS implementations. To use GnuTLS as the DTLS implementation, you can build with:
+
+```sh
+$ docker build -t flowm2m/awalwm2m-gnutls --build-arg "CMAKE_OPTIONS=-DWITH_GNUTLS=ON" -f ci/Dockerfile .
+```
+
+Various other `cmake` options can be found [here](../CMakeLists.txt).
+
 **Note.** *When Awa builds, it runs a suite of unit tests to check that it is functioning correctly. Several of the tests
 intentionally trigger errors which will be displayed in the docker build log as red errors. These can be ignored.*
 
@@ -89,7 +98,7 @@ $ as awa-server-read -a ipc --clientID Client1 /3/0
 Another option is to run the container as a shell and run the commands directly. You must still use the -a option to
 specify the address of the associated daemon:
 
-```sh
+```
 $ docker run --rm --link awa_serverd:is --link awa_clientd:ic -it flowm2m/awalwm2m
 # awa-server-list-clients -a is
 # awa-client-get -a ic /3
