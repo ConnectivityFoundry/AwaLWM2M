@@ -18,8 +18,7 @@ install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
     - virtualenv --system-site-packages venv
     - source venv/bin/activate
-    - pip install nose
-    - pip install lxml
+    - pip install -r ci/requirements.txt
 
 # Travis-CI does not support IPv6 addresses:
 script: make tests TEST_FILTER=*.*:-*.*_handles_IPv6_address*
