@@ -13,10 +13,10 @@
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 # SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #************************************************************************************************************************/
 
@@ -24,7 +24,9 @@
 IPC Core Functionality
 """
 
-from lxml import etree
+# py-lxml is not yet available in openwrt
+#from lxml import etree
+import xml.etree.ElementTree as etree
 
 g_debug = True
 def debug(msg):
@@ -38,7 +40,7 @@ def _serialize(header, msgType, sessionID, content):
         e_root.append(TElement("SessionID", str(sessionID)))
     if content is not None:
         e_root.append(content)
-    return etree.tostring(e_root, pretty_print=True)
+    return etree.tostring(e_root)
 
 def is_sequence(arg):
     """Test for sequence, excluding strings: http://stackoverflow.com/a/1835259/143397"""
@@ -306,7 +308,7 @@ class TreeNode(object):
             s += "value %s, " % (self._value,)
         if self._children:
             s += "children "
-            for key, value in self._children.iteritems():
+            for key, value in self._children.items():  # iteritems in python 2
                 s += str(key) + ":%x" % (id(value),) + " "
         s += "]"
         return s

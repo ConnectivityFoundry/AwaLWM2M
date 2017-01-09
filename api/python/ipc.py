@@ -35,7 +35,7 @@ g_epilog = """Examples:
   ipc.py --ipc udp://127.0.0.1:54321  # Specify IPC channel
 """
 
-g_DEBUG = False
+g_DEBUG = True
 
 def main():
 
@@ -76,12 +76,12 @@ def udp_ipc(id, request):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # send UDP packet
-    if g_DEBUG: print("IPC SEND:\n" + request)
+    if g_DEBUG: print("IPC SEND:\n" + str(request))
     sock.sendto(request, (address, port))
 
     # retrieve and print response
     data, addr = sock.recvfrom(65536)
-    if g_DEBUG: print("IPC RECV:\n" + data)
+    if g_DEBUG: print("IPC RECV:\n" + str(data))
     return data
 
 if __name__ == "__main__":
