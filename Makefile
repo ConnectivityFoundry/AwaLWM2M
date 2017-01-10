@@ -53,7 +53,7 @@ endif
 override CMAKE_OPTIONS+=-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
 
 # absolute path of BUILD_DIR
-BUILD_DIR_ABS:=$(shell pwd)/$(BUILD_DIR)
+BUILD_DIR_ABS:=$(realpath $(BUILD_DIR))
 
 all: $(BUILD_DIR)/Makefile
 	$(MAKE) -C $(BUILD_DIR) --no-print-directory
