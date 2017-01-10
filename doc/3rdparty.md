@@ -3,15 +3,16 @@
 
 ----
 
-# Awa LightweightM2M. 
+# Awa LightweightM2M
 
-## Connecting the Awa LightweightM2M client to third-party servers.
+## Connecting the Awa LightweightM2M client to third-party servers
 
-### Wakaama (bootstrap) / Leshan (server).
+### Wakaama (bootstrap) / Leshan (server)
 
 The *awa_clientd*  daemon can connect to both the Wakaama and Leshan servers. These are third-party LWM2M servers provided by the Eclipse Foundation. The following instructions outline how to use the Wakaama bootstrap server and a Leshan server.
 
 Compile and run the Wakaama bootstrap server. You may need to edit *bootstrap_server.ini* to decrease the *lifetime* setting, though the remaining settings are pre-configured for Leshan:
+
 ````
 $ git clone https://github.com/eclipse/wakaama.git
 $ mkdir bootstrap
@@ -33,15 +34,19 @@ security=NoSec
 
 $ bootstrap> ./bootstrap_server -p 15678
 ````
+
 Run the Imagination LWM2M client with the above bootstrap server address specified:
+
 ````
 $ build/daemon/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
 ````
+
 Open http://leshan.eclipse.org/ in your web browser.
 
-### Wakaama (server).
+### Wakaama (server)
 
 Assuming you have already built the bootstrap server, modify the configuration and start the bootstrap server:
+
 ````
 $ bootstrap> vi bootstrap_server.ini
 
@@ -56,7 +61,9 @@ security=NoSec
 
 $ bootstrap> ./bootstrap_server -p 15678
 ````
+
 Compile and run the wakaama server:
+
 ````
 $ mkdir server
 $ cd server
@@ -64,11 +71,13 @@ $ server> cmake ../wakaama/tests/server
 $ server> make
 $ server> ./lwm2mserver
 ````
+
 Run the Awa LightweightM2M client:
+
 ````
 $ build/daemon/src/client/awa_clientd --bootstrap coap://0.0.0.0:15678 --verbose --endPointName imaginationtest
 ````
+
 The Wakaama client will show the registration attempt.
 
-----
 ----
