@@ -1,10 +1,10 @@
 {
-    "default": true,
-    "MD014": false,
-    "MD029": false,
-    "MD034": false,
-    "MD040": false,
-    "MD041": false,
-    "no-hard-tabs": false,
-    "line-length": false
+  "default": true,
+  "commands-show-output": false,
+  "ol-prefix": false,
+  "no-bare-urls": false,
+  "fenced-code-language": false,
+  "first-line-h1": false,
+  "no-hard-tabs": false,
+  "line-length": false
 }
