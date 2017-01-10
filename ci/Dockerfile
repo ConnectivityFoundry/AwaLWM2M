@@ -18,8 +18,15 @@ RUN apt-get update -yq && apt-get install -yq \
 	libxslt-dev \
 	doxygen \
 	graphviz \
+	gnutls-dev \
+	gawk \
 	cmake
 # apt-get clean is automatic for Ubuntu images
+
+# some handy utilities for development purposes
+RUN apt-get install -yq \
+	dnsutils \
+	iputils-ping
 
 # install pyenv
 RUN useradd -m build
@@ -38,6 +45,10 @@ RUN pyenv install 2.7.11 && pyenv global 2.7.11 && pyenv rehash
 USER root
 COPY . $HOME/AwaLWM2M
 RUN chown build:build -R $HOME/AwaLWM2M
+
+# allow CMAKE_OPTIONS to be specified during image build-time
+ARG CMAKE_OPTIONS
+ENV CMAKE_OPTIONS ${CMAKE_OPTIONS}
 
 # build AwaLWM2M and tests
 USER build
