@@ -1,15 +1,13 @@
 ﻿
-
 ![](images/img.png)
 
 ----
 
-# Extra information for Awa LightweightM2M contributors.
+# Extra information for Awa LightweightM2M contributors
 
+## Rebasing
 
-## Rebasing.
-
-Usually rebasing commits that have already been pushed is strongly discouraged. 
+Usually rebasing commits that have already been pushed is strongly discouraged.
 
 The main problem with rebasing pushed commits is that if another contributor has based
 their work on one of the commits which is subsequently rebased, this effectively
@@ -21,11 +19,10 @@ the universe to implode.
 
 That said, here's the process...
 
-
 First, fetch any upstream changes...
 
 ```
-$ git fetch upstream 
+$ git fetch upstream
 ```
 
 and change to your development branch...
@@ -34,7 +31,7 @@ and change to your development branch...
 $ git checkout dev-branch1
 ```
 
-### Rebasing your commits on top of upstream/master.
+### Rebasing your commits on top of upstream/master
 
 Now if you want to rebase your commits on top without making any additional changes you can use the command:
 
@@ -42,7 +39,7 @@ Now if you want to rebase your commits on top without making any additional chan
 $ git rebase upstream/master
 ```
 
-### Editing commit messages.
+### Editing commit messages
 
 If you want to edit a commit message you will need to use the interactive rebase.
 
@@ -68,7 +65,8 @@ pick d38fb35 Deleted line
 # x, exec = run command (the rest of the line) using shell
 # d, drop = remove commit
 ```
-To change a commit comment, select the line you wish to change by replacing 
+
+To change a commit comment, select the line you wish to change by replacing
 "pick" with "r" and then saving the document.
 
 ```
@@ -88,8 +86,7 @@ Fixed typo
 
 Save and quit to apply your changes.
 
-
-### Squashing commits.
+### Squashing commits
 
 If you want to squash multiple commits together into a single commit you will need to use the interactive
 rebase.
@@ -116,9 +113,9 @@ pick d38fb35 Deleted line
 # x, exec = run command (the rest of the line) using shell
 # d, drop = remove commit
 ```
+
 To change a commit comment, select the lines you wish to squash by replacing
 "pick" with "s" and saving the document.
-
 
 For example:
 
@@ -128,7 +125,7 @@ s 80309d3 Fixed tpyo
 s d38fb35 Deleted line
 ```
 
-If all goes well your text editor will open and display something like... 
+If all goes well your text editor will open and display something like...
 
 ```
 # This is a combination of 3 commits.
@@ -147,8 +144,7 @@ Deleted line
 Comment out any of the commit messages you no longer require, enter a new message
 then save and quit.
 
-
-###Aborting a rebase.
+### Aborting a rebase
 
 If you feel uncertain at any stage, you can abort a rebase using the following command:
 
@@ -156,10 +152,9 @@ If you feel uncertain at any stage, you can abort a rebase using the following c
 $ git rebase --abort
 ```
 
+### Pushing your changes
 
-### Pushing your changes.
-
-After rebasing you will not be able to push your changes back to your branch. You will need to use the --force option. 
+After rebasing you will not be able to push your changes back to your branch. You will need to use the --force option.
 There's no going back if you make a mistake so be sure about what you are pushing, and that you are pushing the correct branch to the correct remote.
 
 ```
@@ -169,6 +164,3 @@ $ git push -f origin dev-branch1:dev-branch1
 The above command will replace origin/dev-branch1 with the contents of dev-branch1, including all history.
 
 ----
-
-----
-
