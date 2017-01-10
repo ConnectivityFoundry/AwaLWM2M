@@ -24,7 +24,11 @@
 LWM2M Server IPC Interface
 """
 
-from lxml import etree
+try:
+    import lxml.etree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
+
 import ipc_core
 
 class IpcError(Exception):
@@ -96,10 +100,10 @@ class ContentClientID(ipc_core.IpcContent):
         model.add(path, value, label)
 
     def getElement(self):
-        e_content = etree.Element("Content")
-        e_clients = etree.Element("Clients")
+        e_content = ElementTree.Element("Content")
+        e_clients = ElementTree.Element("Clients")
         for client_id in self._clients:
-            e_client = etree.Element("Client")
+            e_client = ElementTree.Element("Client")
             e_client.append(ipc_core.TElement("ID", str(client_id)))
             e_model = self._clients[client_id].model.getElement()
             # strip the outer container
