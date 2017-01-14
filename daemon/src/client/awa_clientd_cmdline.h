@@ -84,7 +84,7 @@ struct gengetopt_args_info
   const char *logFile_help; /**< @brief Log output to FILE help description.  */
   int version_flag;	/**< @brief Print version and exit (default=off).  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int port_given ;	/**< @brief Whether port was given.  */
   unsigned int addressFamily_given ;	/**< @brief Whether addressFamily was given.  */
@@ -192,7 +192,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

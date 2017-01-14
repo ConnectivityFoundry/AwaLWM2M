@@ -1,0 +1,31 @@
+diff --git a/crypto.h b/crypto.h
+index f434618..fde1221 100644
+--- a/crypto.h
++++ b/crypto.h
+@@ -36,13 +36,16 @@
+ #define DTLS_MAC_LENGTH        DTLS_HMAC_DIGEST_SIZE
+ #define DTLS_IV_LENGTH         4  /* length of nonce_explicit */
+ 
++/* This is the maximal supported length of the pre-shared key. */
++#define DTLS_PSK_MAX_KEY_LEN 32
++
+ /** 
+  * Maximum size of the generated keyblock. Note that MAX_KEYBLOCK_LENGTH must 
+  * be large enough to hold the pre_master_secret, i.e. twice the length of the 
+  * pre-shared key + 1.
+  */
+ #define MAX_KEYBLOCK_LENGTH  \
+-  (2 * DTLS_MAC_KEY_LENGTH + 2 * DTLS_KEY_LENGTH + 2 * DTLS_IV_LENGTH)
++  (2 * DTLS_MAC_KEY_LENGTH + 2 * DTLS_PSK_MAX_KEY_LEN + 2 * DTLS_IV_LENGTH)
+ 
+ /** Length of DTLS master_secret */
+ #define DTLS_MASTER_SECRET_LENGTH 48
+@@ -77,8 +80,6 @@ typedef struct {
+  * server identity hint */
+ #define DTLS_PSK_MAX_CLIENT_IDENTITY_LEN   32
+ 
+-/* This is the maximal supported length of the pre-shared key. */
+-#define DTLS_PSK_MAX_KEY_LEN DTLS_KEY_LENGTH
+ 
+ typedef struct {
+   uint16_t id_length;

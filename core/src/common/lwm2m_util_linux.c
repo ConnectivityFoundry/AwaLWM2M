@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -100,12 +100,14 @@ const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
     switch (sa->sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr,
+                           buffer, sizeof(buffer));
             port = ntohs(((struct sockaddr_in *)sa)->sin_port);
             sprintf(out, "%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+                           buffer, sizeof(buffer));
             port =  ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
             sprintf(out, "[%s]:%d", ip, port);
             break;
