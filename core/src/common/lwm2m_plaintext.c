@@ -38,6 +38,11 @@
 static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition * definition, int objectID,
                                        int instanceID, int resourceID, int resID, uint8_t * buffer, int len)
 {
+    (void)objectID;
+    (void)instanceID;
+    (void)resourceID;
+    (void)resID;
+
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_ResourceInstance)
     {
        Lwm2m_Error("ERROR: Resource Instance node type expected. Received %d\n", Lwm2mTreeNode_GetType(node));
@@ -122,6 +127,8 @@ static int PTSerialiseResourceInstance(Lwm2mTreeNode * node, ResourceDefinition 
 static int PTSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * node, ObjectIDType objectID,
                                ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * buffer, int len)
 {
+    (void)serdesContext;
+
     int resourceLength = 0;
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)
@@ -156,6 +163,8 @@ static int PTSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * no
 static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                                  ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const uint8_t * buffer, int bufferLen)
 {
+    (void)serdesContext;
+    (void)objectInstanceID;
     int result = -1;
     ResourceDefinition * definition;
 
@@ -188,7 +197,8 @@ static int PTDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode **
         case AwaResourceType_Time:
             {
                 int64_t temp = 0;
-                result = sscanf((char *)buffer, "%" SCNu64, &temp);
+                result = sscanf((char *)buffer, "%" SCNi64, &temp);
+
                 if (result > 0)
                 {
                     result = Lwm2mTreeNode_SetValue(resourceValueNode,

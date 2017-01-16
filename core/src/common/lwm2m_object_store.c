@@ -130,7 +130,7 @@ static Resource * LookupResource(const ObjectStore * store, ObjectIDType objectI
     return NULL;
 }
 
-static Resource * CreateResource(const ObjectStore * store, ObjectInstance * instance, ObjectIDType objectID, ResourceIDType resourceID)
+static Resource * CreateResource(ObjectInstance * instance, ResourceIDType resourceID)
 {
     Resource * resource = GetResource(instance, resourceID);
     if (resource)
@@ -226,7 +226,7 @@ Object * CreateObject(ObjectStore * store, ObjectIDType objectID)
     return object;
 }
 
-static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * object, ObjectInstanceIDType objectInstanceID)
+static ObjectInstance * CreateObjectInstance(Object * object, ObjectInstanceIDType objectInstanceID)
 {
     ObjectInstance * instance = GetObjectInstance(object, objectInstanceID);
     if (instance != NULL)
@@ -726,7 +726,7 @@ ResourceIDType ObjectStore_CreateResource(ObjectStore * store, ObjectIDType obje
         AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
-    Resource * resource = CreateResource(store, instance, objectID, resourceID);
+    Resource * resource = CreateResource(instance, resourceID);
     if (resource != NULL)
     {
         Lwm2m_Debug("Created new resource ID: %d for object %d instance %d\n", resource->ID, objectID, objectInstanceID);
@@ -774,7 +774,7 @@ ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, Objec
     }
 
     // Create the new object instance
-    ObjectInstance * instance = CreateObjectInstance(store, obj, objectInstanceID);
+    ObjectInstance * instance = CreateObjectInstance(obj, objectInstanceID);
     if (instance == NULL)
     {
         Lwm2m_Error("Failed to create object instance\n");

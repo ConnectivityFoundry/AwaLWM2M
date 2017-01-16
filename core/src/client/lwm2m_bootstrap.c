@@ -78,6 +78,11 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
 
 static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+    (void)address;
+    (void)responsePath;
+    (void)contentType;
+    (void)payload;
+    (void)payloadLen;
     Lwm2mContextType * context = ctxt;
 
     if (responseCode == AwaResult_SuccessChanged)
@@ -94,6 +99,7 @@ static void HandleBootstrapResponse(void * ctxt, AddressType* address, const cha
 
 static bool BootStrapFromSmartCard(Lwm2mContextType * context)
 {
+    (void)context;
     // not implemented
 
     Lwm2m_Debug("Lwm2m_BootstrapFromSmartCard\n");
@@ -111,6 +117,14 @@ static bool BootStrapFromFactory(Lwm2mContextType * context)
 static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                          const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)addr;
+    (void)path;
+    (void)query;
+    (void)contentType;
+    (void)requestContent;
+    (void)requestContentLen;
+    (void)responseContent;
+    (void)responseContentLen;
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     Lwm2mBootStrapState state = Lwm2mCore_GetBootstrapState(context);
 
@@ -146,6 +160,9 @@ static int BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
                                               AwaContentType contentType, const char * requestContent, size_t requestContentLen,
                                               AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)token;
+    (void)tokenLength;
+
     switch (type)
     {
         case COAP_PUT_REQUEST:  // no break

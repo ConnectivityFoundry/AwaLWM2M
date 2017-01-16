@@ -161,7 +161,7 @@ static int DeserialiseOIR(Lwm2mTreeNode ** dest, AwaContentType contentType, Lwm
     return len;
 }
 
-AwaContentType Lwm2mCore_GetDefaultContentType()
+AwaContentType Lwm2mCore_GetDefaultContentType(void)
 {
     return defaultContentType;
 }
@@ -1383,6 +1383,7 @@ void Lwm2mCore_GetObjectList(Lwm2mContextType * context, char * altPath, char * 
 static int HandleNotification(void * ctxt, AddressType * addr, int sequence, const char * token, int tokenLength, ObjectIDType objectID,
         ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, AwaContentType contentType, void * ContextData)
 {
+    (void)ContextData;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int oir[3];
     ObjectInstanceResourceKey key =
@@ -1423,6 +1424,9 @@ static int HandleObserveRequest(void * ctxt, AddressType * addr, const char * pa
         AwaContentType contentType, const char * requestContent, size_t requestContentLen, AwaContentType * responseContentType,
         char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)query;
+    (void)requestContent;
+    (void)requestContentLen;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int matches;
     int oir[3] =
@@ -1470,6 +1474,9 @@ static int HandleCancelObserveRequest(void * ctxt, AddressType * addr, const cha
         const char * requestContent, size_t requestContentLen, AwaContentType * responseContentType, char * responseContent,
         size_t * responseContentLen, int * responseCode)
 {
+    (void)query;
+    (void)requestContent;
+    (void)requestContentLen;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int matches;
     int oir[3] =
@@ -1516,6 +1523,9 @@ static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, 
         const char * requestContent, size_t requestContentLen, AwaContentType * responseContentType, char * responseContent,
         size_t * responseContentLen, int * responseCode)
 {
+    (void)query;
+    (void)requestContent;
+    (void)requestContentLen;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int len = 0;
     int matches;
@@ -1559,6 +1569,10 @@ static int HandleGetRequest(void * ctxt, AddressType * addr, const char * path, 
 static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
         const char * requestContent, int requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)query;
+    (void)requestContent;
+    (void)requestContentLen;
+    (void)responseContent;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int len = -1;
     int matches;
@@ -1693,6 +1707,10 @@ static int HandlePostRequest(void * ctxt, AddressType * addr, const char * path,
 static int HandleWriteAttributesRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)contentType;
+    (void)requestContent;
+    (void)requestContentLen;
+    (void)responseContent;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int oir[3] =
     { -1, -1, -1 };
@@ -1990,6 +2008,9 @@ static void PrepareObjectForReplace(Lwm2mContextType * context, ObjectIDType obj
 static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)addr;
+    (void)query;
+    (void)responseContent;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int matches;
     int oir[3] =
@@ -2083,6 +2104,9 @@ static int HandlePutRequest(void * ctxt, AddressType * addr, const char * path, 
 static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)addr;
+    (void)query;
+    (void)responseContent;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int matches;
     int oir[3] =
@@ -2138,6 +2162,11 @@ static int HandleBootstrapPutRequest(void * ctxt, AddressType * addr, const char
 static int HandleDeleteRequest(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
         const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)query;
+    (void)contentType;
+    (void)requestContent;
+    (void)requestContentLen;
+    (void)responseContent;
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int oir[3] =
     { -1, -1, -1 };
@@ -2265,6 +2294,7 @@ int Lwm2mCore_SetEndPointClientName(Lwm2mContextType * context, const char * end
 
 int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len)
 {
+    (void)len;
     strcpy(buffer, context->EndPointName);
     return strlen(buffer);
 }
@@ -2377,7 +2407,7 @@ bool Lwm2mCore_GetUseFactoryBootstrap(Lwm2mContextType * context)
     return context->UseFactoryBootstrap;
 }
 
-Lwm2mContextType * Lwm2mCore_New()
+Lwm2mContextType * Lwm2mCore_New(void)
 {
     Lwm2mContextType * context = &Lwm2mContext;
 

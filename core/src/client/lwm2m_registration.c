@@ -153,6 +153,9 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
 
 static void HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
 
     if (responseCode == 201)
@@ -212,6 +215,10 @@ static void SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServerType *
 
 static void HandleRegisterUpdateResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     Lwm2m_Debug("Registration Update Response %s %d\n", responsePath, responseCode);
 
@@ -253,6 +260,11 @@ static void Deregister(Lwm2mContextType * context, Lwm2mServerType * server)
 
 static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)responsePath;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     if (responseCode == 202)
     {

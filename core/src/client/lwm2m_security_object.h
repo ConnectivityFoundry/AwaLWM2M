@@ -49,7 +49,7 @@ void Lwm2m_RegisterSecurityObject(Lwm2mContextType * context);
 void Lwm2m_PopulateSecurityObject(Lwm2mContextType * context, const char * bootStrapServer);
 
 int Lwm2m_GetServerURI(Lwm2mContextType * context, int shortServerID, char * buffer, int len);
-int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff);
+int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, uint32_t * clientHoldOff);
 
 bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortServerID);
 

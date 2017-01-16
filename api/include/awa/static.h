@@ -218,7 +218,7 @@ typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperati
  * @return A pointer to a newly allocated Awa Static Client instance.
  * @return NULL on failure.
  */
-AwaStaticClient * AwaStaticClient_New();
+AwaStaticClient * AwaStaticClient_New(void);
 
 /**
  * @brief Retrieve default content type to use when a request doesn't specify via accept header a preferred content type.
@@ -227,7 +227,7 @@ AwaStaticClient * AwaStaticClient_New();
  *
  * @return The default content type
  */
-AwaContentType AwaStaticClient_GetDefaultContentType();
+AwaContentType AwaStaticClient_GetDefaultContentType(void);
 
 /**
  * @brief Set the default content type to use when a request doesn't specify via accept header a preferred content type.
