@@ -152,7 +152,7 @@ int coap_receive(NetworkSocket * networkSocket)
                                 {
 
                                     /* unchanged new_offset indicates that resource is unaware of blockwise transfer */
-                                    if (new_offset == block_offset)
+                                    if (new_offset == (int32_t)block_offset)
                                     {
                                         PRINTF("Blockwise: unaware resource with payload length %u/%u\n", response->payload_len,
                                                 block_size);

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -33,7 +33,7 @@
 #include "lwm2m_debug.h"
 #include "lwm2m_result.h"
 
-const static AttributeCharacteristics AttributeCharacteristicsTable[] =
+static const AttributeCharacteristics AttributeCharacteristicsTable[] =
 {
     {.Type = AttributeTypeEnum_MinimumPeriod,   .Name = "Minimum Period",  .CoRELinkParam = "pmin",    .ValueType = AwaResourceType_Integer},
     {.Type = AttributeTypeEnum_MaximumPeriod,   .Name = "Maximum Period",  .CoRELinkParam = "pmax",    .ValueType = AwaResourceType_Integer},
@@ -46,7 +46,7 @@ const static AttributeCharacteristics AttributeCharacteristicsTable[] =
 const AttributeCharacteristics * Lwm2mAttributes_GetAttributeCharacteristics(char * coreLinkParam)
 {
     const AttributeCharacteristics * characteristics = NULL;
-    int i = 0;
+    unsigned int i = 0;
     for (; i < sizeof(AttributeCharacteristicsTable) / sizeof(AttributeCharacteristicsTable[0]); i++)
     {
         if (strcmp(coreLinkParam, AttributeCharacteristicsTable[i].CoRELinkParam) == 0)
@@ -102,10 +102,7 @@ static void DestroyAttributesList(struct ListHead * serverNotificationAttributes
         ListForEachSafe(i, n, serverNotificationAttributesList)
         {
             NotificationAttributes * attributes = ListEntry(i, NotificationAttributes, list);
-            if (attributes != NULL)
-            {
-                free(attributes);
-            }
+            free(attributes);
         }
     }
 }

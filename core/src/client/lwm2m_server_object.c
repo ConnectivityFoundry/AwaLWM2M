@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -111,12 +111,17 @@ static Lwm2mServerType * AddServerObject(Lwm2mContextType * context, int serverO
 
 static int Lwm2mServer_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    (void)objectID;
     Lwm2m_Debug("Creating server object instance\n");
     return (AddServerObject(context, objectInstanceID) != NULL) ? objectInstanceID : -1;
 }
 
 static int Lwm2mServer_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     // No action
     return 0;
 }
@@ -136,12 +141,18 @@ static int RemoveServerObject(Lwm2mContextType * context, int objectInstanceID)
 
 static int Lwm2mServer_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
+    (void)objectID;
+    (void)resourceID;
+    (void)resourceInstanceID;
     return RemoveServerObject(context, objectInstanceID);
 }
 
 static int Lwm2mServer_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                            ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
+
     Lwm2mServerType * server = GetServerObjectByObjectInstanceID(context, objectInstanceID);
     if (server != NULL)
     {
@@ -205,6 +216,9 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                             ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
+
     int result = -1;
 
     // FIXME: this server entry needs to be created when the server objects are written.
@@ -299,6 +313,11 @@ static int Lwm2mServer_ResourceWriteHandler(void * context, ObjectIDType objectI
 
 static int executeRegistrationUpdateTrigger(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
+    (void)objectID;
+    (void)resourceID;
+    (void)inValueBuffer;
+    (void)inValueBufferLen;
+
     Lwm2m_Debug("Registration Update triggered for server %d\n", objectInstanceID);
     Lwm2mCore_SetServerUpdateRegistration(context, objectInstanceID);
     return 0;
@@ -422,10 +441,7 @@ void Lwm2mCore_DestroyServerList(Lwm2mContextType * context)
         ListForEachSafe(i, n, Lwm2mCore_GetServerList(context))
         {
             Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
-            if (server != NULL)
-            {
-                free(server);
-            }
+            free(server);
         }
     }
 }

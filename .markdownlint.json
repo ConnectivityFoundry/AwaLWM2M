@@ -1,0 +1,10 @@
+{
+  "default": true,
+  "commands-show-output": false,
+  "ol-prefix": false,
+  "no-bare-urls": false,
+  "fenced-code-language": false,
+  "first-line-h1": false,
+  "no-hard-tabs": false,
+  "line-length": false
+}

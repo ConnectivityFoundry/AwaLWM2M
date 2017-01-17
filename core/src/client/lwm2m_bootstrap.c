@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -64,11 +64,11 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
     char uri[1024];
 
     Lwm2mCore_GetEndPointClientName(context, buffer, sizeof(buffer));
-    sprintf(uriQuery, "?ep=%s", buffer);
+    snprintf(uriQuery, sizeof(uriQuery), "?ep=%s", buffer);
 
     Lwm2m_GetServerURI(context, shortServerID, serverPath, sizeof(serverPath));
 
-    sprintf(uri, "%s%s%s", serverPath, uriPath, uriQuery);
+    snprintf(uri, sizeof(uri), "%s%s%s", serverPath, uriPath, uriQuery);
     Lwm2m_Info("Bootstrap with %s\n", uri);
 
     coap_Reset(uri);
@@ -78,6 +78,11 @@ static void SendBootStrapRequest(Lwm2mContextType * context, int shortServerID)
 
 static void HandleBootstrapResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+    (void)address;
+    (void)responsePath;
+    (void)contentType;
+    (void)payload;
+    (void)payloadLen;
     Lwm2mContextType * context = ctxt;
 
     if (responseCode == AwaResult_SuccessChanged)
@@ -94,6 +99,7 @@ static void HandleBootstrapResponse(void * ctxt, AddressType* address, const cha
 
 static bool BootStrapFromSmartCard(Lwm2mContextType * context)
 {
+    (void)context;
     // not implemented
 
     Lwm2m_Debug("Lwm2m_BootstrapFromSmartCard\n");
@@ -111,6 +117,14 @@ static bool BootStrapFromFactory(Lwm2mContextType * context)
 static int BootStrapPost(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                          const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)addr;
+    (void)path;
+    (void)query;
+    (void)contentType;
+    (void)requestContent;
+    (void)requestContentLen;
+    (void)responseContent;
+    (void)responseContentLen;
     Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     Lwm2mBootStrapState state = Lwm2mCore_GetBootstrapState(context);
 
@@ -146,6 +160,9 @@ static int BootstrapEndpointHandler(int type, void * ctxt, AddressType * addr,
                                               AwaContentType contentType, const char * requestContent, size_t requestContentLen,
                                               AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
+    (void)token;
+    (void)tokenLength;
+
     switch (type)
     {
         case COAP_PUT_REQUEST:  // no break

@@ -1,9 +1,7 @@
 common_src = \
     lwm2m_list.c \
-  	network_abstraction_contiki.c \
     lwm2m_debug.c \
     lwm2m_util.c \
-    lwm2m_util_contiki.c \
     lwm2m_object_store.c \
     lwm2m_definition.c \
     lwm2m_attributes.c \
@@ -12,7 +10,16 @@ common_src = \
     lwm2m_result.c \
     lwm2m_types.c \
     lwm2m_bootstrap_config.c \
-    coap_abstraction_erbium.c 
+    lwm2m_serdes.c \
+    lwm2m_tlv.c \
+    lwm2m_opaque.c \
+    lwm2m_plaintext.c \
+    lwm2m_prettyprint.c \
+    lwm2m_tree_builder.c \
+    lwm2m_observers.c \
+    coap_abstraction_erbium.c \
+    network_abstraction_contiki.c \
+    lwm2m_util_contiki.c
 
 
 ifeq ($(TINYDTLS),)

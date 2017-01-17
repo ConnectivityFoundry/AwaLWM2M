@@ -52,7 +52,7 @@ struct gengetopt_args_info
   char * clientID_arg;	/**< @brief Client ID.  */
   char * clientID_orig;	/**< @brief Client ID original value given at command line.  */
   const char *clientID_help; /**< @brief Client ID help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -150,7 +150,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

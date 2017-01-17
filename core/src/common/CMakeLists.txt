@@ -33,8 +33,11 @@ if (WITH_TINYDTLS)
   list (APPEND awa_common_SOURCES dtls_abstraction_tinydtls.c)
 endif ()
 
+if (WITH_MBEDTLS)
+  list (APPEND awa_common_SOURCES dtls_abstraction_mbedTLS.c)
+endif ()
 
-if (NOT WITH_GNUTLS AND NOT WITH_CYASSL AND NOT WITH_TINYDTLS)
+if (NOT WITH_GNUTLS AND NOT WITH_CYASSL AND NOT WITH_TINYDTLS AND NOT WITH_MBEDTLS)
   list (APPEND awa_common_SOURCES dtls_abstraction_dummy.c)
 endif ()
 
@@ -94,9 +97,13 @@ if (WITH_TINYDTLS)
   list (APPEND awa_common_LIBS tinydtls_static)
 endif ()
 
+if (WITH_MBEDTLS)
+  list (APPEND awa_common_LIBS mbedx509 mbedcrypto mbedtls)
+endif ()
+
 if (ENABLE_GCOV)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 --coverage")
+  set (CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
 endif ()
 
 # Virtual library to avoid building .o files twice:

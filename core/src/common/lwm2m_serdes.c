@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -43,7 +43,7 @@ typedef struct
 /**
  * Map content type to serialiser/deserialisers
  */
-const static SerdesMapEntry serdesList[] =
+static const SerdesMapEntry serdesList[] =
 {
 
 #ifndef CONTIKI
@@ -68,12 +68,12 @@ const static SerdesMapEntry serdesList[] =
 
 static SerialiserDeserialiser * GetSerialiserDeserialiser(AwaContentType type)
 {
-    int i;
+    unsigned int i;
     // lookup serialiser in serialiser list.
     for (i = 0; i < NUM_SERIALISERS; i++)
     {
         if (serdesList[i].Type == type)
-            return (SerialiserDeserialiser*)serdesList[i].Serdes;
+            return (SerialiserDeserialiser *)serdesList[i].Serdes;
     }
     return NULL;
 }
@@ -84,7 +84,8 @@ int SerialiseObject(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType obje
     if ((serdes != NULL) && serdes->SerialiseObject)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->SerialiseObject(&serdesContext, node, objectID, (uint8_t*)buffer, len);
+        return serdes->SerialiseObject(&serdesContext, node, objectID,
+                                       (uint8_t *)buffer, len);
     }
     Lwm2m_Error("Serialiser not found for type %d\n", type);
     return -1;
@@ -96,7 +97,8 @@ int SerialiseObjectInstance(AwaContentType type, Lwm2mTreeNode * node, ObjectIDT
     if ((serdes != NULL) && serdes->SerialiseObjectInstance)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->SerialiseObjectInstance(&serdesContext, node, objectID, objectInstanceID, (uint8_t*)buffer, len);
+        return serdes->SerialiseObjectInstance(&serdesContext, node, objectID, objectInstanceID,
+                                               (uint8_t *)buffer, len);
     }
     Lwm2m_Error("Serialiser not found for type %d\n", type);
     return -1;
@@ -109,7 +111,8 @@ int SerialiseResource(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType ob
     if ((serdes != NULL) && serdes->SerialiseResource)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->SerialiseResource(&serdesContext, node, objectID, objectInstanceID, resourceID, (uint8_t*)buffer, len);
+        return serdes->SerialiseResource(&serdesContext, node, objectID, objectInstanceID, resourceID,
+                                         (uint8_t *)buffer, len);
     }
     Lwm2m_Error("Serialiser not found for type %d\n", type);
     return -1;
@@ -122,7 +125,8 @@ int DeserialiseObject(AwaContentType type, Lwm2mTreeNode ** dest, const Definiti
     if ((serdes != NULL) && serdes->DeserialiseObject)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->DeserialiseObject(&serdesContext, dest, registry, objectID, (const uint8_t*)buffer, bufferLen);
+        return serdes->DeserialiseObject(&serdesContext, dest, registry, objectID,
+                                         (const uint8_t *)buffer, bufferLen);
     }
     Lwm2m_Error("Deserialiser not found for type %d\n", type);
     return -1;
@@ -135,7 +139,9 @@ int DeserialiseObjectInstance(int type, Lwm2mTreeNode ** dest, const DefinitionR
     if ((serdes != NULL) && serdes->DeserialiseObjectInstance)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->DeserialiseObjectInstance(&serdesContext, dest, registry, objectID, objectInstanceID, (const uint8_t*)buffer, bufferLen);
+        return serdes->DeserialiseObjectInstance(&serdesContext, dest, registry, objectID, objectInstanceID,
+                                                 (const uint8_t *)buffer,
+                                                 bufferLen);
     }
     Lwm2m_Error("Deserialiser not found for type %d\n", type);
     return -1;
@@ -148,7 +154,8 @@ int DeserialiseResource(int type, Lwm2mTreeNode ** dest, const DefinitionRegistr
     if ((serdes != NULL) && serdes->DeserialiseResource)
     {
         SerdesContext serdesContext = NULL;
-        return serdes->DeserialiseResource(&serdesContext, dest, registry, objectID, objectInstanceID, resourceID, (const uint8_t*)buffer, bufferLen);
+        return serdes->DeserialiseResource(&serdesContext, dest, registry, objectID, objectInstanceID, resourceID,
+                                           (const uint8_t *)buffer, bufferLen);
     }
     Lwm2m_Error("Deserialiser not found for type %d\n", type);
     return -1;

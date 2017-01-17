@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -130,7 +130,7 @@ static Resource * LookupResource(const ObjectStore * store, ObjectIDType objectI
     return NULL;
 }
 
-static Resource * CreateResource(const ObjectStore * store, ObjectInstance * instance, ObjectIDType objectID, ResourceIDType resourceID)
+static Resource * CreateResource(ObjectInstance * instance, ResourceIDType resourceID)
 {
     Resource * resource = GetResource(instance, resourceID);
     if (resource)
@@ -141,7 +141,7 @@ static Resource * CreateResource(const ObjectStore * store, ObjectInstance * ins
     }
 
     // allocate memory for new resource
-    resource = (Resource*)malloc(sizeof(Resource));
+    resource = (Resource *)malloc(sizeof(Resource));
     if (resource == NULL)
     {
         AwaResult_SetResult(AwaResult_OutOfMemory);
@@ -210,7 +210,7 @@ Object * CreateObject(ObjectStore * store, ObjectIDType objectID)
         return object;
     }
 
-    object = (Object*)malloc(sizeof(Object));
+    object = (Object *)malloc(sizeof(Object));
     if (object == NULL)
     {
         AwaResult_SetResult(AwaResult_OutOfMemory);
@@ -226,7 +226,7 @@ Object * CreateObject(ObjectStore * store, ObjectIDType objectID)
     return object;
 }
 
-static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * object, ObjectInstanceIDType objectInstanceID)
+static ObjectInstance * CreateObjectInstance(Object * object, ObjectInstanceIDType objectInstanceID)
 {
     ObjectInstance * instance = GetObjectInstance(object, objectInstanceID);
     if (instance != NULL)
@@ -236,7 +236,7 @@ static ObjectInstance * CreateObjectInstance(ObjectStore * store, Object * objec
     }
 
     // Create a new instance
-    instance = (ObjectInstance*)malloc(sizeof(ObjectInstance));
+    instance = (ObjectInstance *)malloc(sizeof(ObjectInstance));
     if (instance == NULL)
     {
         AwaResult_SetResult(AwaResult_OutOfMemory);
@@ -421,7 +421,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
     rInst = GetResourceInstance(r, resourceInstanceID);
     if (rInst == NULL)
     {
-        rInst = (ResourceInstance*)malloc(sizeof(ResourceInstance));
+        rInst = (ResourceInstance *)malloc(sizeof(ResourceInstance));
         if (rInst == NULL)
         {
             Lwm2m_Error("Failed to allocate memory\n");
@@ -480,9 +480,10 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
 
     if ((valueBufferPos < valueSize && valueBufferPos >= 0) || (valueBufferPos == valueSize && valueSize == 0/*Allow empty opaque data*/))
     {
-        if (memcmp((char*)(rInst->Value) + valueBufferPos, valueBuffer, valueBufferLen))
+        if (memcmp((char *)(rInst->Value) + valueBufferPos, valueBuffer, valueBufferLen))
         {
-            memcpy((char*)(rInst->Value) + valueBufferPos, valueBuffer, valueBufferLen);
+            memcpy((char *)(rInst->Value) + valueBufferPos, valueBuffer,
+                   valueBufferLen);
             *changed = true;
         }
 
@@ -497,7 +498,7 @@ int ObjectStore_SetResourceInstanceValue(ObjectStore * store, ObjectIDType objec
 
 ObjectStore * ObjectStore_Create(void)
 {
-    ObjectStore * store = (ObjectStore*)malloc(sizeof(ObjectStore));
+    ObjectStore * store = (ObjectStore *)malloc(sizeof(ObjectStore));
     if (store == NULL)
     {
         AwaResult_SetResult(AwaResult_OutOfMemory);
@@ -725,7 +726,7 @@ ResourceIDType ObjectStore_CreateResource(ObjectStore * store, ObjectIDType obje
         AwaResult_SetResult(AwaResult_NotFound);
         goto error;
     }
-    Resource * resource = CreateResource(store, instance, objectID, resourceID);
+    Resource * resource = CreateResource(instance, resourceID);
     if (resource != NULL)
     {
         Lwm2m_Debug("Created new resource ID: %d for object %d instance %d\n", resource->ID, objectID, objectInstanceID);
@@ -773,7 +774,7 @@ ObjectInstanceIDType ObjectStore_CreateObjectInstance(ObjectStore * store, Objec
     }
 
     // Create the new object instance
-    ObjectInstance * instance = CreateObjectInstance(store, obj, objectInstanceID);
+    ObjectInstance * instance = CreateObjectInstance(obj, objectInstanceID);
     if (instance == NULL)
     {
         Lwm2m_Error("Failed to create object instance\n");

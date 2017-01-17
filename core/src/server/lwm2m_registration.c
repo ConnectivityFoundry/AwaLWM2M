@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -231,7 +231,7 @@ static void Lwm2m_ReleaseQueryString(RegistrationQueryString * queryString)
 {
     if (queryString != NULL)
     {
-        free((char*)queryString->EndPointName);
+        free((char *)queryString->EndPointName);
     }
 }
 
@@ -297,7 +297,7 @@ static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, 
             {
                 if (eventRecord->Callback != NULL)
                 {
-                    Lwm2m_Debug("Calling registration event callback with type %d, context %p\n", eventType, eventRecord->Context)
+                    Lwm2m_Debug("Calling registration event callback with type %d, context %p\n", eventType, eventRecord->Context);
                     eventRecord->Callback(eventType, eventRecord->Context, parameter);
                 }
             }
@@ -406,12 +406,12 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
-                              const char * query, AwaContentType contentType, 
+                              const char * query, AwaContentType contentType,
                               const char * requestContent, size_t requestContentLen,
                               char * responseContent, size_t * responseContentLen,
                               int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
     Lwm2mClientType * client;
 
@@ -453,7 +453,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         Lwm2mClientType * client = Lwm2m_LookupClientByName(context, q.EndPointName);
 
         sprintf(responseContent, "rd/%d", client->Location);
-    
+
         *responseContentLen = strlen(responseContent);  // no content
         *responseCode = AwaResult_SuccessCreated;
     }
@@ -476,7 +476,7 @@ static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
                        char * responseContent, size_t * responseContentLen,
                        int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
 
     int32_t location;
@@ -511,7 +511,7 @@ done:
 static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                           const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
 
     int32_t location;
 
@@ -629,10 +629,7 @@ static void DestroyObjectList(struct ListHead * objectList)
         ListForEachSafe(i, n, objectList)
         {
             ObjectListEntry * object = ListEntry(i, ObjectListEntry, list);
-            if (object != NULL)
-            {
-                free(object);
-            }
+            free(object);
         }
     }
 }

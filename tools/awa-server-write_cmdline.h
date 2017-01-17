@@ -59,7 +59,7 @@ struct gengetopt_args_info
   const char *create_help; /**< @brief Create a new Object Instance or Optional Resource help description.  */
   int replace_flag;	/**< @brief Replace existing resource (rather than update which is the default) (default=off).  */
   const char *replace_help; /**< @brief Replace existing resource (rather than update which is the default) help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -159,7 +159,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

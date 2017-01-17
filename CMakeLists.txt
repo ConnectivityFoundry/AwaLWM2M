@@ -19,7 +19,14 @@ option (WITH_ERBIUM "Enable Erbium CoAP support)" ON)
 option (WITH_GNUTLS "Enable GnuTLS DTLS support" OFF)
 option (WITH_CYASSL "Enable CyaSSL DTLS support" OFF)
 option (WITH_TINYDTLS "Enable TinyDTLS DTLS support" OFF)
+option (WITH_MBEDTLS "Enable mbedTLS DTLS support" OFF)
 option (WITH_SYSTEMD "Install systemd service files" OFF)
+
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
 
 if (WITH_LIBCOAP)
   message (WARNING "Disabling erbium support")
@@ -49,7 +56,7 @@ if (RUN_TESTS)
   set (BUILD_TESTS ON)
 endif ()
 
-if (CMAKE_CROSSCOMPILING)
+if ((CMAKE_CROSSCOMPILING) OR (CMAKE_BUILD_TYPE STREQUAL "Release"))
   set (BUILD_TESTS OFF)
   set (RUN_TESTS OFF)
   set (ENABLE_GCOV OFF)
@@ -59,10 +66,11 @@ endif ()
 #execute_process (COMMAND git describe --abbrev=4 --dirty --always --tags OUTPUT_VARIABLE VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 file (STRINGS "VERSION" VERSION)
 
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 # enable debugging info for all components
-# TODO: separate debug and release builds
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
-add_compile_options (-g)
+  add_compile_options (-g)
+endif ()
 
 # build libraries
 add_subdirectory (lib)

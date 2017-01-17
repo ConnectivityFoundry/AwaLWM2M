@@ -350,7 +350,7 @@ If the resource data is of type string, the ValueData element must be BASE64-enc
 </Request>
 ```
 
-Set also allows the creation of new object instances through the <Create> tag which is placed inside the <ObjectInstance> tag of a specified object.
+Set also allows the creation of new object instances through the `<Create>` tag which is placed inside the `<ObjectInstance>` tag of a specified object.
 
 If an ID is not specified the client will generate one automatically.
 
@@ -377,7 +377,7 @@ Optional resources are not created automatically.
 </Request>
 ```
 
-Set also allows the creation of an optional resource through the <Create> tag which is placed inside the <Resource> tag. The default value is assigned and can be overridden in the same request:
+Set also allows the creation of an optional resource through the `<Create>` tag which is placed inside the `<Resource>` tag. The default value is assigned and can be overridden in the same request:
 
 ```xml
 <Request>
@@ -866,7 +866,7 @@ Currently the Execute notification returns a single Opaque value however it will
 
 The Change Notification is sent by the daemon to all subscribed-to-change IPC clients when an LWM2M Write operation is performed on a resource that supports the Write operation, or a local Set operation occurs. In both cases, the operation must change the resource value for a notification to be generated.
 
-Currently the <ChangeType> node is not supported.
+Currently the `<ChangeType>` node is not supported.
 
 ```xml
 <Notification>
@@ -1452,6 +1452,7 @@ TODO: add more examples
     </Clients>
   </Content>
 </Response>
+```
 
 ## Notifications
 
@@ -1576,4 +1577,3 @@ The server may combine multiple clients into a single event.
   </Content>
 </Notification>
 ```
-

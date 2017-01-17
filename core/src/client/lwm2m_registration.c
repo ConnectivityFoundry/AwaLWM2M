@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -75,7 +75,7 @@ static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, ch
     // Get binding from Server object in object store as a string
     enum { BINDING_MAX_SIZE = 16 };
     char binding[BINDING_MAX_SIZE];
-   
+
     int res = Lwm2mServerObject_GetTransportBinding(context, shortServerID, binding, sizeof(binding));
     if (res < 0)
     {
@@ -153,6 +153,9 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
 
 static void HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
 
     if (responseCode == 201)
@@ -212,6 +215,10 @@ static void SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServerType *
 
 static void HandleRegisterUpdateResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     Lwm2m_Debug("Registration Update Response %s %d\n", responsePath, responseCode);
 
@@ -253,6 +260,11 @@ static void Deregister(Lwm2mContextType * context, Lwm2mServerType * server)
 
 static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)responsePath;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     if (responseCode == 202)
     {

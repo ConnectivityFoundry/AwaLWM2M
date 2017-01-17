@@ -44,8 +44,10 @@ INSTALL_PREFIX:=/
 ###############################################################################
 # Rules
 
-ifeq ($(DEBUG),)
-#  override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Release
+DEBUG?=1
+
+ifeq ($(DEBUG),0)
+  override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Release
 else
   override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Debug
 endif

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -38,23 +38,32 @@ void DTLS_Shutdown(void)
 
 void DTLS_Reset(NetworkAddress * address)
 {
+	(void)address;
 }
 
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
+	(void)cert;
+	(void)certLength;
+	(void)format;
 }
 
 void DTLS_SetNetworkSendCallback(DTLS_NetworkSendCallback sendCallback)
 {
+	(void)sendCallback;
 }
 
 void DTLS_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 {
+	(void)identity;
+	(void)key;
+	(void)keyLength;
 }
 
 
 bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encryptedLength, uint8_t * decryptBuffer, int decryptBufferLength, int * decryptedLength, void *context)
 {
+    (void) sourceAddress;
     (void)context;
     bool result = false;
     if (encryptedLength <= decryptBufferLength && encryptedLength > 0)
@@ -69,6 +78,7 @@ bool DTLS_Decrypt(NetworkAddress * sourceAddress, uint8_t * encrypted, int encry
 bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTextLength, uint8_t * encryptedBuffer, int encryptedBufferLength, int * encryptedLength, void *context)
 {
     (void)context;
+    (void)destAddress;
     bool result = false;
     if (plainTextLength <= encryptedBufferLength && plainTextLength > 0)
     {

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ************************************************************************************************************************/
 
@@ -91,6 +91,7 @@ static int removeObserve(NetworkAddress * remoteAddress, char * path);
 
 CoapInfo * coap_Init(const char * ipAddress, int port, bool secure, int logLevel)
 {
+    (void) logLevel;
     CoapInfo * result = NULL;
     memset(CurrentTransaction, 0, sizeof(CurrentTransaction));
     memset(Observations, 0, sizeof(Observations));
@@ -141,11 +142,13 @@ void coap_SetPSK(const char * identity, const uint8_t * key, int keyLength)
 
 void coap_SetLogLevel(int logLevel)
 {
+    (void)logLevel;
     // TODO - set log level for Erbium (replace PRINTFs)
 }
 
 int coap_WaitMessage(int timeout, int fd)
 {
+    (void)fd;
     coap_receive(networkSocket);
     coap_check_transactions();
     return timeout;
@@ -153,17 +156,18 @@ int coap_WaitMessage(int timeout, int fd)
 
 static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
+    (void)offset;
     int result = 1;
     const char *url = NULL;
     int urlLen = 0;
     const uint8_t * payload = NULL;
     int payloadLen = 0;
-    int content = -1;
+    unsigned int content = 0;
 
     coap_packet_t * const request = (coap_packet_t *) packet;
 
     CoapResponse coapResponse =
-    { .responseContent = buffer, .responseContentLen = preferred_size, .responseCode = 400, };
+    { .responseContent = (char *)buffer, .responseContentLen = preferred_size, .responseCode = 400, };
 
     payloadLen = coap_get_payload(request, &payload);
 
@@ -186,7 +190,7 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
 
         CoapRequest coapRequest =
         { .ctxt = context, .addr =
-        { 0 }, .path = uriBuf, .query = queryBuf, .token = request->token, .tokenLength = request->token_len, .requestContent = payload,
+        { 0 }, .path = uriBuf, .query = queryBuf, .token = (char*)request->token, .tokenLength = request->token_len, .requestContent = (char*)payload,
                 .requestContentLen = payloadLen, };
 
         NetworkAddress_SetAddressType(sourceAddress, &coapRequest.addr);
@@ -195,10 +199,10 @@ static int coap_HandleRequest(void *packet, void *response, uint8_t *buffer, uin
         {
         case METHOD_GET:
 
-            coap_get_header_accept(request, &content);
+            coap_get_header_accept(request,&content);
             coapRequest.contentType = content;
 
-            int32_t observe;
+            uint32_t observe;
 
             if (!coap_get_header_observe(request, &observe))
                 observe = -1;
@@ -309,7 +313,7 @@ bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
     bool result = false;
 
     Lwm2m_Debug("resolve address from Uri: %s\n", address);
-    NetworkAddress * networkAddress = NetworkAddress_New(address, strlen(address));
+    NetworkAddress * networkAddress = NetworkAddress_New((char *)address, strlen((char *)address));
     if (networkAddress)
     {
         NetworkAddress_SetAddressType(networkAddress, addr);
@@ -323,7 +327,7 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
 {
     TransactionType * transaction = (TransactionType *) callback_data;
     coap_packet_t * coap_response = (coap_packet_t *) response;
-    int ContentType = 0;
+    unsigned int ContentType = 0;
     const char *url = NULL;
     char * payload = NULL;
     char uriBuf[64] =
@@ -348,7 +352,8 @@ void coap_CoapRequestCallback(void *callback_data, void *response)
                     memcpy(&uriBuf[1], transaction->Path, urlLen);
                 }
                 coap_get_header_content_format(response, &ContentType);
-                int payloadLen = coap_get_payload(response, (const uint8_t **) &payload);
+                int payloadLen = coap_get_payload(response,
+                                                  (const uint8_t **) &payload);
 
                 transaction->Callback(transaction->Context, &transaction->Address, uriBuf, COAP_OPTION_TO_RESPONSE_CODE(coap_response->code),
                         ContentType, payload, payloadLen);
@@ -372,6 +377,11 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
     { 0 };
     coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(uri, strlen(uri));
+
+    if (!remoteAddress)
+    {
+        return;
+    }
 
     if ((strcmp(DTLS_LibraryName, "None") == 0) && NetworkAddress_IsSecure(remoteAddress))
     {
@@ -414,7 +424,8 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
             coap_set_header_observe(&request, 0);
             int token = addObserve(remoteAddress, path, callback, context);
             if (token != 0)
-                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+                coap_set_token(&request, (const uint8_t *) &token,
+                               sizeof(token));
 
         }
         else if (observeState == ObserveState_Cancel)
@@ -422,7 +433,8 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
             coap_set_header_observe(&request, 1);
             int token = removeObserve(remoteAddress, path);
             if (token != 0)
-                coap_set_token(&request, (const uint8_t *) &token, sizeof(token));
+                coap_set_token(&request, (const uint8_t *) &token,
+                               sizeof(token));
         }
     }
 
@@ -448,7 +460,7 @@ void coap_createCoapRequest(coap_method_t method, const char * uri, AwaContentTy
 
         transaction->packet_len = coap_serialize_message(&request, transaction->packet);
 
-        Lwm2m_Debug("Sending transaction [%d]: %p\n", CurrentTransactionIndex, CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
+        Lwm2m_Debug("Sending transaction [%d]: %p\n", CurrentTransactionIndex, (void*)CurrentTransaction[CurrentTransactionIndex].TransactionPtr);
         coap_send_transaction(transaction);
 
         CurrentTransactionIndex++;
@@ -508,6 +520,7 @@ void coap_DeleteRequest(void * context, const char * path, TransactionCallback c
 void coap_Observe(void * context, const char * path, AwaContentType contentType, TransactionCallback callback,
         NotificationFreeCallback notificationFreeCallback)
 {
+    (void)notificationFreeCallback;
     coap_createCoapRequest(COAP_GET, path, contentType, ObserveState_Establish, NULL, 0, callback, context);
 }
 
@@ -520,31 +533,36 @@ void coap_CancelObserve(void * context, const char * path, AwaContentType conten
 void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, AwaContentType contentType,
         const char * payload, int payloadLen, int sequence)
 {
+    (void)addr;
     // TODO - FIXME: if path is not full uri then map addr to Network address + append path(?)
-    coap_packet_t notify;
-    coap_transaction_t *transaction;
     NetworkAddress * remoteAddress = NetworkAddress_New(path, strlen(path));
 
     Lwm2m_Debug("Coap notify: %s\n", path);
     //Lwm2m_Debug("Coap IPv6 request address: " PRINT6ADDR(&addr->Addr));
     //Lwm2m_Debug("Coap request port: %d\n", addr->Port);
 
-    coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
-
-    if (contentType != AwaContentType_None)
+    if (remoteAddress)
     {
-        coap_set_header_content_format(&notify, contentType);
-        coap_set_payload(&notify, payload, payloadLen);
-    }
+        coap_packet_t notify;
+        coap_transaction_t *transaction;
 
-    coap_set_token(&notify, token, tokenSize);
-    coap_set_header_observe(&notify, sequence);
+        coap_init_message(&notify, COAP_TYPE_NON, CONTENT_2_05, coap_get_mid());
 
-    if ((transaction = coap_new_transaction(networkSocket, notify.mid, remoteAddress)))
-    {
-        transaction->packet_len = coap_serialize_message(&notify, transaction->packet);
+        if (contentType != AwaContentType_None)
+        {
+            coap_set_header_content_format(&notify, contentType);
+            coap_set_payload(&notify, payload, payloadLen);
+        }
 
-        coap_send_transaction(transaction); // for NON confirmable messages this will call coap_clear_transaction();
+        coap_set_token(&notify, (unsigned char *)token, tokenSize);
+        coap_set_header_observe(&notify, sequence);
+
+        if ((transaction = coap_new_transaction(networkSocket, notify.mid, remoteAddress)))
+        {
+            transaction->packet_len = coap_serialize_message(&notify, transaction->packet);
+
+            coap_send_transaction(transaction); // for NON confirmable messages this will call coap_clear_transaction();
+        }
     }
 }
 
@@ -560,12 +578,14 @@ void coap_SetRequestHandler(RequestHandler handler)
 
 int coap_RegisterUri(const char * uri)
 {
+    (void)uri;
     // Do nothing
     return 0;
 }
 
 int coap_DeregisterUri(const char * path)
 {
+    (void)path;
     // Do nothing
     return 0;
 }
@@ -617,6 +637,7 @@ static int addObserve(NetworkAddress * remoteAddress, char * path, TransactionCa
 
 static int removeObserve(NetworkAddress * remoteAddress, char * path)
 {
+    (void)remoteAddress;
     int result = 0;
     int index;
     for (index = 0; index < MAX_COAP_OBSERVATIONS; index++)
@@ -651,12 +672,13 @@ void coap_handle_notification(NetworkAddress * sourceAddress, coap_packet_t * me
         if (observation && observation->Callback)
         {
             AddressType address;
-            int ContentType = 0;
+            unsigned int ContentType = 0;
             char * payload = NULL;
 
             NetworkAddress_SetAddressType(sourceAddress, &address);
             coap_get_header_content_format(message, &ContentType);
-            int payloadLen = coap_get_payload(message, (const uint8_t **) &payload);
+            int payloadLen = coap_get_payload(message,
+                                              (const uint8_t **) &payload);
 
             observation->Callback(observation->Context, &address, observation->Path, COAP_OPTION_TO_RESPONSE_CODE(message->code),
                     ContentType, payload, payloadLen);

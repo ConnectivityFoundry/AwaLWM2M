@@ -54,7 +54,7 @@
  * then retry later.
  */
 void
-coap_separate_reject()
+coap_separate_reject(void)
 {
   /* TODO: Accept string pointer for custom error message */
   erbium_status_code = SERVICE_UNAVAILABLE_5_03;

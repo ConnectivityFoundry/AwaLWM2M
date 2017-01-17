@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -79,12 +79,10 @@ typedef struct
     bool Version;
 } Options;
 
-static FILE * logFile = NULL;
-static uint8_t * loadedClientCert = NULL;
 static const char * version = VERSION; // from Makefile
 static volatile int quit = 0;
 
-static void LoadCertificateFile(char * certificateFilename);
+static uint8_t* LoadCertificateFile(char * certificateFilename);
 static void PrintOptions(const Options * options);
 
 static void Lwm2m_CtrlCSignalHandler(int dummy)
@@ -168,6 +166,8 @@ uint8_t HexToByte(const char *value)
 
 static int Lwm2mClient_Start(Options * options)
 {
+    FILE * logFile = NULL;
+    uint8_t * loadedClientCert = NULL;
     int result = 0;
     uint8_t * key = NULL;
 
@@ -235,7 +235,7 @@ static int Lwm2mClient_Start(Options * options)
     // always set key
     if (options->CertificateFile)
     {
-        LoadCertificateFile(options->CertificateFile);
+        loadedClientCert = LoadCertificateFile(options->CertificateFile);
     }
     else
         coap_SetCertificate(clientCert, sizeof(clientCert), AwaCertificateFormat_PEM);
@@ -364,14 +364,8 @@ error_coap:
     coap_Destroy();
 
 error_close_log:
-    if (loadedClientCert)
-    {
-        free(loadedClientCert);
-    }
-    if (key)
-    {
-        free(key);
-    }
+    free(loadedClientCert);
+    free(key);
     Lwm2m_Info("Client exiting\n");
     if (logFile)
     {
@@ -381,8 +375,9 @@ error_close_log:
     return result;
 }
 
-static void LoadCertificateFile(char * filename)
+static uint8_t* LoadCertificateFile(char * filename)
 {
+    uint8_t *clientCertificate = NULL;
     FILE * file = fopen(filename, "r");
     if (file)
     {
@@ -390,12 +385,16 @@ static void LoadCertificateFile(char * filename)
         long int fileSize = ftell (file);
         if (fileSize > 0)
         {
-            loadedClientCert = (uint8_t *)malloc(fileSize);
-            if (loadedClientCert)
+            clientCertificate = (uint8_t *)malloc(fileSize + 1);
+            if (clientCertificate)
             {
+                // Add null character at the end of buffer because
+                // mbedTLS requires it, otherwise it will get discarded.
+                clientCertificate[fileSize] = '\0';
+
                 rewind(file);
                 size_t totalRead = 0;
-                uint8_t * position = loadedClientCert;
+                uint8_t * position = clientCertificate;
                 size_t read;
                 do
                 {
@@ -404,11 +403,13 @@ static void LoadCertificateFile(char * filename)
                     position += read;
                 } while ( (read != 0) && (totalRead < fileSize));
                 if (totalRead == fileSize)
-                    coap_SetCertificate(loadedClientCert, fileSize, AwaCertificateFormat_PEM);
+                    coap_SetCertificate(clientCertificate, fileSize + 1, AwaCertificateFormat_PEM);
             }
         }
         fclose(file);
     }
+
+    return clientCertificate;
 }
 
 
