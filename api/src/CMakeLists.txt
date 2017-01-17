@@ -74,11 +74,12 @@ set (Awa_SOURCES
   ${DAEMON_SRC_DIR}/common/lwm2m_xml_serdes.c
 )
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -D_GNU_SOURCE")
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -Wall -Werror -D_GNU_SOURCE")
+set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Os -Wall -Werror -D_GNU_SOURCE")
 
 if (ENABLE_GCOV)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 --coverage")
+  set (CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
 endif ()
 
 # Virtual library to avoid building .o files twice:

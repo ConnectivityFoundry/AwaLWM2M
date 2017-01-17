@@ -38,8 +38,8 @@ set (awa_erbium_LIBS
 )
 
 if (ENABLE_GCOV)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 --coverage")
+  set (CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
 endif ()
 
 # From Contiki Makefiles
