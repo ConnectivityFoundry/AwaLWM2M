@@ -780,21 +780,11 @@ bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const 
         int lastError = errno;
         if (sentBytes == SOCKET_ERROR)
         {
-            if (lastError == EWOULDBLOCK)
+            if ((lastError == EWOULDBLOCK) || (lastError == EINTR))
             {
                 sentBytes = 0;
             }
-            else if (lastError == ENOTCONN)
-            {
-                networkSocket->LastError = NetworkSocketError_SendError;
-                break;
-            }
-            else if (lastError == ECONNRESET)
-            {
-                networkSocket->LastError = NetworkSocketError_SendError;
-                break;
-            }
-            else if (lastError == EBADF)
+            else
             {
                 networkSocket->LastError = NetworkSocketError_SendError;
                 break;
