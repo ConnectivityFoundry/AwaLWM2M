@@ -32,6 +32,7 @@
 #define MAX_ADDRESS_LENGTH           (50)
 #define DEFAULT_CLIENT_HOLD_OFF_TIME (30)
 
+
 struct _AwaStaticClient
 {
     Lwm2mContextType * Context;
@@ -47,7 +48,7 @@ struct _AwaStaticClient
     void * ApplicationContext;
 };
 
-AwaStaticClient * AwaStaticClient_New()
+AwaStaticClient * AwaStaticClient_New(void)
 {
     AwaStaticClient * client = (AwaStaticClient *)malloc(sizeof(*client));
 
@@ -127,6 +128,16 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     }
 
     return result;
+}
+
+AwaContentType AwaStaticClient_GetDefaultContentType(void)
+{
+    return Lwm2mCore_GetDefaultContentType();
+}
+
+void AwaStaticClient_SetDefaultContentType(AwaContentType contentType)
+{
+    Lwm2mCore_SetDefaultContentType(contentType);
 }
 
 AwaError AwaStaticClient_SetLogLevel(AwaLogLevel level)
@@ -348,6 +359,16 @@ void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client)
     return result;
 }
 
+AwaClientRegistrationStatus AwaStaticClient_GetRegistrationStatus(AwaStaticClient * client)
+{
+    AwaClientRegistrationStatus result = AwaClientRegistrationStatus_Invalid;
+    if (client != NULL)
+    {
+        result = Lwm2mCore_GetRegistrationStatus(client->Context);
+    }
+    return result;
+}
+
 int AwaStaticClient_Process(AwaStaticClient * client)
 {
     int result = -1;
@@ -369,6 +390,8 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                                 AwaObjectID objectID, AwaObjectInstanceID objectInstanceID, AwaResourceID resourceID, AwaResourceInstanceID resourceInstanceID,
                                 void ** dataPointer, size_t * dataSize, bool * changed)
 {
+    (void)resourceInstanceID;
+    (void)changed;
     AwaResult result;
 
     ObjectDefinition * objectDefinition = Definition_LookupObjectDefinition(Lwm2mCore_GetDefinitions(client->Context), objectID);
@@ -449,7 +472,7 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
 
                     if (resourceDefinition->Type == AwaResourceType_String)
                     {
-                        *dataSize = strlen(offset);
+                        *dataSize = strlen((const char *)offset);
                     }
                     else
                     {
@@ -623,7 +646,7 @@ AwaError AwaStaticClient_DeleteResource(AwaStaticClient * client, AwaObjectID ob
 
     if (client != NULL)
     {
-        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, false) == AwaResult_SuccessDeleted)
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, resourceID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
 		{
 			result = AwaError_Success;
 		}
@@ -669,7 +692,7 @@ AwaError AwaStaticClient_DeleteObjectInstance(AwaStaticClient * client, AwaObjec
 
     if (client != NULL)
     {
-        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
+        if (Lwm2mCore_Delete(client->Context, Lwm2mRequestOrigin_Client, objectID, objectInstanceID, AWA_INVALID_ID, AWA_INVALID_ID, false) == AwaResult_SuccessDeleted)
         {
             result = AwaError_Success;
         }

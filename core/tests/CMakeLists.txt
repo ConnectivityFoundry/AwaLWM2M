@@ -14,7 +14,6 @@ set (test_core_runner_SOURCES
   test_lwm2m_tree_builder.cc
   unit_support.cc
   test_object_tree.cc
-  test_xml.cc
   
   lwm2m_device_object.c
 )

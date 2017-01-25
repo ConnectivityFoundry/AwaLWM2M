@@ -218,7 +218,23 @@ typedef AwaResult (*AwaStaticClientHandler)(AwaStaticClient * client, AwaOperati
  * @return A pointer to a newly allocated Awa Static Client instance.
  * @return NULL on failure.
  */
-AwaStaticClient * AwaStaticClient_New();
+AwaStaticClient * AwaStaticClient_New(void);
+
+/**
+ * @brief Retrieve default content type to use when a request doesn't specify via accept header a preferred content type.
+ *
+ *        The default is initially AwaContentType_ApplicationPlainText.
+ *
+ * @return The default content type
+ */
+AwaContentType AwaStaticClient_GetDefaultContentType(void);
+
+/**
+ * @brief Set the default content type to use when a request doesn't specify via accept header a preferred content type.
+ *
+ * @param[in] contentType The default contentType eg AwaContentType_ApplicationOmaLwm2mTLV.
+ */
+void AwaStaticClient_SetDefaultContentType(AwaContentType contentType);
 
 /**
  * @brief Set the client log level. This function is not
@@ -355,6 +371,16 @@ AwaError AwaStaticClient_SetApplicationContext(AwaStaticClient * client, void * 
  * @return NULL if @e client is NULL, or no application context was set by the user.
  */
 void * AwaStaticClient_GetApplicationContext(AwaStaticClient * client);
+
+/**
+ * @brief Retrieve register status for the Awa Static Client.
+ *
+ *        This function should only be called after ::AwaStaticClient_Init.
+ *
+ * @param[in] client A pointer to a valid Awa Static Client.
+ * @return Client registration status.
+ */
+AwaClientRegistrationStatus AwaStaticClient_GetRegistrationStatus(AwaStaticClient * client);
 
 /**
  * @brief Initialise an Awa Static client. This function can only be called

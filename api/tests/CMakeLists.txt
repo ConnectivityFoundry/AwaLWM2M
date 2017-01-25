@@ -90,6 +90,7 @@ set (test_api_runner_INCLUDE_DIRS
   ${CORE_SRC_DIR}
   ${CORE_SRC_DIR}/common
   ${CORE_SRC_DIR}/client
+  ${DAEMON_SRC_DIR}/common
   ${XML_INCLUDE_DIR}
   ${API_TEST_DIR}
 )

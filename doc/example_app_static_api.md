@@ -3,10 +3,9 @@
 
 ----
 
+# Awa LightweightM2M
 
-# Awa LightweightM2M  
-
-## Example: Create a client application on a device using the Awa API  
+## Example: Create a client application on a device using the Awa API
 
 ### Application overview
 
@@ -15,9 +14,9 @@
 This example shows how to:
 
 * Create the application *client-static-tutorial* in a Linux environment which:
-    * Defines an object
-    * Defines a resource within the object
-    * Instantiates the defined object within the client
+  * Defines an object
+  * Defines a resource within the object
+  * Instantiates the defined object within the client
 * Create the above application *client-static-tutorial* in a Contiki simulated environment.
 * Use the Server daemon tools to create the same object model and read/write resources in the *client-static-tutorial* application.
 
@@ -27,7 +26,7 @@ The *client-static-tutorial* application makes use of the Awa Static API to defi
 
 Note that this example assumes you have downloaded and decompressed (or git-cloned) Awa LWM2M into the directory `~/AwaLWM2M`.
 
-## Awa LightweightM2M installation  
+## Awa LightweightM2M installation
 
 Use the command below to build and install Awa LightweightM2M to the  *./build/install* directory:
 
@@ -45,8 +44,7 @@ This example will assume that you have installed it to `~/AwaLWM2M/build/install
 
 ----
 
-
-## Example: Create a standalone LWM2M client for a Linux environment using the Awa Static API.
+## Example: Create a standalone LWM2M client for a Linux environment using the Awa Static API
 
 This example will demonstrate how to build a standalone LWM2M client using the Awa Static API.
 
@@ -81,7 +79,7 @@ int main(void)
     AwaStaticClient_SetBootstrapServerURI(awaClient, "");
 
     AwaStaticClient_Init(awaClient);
-    
+
     sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[::1]:5683");
     bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
     sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
@@ -93,7 +91,7 @@ int main(void)
     bootstrapinfo.ServerInfo.DisableTimeout = 86400;
     bootstrapinfo.ServerInfo.Notification = false;
     sprintf(bootstrapinfo.ServerInfo.Binding, "U");
-    
+
     AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
     while (1)
@@ -137,7 +135,7 @@ Client: AwaStaticClient1
   /1/0     LWM2MServer
 ```
 
-### Add a custom object using the Awa static API  
+### Add a custom object using the Awa static API
 
 The following code expands on the previous example, by demonstrating how to add a custom object - the "heater" object
 
@@ -190,7 +188,7 @@ int main(void)
     AwaStaticClient_SetBootstrapServerURI(awaClient, "");
 
     AwaStaticClient_Init(awaClient);
-    
+
     sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[::1]:5683");
     bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
     sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
@@ -202,7 +200,7 @@ int main(void)
     bootstrapinfo.ServerInfo.DisableTimeout = 86400;
     bootstrapinfo.ServerInfo.Notification = false;
     sprintf(bootstrapinfo.ServerInfo.Binding, "U");
-    
+
     AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
 +   DefineHeaterObject(awaClient);
@@ -277,7 +275,7 @@ Heater[/1000/0]:
     Temperature[/1000/0/104]: 10
 ```
 
-## Example: Create a standalone LWM2M client within a contiki environment  
+## Example: Create a standalone LWM2M client within a contiki environment
 
 Awa LWM2M includes a number of makefiles to allow it to be compiled out of tree
 for a contiki environment.
@@ -322,10 +320,8 @@ CFLAGS += -Wall -Wno-pointer-sign
 CFLAGS += -I$(LWM2M_DIR)/api/include -DLWM2M_CLIENT
 
 CFLAGS += -DUIP_CONF_BUFFER_SIZE=4096
-CFLAGS += -DREST_MAX_CHUNK_SIZE=512
 
-APPS += er-coap
-APPS += rest-engine
+APPS += erbium
 
 APPDIRS += $(LWM2M_DIR)/core/src
 APPS += client
@@ -386,10 +382,10 @@ AUTOSTART_PROCESSES(&lwm2m_client);
 PROCESS_THREAD(lwm2m_client, ev, data)
 {
     PROCESS_BEGIN();
-    
+
     static AwaFactoryBootstrapInfo bootstrapinfo = { 0 };
     static AwaStaticClient * awaClient;
-    
+
     awaClient = AwaStaticClient_New();
 
     AwaStaticClient_SetLogLevel(AwaLogLevel_Error);
@@ -398,7 +394,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
     AwaStaticClient_SetBootstrapServerURI(awaClient, "coap://[2001::1]:15683");
 
     AwaStaticClient_Init(awaClient);
-    
+
     sprintf(bootstrapinfo.SecurityInfo.ServerURI, "%s", "coap://[2001::1]:5683");
     bootstrapinfo.SecurityInfo.SecurityMode = AwaSecurityMode_NoSec;
     sprintf(bootstrapinfo.SecurityInfo.PublicKeyOrIdentity, "[PublicKey]");
@@ -410,7 +406,7 @@ PROCESS_THREAD(lwm2m_client, ev, data)
     bootstrapinfo.ServerInfo.DisableTimeout = 86400;
     bootstrapinfo.ServerInfo.Notification = false;
     sprintf(bootstrapinfo.ServerInfo.Binding, "U");
-    
+
     AwaStaticClient_SetFactoryBootstrapInformation(awaClient, &bootstrapinfo);
 
     DefineHeaterObject(awaClient);
@@ -449,5 +445,4 @@ Run the contiki minimal-net application:
 contiki-example$ sudo ./static-client-tutorial.minimal-net
 ```
 
-----
 ----

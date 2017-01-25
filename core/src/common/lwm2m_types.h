@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -94,21 +94,6 @@ typedef struct
     bool Secure;
 } AddressType;
 #endif
-
-typedef enum
-{
-    ContentType_None = -1,
-    ContentType_ApplicationPlainText      = 0,       // The new standard suggests to use PlainText
-    ContentType_ApplicationLinkFormat     = 40,      // Object link format
-    ContentType_ApplicationOctetStream    = 42,      // The new standard uses OctetStream, rather than omg.lwm2m+opaque
-    ContentType_ApplicationJson           = 50,      // The new standard uses Json, rather than omg.lwm2m+json
-    ContentType_ApplicationOmaLwm2mText   = 1541,    // application/vnd.oma.lwm2m+text (leshan uses 1541)
-    ContentType_ApplicationOmaLwm2mTLV    = 1542,    // application/vnd.oma.lwm2m+tlv (TBD)??
-    ContentType_ApplicationOmaLwm2mJson   = 1543,
-    ContentType_ApplicationOmaLwm2mOpaque = 1544,
-
-    ContentType_CustomPrettyPrint = 999,
-} ContentType;
 
 bool Operations_IsResourceTypeExecutable(AwaResourceOperations operation);
 bool Operations_IsResourceTypeWritable(AwaResourceOperations operation);

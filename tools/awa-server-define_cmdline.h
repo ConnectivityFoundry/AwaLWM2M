@@ -99,7 +99,7 @@ struct gengetopt_args_info
   unsigned int resourceOperations_min; /**< @brief Resource Operation's minimum occurreces */
   unsigned int resourceOperations_max; /**< @brief Resource Operation's maximum occurreces */
   const char *resourceOperations_help; /**< @brief Resource Operation help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -209,7 +209,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

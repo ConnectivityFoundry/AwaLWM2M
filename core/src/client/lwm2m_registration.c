@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -65,9 +65,9 @@
 #define REGISTRATION_TIMEOUT        (30000)
 
 
-static void HandleRegisterUpdateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
-static void HandleRegisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
-static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen);
+static void HandleRegisterUpdateResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
+static void HandleRegisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
+static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen);
 
 
 static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, char * buffer, size_t len)
@@ -75,7 +75,7 @@ static int GetTransportBinding(Lwm2mContextType * context, int shortServerID, ch
     // Get binding from Server object in object store as a string
     enum { BINDING_MAX_SIZE = 16 };
     char binding[BINDING_MAX_SIZE];
-   
+
     int res = Lwm2mServerObject_GetTransportBinding(context, shortServerID, binding, sizeof(binding));
     if (res < 0)
     {
@@ -147,12 +147,15 @@ static void SendRegisterRequest(Lwm2mContextType * context, Lwm2mServerType * se
 
     coap_Reset(uri);
 
-    coap_PostRequest(server, uri, ContentType_ApplicationLinkFormat, payload, strlen(payload), HandleRegisterResponse);
+    coap_PostRequest(server, uri, AwaContentType_ApplicationLinkFormat, payload, strlen(payload), HandleRegisterResponse);
     server->RegistrationState = Lwm2mRegistrationState_Registering;
 }
 
-static void HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void HandleRegisterResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
 
     if (responseCode == 201)
@@ -204,14 +207,18 @@ static void SendRegistrationUpdate(Lwm2mContextType * context, Lwm2mServerType *
 
     Lwm2m_Debug("Registration Update: PUT %s %s\n", uri, payload);
 #ifdef LWM2M_V1_0
-    coap_PutRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
+    coap_PutRequest(server, uri, strlen(payload) ? AwaContentType_ApplicationLinkFormat: AwaContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
 #else
-    coap_PostRequest(server, uri, strlen(payload) ? ContentType_ApplicationLinkFormat: ContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
+    coap_PostRequest(server, uri, strlen(payload) ? AwaContentType_ApplicationLinkFormat: AwaContentType_None, payload, strlen(payload), HandleRegisterUpdateResponse);
 #endif
 }
 
-static void HandleRegisterUpdateResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void HandleRegisterUpdateResponse(void * ctxt, AddressType * address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     Lwm2m_Debug("Registration Update Response %s %d\n", responsePath, responseCode);
 
@@ -251,8 +258,13 @@ static void Deregister(Lwm2mContextType * context, Lwm2mServerType * server)
     server->RegistrationState = Lwm2mRegistrationState_Deregistering;
 }
 
-static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void HandleDeregisterResponse(void * ctxt, AddressType* address, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
+	(void)address;
+	(void)responsePath;
+	(void)contentType;
+	(void)payload;
+	(void)payloadLen;
     Lwm2mServerType * server = ctxt;
     if (responseCode == 202)
     {
@@ -404,3 +416,44 @@ int32_t Lwm2m_UpdateRegistrationState(Lwm2mContextType * context)
     }
     return 0;
 }
+
+// Return aggregated registration status for all servers in the serverList.
+AwaClientRegistrationStatus Lwm2m_GetRegistrationStatus(Lwm2mContextType * context)
+{
+    struct ListHead * i;
+    AwaClientRegistrationStatus result = AwaClientRegistrationStatus_Invalid;
+
+    ListForEach(i, Lwm2mCore_GetServerList(context))
+    {
+        Lwm2mServerType * server = ListEntry(i, Lwm2mServerType, list);
+        switch (server->RegistrationState)
+        {
+            case Lwm2mRegistrationState_NotRegistered:
+            case Lwm2mRegistrationState_Deregister:
+            case Lwm2mRegistrationState_Deregistering:
+                if (result == AwaClientRegistrationStatus_Invalid)
+                    result = AwaClientRegistrationStatus_NotRegistered;
+                break;
+
+            case Lwm2mRegistrationState_Register:
+            case Lwm2mRegistrationState_Registering:
+                if (result != AwaClientRegistrationStatus_Registered && result != AwaClientRegistrationStatus_RegisterFailed)
+                    result = AwaClientRegistrationStatus_Registering;
+                break;
+
+            case Lwm2mRegistrationState_Registered:
+            case Lwm2mRegistrationState_UpdatingRegistration:
+                result = AwaClientRegistrationStatus_Registered;
+                break;
+
+            case Lwm2mRegistrationState_RegisterFailedRetry:
+            case Lwm2mRegistrationState_RegisterFailed:
+                if (result != AwaClientRegistrationStatus_Registered)
+                    result = AwaClientRegistrationStatus_RegisterFailed;
+                break;
+        }
+    }
+    return result;
+}
+
+

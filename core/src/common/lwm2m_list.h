@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -30,7 +30,7 @@ extern "C" {
 
 /*
  *  example usage:
- *     
+ *
  *     struct {
  *         struct ListHead List;
  *         ... other content ...
@@ -60,7 +60,7 @@ struct ListHead
  * type "type"
  */
 #define ListEntry(ptr, type, member) \
-    ({(type *)((char *)ptr - ((size_t) &((type*)0)->member));})
+    ((type *)((char *)ptr - ((size_t) &((type*)0)->member)));
 
 #define ListForEach(pos, head) \
     for (pos = (head)->Next; pos != (head); pos = (pos)->Next)
@@ -72,6 +72,7 @@ struct ListHead
 #define LIST_INIT(list) { &(list), &(list) }
 
 void ListAdd(struct ListHead * newEntry, struct ListHead * head);
+void ListInsertAfter(struct ListHead * newEntry, struct ListHead * afterEntry);
 void ListRemove(struct ListHead * entry);
 void ListInit(struct ListHead * list);
 int ListCount(const struct ListHead * list);

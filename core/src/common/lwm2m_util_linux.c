@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -100,12 +100,14 @@ const char * Lwm2mCore_DebugPrintSockAddr(const struct sockaddr * sa)
     switch (sa->sa_family)
     {
         case AF_INET:
-            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET, &((struct sockaddr_in *)sa)->sin_addr,
+                           buffer, sizeof(buffer));
             port = ntohs(((struct sockaddr_in *)sa)->sin_port);
             sprintf(out, "%s:%d", ip, port);
             break;
         case AF_INET6:
-            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr, buffer, sizeof(buffer));
+            ip = inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+                           buffer, sizeof(buffer));
             port =  ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
             sprintf(out, "[%s]:%d", ip, port);
             break;
@@ -175,25 +177,46 @@ bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, 
     return result;
 }
 
+static int comparePorts(in_port_t x, in_port_t y)
+{
+    int result;
+    if (x == y)
+        result = 0;
+    else if  (x > y)
+        result = 1;
+    else
+        result = -1;
+    return result;
+}
+
 int Lwm2mCore_CompareAddresses(AddressType * addr1, AddressType * addr2)
 {
-    if (addr1->Addr.Sa.sa_family != addr2->Addr.Sa.sa_family)
+    int result = -1;
+    if (addr1->Addr.Sa.sa_family == addr2->Addr.Sa.sa_family)
     {
-        return -1;
+        switch (addr1->Addr.Sa.sa_family)
+        {
+            case AF_INET:
+                result = memcmp(&addr1->Addr.Sin.sin_addr.s_addr, &addr2->Addr.Sin.sin_addr, sizeof(addr2->Addr.Sin.sin_addr));
+                if (result == 0)
+                {
+                    result = comparePorts(addr1->Addr.Sin.sin_port, addr2->Addr.Sin.sin_port);
+                }
+                break;
+            case AF_INET6:
+                result = memcmp(&addr1->Addr.Sin6.sin6_addr, &addr2->Addr.Sin6.sin6_addr, sizeof(addr2->Addr.Sin6.sin6_addr));
+                if (result == 0)
+                {
+                    result = comparePorts(addr1->Addr.Sin6.sin6_port, addr2->Addr.Sin6.sin6_port);
+                }
+                break;
+            default:
+                Lwm2m_Error("Unsupported address family: %d\n", addr1->Addr.Sa.sa_family);
+                break;
+        }
     }
 
-    switch (addr1->Addr.Sa.sa_family)
-    {
-        case AF_INET:
-            return memcmp(&addr1->Addr.Sin.sin_addr.s_addr, &addr2->Addr.Sin.sin_addr, sizeof(addr2->Addr.Sin.sin_addr));
-        case AF_INET6:
-            return memcmp(&addr1->Addr.Sin6.sin6_addr, &addr2->Addr.Sin6.sin6_addr, sizeof(addr2->Addr.Sin6.sin6_addr));
-        default:
-            Lwm2m_Error("Unsupported address family: %d\n", addr1->Addr.Sa.sa_family);
-            break;
-    }
-
-    return -1;
+    return result;
 }
 
 int Lwm2mCore_ComparePorts(AddressType * addr1, AddressType * addr2)

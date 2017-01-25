@@ -11,16 +11,18 @@ option "ipcPort"    p "Connect to Server IPC port"    int    optional default="5
 option "clientID"   c "Client ID"                     string required                     typestr="ID"
 option "create"     o "Create a new Object Instance or Optional Resource"
                                                       string optional multiple(0-)
+option "replace"    r "Replace existing resource (rather than update which is the default)" flag off
 
 text "\n"
 text "Specify one or more object, object instance and resource paths\n"
 text "and values in the format \"/O/I/R/i=VALUE\", separated by spaces.\n"
 text "For example:\n"
 text "\n"
-text "    /3/0/0=Imagination\n"
-text "    /3/0/7/1=4200\n"
-text "    /4/0/3=3 /4/0/6=7\n"
+text "    awa-server-write -o /3/0/0 /3/0/0=Imagination    (create and set)\n"
+text "    awa-server-write /3/0/0=Imagination\n"
+text "    awa-server-write /3/0/7/1=4200\n"
+text "    awa-server-write /4/0/3=3 /4/0/6=7\n"
 #text "\n"
 #text "Multiple resource instances can be set together with the format:\n"
-#text "    /3/0/6=0:3800,1:4800,4:1700\n"
+#text "  awa-server-write  /3/0/6=0:3800,1:4800,4:1700\n"
 #text " (enclose values containing , and : characters in single or double quotes)\n"

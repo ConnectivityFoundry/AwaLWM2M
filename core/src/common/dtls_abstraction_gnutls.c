@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -30,6 +30,12 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
+
+
+//GnuTLS added DTLS in 2.99.0
+#if ((GNUTLS_VERSION_MAJOR < 2) || ((GNUTLS_VERSION_MAJOR == 2) && (GNUTLS_VERSION_MINOR < 99)))
+#error "This version of GnuTLS does not support DTLS"
+#endif
 
 typedef enum
 {
@@ -97,7 +103,11 @@ void DTLS_Init(void)
     //    unsigned int bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_DH, GNUTLS_SEC_PARAM_LEGACY);
     //    gnutls_dh_params_init(&_DHParameters);
     //    gnutls_dh_params_generate2(_DHParameters, bits);
+#if ((GNUTLS_VERSION_MAJOR > 3) || ((GNUTLS_VERSION_MAJOR == 3) && (GNUTLS_VERSION_MINOR >= 4)))
     gnutls_priority_init(&_PriorityCache, "NONE:+VERS-ALL:+ECDHE-ECDSA:+ECDHE-PSK:+PSK:+CURVE-ALL:+AES-128-CCM-8:+AES-128-CBC:+MAC-ALL:-SHA1:+COMP-ALL:+SIGN-ALL:+CTYPE-X.509", NULL);
+#else
+    gnutls_priority_init(&_PriorityCache, "NONE:+VERS-TLS-ALL:+ECDHE-ECDSA:+ECDHE-PSK:+PSK:+CURVE-ALL:+AES-128-CBC:+MAC-ALL:-SHA1:+COMP-ALL:+SIGN-ALL:+CTYPE-X.509", NULL);
+#endif
 }
 
 void DTLS_Shutdown(void)
@@ -131,7 +141,7 @@ void DTLS_Reset(NetworkAddress * address)
 
 void DTLS_SetCertificate(const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
-    if (certificateLength > 0)
+    if (certLength > 0)
     {
         certificate = (uint8_t *)cert;
         certificateLength = certLength;
@@ -226,7 +236,7 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
             gnutls_transport_set_push_function(session->Session, SSLSendCallBack);
             session->SessionEstablished = (gnutls_handshake(session->Session) == GNUTLS_E_SUCCESS);
             if (session->SessionEstablished)
-                Lwm2m_Info("Session established");
+                Lwm2m_Info("DTLS Session established\n");
         }
     }
     else
@@ -318,24 +328,27 @@ static void SetupNewSession(int index, NetworkAddress * networkAddress, bool cli
                 gnutls_credentials_set(session->Session, GNUTLS_CRD_CERTIFICATE, _CertCredentials);
             }
         }
-        else if (pskIdentity)
+        if (pskIdentity)
         {
             if (client)
             {
-                gnutls_psk_client_credentials_t credentials;
-                if (gnutls_psk_allocate_client_credentials(&credentials) == GNUTLS_E_SUCCESS)
+                if (!certificate)
                 {
-                    if (gnutls_psk_set_client_credentials(credentials, pskIdentity, &pskKey, GNUTLS_PSK_KEY_RAW) == GNUTLS_E_SUCCESS)
+                    gnutls_psk_client_credentials_t credentials;
+                    if (gnutls_psk_allocate_client_credentials(&credentials) == GNUTLS_E_SUCCESS)
                     {
-                        gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
-                        session->Credentials = credentials;
-                        session->CredentialType = CredentialType_ClientPSK;
-                    }
-                    else
-                    {
-                        gnutls_psk_set_client_credentials_function(credentials, PSKClientCallBack);
-                        session->Credentials = credentials;
-                        session->CredentialType = CredentialType_ClientPSK;
+                        if (gnutls_psk_set_client_credentials(credentials, pskIdentity, &pskKey, GNUTLS_PSK_KEY_RAW) == GNUTLS_E_SUCCESS)
+                        {
+                            gnutls_credentials_set(session->Session, GNUTLS_CRD_PSK, credentials);
+                            session->Credentials = credentials;
+                            session->CredentialType = CredentialType_ClientPSK;
+                        }
+                        else
+                        {
+                            gnutls_psk_set_client_credentials_function(credentials, PSKClientCallBack);
+                            session->Credentials = credentials;
+                            session->CredentialType = CredentialType_ClientPSK;
+                        }
                     }
                 }
             }

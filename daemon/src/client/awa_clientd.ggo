@@ -1,0 +1,40 @@
+# gengetopt configuration file
+package "awa_clientd"
+purpose "Awa LWM2M Client"
+versiontext "Copyright (c) 2016 Imagination Technologies Limited and/or its affiliated group companies."
+args "--no-version"
+
+# Options
+option "port"               p  "Use local port number PORT for CoAP communications" int    optional default="6000"             typestr="PORT"
+option "addressFamily"      a  "Address family for network interface. AF=4 for IPv4, AF=6 for IPv6"
+                                                                                 int    optional default="4"                typestr="AF"    values="4","6"
+option "ipcPort"            i  "Use port number PORT for IPC communications"        int    optional default="12345"            typestr="PORT"
+option "endPointName"       e  "Use NAME as client end point name"                  string optional default="Awa Client"       typestr="NAME"
+option "bootstrap"          b  "Use bootstrap server URI"                           string optional                            typestr="URI"
+option "factoryBootstrap"   f  "Load factory bootstrap information from FILE"       string optional                            typestr="FILE"
+option "secure"             s  "CoAP communications are secured with DTLS"          flag off
+option "pskIdentity"        -  "Default Identity of associated pre-shared key for DTLS"      
+                                                                                  string optional                            typestr="IDENTITY"
+option "pskKey"             -  "Default pre-shared key for DTLS as a hex string"    string optional                            typestr="KEY"
+option "certificate"        c  "Load client certificate from FILE"                  string optional                            typestr="FILE"
+
+option "defaultContentType" t  "Default content type to use when a request doesn't specify one (TLV=1542, JSON=50)"  
+                                                                                 int    optional default="0"                 typestr="CONTENTTYPE"
+
+
+option "objDefs"            o  "Load object and resource definitions from FILE"     string optional                            typestr="FILE"  multiple(1-16)
+option "daemonize"          d  "Detach process from terminal and run in the background"
+                                                                                 flag off
+option "verbose"            v  "Generate verbose output"                            flag off
+option "logFile"            l  "Log output to FILE"                                 string optional                            typestr="FILE"
+option "version"            V  "Print version and exit"                             flag off
+
+text "\n"
+text "Example:\n"
+text "    awa_clientd --port 6000 --endPointName client1 --bootstrap coap://[::1]:2134\n"
+text "\n"
+
+text "PSK Example:\n"
+text "\n"
+text "    awa_clientd --port 6000 --endPointName client1 --bootstrap coaps://0.0.0.0:2134 --pskIdentity=myPskIdentity --pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F\n"
+text "\n"

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -78,7 +78,7 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID);
 
-static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
+static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
 static int Lwm2mSecurity_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
@@ -101,10 +101,7 @@ static void DestroySecurityObjects(struct ListHead * securityObjectList)
     ListForEachSafe(i, n, securityObjectList)
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(i, LWM2MSecurityInfo, list);
-        if (securityInfo != NULL)
-        {
-            free(securityInfo);
-        }
+        free(securityInfo);
     }
 }
 
@@ -187,17 +184,23 @@ static ResourceOperationHandlers securityResourceOperationHandlers =
 
 static int Lwm2mSecurity_ObjectCreateInstanceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    (void)objectID;
     return (AddSecurityInfo(context, objectInstanceID) != NULL) ? objectInstanceID : -1;
 }
 
 static int Lwm2mSecurity_CreateOptionalResourceHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     // No action
     return 0;
 }
 
 static int Lwm2mSecurity_DeleteObjectInstance(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID)
 {
+    (void)objectID;
     int result = -1;
     LWM2MSecurityInfo * info = GetSecurityInfo(context, objectInstanceID);
     if (info != NULL)
@@ -214,8 +217,9 @@ static int Lwm2mSecurity_DeleteObjectInstance(Lwm2mContextType * context, Object
     return result;
 }
 
-static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
+static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID)
 {
+    (void)resourceInstanceID;
     // 8.2.2 Delete operation MAY target to “/” URI to delete all the existing Object Instances except LWM2M
     // Bootstrap Server Account in the LWM2M Client.
 
@@ -227,7 +231,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 
     if (objectInstanceID != -1)
     {
-        return Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context, objectID, objectInstanceID);
+        return Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context,
+                                                  objectID, objectInstanceID);
     }
     else
     {
@@ -236,7 +241,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
         while ((objectID = Lwm2mCore_GetNextObjectID(context, objectID)) != -1)
         {
             // Best effort attempt
-            Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context, objectID, objectInstanceID);
+            Lwm2mSecurity_DeleteObjectInstance((Lwm2mContextType *)context,
+                                               objectID, objectInstanceID);
         }
         return 0;
     }
@@ -245,6 +251,8 @@ static int Lwm2mSecurity_ObjectDeleteHandler(void * context, ObjectIDType object
 static int Lwm2mSecurity_ResourceReadHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                              ResourceInstanceIDType resourceInstanceID, const void ** buffer, size_t * bufferLen)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
     LWM2MSecurityInfo * security = GetSecurityInfo(context, objectInstanceID);
 
     if (security != NULL)
@@ -337,6 +345,8 @@ static void WarnOfInsufficientData(size_t dest_size, size_t src_size)
 static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID,
                                               ResourceInstanceIDType resourceInstanceID, uint8_t * srcBuffer, size_t srcBufferLen, bool * changed)
 {
+    (void)objectID;
+    (void)resourceInstanceID;
     int result = -1;
     LWM2MSecurityInfo * security =  GetSecurityInfo(context, objectInstanceID);
 
@@ -350,7 +360,7 @@ static int Lwm2mSecurity_ResourceWriteHandler(void * context, ObjectIDType objec
                     memset(security->ServerURI, 0, sizeof(security->ServerURI));
                     memcpy(security->ServerURI, srcBuffer, srcBufferLen);
                     // Recalculate socket address from URI
-                    security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+                    security->AddressResolved = coap_ResolveAddressByURI((unsigned char *)security->ServerURI, &security->address);
                     result = srcBufferLen;
                 }
                 else
@@ -487,10 +497,18 @@ static LWM2MSecurityInfo * GetSecurityInfoForAddress(Lwm2mContextType * context,
     ListForEach(current, Lwm2mCore_GetSecurityObjectList(context))
     {
         LWM2MSecurityInfo * securityInfo = ListEntry(current, LWM2MSecurityInfo, list);
-        if (Lwm2mCore_CompareAddresses(address, &securityInfo->address) == 0)
+        if (securityInfo)
         {
-            info = securityInfo;
-            break;
+            if (!securityInfo->AddressResolved)
+            {
+                securityInfo->AddressResolved = coap_ResolveAddressByURI(securityInfo->ServerURI, &securityInfo->address);
+            }
+
+            if (securityInfo->AddressResolved && Lwm2mCore_CompareAddresses(address, &securityInfo->address) == 0)
+            {
+                info = securityInfo;
+                break;
+            }
         }
     }
     return info;
@@ -540,14 +558,14 @@ bool Lwm2mCore_IsNetworkAddressRevolved(Lwm2mContextType * context, int shortSer
     {
         if (!security->AddressResolved)
         {
-            security->AddressResolved = coap_ResolveAddressByURI(security->ServerURI, &security->address);
+            security->AddressResolved = coap_ResolveAddressByURI((unsigned char *)security->ServerURI, &security->address);
         }
         result = security->AddressResolved;
     }
     return result;
 }
 
-int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, int32_t * clientHoldOff)
+int Lwm2m_GetClientHoldOff(Lwm2mContextType * context, int shortServerID, uint32_t * clientHoldOff)
 {
     int result = -1;
     LWM2MSecurityInfo * security = GetSecurityInfoForShortServerID(context, shortServerID);

@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType);
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, AwaContentType contentType);
 
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
@@ -91,7 +91,7 @@ int Lwm2mCore_RemoveResourceEndPoint(Lwm2mContextType * context, const char * pa
 DefinitionRegistry * Lwm2mCore_GetDefinitions(Lwm2mContextType * context);
 
 struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context);
-ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context);
+AwaContentType Lwm2mCore_GetContentType(Lwm2mContextType * context);
 int Lwm2mCore_GetLastLocation(Lwm2mContextType * context);
 struct ListHead * Lwm2mCore_GetEventRecordList(Lwm2mContextType * context);
 void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location);

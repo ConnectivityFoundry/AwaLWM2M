@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -53,14 +53,14 @@ typedef struct
 
 } SerialiserDeserialiser;
 
-int SerialiseObject(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len);
-int SerialiseObjectInstance(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len);
-int SerialiseResource(ContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, char * buffer, int len);
+int SerialiseObject(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, char * buffer, int len);
+int SerialiseObjectInstance(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, char * buffer, int len);
+int SerialiseResource(AwaContentType type, Lwm2mTreeNode * node, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, char * buffer, int len);
 
-int DeserialiseObject(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID, const char * buffer, int bufferLen);
-int DeserialiseObjectInstance(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
+int DeserialiseObject(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID, const char * buffer, int bufferLen);
+int DeserialiseObjectInstance(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                               ObjectInstanceIDType objectInstanceID, const char * buffer, int bufferLen);
-int DeserialiseResource(ContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
+int DeserialiseResource(AwaContentType type, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                         ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const char * buffer, int bufferLen);
 
 #ifdef __cplusplus

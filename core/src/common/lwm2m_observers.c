@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -266,7 +266,7 @@ void Lwm2m_FreeObservers(void * ctxt)
 }
 
 int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                  ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData)
+                  ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData)
 {
     Lwm2mContextType * context = (Lwm2mContextType *) ctxt;
     int result = 0;
@@ -379,7 +379,9 @@ void Lwm2m_UpdateObservers(void * ctxt)
             ((maximumPeriod != -1) && (elapsed > ((uint32_t)maximumPeriod * 1000))))
         {
             observer->Sequence ++;
-            observer->Callback(context, &observer->Address, observer->Sequence, (const char*)&observer->Token, observer->TokenLength, 
+            observer->Callback(context, &observer->Address, observer->Sequence,
+                               (const char *)&observer->Token,
+                               observer->TokenLength,
                                observer->ObjectID, observer->ObjectInstanceID, observer->ResourceID, observer->ContentType, observer->ContextData);
             observer->Changed = false;
             observer->LastUpdate = now;

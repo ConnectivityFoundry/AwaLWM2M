@@ -128,10 +128,10 @@ TEST_F(PrettyPrintTestSuite, test_multiple_object_instance)
     uint8_t buffer[512];
     memset(buffer, 0, sizeof(buffer));
     char expected[] =
-"Test[15/1]:\n"
-"\tRes1[15/1/0/0]: 55\n"
-"Test[15/0]:\n"
-"\tRes1[15/0/0/0]: 44\n";
+        "Test[15/0]:\n"
+        "\tRes1[15/0/0/0]: 44\n"
+        "Test[15/1]:\n"
+        "\tRes1[15/1/0/0]: 55\n";
     SerdesContext serdesContext;
     int len = PPSerialiseObject(&serdesContext, dest, 15, buffer, sizeof(buffer));
 

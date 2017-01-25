@@ -116,11 +116,11 @@ static bool Lwm2mBootstrap_AddServerValues(Lwm2mContextType * context, const cha
 }
 
 static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query,
-                           const char * token, int tokenLength, ContentType contentType, const char * requestContent,
-                           size_t requestContentLen, ContentType * responseContentType, char * responseContent,
+                           const char * token, int tokenLength, AwaContentType contentType, const char * requestContent,
+                           size_t requestContentLen, AwaContentType * responseContentType, char * responseContent,
                            size_t * responseContentLen, int * responseCode)
 {
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
 
     switch (type)
@@ -151,7 +151,7 @@ static int EndpointHandler(int type, void * ctxt, AddressType * addr, const char
     return 0;
 }
 
-static void BootstrapTransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, ContentType contentType, char * payload, size_t payloadLen)
+static void BootstrapTransactionCallback(void * context, AddressType * addr, const char * responsePath, int responseCode, AwaContentType contentType, char * payload, size_t payloadLen)
 {
     if ((responseCode >= AwaResult_Success) && (responseCode <= AwaResult_SuccessContent))
     {
@@ -196,11 +196,11 @@ static void BootstrapTransactionCallback(void * context, AddressType * addr, con
             Lwm2mTreeNode_SetID(object, client->ObjectID);
             Lwm2mTreeNode_AddChild(object, objectInstance);
 
-            payloadLen = SerialiseObject(ContentType_ApplicationOmaLwm2mTLV, object, client->ObjectID, payload, sizeof(payload));
+            payloadLen = SerialiseObject(AwaContentType_ApplicationOmaLwm2mTLV, object, client->ObjectID, payload, sizeof(payload));
             Lwm2mTreeNode_DeleteRecursive(object);
 
             Lwm2m_Debug("Put to %s\n", uri);
-            coap_PutRequest(context, uri, ContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, BootstrapTransactionCallback);
+            coap_PutRequest(context, uri, AwaContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, BootstrapTransactionCallback);
         }
         else
         {
@@ -208,7 +208,7 @@ static void BootstrapTransactionCallback(void * context, AddressType * addr, con
             sprintf(uri, "%s/%s", server, "/bs");
             Lwm2m_Debug("Post to %s\n", uri);
             Lwm2m_Info("Client bootstrapped: %s, \'%s\'\n", server, client->EndPointName);
-            coap_PostRequest(context, uri, ContentType_None, NULL, 0, NULL);
+            coap_PostRequest(context, uri, AwaContentType_None, NULL, 0, NULL);
 
             // Delete the client record
             free(client->EndPointName);

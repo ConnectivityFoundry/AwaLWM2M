@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -29,10 +29,6 @@
 #include "coap_abstraction.h"
 #include "lwm2m_device_object.h"
 #include "lwm2m_objects.h"
-
-#ifndef CONTIKI
-#  include "lwm2m_client_xml_handlers.h"
-#endif
 
 #define DEVICE_MANUFACTURER          "Imagination Technologies"
 #define DEVICE_MODEL_NUMBER          "Awa Client"
@@ -62,10 +58,6 @@ static int DEVICE_MEMORY_TOTAL    =  42;
 static int executeReboot(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Reboot resource executed\n");
-#ifndef CONTIKI
-    // Fire IPC notifications to any subscribers.
-    xmlif_ExecuteResourceHandler(context, objectID, objectInstanceID, resourceID, inValueBuffer, inValueBufferLen);
-#endif
     return 0;
 }
 
@@ -78,10 +70,6 @@ static int createRebootResource(void * context, ObjectIDType objectID, ObjectIns
 static int executeFactoryReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
     Lwm2m_Debug("Factory Reset resource executed\n");
-#ifndef CONTIKI
-    // Fire IPC notifications to any subscribers.
-    xmlif_ExecuteResourceHandler(context, objectID, objectInstanceID, resourceID, inValueBuffer, inValueBufferLen);
-#endif
     return 0;
 }
 

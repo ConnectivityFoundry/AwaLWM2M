@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -37,6 +37,10 @@
 static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * node, ObjectIDType objectID,
                                    ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * buffer, int len)
 {
+    (void)serdesContext;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     uint16_t resourceLength = 0;
 
     if (Lwm2mTreeNode_GetType(node) != Lwm2mTreeNodeType_Resource)
@@ -70,7 +74,7 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
         return -1;
     }
 
-    uint8_t * value = (uint8_t * )Lwm2mTreeNode_GetValue(child, &resourceLength);
+    uint8_t * value = (uint8_t *)Lwm2mTreeNode_GetValue(child, &resourceLength);
 
     if (len < resourceLength)
     {
@@ -78,7 +82,7 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
         return -1;
     }
 
-    memcpy(buffer, (char*)value, resourceLength);
+    memcpy(buffer, (char *)value, resourceLength);
 
     return resourceLength;
 }
@@ -86,6 +90,9 @@ static int OpaqueSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode 
 static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode ** dest, const DefinitionRegistry * registry, ObjectIDType objectID,
                                      ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const uint8_t * buffer, int bufferLen)
 {
+    (void)serdesContext;
+    (void)objectID;
+    (void)objectInstanceID;
     int result = -1;
     ResourceDefinition * definition;
 
@@ -117,7 +124,8 @@ static int OpaqueDeserialiseResource(SerdesContext * serdesContext, Lwm2mTreeNod
     Lwm2mTreeNode_SetID(resourceValueNode, 0);
     Lwm2mTreeNode_SetType(resourceValueNode, Lwm2mTreeNodeType_ResourceInstance);
 
-    result = Lwm2mTreeNode_SetValue(resourceValueNode, (const uint8_t*)&buffer[0], bufferLen);
+    result = Lwm2mTreeNode_SetValue(resourceValueNode,
+                                    (const uint8_t *)&buffer[0], bufferLen);
 
     if (result >= 0)
     {

@@ -53,7 +53,7 @@ struct gengetopt_args_info
   int ipcPort_arg;	/**< @brief Connect to Server IPC port (default='54321').  */
   char * ipcPort_orig;	/**< @brief Connect to Server IPC port original value given at command line.  */
   const char *ipcPort_help; /**< @brief Connect to Server IPC port help description.  */
-  
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -152,7 +152,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

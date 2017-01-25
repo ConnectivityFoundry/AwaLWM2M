@@ -39,9 +39,9 @@ clean:
 # otherwise use a sensible default for local development
 BUILD_DIR_ABS=$(realpath ../$(BUILD_DIR))
 export LWM2M_TOOLS_PATH:=$(BUILD_DIR_ABS)/tools
-export LWM2M_CLIENTD_BIN:=$(BUILD_DIR_ABS)/core/src/client/awa_clientd
-export LWM2M_SERVERD_BIN:=$(BUILD_DIR_ABS)/core/src/server/awa_serverd
-export LWM2M_BOOTSTRAPD_BIN:=$(BUILD_DIR_ABS)/core/src/bootstrap/awa_bootstrapd
+export LWM2M_CLIENTD_BIN:=$(BUILD_DIR_ABS)/daemon/src/client/awa_clientd
+export LWM2M_SERVERD_BIN:=$(BUILD_DIR_ABS)/daemon/src/server/awa_serverd
+export LWM2M_BOOTSTRAPD_BIN:=$(BUILD_DIR_ABS)/daemon/src/bootstrap/awa_bootstrapd
 
 # Tool tests use environment variables to locate binaries:
 #   LWM2M_TOOLS_PATH     : absolute path of LWM2M tool binaries

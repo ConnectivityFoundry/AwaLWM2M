@@ -3,7 +3,6 @@
 
 ----
 
-
 # Awa LightweightM2M
 
 ## Example: Create a client application on a gateway device using the Awa API
@@ -16,12 +15,12 @@ This example shows how to:
 
 * Compile and install Awa LightweightM2M
 * Create the application *client-tutorial* which:
-    * Initiates a client session
-    * Defines an object
-    * Defines a resource within the object
-    * Instantiates the defined object within the client
-    * closes the client session
-    * Exits
+  * Initiates a client session
+  * Defines an object
+  * Defines a resource within the object
+  * Instantiates the defined object within the client
+  * closes the client session
+  * Exits
 * Enhance the initial application with the addition of another resource to the existing object
 * Create a server side application which uses the same object model
 
@@ -49,9 +48,7 @@ This example will assume that you have installed it to `~/AwaLWM2M/build/install
 
 ----
 
-
 ## Creating the application
-
 
 Now we create a new directory for the project. We'll use *tutorial*:
 
@@ -129,7 +126,7 @@ Now build the application...
 Start the client daemon...
 
 ````
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonize --logFile /tmp/awa_clientd.log
 ````
 
 And run the application...
@@ -152,7 +149,6 @@ Heater[/1000/0]:
 ```
 
 ----
-
 
 ## Adding further resources
 
@@ -256,7 +252,7 @@ And restart the client daemon:
 
 ```
 ~/AwaLWM2M$ killall awa_clientd
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonize --logFile /tmp/awa_clientd.log
 ```
 
 Then restart the client application and set the temperature...
@@ -278,10 +274,7 @@ Heater[/1000/0]:
 
 So far our object definitions have remained local to the client. The next section compliments our client application by extending our object definitions to the server.
 
-
 ----
-
-
 
 ## Creating a server application using the Awa API
 
@@ -343,8 +336,8 @@ Restart the client/server daemon:
 ```
 ~/AwaLWM2M$ killall awa_serverd
 ~/AwaLWM2M$ killall awa_clientd
-~/AwaLWM2M$ build/core/src/server/awa_serverd --verbose --daemonise --logFile /tmp/awa_serverd.log
-~/AwaLWM2M$ build/core/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonise --logFile /tmp/awa_clientd.log
+~/AwaLWM2M$ build/daemon/src/server/awa_serverd --verbose --daemonize --logFile /tmp/awa_serverd.log
+~/AwaLWM2M$ build/daemon/src/client/awa_clientd --endPointName client1 --factoryBootstrap ./config/localhost.bsc --daemonize --logFile /tmp/awa_clientd.log
 ```
 
 And start the server application:
@@ -527,5 +520,4 @@ static void clientRegisterCallback(const AwaServerClientRegisterEvent * event, v
 
 The application should now print the name of each registering client and the list of registered entity paths.
 
-----
 ----

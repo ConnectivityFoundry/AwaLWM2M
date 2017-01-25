@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -251,7 +251,8 @@ const AwaPathResult * AwaServerReadResponse_GetPathResult(const AwaServerReadRes
 {
     // AwaServerReadResponse is an alias for ResponseCommon
     const PathResult * pathResult = NULL;
-    ResponseCommon_GetPathResult((const ResponseCommon *)response, path, &pathResult);
+    ResponseCommon_GetPathResult((const ResponseCommon *)response, path,
+                                 &pathResult);
     // AwaPathResult is an alias for PathResult
     return (AwaPathResult *)pathResult;
 }
@@ -271,88 +272,133 @@ bool AwaServerReadResponse_HasValue(const AwaServerReadResponse * response, cons
 AwaError AwaServerReadResponse_GetValueAsCStringPointer(const AwaServerReadResponse * response, const char * path, const char ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointerWithNull((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_String, -1);
+    return ResponseCommon_GetValuePointerWithNull((const ResponseCommon *)response,
+                                                  path, (const void **)value,
+                                                  NULL,
+                                                  AwaResourceType_String, -1);
 }
 
 AwaError AwaServerReadResponse_GetValueAsIntegerPointer(const AwaServerReadResponse * response, const char * path, const AwaInteger ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Integer, sizeof(AwaInteger));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_Integer,
+                                          sizeof(AwaInteger));
 }
 
 AwaError AwaServerReadResponse_GetValueAsFloatPointer(const AwaServerReadResponse * response, const char * path, const AwaFloat ** value)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Float, sizeof(AwaFloat));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_Float,
+                                          sizeof(AwaFloat));
 }
 
 AwaError AwaServerReadResponse_GetValueAsBooleanPointer(const AwaServerReadResponse * response, const char * path, const AwaBoolean ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Boolean, sizeof(AwaBoolean));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_Boolean,
+                                          sizeof(AwaBoolean));
 }
 
 AwaError AwaServerReadResponse_GetValueAsTimePointer(const AwaServerReadResponse * response, const char * path, const AwaTime ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Time, sizeof(AwaTime));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_Time,
+                                          sizeof(AwaTime));
 }
 
 AwaError AwaServerReadResponse_GetValueAsOpaque(const AwaServerReadResponse * response, const char * path, AwaOpaque * value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValueAsOpaque((const ResponseCommon *)response, path, value);
+    return ResponseCommon_GetValueAsOpaque((const ResponseCommon *)response,
+                                           path, value);
 }
 
 AwaError AwaServerReadResponse_GetValueAsObjectLink(const AwaServerReadResponse * response, const char * path, AwaObjectLink * value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValueAsObjectLink((const ResponseCommon *)response, path, value);
+    return ResponseCommon_GetValueAsObjectLink((const ResponseCommon *)response,
+                                               path, value);
 }
 
 AwaError AwaServerReadResponse_GetValueAsObjectLinkPointer(const AwaServerReadResponse * response, const char * path, const AwaObjectLink ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_ObjectLink, sizeof(AwaObjectLink));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_ObjectLink,
+                                          sizeof(AwaObjectLink));
 }
 
 AwaError AwaServerReadResponse_GetValueAsOpaquePointer(const AwaServerReadResponse * response, const char * path, const AwaOpaque ** value)
 {
     // AwaServerReadResponse is an alias for ResponseCommon
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)value, NULL, AwaResourceType_Opaque, sizeof(AwaOpaque));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)value, NULL,
+                                          AwaResourceType_Opaque,
+                                          sizeof(AwaOpaque));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsStringArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaStringArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_StringArray, sizeof(AwaStringArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_StringArray,
+                                          sizeof(AwaStringArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsIntegerArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaIntegerArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_IntegerArray, sizeof(AwaIntegerArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_IntegerArray,
+                                          sizeof(AwaIntegerArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsFloatArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaFloatArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_FloatArray, sizeof(AwaFloatArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_FloatArray,
+                                          sizeof(AwaFloatArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsBooleanArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaBooleanArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_BooleanArray, sizeof(AwaBooleanArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_BooleanArray,
+                                          sizeof(AwaBooleanArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsTimeArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaTimeArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_TimeArray, sizeof(AwaTimeArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_TimeArray,
+                                          sizeof(AwaTimeArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsOpaqueArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaOpaqueArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_OpaqueArray, sizeof(AwaOpaqueArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL, AwaResourceType_OpaqueArray,
+                                          sizeof(AwaOpaqueArray *));
 }
 
 AwaError AwaServerReadResponse_GetValuesAsObjectLinkArrayPointer(const AwaServerReadResponse * response, const char * path, const AwaObjectLinkArray ** valueArray)
 {
-    return ResponseCommon_GetValuePointer((const ResponseCommon *)response, path, (const void **)valueArray, NULL, AwaResourceType_ObjectLinkArray, sizeof(AwaObjectLinkArray *));
+    return ResponseCommon_GetValuePointer((const ResponseCommon *)response,
+                                          path, (const void **)valueArray,
+                                          NULL,
+                                          AwaResourceType_ObjectLinkArray,
+                                          sizeof(AwaObjectLinkArray *));
 }
 

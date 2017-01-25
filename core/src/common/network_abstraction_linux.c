@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -287,6 +287,18 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
     return result;
 }
 
+static int comparePorts(in_port_t x, in_port_t y)
+{
+    int result;
+    if (x == y)
+        result = 0;
+    else if  (x > y)
+        result = 1;
+    else
+        result = -1;
+    return result;
+}
+
 int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
 {
     int result = -1;
@@ -299,7 +311,7 @@ int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
             result = memcmp(&address1->Address.Sin.sin_addr.s_addr, &address2->Address.Sin.sin_addr.s_addr, sizeof(address2->Address.Sin.sin_addr.s_addr));
             if (result == 0)
             {
-                result = address1->Address.Sin.sin_port - address2->Address.Sin.sin_port;
+                result = comparePorts(address1->Address.Sin.sin_port, address2->Address.Sin.sin_port);
             }
         }
         else if (address1->Address.Sa.sa_family == AF_INET6)
@@ -307,7 +319,7 @@ int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2)
             result = memcmp(&address1->Address.Sin6.sin6_addr, &address2->Address.Sin6.sin6_addr, sizeof(address2->Address.Sin6.sin6_addr));
             if (result == 0)
             {
-                result = address1->Address.Sin6.sin6_port - address2->Address.Sin6.sin6_port;
+                result = comparePorts(address1->Address.Sin6.sin6_port, address2->Address.Sin6.sin6_port);
             }
         }
     }
@@ -518,12 +530,13 @@ int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket)
 
 void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format)
 {
+    (void)networkSocket;
     DTLS_SetCertificate(cert, certLength, format);
 }
 
 void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength)
 {
-
+    (void)networkSocket;
     DTLS_SetPSK(identity, key, keyLength);
 }
 
@@ -637,7 +650,9 @@ bool readUDP(NetworkSocket * networkSocket, int socketHandle, uint8_t * buffer, 
     struct sockaddr_storage sourceSocket;
     socklen_t sourceSocketLength = sizeof(struct sockaddr_storage);
     errno = 0;
-    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT, (struct sockaddr *)&sourceSocket, &sourceSocketLength);
+    *readLength = recvfrom(socketHandle, buffer, bufferLength, MSG_DONTWAIT,
+                           (struct sockaddr *)&sourceSocket,
+                           &sourceSocketLength);
     int lastError = errno;
     if (*readLength == SOCKET_ERROR)
     {
@@ -765,21 +780,11 @@ bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const 
         int lastError = errno;
         if (sentBytes == SOCKET_ERROR)
         {
-            if (lastError == EWOULDBLOCK)
+            if ((lastError == EWOULDBLOCK) || (lastError == EINTR))
             {
                 sentBytes = 0;
             }
-            else if (lastError == ENOTCONN)
-            {
-                networkSocket->LastError = NetworkSocketError_SendError;
-                break;
-            }
-            else if (lastError == ECONNRESET)
-            {
-                networkSocket->LastError = NetworkSocketError_SendError;
-                break;
-            }
-            else if (lastError == EBADF)
+            else
             {
                 networkSocket->LastError = NetworkSocketError_SendError;
                 break;

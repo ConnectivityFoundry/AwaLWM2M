@@ -1,5 +1,6 @@
 
 ![](images/img.png)
+
 ----
 
 # Awa LightweightM2M
@@ -12,34 +13,33 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 
 ----
 
-
 ### Contents
 
 * [Introduction.](userguide.md#introduction)
 * [The LWM2M object model.](userguide.md#the-lwm2m-object-model)
 * [The LWM2M client.](userguide.md#the-lwm2m-client)
-    * [The Awa client daemon.](userguide.md#the-awa-client-daemon)
-    * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
-    * [The Awa API.](userguide.md#the-awa-api)
-    * [Awa client API tools.](userguide.md#awa-client-api-tools)
-        * [API options.](userguide.md#common-options)
-        * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
-        * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
-        * [Setting resource values.](userguide.md#setting-resource-values)
-        * [Retrieving a resource value.](userguide.md#retrieving-a-resource-value)
-        * [Subscribing to a change of resource value.](userguide.md#subscribing-to-a-change-of-resource-value)
-        * [Deleting a resource.](userguide.md#deleting-a-resource)
+  * [The Awa client daemon.](userguide.md#the-awa-client-daemon)
+  * [Using the LWM2M client.](userguide.md#using-the-LWM2M-client)
+  * [The Awa API.](userguide.md#the-awa-api)
+  * [Awa client API tools.](userguide.md#awa-client-api-tools)
+    * [API options.](userguide.md#common-options)
+    * [Creating a new object definition.](userguide.md#creating-a-new-object-definition)
+    * [Discovering a device's object and resource definitions.](userguide.md#discovering-a-device's-object-and-resource-definitions)
+    * [Setting resource values.](userguide.md#setting-resource-values)
+    * [Retrieving a resource value.](userguide.md#retrieving-a-resource-value)
+    * [Subscribing to a change of resource value.](userguide.md#subscribing-to-a-change-of-resource-value)
+    * [Deleting a resource.](userguide.md#deleting-a-resource)
 * [The LWM2M server.](userguide.md#the-lwm2m-server)
-    * [The Awa server daemon.](userguide.md#the-awa-server-daemon)
-    * [Awa server API tools.](userguide.md#awa-server-api-tools)
-        * [Listing registered clients.](userguide.md#listing-registered-clients)
-        * [Creating a server object definition.](userguide.md#creating-a-server-object-definition)
-        * [Writing a value to a resource on a registered client.](userguide.md#writing-a-value-to-a-resource-on-a-registered-client)
-        * [Reading a resource value from a registered client.](userguide.md#reading-a-resource-value-from-a-registered-client)
-        * [Deleting an object instance from a registered client.](userguide.md#deleting-an-object-instance-from-a-registered-client)
-        * [Observing a resource on a registered client.](userguide.md#observing-a-resource-on-a-registered-client)
-        * [Executing a resource on a registered client.](userguide.md#executing-a-resource-on-a-registered-client)
-        * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
+  * [The Awa server daemon.](userguide.md#the-awa-server-daemon)
+  * [Awa server API tools.](userguide.md#awa-server-api-tools)
+    * [Listing registered clients.](userguide.md#listing-registered-clients)
+    * [Creating a server object definition.](userguide.md#creating-a-server-object-definition)
+    * [Writing a value to a resource on a registered client.](userguide.md#writing-a-value-to-a-resource-on-a-registered-client)
+    * [Reading a resource value from a registered client.](userguide.md#reading-a-resource-value-from-a-registered-client)
+    * [Deleting an object instance from a registered client.](userguide.md#deleting-an-object-instance-from-a-registered-client)
+    * [Observing a resource on a registered client.](userguide.md#observing-a-resource-on-a-registered-client)
+    * [Executing a resource on a registered client.](userguide.md#executing-a-resource-on-a-registered-client)
+    * [Write attribute values of a resource or object instance on a registered client.](userguide.md#write-attribute-values-of-a-resource-or-object-instance-on-a-registered-client)
 * [The LWM2M Bootstrap server.](userguide.md#the-lwm2m-bootstrap-server)
     * [The Awa bootstrap server daemon.](userguide.md#the-awa-bootstrap-server-daemon)
 * [Application example.](userguide.md#application-example)
@@ -49,9 +49,7 @@ Developers who aim to contribute to the Awa LightweightM2M project are referred 
 
 ### Introduction
 
-
 ![Awa application overview](images/Awa_application_overview.png)
-
 
 LWM2M is a protocol that allows resources on a client to be accessed by a server. In the Awa library both the client and the server are daemon processes, each having its own respective API interface over an inter-process communication interface (IPC). The client API is for use exclusively with the client daemon, and the server API is for use exclusively with the server daemon.
 A suite of tools is also provided to exercise the main functionality of the API for both the client and server. Later sections describe the configuration of the Awa client and server daemons, along with examples of tools use.
@@ -66,8 +64,8 @@ A bootstrap server daemon is included that implements the LWM2M bootstrapping pr
 
 ----
 
-
 LWM2M is based on an object model such that:
+
 * An object is defined to represent a device or client application, or a LWM2M device management function.
 * Each object is defined on both the client and the server.
 * The client hosted object holds the current status of the device and resources are mapped directly to device functions (e.g. temperature sensor or tilt switch).
@@ -100,9 +98,9 @@ If you have installed Awa on your system, or installed it as a Linux package, th
 
 If you are using the build instructions found in the [Starters Guide](starters_guide.md), you will find the Awa programs within the build directory:
 
-    build/core/src/client/awa_clientd
-    build/core/src/server/awa_serverd
-    build/core/src/bootstrap/awa_bootstrapd
+    build/daemon/src/client/awa_clientd
+    build/daemon/src/server/awa_serverd
+    build/daemon/src/bootstrap/awa_bootstrapd
     build/tools/awa-client-get, awa-server-read, etc
 
 ### The LWM2M client
@@ -119,18 +117,14 @@ The client provides two interfaces:
 * A CoAP interface to talk to the LWM2M server
 * An IPC interface which provides a mechanism for applications to talk to the daemon
 
-
 ![Awa LWM2M client interfaces](images/awa_client_interfaces.png)
-
 
 The IPC interface allows the end user application to define new objects and to perform Get/Set/Delete/Subscribe operations on the client.
 Currently the IPC interface is implemented as a simple UDP channel, with an associated UDP port. It is recommended that only a single user application connect to the daemon's IPC interface at any time.
 
-
 ### The Awa client daemon
 
 Usage: `awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]]`
-
 
 | options | description |
 |-----|-----|
@@ -142,6 +136,7 @@ Usage: `awa_clientd [options] [--bootstrap [URI] | --factoryBootstrap [filename]
 | --factoryBootstrap, -f | Load factory bootstrap information from FILE |
 | --pskIdentity | Default Identity of associated pre-shared key for DTLS |
 | --pskKey | Default pre-shared key for DTLS as a hex string |
+| --defaultContentType, -t | Default content type to use when a request doesn't specify one (TLV=1542, JSON=50) |
 | --objDefs, -o | Load object definitions from FILE |
 | --daemonise, -d | Detach process from terminal and run in the background |
 | --verbose, -v | Generate verbose output |
@@ -161,11 +156,9 @@ The factory bootstrap information file contains the server information that woul
 
 Object definitions can be loaded into the client daemon before it attempts to bootstrap with a LWM2M bootstrap server, or register with a LWM2M server. See [Object Definition Files](object_definition_files.md) for details.
 
-
 [Back to the table of contents](userguide.md#contents)
 
 ----
-
 
 ### The LWM2M server
 
@@ -175,7 +168,6 @@ The LWM2M server runs as a daemon which provides an interface to perform LWM2M o
 
 The IPC interface allows the end user application to define new objects, list registered clients and perform Read/Write/Delete/Observe operations for a given LWM2M client registered with the server.
 Currently the IPC interface is implemented as a simple UDP channel, with an associated UDP port. It is recommended that only a single user application connect to the daemon's IPC interface at any time.
-
 
 ### The Awa server daemon
 
@@ -195,7 +187,6 @@ Usage: `awa_serverd [options]`
 | --logFile | log filename |
 | --help | show usage |
 
-
 Example:
 
     awa_serverd --interface eth0 --addressFamily 4 --port 5683
@@ -208,14 +199,11 @@ Object definitions can be loaded into the server daemon before it attempts to ac
 
 ----
 
-
 ### The LWM2M Bootstrap server
 
 The LWM2M Bootstrap server runs as a daemon which provides a mechanism to bootstrap LWM2M clients.
 
-
 ![](images/Awa_LWM2M_bootstrap_server-interfaces.png)
-
 
 ### The Awa Bootstrap server daemon
 
@@ -236,7 +224,6 @@ Usage: `awa_bootstrapd [options]`
 | --verbose, -v | verbose debug output |
 | --logfile  | logfile name |
 | --help | show usage |
-
 
 Example:
 
@@ -264,24 +251,23 @@ The configuration file must have the following format:
     DisableTimeout=86400
     NotificationStoringWhenDisabledOrOffline=true
 
- * *ServerURI* specifies the address and port of the LWM2M server to which clients will be directed.
- * *SecurityMode* is not yet supported.
- * *PublicKey* is not supported.
- * *SecretKey* is not supported.
- * *ServerID* specifies the numerical ID of the LWM2M server used to associate security and server objects on the LWM2M client.
- * *HoldOffTime* is not yet supported.
- * *ShortServerID* specifies the numerical ID of the LWM2M server used to associate Security and Server objects on the LWM2M client.
- * Binding specifies the supported LWM2M binding modes for this server. Only "U" (UDP, non-queuing) is currently supported.
- * *LifeTime* specifies the minimum time (in seconds) that the server will wait after receiving a registration or update from the client before terminating that registration.
- * *DefaultMinimumPeriod* specifies the default minimum period of observations.
- * *DefaultMaximumPeriod* specifies the default maximum period of observations, -1 represents an indefinite period.
- * *DisableTimeout* is not supported.
- * *NotificationStoringWhenDisabledOrOffline* is not supported.
+* *ServerURI* specifies the address and port of the LWM2M server to which clients will be directed.
+* *SecurityMode* is not yet supported.
+* *PublicKey* is not supported.
+* *SecretKey* is not supported.
+* *ServerID* specifies the numerical ID of the LWM2M server used to associate security and server objects on the LWM2M client.
+* *HoldOffTime* is not yet supported.
+* *ShortServerID* specifies the numerical ID of the LWM2M server used to associate Security and Server objects on the LWM2M client.
+* Binding specifies the supported LWM2M binding modes for this server. Only "U" (UDP, non-queuing) is currently supported.
+* *LifeTime* specifies the minimum time (in seconds) that the server will wait after receiving a registration or update from the client before terminating that registration.
+* *DefaultMinimumPeriod* specifies the default minimum period of observations.
+* *DefaultMaximumPeriod* specifies the default maximum period of observations, -1 represents an indefinite period.
+* *DisableTimeout* is not supported.
+* *NotificationStoringWhenDisabledOrOffline* is not supported.
 
 [Back to the table of contents](userguide.md#contents)
 
 ----
-
 
 ## Using the LWM2M client
 
@@ -324,7 +310,6 @@ Several command-line tools are available for user interaction with the LWM2M dae
 
 Note that these are *not* LWM2M Protocol tools - they do not issue LWM2M operations.
 
-
 ### Common options
 
 Common options include:
@@ -353,7 +338,6 @@ Most tools take one or more PATH parameters, specified in the format:
 For tools that write data, values can be specified with the format: `PATH=VALUE`.
 
 [Back to the table of contents](userguide.md#contents)
-
 
 ### Creating a new object definition
 
@@ -494,7 +478,6 @@ By default, *awa-client-subscribe* will wait indefinitely, displaying each notif
 | -t, --waitTime=SECONDS | Time to wait for notification  (default=`0') |
 | -c, --waitCount=NUMBER | Number of notifications to wait for  (default=`0') |
 
-
 For example, to wait for no longer than 60 seconds for a single notification:
 
     awa-client-subscribe /3/0/4 --waitTime=60 --waitCount=1
@@ -525,7 +508,6 @@ Unlike the *awa-server-delete* tool, this tool can modify the client's data stru
 
 [Back to the table of contents](userguide.md#contents)
 
-
 ## Awa Server API tools
 
 Server tools are used to communicate with the LWM2M Server daemon and typically issue one or more LWM2M operations to a connected client.
@@ -535,7 +517,6 @@ Server tools often require a target client ID to be specified:
 | option | description |
 |-----|-----|
 | -c, --clientID=ID | ClientID is the client endpoint name used by the client when registering with the LWM2M server. |
-
 
 [Back to the table of contents](userguide.md#contents)
 
@@ -567,7 +548,6 @@ Returns
     1 ClientA <2/0>,<4/0>,<7>,<3/0>,<5>,<6>,<0/1>,<1/1>
 
 [Back to the table of contents](userguide.md#contents)
-
 
 ### Creating a server object definition
 
@@ -604,7 +584,6 @@ The ID of the newly created object instance is displayed.
 
  **Note: Create functionality is not yet supported.**
 
-
 [Back to the table of contents](userguide.md#contents)
 
 ### Reading a resource value from a registered client
@@ -617,7 +596,6 @@ Multiple resources and object instances can be read using:
 
     awa-server-read -c imagination1 /1000/0/2 /1000/0/3 /1000/1 /1001
 
-
 [Back to the table of contents](userguide.md#contents)
 
 ### Deleting an object instance from a registered client
@@ -627,7 +605,6 @@ The *awa-server-delete* tool is used to delete an instance of an object from a c
     awa-server-delete --clientID=imagination1 /1000/0
 
 **Note.** Due to LWM2M protocol restrictions it is not possible to delete individual resources, resource instances, or entire objects.
-
 
 [Back to the table of contents](userguide.md#contents)
 
@@ -658,7 +635,6 @@ For example, to wait for no longer than 60 seconds for a single notification:
 
 Observe attributes that affect the way notifications are generated can be changed with the *awa-server-write-attributes* tool.
 
-
 [Back to the table of contents](userguide.md#contents)
 
 ### Executing a resource on a registered client
@@ -681,9 +657,7 @@ Opaque data can be supplied as an argument to the execute operation by piping in
 
 Execute operations on an object, an object instance or a resource instance are not possible.
 
-
 [Back to the table of contents](userguide.md#contents)
-
 
 ### Write attribute values of a resource or object instance on a registered client
 
@@ -701,13 +675,11 @@ Note that the *?* and *&* characters will need to be escaped for most shells.
 
 [Back to the table of contents](userguide.md#contents)
 
-
 ## Further information
 
 ### Application example
 
 For an application example showing object and resource definitions on a client and a server, go [here](example_app.md).
-
 
 ### Awa API reference
 
@@ -718,8 +690,5 @@ Full Awa API reference material is available [here](http://flowm2m.github.io/Awa
 A '*how to*' guide to connecting to Wakaama bootstrap and Eclipse Leshan servers is available [here](3rdparty.md).
 
 [Back to the table of contents](userguide.md#contents)
-
-
-----
 
 ----

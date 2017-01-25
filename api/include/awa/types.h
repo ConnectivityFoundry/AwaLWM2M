@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -165,6 +165,31 @@ typedef enum
     AwaCertificateFormat_ASN1, /**< Raw ASN1 sequence. */
     AwaCertificateFormat_PEM,  /**< PEM format. */
 } AwaCertificateFormat;
+
+
+typedef enum
+{
+    AwaContentType_None = -1,
+    AwaContentType_ApplicationPlainText      = 0,       // The new standard suggests to use PlainText
+    AwaContentType_ApplicationLinkFormat     = 40,      // Object link format
+    AwaContentType_ApplicationOctetStream    = 42,      // The new standard uses OctetStream, rather than omg.lwm2m+opaque
+    AwaContentType_ApplicationJson           = 50,      // The new standard uses Json, rather than omg.lwm2m+json
+    AwaContentType_ApplicationOmaLwm2mText   = 1541,    // application/vnd.oma.lwm2m+text (leshan uses 1541)
+    AwaContentType_ApplicationOmaLwm2mTLV    = 1542,    // application/vnd.oma.lwm2m+tlv (TBD)??
+    AwaContentType_ApplicationOmaLwm2mJson   = 1543,
+    AwaContentType_ApplicationOmaLwm2mOpaque = 1544,
+} AwaContentType;
+
+typedef enum
+{
+    AwaClientRegistrationStatus_Invalid = -1,               /**< invalid client reference */
+    AwaClientRegistrationStatus_Bootstrap,                  /**< bootstrap in progress */
+    AwaClientRegistrationStatus_BootstrapFailed,            /**< bootstrap failed */
+    AwaClientRegistrationStatus_NotRegistered,              /**< not registered (to any server) */
+    AwaClientRegistrationStatus_Registering,                /**< register in progress (and not registered or failed on another server) */
+    AwaClientRegistrationStatus_Registered,                 /**< register complete (to at least one server) */
+    AwaClientRegistrationStatus_RegisterFailed,             /**< register failed (and not registered on another server) */
+} AwaClientRegistrationStatus;
 
 #ifdef __cplusplus
 }

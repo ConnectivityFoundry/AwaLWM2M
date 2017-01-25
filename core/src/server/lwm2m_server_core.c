@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -45,7 +45,7 @@ struct _Lwm2mContextType
     CoapInfo * Coap;                          // CoAP library context information
     struct ListHead ClientList;               // List of registered clients
     int LastLocation;                         // Used for registration, creates /rd/0, /rd/1 etc
-    ContentType ContentType;                  // Used to set CoAP content type
+    AwaContentType ContentType;                  // Used to set CoAP content type
     struct ListHead EventRecordList;          // Used to dispatch event callbacks
 };
 
@@ -110,7 +110,7 @@ static int Lwm2mCore_HandleRequest(CoapRequest * request, CoapResponse * respons
     }
     else
     {
-        response->responseContentType = ContentType_None;
+        response->responseContentType = AwaContentType_None;
         response->responseContentLen = 0;
         response->responseCode = AwaResult_NotFound;
     }
@@ -138,7 +138,7 @@ struct ListHead * Lwm2mCore_GetClientList(Lwm2mContextType * context)
     return &context->ClientList;
 }
 
-ContentType Lwm2mCore_GetContentType(Lwm2mContextType * context)
+AwaContentType Lwm2mCore_GetContentType(Lwm2mContextType * context)
 {
     return context->ContentType;
 }
@@ -158,7 +158,7 @@ void Lwm2mCore_SetLastLocation(Lwm2mContextType * context, int location)
     context->LastLocation = location;
 }
 
-Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, ContentType contentType)
+Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, AwaContentType contentType)
 {
     Lwm2m_Debug("Create object store\n");
 

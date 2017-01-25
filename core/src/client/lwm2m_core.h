@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -54,7 +54,7 @@ extern "C" {
 extern ResourceOperationHandlers defaultResourceOperationHandlers;
 extern ObjectOperationHandlers defaultObjectOperationHandlers;
 
-Lwm2mContextType * Lwm2mCore_New();
+Lwm2mContextType * Lwm2mCore_New(void);
 void Lwm2mCore_SetCoapInfo(Lwm2mContextType * context, CoapInfo * coap);
 CoapInfo * Lwm2mCore_GetCoapInfo(Lwm2mContextType * context);
 void * Lwm2mCore_GetApplicationContext(Lwm2mContextType * context);
@@ -63,12 +63,19 @@ void Lwm2mCore_SetApplicationContext(Lwm2mContextType * context, void * applicat
 // Initialise the LWM2M core, setup any callbacks, initialise CoAP etc
 Lwm2mContextType * Lwm2mCore_Init(CoapInfo * coap, char * endPointName);
 
+#if LWM2M_CLIENT
 
+AwaContentType Lwm2mCore_GetDefaultContentType(void);
+void Lwm2mCore_SetDefaultContentType(AwaContentType contentType);
+
+#endif
 
 void Lwm2mCore_SetFactoryBootstrap(Lwm2mContextType * context, const BootstrapInfo * factoryBootstrapInformation);
 
 // Update the LWM2M state machine, process any message timeouts, registration attempts etc.
 int Lwm2mCore_Process(Lwm2mContextType * context);
+
+AwaClientRegistrationStatus Lwm2mCore_GetRegistrationStatus(Lwm2mContextType * context);
 
 int Lwm2mCore_SetEndPointClientName(Lwm2mContextType * context, const char * endpoint);
 int Lwm2mCore_GetEndPointClientName(Lwm2mContextType * context, char * buffer, int len);
@@ -106,10 +113,10 @@ ObjectInstanceIDType Lwm2mCore_GetNextObjectInstanceID(Lwm2mContextType * contex
 ResourceIDType Lwm2mCore_GetNextResourceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 ResourceInstanceIDType Lwm2mCore_GetNextResourceInstanceID(Lwm2mContextType * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID);
 
-AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, bool replace);
+AwaResult Lwm2mCore_Delete(Lwm2mContextType * context, Lwm2mRequestOrigin requestOrigin, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, ResourceInstanceIDType resourceInstanceID, bool replace);
 
 int Lwm2mCore_Observe(Lwm2mContextType * context, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                      ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
+                      ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
 
 int Lwm2mCore_CancelObserve(Lwm2mContextType * context, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 

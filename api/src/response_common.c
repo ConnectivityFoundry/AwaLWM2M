@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -447,7 +447,7 @@ AwaError ResponseCommon_GetPathResult(const ResponseCommon * response, const cha
         {
             if (result)
             {
-                if (Map_Get(response->PathResults, path, (void**)result))
+                if (Map_Get(response->PathResults, path, (void **)result))
                 {
                     error = AwaError_Success;
                 }
@@ -649,7 +649,11 @@ AwaError ResponseCommon_GetValueAsObjectLink(const ResponseCommon * response, co
 {
     AwaObjectLink * storedObjectLink;
 
-    AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedObjectLink, NULL, AwaResourceType_ObjectLink, sizeof(*value));
+    AwaError result = ResponseCommon_GetValuePointer(response, path,
+                                                     (const void **)&storedObjectLink,
+                                                     NULL,
+                                                     AwaResourceType_ObjectLink,
+                                                     sizeof(*value));
 
     if ((result == AwaError_Success) && (value != NULL))
     {
@@ -663,7 +667,11 @@ AwaError ResponseCommon_GetValueAsOpaque(const ResponseCommon * response, const 
 {
     AwaOpaque * storedOpaque;
 
-    AwaError result = ResponseCommon_GetValuePointer(response, path, (const void **)&storedOpaque, NULL, AwaResourceType_Opaque, sizeof(*value));
+    AwaError result = ResponseCommon_GetValuePointer(response, path,
+                                                     (const void **)&storedOpaque,
+                                                     NULL,
+                                                     AwaResourceType_Opaque,
+                                                     sizeof(*value));
 
     if ((result == AwaError_Success) && (value != NULL))
     {

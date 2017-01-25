@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -30,8 +30,6 @@
 #include "lwm2m_result.h"
 #include "lwm2m_endpoints.h"
 #include "server/lwm2m_registration.h"
-#include "lwm2m_events.h"
-#include "../../api/src/ipc_defs.h"
 
 #define QUERY_EP_NAME  "ep="
 #define QUERY_LIFETIME "lt="
@@ -57,12 +55,12 @@ typedef struct
 static void DestroyObjectList(struct ListHead * objectList);
 
 static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
+                                       int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
+                                 int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode);
 
 static void Lwm2m_SplitUpQuery(const char * query, RegistrationQueryString * result)
 {
@@ -166,7 +164,7 @@ static void Lwm2m_ParseObjectList(Lwm2mClientType * client, const char * objectL
                     {
                         // If the LWM2M Client supports the JSON data format for all the objects it should inform the LWM2M server
                         // by including the content type in the root path link using the ct= link attribute.
-                        if ((contentType == ContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
+                        if ((contentType == AwaContentType_ApplicationOmaLwm2mJson) && (!strcmp(objectStr, "</>")))
                         {
                             client->SupportsJson = true;
                             Lwm2m_Info("Supports JSON\n");
@@ -233,7 +231,7 @@ static void Lwm2m_ReleaseQueryString(RegistrationQueryString * queryString)
 {
     if (queryString != NULL)
     {
-        free((char*)queryString->EndPointName);
+        free((char *)queryString->EndPointName);
     }
 }
 
@@ -299,7 +297,7 @@ static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, 
             {
                 if (eventRecord->Callback != NULL)
                 {
-                    Lwm2m_Debug("Calling registration event callback with type %d, context %p\n", eventType, eventRecord->Context)
+                    Lwm2m_Debug("Calling registration event callback with type %d, context %p\n", eventType, eventRecord->Context);
                     eventRecord->Callback(eventType, eventRecord->Context, parameter);
                 }
             }
@@ -308,7 +306,7 @@ static void DispatchRegistrationEventCallbacks(Lwm2mContextType * lwm2mContext, 
 }
 
 static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int lifeTime, BindingMode bindingMode,
-                              AddressType * addr, ContentType contentType, const char * objectList, int objectListLength,
+                              AddressType * addr, AwaContentType contentType, const char * objectList, int objectListLength,
                               RegistrationEventType registrationEventType)
 {
     int result = -1;
@@ -328,7 +326,7 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
 
         memcpy(&client->Address, addr, sizeof(AddressType));
 
-        if (contentType == ContentType_ApplicationLinkFormat)
+        if (contentType == AwaContentType_ApplicationLinkFormat)
         {
             Lwm2m_ParseObjectList(client, objectList, objectListLength);
         }
@@ -347,7 +345,7 @@ static int Lwm2m_UpdateClient(Lwm2mContextType * context, int location, int life
 }
 
 static int Lwm2m_RegisterClient(Lwm2mContextType * context, const char * endPointName, int lifeTime, BindingMode bindingMode,
-                                AddressType * addr, ContentType contentType, const char * objectList, int objectListLength)
+                                AddressType * addr, AwaContentType contentType, const char * objectList, int objectListLength)
 {
     int result = -1;
     Lwm2mClientType * client = Lwm2m_LookupClientByName(context, endPointName);
@@ -408,12 +406,12 @@ static void Lwm2m_DeregisterClient(Lwm2mContextType * context, Lwm2mClientType *
 
 // handler called when a client posts to /rd
 static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path,
-                              const char * query, ContentType contentType, 
+                              const char * query, AwaContentType contentType,
                               const char * requestContent, size_t requestContentLen,
                               char * responseContent, size_t * responseContentLen,
                               int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
     Lwm2mClientType * client;
 
@@ -429,16 +427,16 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
     }
 
     // Check object list is supplied, or at least an empty list with the type application-link
-    if (contentType != ContentType_ApplicationLinkFormat)
+    if (contentType != AwaContentType_ApplicationLinkFormat)
     {
         *responseContentLen = 0;
         *responseCode = AwaResult_BadRequest;
         goto done;
     }
 
-    /* If the LWM2M Client sends a “Register” operation to the LWM2M Server even though the LWM2M Server has registration
+    /* If the LWM2M Client sends a "Register" operation to the LWM2M Server even though the LWM2M Server has registration
      * information of the LWM2M Client, the LWM2M Server removes the existing registration information and performs the
-     * new “Register” operation. This situation happens when the LWM2M Client forgets the state of the LWM2M Server (e.g., factory reset).
+     * new "Register" operation. This situation happens when the LWM2M Client forgets the state of the LWM2M Server (e.g., factory reset).
      */
     if ((client = Lwm2m_LookupClientByName(context, q.EndPointName)) != NULL)
     {
@@ -455,7 +453,7 @@ static int Lwm2m_RegisterPost(void * ctxt, AddressType * addr, const char * path
         Lwm2mClientType * client = Lwm2m_LookupClientByName(context, q.EndPointName);
 
         sprintf(responseContent, "rd/%d", client->Location);
-    
+
         *responseContentLen = strlen(responseContent);  // no content
         *responseCode = AwaResult_SuccessCreated;
     }
@@ -473,12 +471,12 @@ done:
 
 // handler called when a client puts to /rd/<location>
 static int RegisterPut(void * ctxt, AddressType * addr, const char * path,
-                       const char * query, ContentType contentType,
+                       const char * query, AwaContentType contentType,
                        const char * requestContent, size_t requestContentLen,
                        char * responseContent, size_t * responseContentLen,
                        int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
     RegistrationQueryString q;
 
     int32_t location;
@@ -510,10 +508,10 @@ done:
 }
 
 // handler called when a client sends a deregister by sending a DELETE to /rd/X
-static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, ContentType contentType,
+static int RegisterDelete(void * ctxt, AddressType * addr, const char * path, const char * query, AwaContentType contentType,
                           const char * requestContent, size_t requestContentLen, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
-    Lwm2mContextType * context = (Lwm2mContextType*)ctxt;
+    Lwm2mContextType * context = (Lwm2mContextType *)ctxt;
 
     int32_t location;
 
@@ -547,8 +545,8 @@ done:
  * end points are handled here.
  */
 static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                 int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                 ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                 int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                 AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch(type)
     {
@@ -566,7 +564,7 @@ static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, cons
             break;
     }
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
     *responseCode = AwaResult_MethodNotAllowed;
     return 0;
@@ -574,8 +572,8 @@ static int UpdateEndpointHandler(int type, void * ctxt, AddressType * addr, cons
 
 // This function is called when a CoAP request is made to /rd
 static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr, const char * path, const char * query, const char * token,
-                                       int tokenLength, ContentType contentType, const char * requestContent, size_t requestContentLen,
-                                       ContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
+                                       int tokenLength, AwaContentType contentType, const char * requestContent, size_t requestContentLen,
+                                       AwaContentType * responseContentType, char * responseContent, size_t * responseContentLen, int * responseCode)
 {
     switch (type)
     {
@@ -585,7 +583,7 @@ static int RegistrationEndpointHandler(int type, void * ctxt, AddressType * addr
             break;
     }
 
-    *responseContentType = ContentType_None;
+    *responseContentType = AwaContentType_None;
     *responseContentLen = 0;
     *responseCode = AwaResult_MethodNotAllowed;
     return 0;
@@ -631,10 +629,7 @@ static void DestroyObjectList(struct ListHead * objectList)
         ListForEachSafe(i, n, objectList)
         {
             ObjectListEntry * object = ListEntry(i, ObjectListEntry, list);
-            if (object != NULL)
-            {
-                free(object);
-            }
+            free(object);
         }
     }
 }

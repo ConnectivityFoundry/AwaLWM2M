@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -731,7 +731,8 @@ static char * EncodeOpaque(AwaOpaque * value)
                 if ((i <= OPAQUE_DISPLAY_LEN) || (i == value->Size - 1))
                 {
                     char hexValue[4] = {0};
-                    snprintf(hexValue, 4, "%02X ", ((uint8_t*)value->Data)[i]);
+                    snprintf(hexValue, 4, "%02X ",
+                             ((uint8_t *)value->Data)[i]);
                     strcat(resourceValue, hexValue);
                 }
                 else
@@ -1626,8 +1627,6 @@ void PrintDefinitionTarget(const AwaObjectDefinition * objectDefinition, OutputF
 {
     if (objectDefinition != NULL)
     {
-        AwaObjectID objectID = AwaObjectDefinition_GetID(objectDefinition);
-
         if (*lastObjectIDPrinted != objectID)
         {
             PrintObjectDefinitionHeader(objectDefinition, format);
@@ -1807,7 +1806,7 @@ void PrintResourceDefinition(const AwaResourceDefinition * resourceDefinition, O
                         "            <IsMandatory>%s</IsMandatory>\n"
                         "            <IsCollection>%s</IsCollection>\n"
                         "            <Access>%s</Access>\n"
-                        "        </PropertyDefinition>\n";
+                        "       </PropertyDefinition>\n";
                 msprintf2(&id, "%d", resourceID);
                 msprintf2(&mandatory, "%s", AwaResourceDefinition_GetMinimumInstances(resourceDefinition) == 0 ? "False" : "True");
                 msprintf2(&collection, "%s", AwaResourceDefinition_GetMaximumInstances(resourceDefinition) <= 1 ? "False" : "True");

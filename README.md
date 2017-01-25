@@ -1,87 +1,114 @@
-
-
 ![Imagination Technologies Limited logo](doc/images/img.png)
 
 ----
 
-## Awa LightweightM2M
+# Awa LightweightM2M
 
 [![Build Status](https://travis-ci.org/FlowM2M/AwaLWM2M.svg?branch=master)](https://travis-ci.org/FlowM2M/AwaLWM2M)
 [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg?style=flat-square)](http://opensource.org/licenses/BSD-3-Clause)
 [![Coverity Scan](https://scan.coverity.com/projects/8186/badge.svg)](https://scan.coverity.com/projects/flowm2m-awalwm2m)
 
-The Internet of Things (IoT) is currently fragmented by numerous proprietary methods of device management. In order for the IoT to reach its full potential, devices from different vendors must be able to communicate effectively with each other. This is where open standards such as the Open Mobile Alliance's (OMA) Lightweight Machine to Machine protocol (LWM2M) become important.
+The Internet of Things (IoT) is currently fragmented by numerous proprietary methods of device management. In order
+for the IoT to reach its full potential, devices from different vendors must be able to communicate effectively with
+each other. This is where open standards such as the Open Mobile Alliance's (OMA) Lightweight Machine to Machine protocol
+(LWM2M) become important.
 
-The LWM2M protocol has been designed to be highly efficient in terms of data transfer and memory footprint, making it  suitable for deployment on larger gateway devices as well as the more constrained devices.
+The LWM2M protocol has been designed to be highly efficient in terms of data transfer and memory footprint, making it
+suitable for deployment on larger gateway devices as well as the more constrained devices.
 
-Awa LightweightM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards compliant device management solution to simplify the development of M2M applications by providing an intuitive API that enables customization without the need for an intimate knowledge of M2M protocols.
+Awa LightweightM2M is an implementation of the OMA Lightweight M2M protocol that provides a secure and standards compliant
+device management solution to simplify the development of M2M applications by providing an intuitive API that enables
+customization without the need for an intimate knowledge of M2M protocols.
 
 ![Awa application overview](doc/images/Awa_application_overview.png)
 
-Awa LightweightM2M is a development suite that provides a number of components and tools which can be combined in various ways depending on requirement. For example:
+Awa LightweightM2M is a development suite that provides a number of components and tools which can be combined in various
+ways depending on requirement. For example:
 
+* When running on a larger Linux based device, Awa LightweightM2M can be deployed as a series of daemons that interact
+  with your application via the Awa API.
+* For more constrained devices, your application code can be built against the [Awa static API](doc/Awa_Static_API.md)
+  and compiled along with the Awa LightweightM2M client code into a binary to be deployed on your device.
 
-* When running on a larger Linux based device, Awa LightweightM2M can be deployed as a series of daemons that interact with your application via the Awa API.
-* For more constrained devices, your application code can be built against the [Awa static API](doc/Awa_Static_API.md) and compiled along with the Awa LightweightM2M client code into a binary to be deployed on your device.
-
-*Regardless of the method, adding LWM2M support for your device is simply a matter of incorporating any objects you need into your own M2M application.*
+*Regardless of the method, adding LWM2M support for your device is simply a matter of incorporating
+any objects you need into your own M2M application.*
 
 ----
 
-###  Getting started
+## News
+
+2016-08-17: Awa LightweightM2M is a finalist in the [New Zealand Open Source Awards](http://nzosa.org.nz/news-and-media/finalists-for-the-2016-new-zealand-open-source-awards/).
+
+## Getting started
 
 The easiest way to get started with Awa LightweightM2M is to use our [docker container](doc/docker.md).
 
-Alternatively, you can build Awa on a Linux PC.  The following instructions are based on the Ubuntu Linux distribution and assume that the user is familiar with the GNU compiler toolchain, and with the process of installing packages using the package manager.
+Alternatively, you can build Awa on a Linux PC.  The following instructions are based on the Ubuntu Linux distribution
+and assume that the user is familiar with the GNU compiler toolchain, and with the process of installing packages using
+the package manager.
 
 Firstly, to obtain a copy of the Awa LightweightM2M source code:
 
- * Sign up for a Github account
+* Sign up for a Github account
 
- * Install Git:  ```` sudo apt-get install git ````
+* Install Git:
 
- * Clone the repository: ```` git clone https://github.com/FlowM2M/AwaLWM2M.git ````
+```sh
+sudo apt-get install git
+```
 
+* Clone the repository:
+
+```sh
+git clone https://github.com/FlowM2M/AwaLWM2M.git
+```
 
 Further information can be found in the [Quick start guide](doc/starters_guide.md).
 
-
 ----
 
-### Documentation
+## Documentation
 
-This project assumes a basic knowledge of The Open Mobile Alliance's (OMA) LWM2M, its functionality and services. For more detail, see our [introductory LWM2M overview](doc/lwm2m_overview.md).
+This project assumes a basic knowledge of The Open Mobile Alliance's (OMA) LWM2M, its functionality and services. For more
+detail, see our [introductory LWM2M overview](doc/lwm2m_overview.md).
 
-Awa LightweightM2M documentation is available both at a general level (project information, user and developer guides), and a technical level (the API guide). All documentation is available in this repository. The *doc* directory contains information relating to the project in general, and the *api/doc* directory contains the lower level documentation for the Awa API.
+Awa LightweightM2M documentation is available both at a general level (project information, user and developer guides),
+and a technical level (the API guide). All documentation is available in this repository. The *doc* directory contains
+information relating to the project in general, and the *api/doc* directory contains the lower level documentation for
+the Awa API.
 
 Note that for our purposes the terms *user* and *developer* have the following definitions:
 
-* *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of, or enhancement to, their own M2M application.
+* *User* - An M2M application developer who uses the tools and libraries supplied by this project as the foundation of,
+  or enhancement to, their own M2M application.
 * *Developer* - A developer who develops for and contributes to the Awa LightweightM2M project.
 
-
-#### General documentation
+### General documentation
 
 * For project users:
 
-	* For build instructions, see the [Quick start guide](doc/starters_guide.md).
-	* Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
-	* A sample application tutorial using the Awa API can be found [here](doc/example_app_api.md).
-	* A list of Awa API examples can be found [here](doc/example_api_list.md).
-	* A sample application tutorial using the Awa Static API can be found [here](doc/example_app_static_api.md).
+  * For build instructions, see the [Quick start guide](doc/starters_guide.md).
+  * Examples of how to use the tools can be found in the [User guide](doc/userguide.md).
+  * A sample application tutorial using the Awa API can be found [here](doc/example_app_api.md).
+  * A list of Awa API examples can be found [here](doc/example_api_list.md).
+  * A sample application tutorial using the Awa Static API can be found [here](doc/example_app_static_api.md).
 
 * For contributors:
 
-	* An overview of the system can be found in the [Contributing developer guide](doc/developer_guide.md).
-	* Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.
+  * An overview of the system can be found in the [Contributing developer guide](doc/developer_guide.md).
+  * Information regarding the testing framework, can be found in the [Testing](doc/testing.md) guide.
 
-#### API guide
+### API guide
 
 The Awa API documentation is available as a Doxygen presentation which is generated via the following process.
 
-  1. Install [Doxygen ](http://www.stack.nl/~dimitri/doxygen/download.html) and [Graphviz](http://www.graphviz.org): ```` sudo apt-get install doxygen graphviz````
+1. Install [Doxygen](http://www.stack.nl/~dimitri/doxygen/download.html) and [Graphviz](http://www.graphviz.org):
 
-  2. Generate the documentation: ```` make docs````
+        sudo apt-get install doxygen graphviz
+
+2. Generate the documentation:
+
+        make docs
 
 The output can be found in the api/doc/html directory and viewed by opening index.html with your web browser.
 
@@ -89,38 +116,39 @@ For convenience you can also find the latest version of this documentation [here
 
 ----
 
-### Contributing
+## Contributing
 
-We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality to improving documentation and bug reporting - it's all good.
+We welcome all contributions to this project and we give credit where it's due. Anything from enhancing functionality to
+improving documentation and bug reporting - it's all good.
 
 Find out more in the [contributor guide](CONTRIBUTING.md).
 
-### Credits
+## Credits
 
 We would like to thank all of our current [contributors](CONTRIBUTORS).
 
 We would also like to acknowledge and thank the authors of the following projects.
 
-* libcoap : http://sourceforge.net/projects/libcoap/
-* googletest : https://code.google.com/p/googletest/
-* jsmn : https://github.com/zserge/jsmn
+* libcoap: [https://github.com/obgm/libcoap](https://github.com/obgm/libcoap)
+* googletest: [https://code.google.com/p/googletest/](https://code.google.com/p/googletest/)
+* jsmn: [https://github.com/zserge/jsmn](https://github.com/zserge/jsmn)
+* contiki: [https://github.com/contiki-os/contiki](https://github.com/contiki-os/contiki)
 
-
-### Development tasks
+## Development tasks
 
 A list of ongoing development tasks can be seen [here](https://github.com/FlowM2M/AwaLWM2M/wiki/Development-task-list).
 
-
 ----
 
-### License information
+## License information
 
 * All code and documentation developed by Imagination Technologies Limited is licensed under the [BSD 3-clause license](LICENSE).
-* LibCoAP by Olaf Bergmann is licensed under the GNU General Public License (GPL), Version 2 or higher, OR the simplified BSD license.
-* Jsmn by Serge A. Zaitsev is licensed under the MIT license.
+* LibCoAP by Olaf Bergmann is under the [GNU General Public License (GPL), Version 2 or higher](https://github.com/obgm/libcoap/blob/develop/LICENSE.GPL),
+  OR the [simplified BSD license](https://github.com/obgm/libcoap/blob/develop/LICENSE.BSD).
+* Jsmn by Serge A. Zaitsev is [licensed](https://github.com/zserge/jsmn/blob/master/LICENSE) under the MIT license.
+* Erbium/TinyDTLS by Contiki are [licensed](https://github.com/contiki-os/contiki/blob/master/LICENSE) under
+  the BSD 3-clause license.
 
 ----
 
-
-----
-----
+Made in New Zealand.

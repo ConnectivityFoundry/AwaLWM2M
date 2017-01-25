@@ -13,9 +13,9 @@ option "bootstrapServerCoapPort" - "External LWM2M Bootstrap Server CoAP Port" i
 option "logLevel" - "Awa API Log Level" int optional typestr="LEVEL"
 
 option "coapClientPath"      - "Path to libcoap coap-client tool"  string optional default="lib/libcoap/examples/coap-client"
-option "clientDaemonPath"    - "Path to LWM2M client daemon"       string optional default="core/src/client/awa_clientd"
-option "serverDaemonPath"    - "Path to LWM2M server daemon"       string optional default="core/src/server/awa_serverd"
-option "bootstrapDaemonPath" - "Path to LWM2M bootstrap daemon"    string optional default="core/src/bootstrap/awa_bootstrapd"
+option "clientDaemonPath"    - "Path to LWM2M client daemon"       string optional default="daemon/src/client/awa_clientd"
+option "serverDaemonPath"    - "Path to LWM2M server daemon"       string optional default="daemon/src/server/awa_serverd"
+option "bootstrapDaemonPath" - "Path to LWM2M bootstrap daemon"    string optional default="daemon/src/bootstrap/awa_bootstrapd"
 option "bootstrapConfig"     - "Path to bootstrap config file"     string optional default="../api/tests/gtest.bsc"
 option "objectDefinitions"   - "Path to object definitions file"   string optional default="../api/tests/object-defs-gtest.xml"
 

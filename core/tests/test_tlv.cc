@@ -822,7 +822,7 @@ TEST_F(TlvTestSuite, test_multiple_object_instance)
     TreeBuilder_CreateTreeFromOIR(&dest, context, Lwm2mRequestOrigin_Client, OIR, 1);
 
     uint8_t buffer[512];
-    uint8_t expected[] = { 0x3, 1, 0xc1, 0, 55, 0x3, 0, 0xc1, 0, 44 };
+    uint8_t expected[] = { 0x3, 0, 0xc1, 0, 44, 0x3, 1, 0xc1, 0, 55 };
 
     SerdesContext serdesContext;
     int len = TlvSerialiseObject(&serdesContext, dest, 15, buffer, sizeof(buffer));

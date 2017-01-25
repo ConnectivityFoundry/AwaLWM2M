@@ -57,7 +57,9 @@ struct gengetopt_args_info
   unsigned int create_min; /**< @brief Create a new Object Instance or Optional Resource's minimum occurreces */
   unsigned int create_max; /**< @brief Create a new Object Instance or Optional Resource's maximum occurreces */
   const char *create_help; /**< @brief Create a new Object Instance or Optional Resource help description.  */
-  
+  int replace_flag;	/**< @brief Replace existing resource (rather than update which is the default) (default=off).  */
+  const char *replace_help; /**< @brief Replace existing resource (rather than update which is the default) help description.  */
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
@@ -66,6 +68,7 @@ struct gengetopt_args_info
   unsigned int ipcPort_given ;	/**< @brief Whether ipcPort was given.  */
   unsigned int clientID_given ;	/**< @brief Whether clientID was given.  */
   unsigned int create_given ;	/**< @brief Whether create was given.  */
+  unsigned int replace_given ;	/**< @brief Whether replace was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -156,7 +159,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

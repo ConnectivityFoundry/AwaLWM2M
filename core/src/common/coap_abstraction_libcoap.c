@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -150,16 +150,11 @@ int coap_WaitMessage(int timeout, int fd)
 bool coap_ResolveAddressByURI(unsigned char * address, AddressType * addr)
 {
     bool result = false;
-    coap_uri_t uri;
-    coap_split_uri(address, strlen(address), &uri);
-
-    if (Lwm2mCore_ResolveAddressByName(uri.host.s, uri.host.length, addr))
+    NetworkAddress * networkAddress = NetworkAddress_New(address, strlen(address));
+    if (networkAddress)
     {
-#ifndef CONTIKI
-        addr->Addr.Sin.sin_port = uri.port;
-#else
-        addr->Port = uri.port;
-#endif
+        NetworkAddress_SetAddressType(networkAddress, addr);
+        NetworkAddress_Free(&networkAddress);
         result = true;
     }
     return result;
@@ -275,13 +270,13 @@ static int remove_Transaction(TransactionType * transaction)
     return 0;
 }
 
-static void HandleGetRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+static void HandleGetRequest(void * context, coap_address_t * addr, const char * path, const char * query, AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     char responseContent[4096];
 
     CoapRequest coapRequest = {
-        .type = COAP_GET_REQUEST, 
-        .ctxt = context, 
+        .type = COAP_GET_REQUEST,
+        .ctxt = context,
         .addr = { 0 },
         .path = path,
         .query = query,
@@ -292,8 +287,8 @@ static void HandleGetRequest(void * context, coap_address_t * addr, const char *
         .requestContentLen = 0,
     };
 
-    CoapResponse coapResponse = { 
-        .responseContent = responseContent, 
+    CoapResponse coapResponse = {
+        .responseContent = responseContent,
         .responseContentLen = sizeof(responseContent),
         .responseCode = 500,
     };
@@ -319,7 +314,7 @@ static void HandleGetRequest(void * context, coap_address_t * addr, const char *
     Lwm2m_Debug("COAP_REQUEST_GET: responseCode %d, responseContentLen %zu\n", coapResponse.responseCode, coapResponse.responseContentLen);
 }
 
-static void HandleObserveRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+static void HandleObserveRequest(void * context, coap_address_t * addr, const char * path, const char * query, AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     char responseContent[512];
 
@@ -367,7 +362,7 @@ static void HandleObserveRequest(void * context, coap_address_t * addr, const ch
 }
 
 static void HandleCancelObserveRequest(void * context, coap_address_t * addr, const char * path, const char * query,
-                                       ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+                                       AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     char responseContent[512];
 
@@ -414,7 +409,7 @@ static void HandleCancelObserveRequest(void * context, coap_address_t * addr, co
 /* 8.2.4: A CoAP PUT is used for the Replace
  * 5.4.3: Replace: replaces the Object Instance or the Resource(s) with the new value provided in the “Write” operation.
  */
-static void HandlePutRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+static void HandlePutRequest(void * context, coap_address_t * addr, const char * path, const char * query, AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     size_t requestLength;
     unsigned char * requestData;
@@ -461,7 +456,7 @@ static void HandlePutRequest(void * context, coap_address_t * addr, const char *
  * 8.2.4: An Object Instance is Created by sending a CoAP POST to the corresponding path
  * 5.4.3: Partial Update: adds or updates Resources or Resource Instances provided in the new value and leaves other existing Resources or Resource Instances unchanged.
  */
-static void HandlePostRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+static void HandlePostRequest(void * context, coap_address_t * addr, const char * path, const char * query, AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     char responseLocation[512] = {0};
     size_t requestLength = 0;
@@ -523,7 +518,7 @@ static void HandlePostRequest(void * context, coap_address_t * addr, const char 
     Lwm2m_Debug("COAP_REQUEST_POST: responseCode %d\n", coapResponse.responseCode);
 }
 
-static void HandleDeleteRequest(void * context, coap_address_t * addr, const char * path, const char * query, ContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
+static void HandleDeleteRequest(void * context, coap_address_t * addr, const char * path, const char * query, AwaContentType contentType, coap_pdu_t * request, coap_pdu_t * response)
 {
     char responseContent[512] = { 0 };
 
@@ -568,7 +563,7 @@ static void coap_HandleRequest(coap_context_t * ctx,
     char requestPath[256] = {0};
     char requestQuery[256] = {0};
     int observe;
-    ContentType contentType = ContentType_None;
+    AwaContentType contentType = AwaContentType_None;
     coap_opt_iterator_t opt_iter;
     coap_opt_filter_t filter;
     coap_opt_t *option;
@@ -678,7 +673,7 @@ void coap_ResponseHandler(struct coap_context_t * ctx,
 {
     size_t len = 0;
     unsigned char * databuf = NULL;
-    ContentType contentType = ContentType_None;
+    AwaContentType contentType = AwaContentType_None;
 
     coap_opt_iterator_t opt_iter;
     coap_opt_filter_t filter;
@@ -888,7 +883,7 @@ void coap_Process(void)
             if (tid == COAP_INVALID_TID)
             {
                 Lwm2m_Error("Transaction Timed out\n");
-                transaction->Callback(transaction->Context, &transaction->Address, transaction->Path, 504, ContentType_None, NULL, 0);
+                transaction->Callback(transaction->Context, &transaction->Address, transaction->Path, 504, AwaContentType_None, NULL, 0);
 
                 remove_Transaction(transaction);
             }
@@ -903,7 +898,7 @@ void coap_Process(void)
     }
 }
 
-static void coap_SendRequest(int messageType, void * context, char * token, int tokenSize, const char * path, ContentType contentType,
+static void coap_SendRequest(int messageType, void * context, char * token, int tokenSize, const char * path, AwaContentType contentType,
                              const char * payload, int payloadLen, TransactionCallback transactionCallback, NotificationFreeCallback notificationFreeCallback)
 {
     AddressType addr;
@@ -990,7 +985,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
     {
         // The content type needs to be added to the options before the query,
         // however the payload needs to be added afterwards
-        if (payload && payloadLen && contentType != ContentType_None)
+        if (payload && payloadLen && contentType != AwaContentType_None)
         {
             coap_add_option(request, COAP_OPTION_CONTENT_TYPE, coap_encode_var_bytes(buf, contentType), buf);
         }
@@ -1012,7 +1007,7 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
 
     if ((messageType & 0xF) == COAP_REQUEST_GET)
     {
-        if (contentType != ContentType_None)
+        if (contentType != AwaContentType_None)
         {
             coap_add_option(request, COAP_OPTION_ACCEPT, coap_encode_var_bytes(buf, contentType), buf);
         }
@@ -1040,37 +1035,37 @@ static void coap_SendRequest(int messageType, void * context, char * token, int 
     }
 }
 
-void coap_PostRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
+void coap_PostRequest(void * context, const char * path, AwaContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
 {
     coap_SendRequest(COAP_REQUEST_POST, context, NULL, 0, path, contentType, payload, payloadLen, callback, NULL);
 }
 
-void coap_PutRequest(void * context, const char * path, ContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
+void coap_PutRequest(void * context, const char * path, AwaContentType contentType, const char * payload, int payloadLen, TransactionCallback callback)
 {
     coap_SendRequest(COAP_REQUEST_PUT, context,  NULL, 0, path, contentType, payload, payloadLen, callback, NULL);
 }
 
-void coap_GetRequest(void * context, const char * path, ContentType contentType, TransactionCallback callback)
+void coap_GetRequest(void * context, const char * path, AwaContentType contentType, TransactionCallback callback)
 {
     coap_SendRequest(COAP_REQUEST_GET, context,  NULL, 0, path, contentType, NULL, 0, callback, NULL);
 }
 
-void coap_Observe(void * context, const char * path, ContentType contentType, TransactionCallback transactionCallback, NotificationFreeCallback notificationFreeCallback)
+void coap_Observe(void * context, const char * path, AwaContentType contentType, TransactionCallback transactionCallback, NotificationFreeCallback notificationFreeCallback)
 {
     coap_SendRequest(COAP_REQUEST_GET | COAP_MESSAGE_OBSERVE, context,  NULL, 0, path, contentType, NULL, 0, transactionCallback, notificationFreeCallback);
 }
 
-void coap_CancelObserve(void * context, const char * path, ContentType contentType, TransactionCallback callback)
+void coap_CancelObserve(void * context, const char * path, AwaContentType contentType, TransactionCallback callback)
 {
     coap_SendRequest(COAP_REQUEST_GET | COAP_MESSAGE_CANCEL_OBSERVE, context,  NULL, 0, path, contentType, NULL, 0, callback, NULL);
 }
 
 void coap_DeleteRequest(void * context, const char * path, TransactionCallback callback)
 {
-    coap_SendRequest(COAP_REQUEST_DELETE, context,  NULL, 0, path, ContentType_None, NULL, 0, callback, NULL);
+    coap_SendRequest(COAP_REQUEST_DELETE, context,  NULL, 0, path, AwaContentType_None, NULL, 0, callback, NULL);
 }
 
-void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, ContentType contentType, const char * payload, int payloadLen, int sequence)
+void coap_SendNotify(AddressType * addr, const char * path, const char * token, int tokenSize, AwaContentType contentType, const char * payload, int payloadLen, int sequence)
 {
     AddressType destAddr;
     coap_address_t dst;

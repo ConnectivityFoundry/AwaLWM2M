@@ -526,6 +526,7 @@ class TestLWM2MServerIpcRequests(xml_test_case.XmlTestCase):
                       <ID>2</ID>
                       <Resource>
                         <ID>3</ID>
+                        <Observe/>
                       </Resource>
                     </ObjectInstance>
                   </Object>
@@ -552,6 +553,7 @@ class TestLWM2MServerIpcRequests(xml_test_case.XmlTestCase):
                     <ID>1</ID>
                     <ObjectInstance>
                       <ID>2</ID>
+                      <Observe/>
                     </ObjectInstance>
                   </Object>
                 </Objects>
@@ -575,6 +577,7 @@ class TestLWM2MServerIpcRequests(xml_test_case.XmlTestCase):
                 <Objects>
                   <Object>
                     <ID>1</ID>
+                    <Observe/>
                   </Object>
                 </Objects>
               </Client>

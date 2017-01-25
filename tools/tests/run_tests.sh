@@ -39,7 +39,7 @@ if ! [[ "$LWM2M_TOOLS_PATH" = /* ]] ; then
 fi
 
 if [ x"${LWM2M_CLIENTD_BIN}" == "x" ] ; then
-  LWM2M_CLIENTD_BIN=$BUILD_DIR_ABS/core/src/client/awa_clientd
+  LWM2M_CLIENTD_BIN=$BUILD_DIR_ABS/daemon/src/client/awa_clientd
 fi
 
 if ! [[ "$LWM2M_CLIENTD_BIN" = /* ]] ; then
@@ -48,7 +48,7 @@ if ! [[ "$LWM2M_CLIENTD_BIN" = /* ]] ; then
 fi
 
 if [ x"${LWM2M_SERVERD_BIN}" == "x" ] ; then
-  LWM2M_SERVERD_BIN=$BUILD_DIR_ABS/core/src/server/awa_serverd
+  LWM2M_SERVERD_BIN=$BUILD_DIR_ABS/daemon/src/server/awa_serverd
 fi
 
 if ! [[ "$LWM2M_SERVERD_BIN" = /* ]] ; then
@@ -57,7 +57,7 @@ if ! [[ "$LWM2M_SERVERD_BIN" = /* ]] ; then
 fi
 
 if [ x"${LWM2M_BOOTSTRAPD_BIN}" == "x" ] ; then
-  LWM2M_BOOTSTRAPD_BIN=$BUILD_DIR_ABS/core/src/bootstrap/awa_bootstrapd
+  LWM2M_BOOTSTRAPD_BIN=$BUILD_DIR_ABS/daemon/src/bootstrap/awa_bootstrapd
 fi
 
 if ! [[ "$LWM2M_BOOTSTRAPD_BIN" = /* ]] ; then

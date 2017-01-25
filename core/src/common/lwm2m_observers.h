@@ -13,10 +13,10 @@
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
@@ -32,7 +32,7 @@ extern "C" {
 #include "lwm2m_attributes.h"
 #include "lwm2m_list.h"
 
-typedef int (*Lwm2mNotificationCallback)(void * context, AddressType *, int, const char *, int, ObjectIDType, ObjectInstanceIDType, ResourceIDType, ContentType, void * ContextData);
+typedef int (*Lwm2mNotificationCallback)(void * context, AddressType *, int, const char *, int, ObjectIDType, ObjectInstanceIDType, ResourceIDType, AwaContentType, void * ContextData);
 
 typedef struct
 {
@@ -41,7 +41,7 @@ typedef struct
     ObjectIDType ObjectID;
     ObjectInstanceIDType ObjectInstanceID;
     ResourceIDType ResourceID;
-    ContentType ContentType;
+    AwaContentType ContentType;
     AddressType Address;
     Lwm2mNotificationCallback Callback;
     void * ContextData;
@@ -62,7 +62,7 @@ void Lwm2m_FreeObservers(void * ctxt);
 void Lwm2m_MarkObserversChanged(void * ctxt, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, const void * newValue, size_t newValueLength);
 
 int Lwm2m_Observe(void * ctxt, AddressType * addr, const char * token, int tokenLength, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID,
-                  ResourceIDType resourceID, ContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
+                  ResourceIDType resourceID, AwaContentType contentType, Lwm2mNotificationCallback callback, void * ContextData);
 int Lwm2m_CancelObserve(void * ctxt, AddressType * addr, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID);
 
 /* Free any observers in the observer list. this is called when a DELETE operation occurs for a specified object instance/resource.
