@@ -107,19 +107,19 @@ The serialiser converts data from a Lwm2mTree, constructed from lwm2mTreeNode el
 
 #### The object store
 
-TODO
+The object store contains the resource values for all object instances and resource instances in the Client daemon. 
 
-#### The object tree
+#### The object tree  
 
 The object tree implements the LWM2M OIR data model by keeping track of all objects, object instances, resources and resource instances in the system. It encapsulates this information so that other components, such as lower level handlers (i.e security object handler, server object handler), do not need to know about the higher-level data structure. It only stores structural information regarding the data model - any resource-specific information is managed by lower-level handlers and the object store.
 
 #### Observers
 
-TODO
+Observers are either on the IPC or LWM2M interfaces, this allows notifications of changes to resources to be sent over the IPC or LWM2M to applications. 
 
 #### Endpoints
 
-TODO
+Endpoints provide the mapping between LWM2M operations and CoAP requests.
 
 #### IPC
 
