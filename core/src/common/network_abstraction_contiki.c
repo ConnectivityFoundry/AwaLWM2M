@@ -299,6 +299,7 @@ void NetworkAddress_Free(NetworkAddress ** address)
                 {
                     Lwm2m_Debug("Address free\n");
                     networkAddressCache[index].InUse = false;
+                    memset(&networkAddressCache[index].Address, 0, sizeof(struct _NetworkAddress));
                     break;
                 }
             }
@@ -331,7 +332,6 @@ static NetworkAddress * addCachedAddress(const uip_ipaddr_t * addr, uint16_t por
             memcpy(&networkAddress->Address, addr, sizeof(uip_ipaddr_t));
             networkAddress->Port = port;
             networkAddress->Secure = secure;
-            networkAddress->useCount = 1;
             result = &networkAddressCache[index].Address;
             break;
         }
