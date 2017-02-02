@@ -249,6 +249,11 @@ bool DTLS_Encrypt(NetworkAddress * destAddress, uint8_t * plainText, int plainTe
         if (session)
         {
             dtls_peer_t * peer = dtls_get_peer(session->Context, &session->Session);
+            if (peer)
+            {
+                FreeSession(session);
+                session = AllocateSession(destAddress, true, context);
+            }
             if (!peer)
             {
                 dtls_set_app_data(session->Context, session);
