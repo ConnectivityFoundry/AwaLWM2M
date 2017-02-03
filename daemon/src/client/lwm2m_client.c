@@ -205,6 +205,12 @@ static int Lwm2mClient_Start(Options * options)
         goto error_close_log;
     }
 
+    srandom((int)time(NULL)*getpid());
+    if (options->CoapPort == 0)
+    {
+        options->CoapPort = 6000 + (rand() % 32768);
+    }
+
     Lwm2m_SetLogLevel((options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     Lwm2m_PrintBanner();
     if (options->Verbose)
@@ -221,8 +227,6 @@ static int Lwm2mClient_Start(Options * options)
     Lwm2m_Info("  Address family : IPv%d\n", options->AddressFamily == AF_INET ? 4 : 6);
 
     Lwm2mCore_SetDefaultContentType(options->DefaultContentType);
-
-    srandom((int)time(NULL)*getpid());
 
     CoapInfo * coap = coap_Init((options->AddressFamily == AF_INET) ? "0.0.0.0" : "::", options->CoapPort, false /* not a server */, (options->Verbose) ? DebugLevel_Debug : DebugLevel_Info);
     if (coap == NULL)

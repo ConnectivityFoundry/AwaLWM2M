@@ -34,7 +34,7 @@ const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
   "  -h, --help                    Print help and exit",
-  "  -p, --port=PORT               Use local port number PORT for CoAP\n                                  communications  (default=`6000')",
+  "  -p, --port=PORT               Use local port number PORT for CoAP\n                                  communications - zero will select random port\n                                  (default=`0')",
   "  -a, --addressFamily=AF        Address family for network interface. AF=4 for\n                                  IPv4, AF=6 for IPv6  (possible values=\"4\",\n                                  \"6\" default=`4')",
   "  -i, --ipcPort=PORT            Use port number PORT for IPC communications\n                                  (default=`12345')",
   "  -e, --endPointName=NAME       Use NAME as client end point name\n                                  (default=`Awa Client')",
@@ -50,7 +50,7 @@ const char *gengetopt_args_info_help[] = {
   "  -v, --verbose                 Generate verbose output  (default=off)",
   "  -l, --logFile=FILE            Log output to FILE",
   "  -V, --version                 Print version and exit  (default=off)",
-  "\nExample:\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoap://[::1]:2134\n\nPSK Example:\n\n    awa_clientd --port 6000 --endPointName client1 --bootstrap\ncoaps://0.0.0.0:2134 --pskIdentity=myPskIdentity\n--pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F\n\n",
+  "\nExample:\n    awa_clientd --endPointName client1 --bootstrap coap://[::1]:2134\n\nPSK Example:\n\n    awa_clientd --endPointName client1 --bootstrap coaps://0.0.0.0:2134\n--pskIdentity=myPskIdentity\n--pskKey=2646188672F6CCD4AAEA476C645F2565B83E15BF00D135A3A6944DF72218759F\n\n",
     0
 };
 
@@ -103,7 +103,7 @@ static
 void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
-  args_info->port_arg = 6000;
+  args_info->port_arg = 0;
   args_info->port_orig = NULL;
   args_info->addressFamily_arg = 4;
   args_info->addressFamily_orig = NULL;
@@ -131,7 +131,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->logFile_arg = NULL;
   args_info->logFile_orig = NULL;
   args_info->version_flag = 0;
-
+  
 }
 
 static
@@ -158,7 +158,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->verbose_help = gengetopt_args_info_help[14] ;
   args_info->logFile_help = gengetopt_args_info_help[15] ;
   args_info->version_help = gengetopt_args_info_help[16] ;
-
+  
 }
 
 void
@@ -211,7 +211,7 @@ void
 cmdline_parser_params_init(struct cmdline_parser_params *params)
 {
   if (params)
-    {
+    { 
       params->override = 0;
       params->initialize = 1;
       params->check_required = 1;
@@ -223,9 +223,9 @@ cmdline_parser_params_init(struct cmdline_parser_params *params)
 struct cmdline_parser_params *
 cmdline_parser_params_create(void)
 {
-  struct cmdline_parser_params *params =
+  struct cmdline_parser_params *params = 
     (struct cmdline_parser_params *)malloc(sizeof(struct cmdline_parser_params));
-  cmdline_parser_params_init(params);
+  cmdline_parser_params_init(params);  
   return params;
 }
 
@@ -255,7 +255,7 @@ struct generic_list
 };
 
 /**
- * @brief add a node at the head of the list
+ * @brief add a node at the head of the list 
  */
 static void add_node(struct generic_list **list) {
   struct generic_list *new_node = (struct generic_list *) malloc (sizeof (struct generic_list));
@@ -308,8 +308,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_multiple_string_field (args_info->objDefs_given, &(args_info->objDefs_arg), &(args_info->objDefs_orig));
   free_string_field (&(args_info->logFile_arg));
   free_string_field (&(args_info->logFile_orig));
-
-
+  
+  
   for (i = 0; i < args_info->inputs_num; ++i)
     free (args_info->inputs [i]);
 
@@ -361,7 +361,7 @@ write_into_file(FILE *outfile, const char *opt, const char *arg, const char *val
   int found = -1;
   if (arg) {
     if (values) {
-      found = check_possible_values(arg, values);
+      found = check_possible_values(arg, values);      
     }
     if (found >= 0)
       fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
@@ -376,7 +376,7 @@ static void
 write_multiple_into_file(FILE *outfile, int len, const char *opt, char **arg, const char *values[])
 {
   int i;
-
+  
   for (i = 0; i < len; ++i)
     write_into_file(outfile, opt, (arg ? arg[i] : 0), values);
 }
@@ -425,7 +425,7 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "logFile", args_info->logFile_orig, 0);
   if (args_info->version_given)
     write_into_file(outfile, "version", 0, 0 );
-
+  
 
   i = EXIT_SUCCESS;
   return i;
@@ -465,9 +465,9 @@ gengetopt_strdup (const char *s)
   if (!s)
     return result;
 
-  result = (char *)malloc(strlen(s) + 1);
-  if (result == (char *)0)
-    return (char *)0;
+  result = (char*)malloc(strlen(s) + 1);
+  if (result == (char*)0)
+    return (char*)0;
   strcpy(result, s);
   return result;
 }
@@ -511,8 +511,8 @@ get_multiple_arg_token(const char *arg)
   j = 0;
   while (arg[i] && (j < len-1))
     {
-      if (arg[i] == '\\' &&
-	  arg[ i + 1 ] &&
+      if (arg[i] == '\\' && 
+	  arg[ i + 1 ] && 
 	  arg[ i + 1 ] == ',')
         ++i;
 
@@ -604,7 +604,7 @@ check_multiple_option_occurrences(const char *prog_name, unsigned int option_giv
             }
         }
     }
-
+    
   return error_occurred;
 }
 int
@@ -625,7 +625,7 @@ cmdline_parser_ext (int argc, char **argv, struct gengetopt_args_info *args_info
       cmdline_parser_free (args_info);
       exit (EXIT_FAILURE);
     }
-
+  
   return result;
 }
 
@@ -634,7 +634,7 @@ cmdline_parser2 (int argc, char **argv, struct gengetopt_args_info *args_info, i
 {
   int result;
   struct cmdline_parser_params params;
-
+  
   params.override = override;
   params.initialize = initialize;
   params.check_required = check_required;
@@ -648,7 +648,7 @@ cmdline_parser2 (int argc, char **argv, struct gengetopt_args_info *args_info, i
       cmdline_parser_free (args_info);
       exit (EXIT_FAILURE);
     }
-
+  
   return result;
 }
 
@@ -665,7 +665,7 @@ cmdline_parser_required (struct gengetopt_args_info *args_info, const char *prog
       cmdline_parser_free (args_info);
       exit (EXIT_FAILURE);
     }
-
+  
   return result;
 }
 
@@ -678,8 +678,8 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   /* checks for required options */
   if (check_multiple_option_occurrences(prog_name, args_info->objDefs_given, args_info->objDefs_min, args_info->objDefs_max, "'--objDefs' ('-o')"))
      error_occurred = 1;
-
-
+  
+  
   /* checks for dependences among options */
 
   return error_occurred;
@@ -698,7 +698,7 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
  *
  */
 
-/*
+/* 
  * we must include anything we need since this file is not thought to be
  * inserted in a file already using getopt.h
  *
@@ -1233,7 +1233,7 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
 		return -1;
 	d->custom_optarg = NULL;
 
-	/*
+	/* 
 	 * This is a big difference with GNU getopt, since optind == 0
 	 * means initialization while here 1 means first call.
 	 */
@@ -1300,7 +1300,7 @@ static char *package_name = 0;
  */
 static
 int update_arg(void *field, char **orig_field,
-               unsigned int *field_given, unsigned int *prev_given,
+               unsigned int *field_given, unsigned int *prev_given, 
                char *value, const char *possible_values[],
                const char *default_value,
                cmdline_parser_arg_type arg_type,
@@ -1321,11 +1321,11 @@ int update_arg(void *field, char **orig_field,
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n",
+        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n", 
                package_name, long_opt, short_opt,
                (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: `--%s' option given more than once%s\n",
+        fprintf (stderr, "%s: `--%s' option given more than once%s\n", 
                package_name, long_opt,
                (additional_error ? additional_error : ""));
       return 1; /* failure */
@@ -1334,16 +1334,16 @@ int update_arg(void *field, char **orig_field,
   if (possible_values && (found = check_possible_values((value ? value : default_value), possible_values)) < 0)
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n",
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n", 
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt, short_opt,
           (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n",
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n", 
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt,
           (additional_error ? additional_error : ""));
       return 1; /* failure */
     }
-
+    
   if (field_given && *field_given && ! override)
     return 0;
   if (prev_given)
@@ -1370,7 +1370,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     break;
-  }
+  };
 
   /* check numeric conversion */
   switch(arg_type) {
@@ -1382,7 +1382,7 @@ int update_arg(void *field, char **orig_field,
     break;
   default:
     ;
-  }
+  };
 
   /* store the original value */
   switch(arg_type) {
@@ -1394,11 +1394,12 @@ int update_arg(void *field, char **orig_field,
       if (no_free) {
         *orig_field = value;
       } else {
-        free(*orig_field); /* free previous string */
+        if (*orig_field)
+          free (*orig_field); /* free previous string */
         *orig_field = gengetopt_strdup (value);
       }
     }
-  }
+  };
 
   return 0; /* OK */
 }
@@ -1431,9 +1432,9 @@ int update_multiple_arg_temp(struct generic_list **list,
     {
       add_node (list);
       if (update_arg((void *)&((*list)->arg), &((*list)->orig), 0,
-                     prev_given, multi_token, possible_values, default_value,
-                     arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
-        free(multi_token);
+          prev_given, multi_token, possible_values, default_value, 
+          arg_type, 0, 1, 1, 1, long_opt, short_opt, additional_error)) {
+        if (multi_token) free(multi_token);
         return 1; /* failure */
       }
 
@@ -1462,7 +1463,8 @@ void free_list(struct generic_list *list, short string_arg)
         tmp = list;
         if (string_arg && list->arg.string_arg)
           free (list->arg.string_arg);
-        free(list->orig);
+        if (list->orig)
+          free (list->orig);
         list = list->next;
         free (tmp);
       }
@@ -1486,19 +1488,17 @@ void update_multiple_arg(void *field, char ***orig_field,
 
     switch(arg_type) {
     case ARG_INT:
-      *((int **)field) = (int *)realloc (*((int **)field),
-                                         (field_given + prev_given) * sizeof (int)); break;
+      *((int **)field) = (int *)realloc (*((int **)field), (field_given + prev_given) * sizeof (int)); break;
     case ARG_STRING:
-      *((char ***)field) = (char **)realloc (*((char ***)field),
-                                             (field_given + prev_given) * sizeof (char *)); break;
+      *((char ***)field) = (char **)realloc (*((char ***)field), (field_given + prev_given) * sizeof (char *)); break;
     default:
       break;
-    }
-
+    };
+    
     for (i = (prev_given - 1); i >= 0; --i)
       {
         tmp = list;
-
+        
         switch(arg_type) {
         case ARG_INT:
           (*((int **)field))[i + field_given] = tmp->arg.int_arg; break;
@@ -1506,7 +1506,7 @@ void update_multiple_arg(void *field, char ***orig_field,
           (*((char ***)field))[i + field_given] = tmp->arg.string_arg; break;
         default:
           break;
-        }
+        }        
         (*orig_field) [i + field_given] = list->orig;
         list = list->next;
         free (tmp);
@@ -1517,7 +1517,7 @@ void update_multiple_arg(void *field, char ***orig_field,
       case ARG_INT:
         if (! *((int **)field)) {
           *((int **)field) = (int *)malloc (sizeof (int));
-          (*((int **)field))[0] = default_value->int_arg;
+          (*((int **)field))[0] = default_value->int_arg; 
         }
         break;
       case ARG_STRING:
@@ -1546,7 +1546,7 @@ cmdline_parser_internal (
   struct generic_list * objDefs_list = NULL;
   int error_occurred = 0;
   struct gengetopt_args_info local_args_info;
-
+  
   int override;
   int initialize;
   int check_required;
@@ -1556,9 +1556,9 @@ cmdline_parser_internal (
   int optind;
   int opterr;
   int optopt;
-
+  
   package_name = argv[0];
-
+  
   override = params->override;
   initialize = params->initialize;
   check_required = params->check_required;
@@ -1620,194 +1620,194 @@ cmdline_parser_internal (
           cmdline_parser_free (&local_args_info);
           exit (EXIT_SUCCESS);
 
-        case 'p':	/* Use local port number PORT for CoAP communications.  */
-
-
-          if (update_arg( (void *)&(args_info->port_arg),
-                         &(args_info->port_orig), &(args_info->port_given),
-                         &(local_args_info.port_given), optarg, 0, "6000", ARG_INT,
-                         check_ambiguity, override, 0, 0,
-                         "port", 'p',
-                         additional_error))
+        case 'p':	/* Use local port number PORT for CoAP communications - zero will select random port.  */
+        
+        
+          if (update_arg( (void *)&(args_info->port_arg), 
+               &(args_info->port_orig), &(args_info->port_given),
+              &(local_args_info.port_given), optarg, 0, "0", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "port", 'p',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'a':	/* Address family for network interface. AF=4 for IPv4, AF=6 for IPv6.  */
-
-
-          if (update_arg( (void *)&(args_info->addressFamily_arg),
-                         &(args_info->addressFamily_orig), &(args_info->addressFamily_given),
-                         &(local_args_info.addressFamily_given), optarg, cmdline_parser_addressFamily_values, "4", ARG_INT,
-                         check_ambiguity, override, 0, 0,
-                         "addressFamily", 'a',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->addressFamily_arg), 
+               &(args_info->addressFamily_orig), &(args_info->addressFamily_given),
+              &(local_args_info.addressFamily_given), optarg, cmdline_parser_addressFamily_values, "4", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "addressFamily", 'a',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'i':	/* Use port number PORT for IPC communications.  */
-
-
-          if (update_arg( (void *)&(args_info->ipcPort_arg),
-                         &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
-                         &(local_args_info.ipcPort_given), optarg, 0, "12345", ARG_INT,
-                         check_ambiguity, override, 0, 0,
-                         "ipcPort", 'i',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->ipcPort_arg), 
+               &(args_info->ipcPort_orig), &(args_info->ipcPort_given),
+              &(local_args_info.ipcPort_given), optarg, 0, "12345", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "ipcPort", 'i',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'e':	/* Use NAME as client end point name.  */
-
-
-          if (update_arg( (void *)&(args_info->endPointName_arg),
-                         &(args_info->endPointName_orig), &(args_info->endPointName_given),
-                         &(local_args_info.endPointName_given), optarg, 0, "Awa Client", ARG_STRING,
-                         check_ambiguity, override, 0, 0,
-                         "endPointName", 'e',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->endPointName_arg), 
+               &(args_info->endPointName_orig), &(args_info->endPointName_given),
+              &(local_args_info.endPointName_given), optarg, 0, "Awa Client", ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "endPointName", 'e',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'b':	/* Use bootstrap server URI.  */
-
-
-          if (update_arg( (void *)&(args_info->bootstrap_arg),
-                         &(args_info->bootstrap_orig), &(args_info->bootstrap_given),
-                         &(local_args_info.bootstrap_given), optarg, 0, 0, ARG_STRING,
-                         check_ambiguity, override, 0, 0,
-                         "bootstrap", 'b',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->bootstrap_arg), 
+               &(args_info->bootstrap_orig), &(args_info->bootstrap_given),
+              &(local_args_info.bootstrap_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "bootstrap", 'b',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'f':	/* Load factory bootstrap information from FILE.  */
-
-
-          if (update_arg( (void *)&(args_info->factoryBootstrap_arg),
-                         &(args_info->factoryBootstrap_orig), &(args_info->factoryBootstrap_given),
-                         &(local_args_info.factoryBootstrap_given), optarg, 0, 0, ARG_STRING,
-                         check_ambiguity, override, 0, 0,
-                         "factoryBootstrap", 'f',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->factoryBootstrap_arg), 
+               &(args_info->factoryBootstrap_orig), &(args_info->factoryBootstrap_given),
+              &(local_args_info.factoryBootstrap_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "factoryBootstrap", 'f',
+              additional_error))
             goto failure;
-
+        
           break;
         case 's':	/* CoAP communications are secured with DTLS.  */
-
-
+        
+        
           if (update_arg((void *)&(args_info->secure_flag), 0, &(args_info->secure_given),
-                         &(local_args_info.secure_given), optarg, 0, 0, ARG_FLAG,
-                         check_ambiguity, override, 1, 0, "secure", 's',
-                         additional_error))
+              &(local_args_info.secure_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "secure", 's',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'c':	/* Load client certificate from FILE.  */
-
-
-          if (update_arg( (void *)&(args_info->certificate_arg),
-                         &(args_info->certificate_orig), &(args_info->certificate_given),
-                         &(local_args_info.certificate_given), optarg, 0, 0, ARG_STRING,
-                         check_ambiguity, override, 0, 0,
-                         "certificate", 'c',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->certificate_arg), 
+               &(args_info->certificate_orig), &(args_info->certificate_given),
+              &(local_args_info.certificate_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "certificate", 'c',
+              additional_error))
             goto failure;
-
+        
           break;
         case 't':	/* Default content type to use when a request doesn't specify one (TLV=1542, JSON=50).  */
-
-
-          if (update_arg( (void *)&(args_info->defaultContentType_arg),
-                         &(args_info->defaultContentType_orig), &(args_info->defaultContentType_given),
-                         &(local_args_info.defaultContentType_given), optarg, 0, "0", ARG_INT,
-                         check_ambiguity, override, 0, 0,
-                         "defaultContentType", 't',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->defaultContentType_arg), 
+               &(args_info->defaultContentType_orig), &(args_info->defaultContentType_given),
+              &(local_args_info.defaultContentType_given), optarg, 0, "0", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "defaultContentType", 't',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'o':	/* Load object and resource definitions from FILE.  */
-
-          if (update_multiple_arg_temp(&objDefs_list,
+        
+          if (update_multiple_arg_temp(&objDefs_list, 
               &(local_args_info.objDefs_given), optarg, 0, 0, ARG_STRING,
               "objDefs", 'o',
               additional_error))
             goto failure;
-
+        
           break;
         case 'd':	/* Detach process from terminal and run in the background.  */
-
-
+        
+        
           if (update_arg((void *)&(args_info->daemonize_flag), 0, &(args_info->daemonize_given),
-                         &(local_args_info.daemonize_given), optarg, 0, 0, ARG_FLAG,
-                         check_ambiguity, override, 1, 0, "daemonize", 'd',
-                         additional_error))
+              &(local_args_info.daemonize_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "daemonize", 'd',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'v':	/* Generate verbose output.  */
-
-
+        
+        
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
-                         &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
-                         check_ambiguity, override, 1, 0, "verbose", 'v',
-                         additional_error))
+              &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "verbose", 'v',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'l':	/* Log output to FILE.  */
-
-
-          if (update_arg( (void *)&(args_info->logFile_arg),
-                         &(args_info->logFile_orig), &(args_info->logFile_given),
-                         &(local_args_info.logFile_given), optarg, 0, 0, ARG_STRING,
-                         check_ambiguity, override, 0, 0,
-                         "logFile", 'l',
-                         additional_error))
+        
+        
+          if (update_arg( (void *)&(args_info->logFile_arg), 
+               &(args_info->logFile_orig), &(args_info->logFile_given),
+              &(local_args_info.logFile_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "logFile", 'l',
+              additional_error))
             goto failure;
-
+        
           break;
         case 'V':	/* Print version and exit.  */
-
-
+        
+        
           if (update_arg((void *)&(args_info->version_flag), 0, &(args_info->version_given),
-                         &(local_args_info.version_given), optarg, 0, 0, ARG_FLAG,
-                         check_ambiguity, override, 1, 0, "version", 'V',
-                         additional_error))
+              &(local_args_info.version_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "version", 'V',
+              additional_error))
             goto failure;
-
+        
           break;
 
         case 0:	/* Long option with no short option */
           /* Default Identity of associated pre-shared key for DTLS.  */
           if (strcmp (long_options[option_index].name, "pskIdentity") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->pskIdentity_arg),
-                           &(args_info->pskIdentity_orig), &(args_info->pskIdentity_given),
-                           &(local_args_info.pskIdentity_given), optarg, 0, 0, ARG_STRING,
-                           check_ambiguity, override, 0, 0,
-                           "pskIdentity", '-',
-                           additional_error))
+          
+          
+            if (update_arg( (void *)&(args_info->pskIdentity_arg), 
+                 &(args_info->pskIdentity_orig), &(args_info->pskIdentity_given),
+                &(local_args_info.pskIdentity_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "pskIdentity", '-',
+                additional_error))
               goto failure;
-
+          
           }
           /* Default pre-shared key for DTLS as a hex string.  */
           else if (strcmp (long_options[option_index].name, "pskKey") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->pskKey_arg),
-                           &(args_info->pskKey_orig), &(args_info->pskKey_given),
-                           &(local_args_info.pskKey_given), optarg, 0, 0, ARG_STRING,
-                           check_ambiguity, override, 0, 0,
-                           "pskKey", '-',
-                           additional_error))
+          
+          
+            if (update_arg( (void *)&(args_info->pskKey_arg), 
+                 &(args_info->pskKey_orig), &(args_info->pskKey_given),
+                &(local_args_info.pskKey_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "pskKey", '-',
+                additional_error))
               goto failure;
-
+          
           }
-
+          
           break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
@@ -1821,13 +1821,13 @@ cmdline_parser_internal (
 
 
   update_multiple_arg((void *)&(args_info->objDefs_arg),
-                      &(args_info->objDefs_orig), args_info->objDefs_given,
-                      local_args_info.objDefs_given, 0,
-                      ARG_STRING, objDefs_list);
+    &(args_info->objDefs_orig), args_info->objDefs_given,
+    local_args_info.objDefs_given, 0,
+    ARG_STRING, objDefs_list);
 
   args_info->objDefs_given += local_args_info.objDefs_given;
   local_args_info.objDefs_given = 0;
-
+  
   if (check_required)
     {
       error_occurred += cmdline_parser_required2 (args_info, argv[0], additional_error);
@@ -1858,7 +1858,7 @@ cmdline_parser_internal (
 
 failure:
   free_list (objDefs_list, 1 );
-
+  
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);
 }

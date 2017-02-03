@@ -63,7 +63,7 @@ $ docker run --rm -p 5683:5683/udp -p 54321:54321/udp --name awa_serverd -it flo
 To run the client daemon, which will bootstrap and register with the server:
 
 ```sh
-$ docker run --rm -p 6000:6000/udp -p 12345:12345/udp --link awa_bootstrapd:awa_bootstrapd --link awa_serverd:awa_serverd --name awa_clientd -it flowm2m/awalwm2m awa_clientd --endPointName Client1 --bootstrap coap://awa_bootstrapd:15685
+$ docker run --rm -p 6000:6000/udp -p 12345:12345/udp --link awa_bootstrapd:awa_bootstrapd --link awa_serverd:awa_serverd --name awa_clientd -it flowm2m/awalwm2m awa_clientd --port 6000 --endPointName Client1 --bootstrap coap://awa_bootstrapd:15685
 ```
 
 Awa tools may also be used:
