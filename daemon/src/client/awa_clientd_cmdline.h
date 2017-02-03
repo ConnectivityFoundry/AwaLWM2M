@@ -38,9 +38,9 @@ extern "C" {
 struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
-  int port_arg;	/**< @brief Use local port number PORT for CoAP communications (default='6000').  */
-  char * port_orig;	/**< @brief Use local port number PORT for CoAP communications original value given at command line.  */
-  const char *port_help; /**< @brief Use local port number PORT for CoAP communications help description.  */
+  int port_arg;	/**< @brief Use local port number PORT for CoAP communications - zero will select random port (default='0').  */
+  char * port_orig;	/**< @brief Use local port number PORT for CoAP communications - zero will select random port original value given at command line.  */
+  const char *port_help; /**< @brief Use local port number PORT for CoAP communications - zero will select random port help description.  */
   int addressFamily_arg;	/**< @brief Address family for network interface. AF=4 for IPv4, AF=6 for IPv6 (default='4').  */
   char * addressFamily_orig;	/**< @brief Address family for network interface. AF=4 for IPv4, AF=6 for IPv6 original value given at command line.  */
   const char *addressFamily_help; /**< @brief Address family for network interface. AF=4 for IPv4, AF=6 for IPv6 help description.  */
@@ -84,7 +84,7 @@ struct gengetopt_args_info
   const char *logFile_help; /**< @brief Log output to FILE help description.  */
   int version_flag;	/**< @brief Print version and exit (default=off).  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-
+  
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int port_given ;	/**< @brief Whether port was given.  */
   unsigned int addressFamily_given ;	/**< @brief Whether addressFamily was given.  */
@@ -192,7 +192,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure
+ * Initializes all the fields a cmdline_parser_params structure 
  * to their default values
  * @param params the structure to initialize
  */

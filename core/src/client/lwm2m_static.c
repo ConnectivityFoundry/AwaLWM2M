@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "awa/static.h"
 #include "lwm2m_security_object.h"
@@ -99,6 +101,11 @@ AwaError AwaStaticClient_Init(AwaStaticClient * client)
     {
         if (client->CoAPConfigured && client->BootstrapConfigured && client->EndpointNameConfigured)
         {
+            if (client->CoAPListenPort == 0)
+            {
+                srand(time(NULL));
+                client->CoAPListenPort = 6000 + (rand() % 32768);
+            }
             client->CoAPInfo = coap_Init(client->CoAPListenAddress, client->CoAPListenPort, false, Lwm2m_GetLogLevel());
 
             if (client->CoAPInfo != NULL)
