@@ -196,11 +196,11 @@ static void BootstrapTransactionCallback(void * context, AddressType * addr, con
             Lwm2mTreeNode_SetID(object, client->ObjectID);
             Lwm2mTreeNode_AddChild(object, objectInstance);
 
-            payloadLen = SerialiseObject(AwaContentType_ApplicationOmaLwm2mTLV, object, client->ObjectID, payload, sizeof(payload));
+            payloadLen = SerialiseObject(AwaContentType_ApplicationOmaLwm2mTLV_Old, object, client->ObjectID, payload, sizeof(payload));
             Lwm2mTreeNode_DeleteRecursive(object);
 
             Lwm2m_Debug("Put to %s\n", uri);
-            coap_PutRequest(context, uri, AwaContentType_ApplicationOmaLwm2mTLV, payload, payloadLen, BootstrapTransactionCallback);
+            coap_PutRequest(context, uri, AwaContentType_ApplicationOmaLwm2mTLV_Old, payload, payloadLen, BootstrapTransactionCallback);
         }
         else
         {

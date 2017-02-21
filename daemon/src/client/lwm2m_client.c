@@ -433,9 +433,12 @@ static void PrintOptions(const Options * options)
         case AwaContentType_ApplicationPlainText:
             printf(" (Plain/Text)\n");
             break;
+        case AwaContentType_ApplicationOmaLwm2mJson_Old:
+        case AwaContentType_ApplicationOmaLwm2mJson:
         case AwaContentType_ApplicationJson:
             printf(" (Json)\n");
             break;
+        case AwaContentType_ApplicationOmaLwm2mTLV_Old:
         case AwaContentType_ApplicationOmaLwm2mTLV:
             printf(" (TLV)\n");
             break;

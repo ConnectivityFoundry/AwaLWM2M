@@ -48,21 +48,23 @@ static const SerdesMapEntry serdesList[] =
 
 #ifndef CONTIKI
 #ifdef WITH_JSON
-        { AwaContentType_ApplicationOmaLwm2mJson,   &jsonSerDes      },
+        { AwaContentType_ApplicationOmaLwm2mJson_Old, &jsonSerDes      },
+        { AwaContentType_ApplicationOmaLwm2mJson,     &jsonSerDes      },
 #endif // WITH_JSON
 #endif // CONTIKI
-        { AwaContentType_ApplicationOmaLwm2mTLV,    &tlvSerDes       },
-        { AwaContentType_ApplicationPlainText,      &plainTextSerDes },
-        { AwaContentType_ApplicationOctetStream,    &opaqueSerDes    },
+        { AwaContentType_ApplicationOmaLwm2mTLV_Old,  &tlvSerDes       },
+        { AwaContentType_ApplicationOmaLwm2mTLV,      &tlvSerDes       },
+        { AwaContentType_ApplicationPlainText,        &plainTextSerDes },
+        { AwaContentType_ApplicationOctetStream,      &opaqueSerDes    },
 
         // Mapping for old types
-        { AwaContentType_ApplicationOmaLwm2mText,   &plainTextSerDes },
+        { AwaContentType_ApplicationOmaLwm2mText,     &plainTextSerDes },
 #ifndef CONTIKI
 #ifdef WITH_JSON
-        { AwaContentType_ApplicationJson,           &jsonSerDes      },
+        { AwaContentType_ApplicationJson,             &jsonSerDes      },
 #endif // WITH_JSON
 #endif // CONTIKI
-        { AwaContentType_ApplicationOmaLwm2mOpaque, &opaqueSerDes    },
+        { AwaContentType_ApplicationOmaLwm2mOpaque,   &opaqueSerDes    },
 };
 #define NUM_SERIALISERS (sizeof(serdesList)/sizeof(SerdesMapEntry))
 
