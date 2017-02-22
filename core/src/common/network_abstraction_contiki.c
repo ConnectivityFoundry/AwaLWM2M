@@ -233,7 +233,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             if (hostnameLength > 0 && port > 0)
             {
                 uip_ipaddr_t * resolvedAddress = getHostByName(hostname);
-                port = UIP_HTONS(port);
 
                 if (resolvedAddress)
                 {
@@ -369,7 +368,7 @@ NetworkSocket * NetworkSocket_New(const char * ipAddress, NetworkSocketType sock
     NetworkSocket * result = &networkSocket;
     memset(result, 0, size);
     result->SocketType = socketType;
-    result->Port = UIP_HTONS(port);
+    result->Port = port;
     DTLS_SetNetworkSendCallback(SendDTLS);
     return result;
 }
@@ -417,7 +416,7 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
             networkSocket->Socket = udp_new(NULL, 0, NULL);
             if (networkSocket->Socket)
             {
-                udp_bind(networkSocket->Socket, networkSocket->Port);
+                udp_bind(networkSocket->Socket, uip_htons(networkSocket->Port));
                 result = true;
             }
         }
@@ -432,7 +431,7 @@ bool readUDP(NetworkSocket * networkSocket, uint8_t * buffer, int bufferLength, 
     //if (uip_newdata() && (UIP_IP_BUF->destport == networkSocket->Port) )
     if (uip_newdata())
     {
-        Lwm2m_Debug("Packet from: %d %d\n", UIP_IP_BUF->destport, networkSocket->Port);
+        Lwm2m_Debug("Packet from: %d %d\n", uip_htons(UIP_IP_BUF->destport), networkSocket->Port);
         if (uip_datalen() > bufferLength)
             *readLength = bufferLength;
         else
@@ -441,7 +440,7 @@ bool readUDP(NetworkSocket * networkSocket, uint8_t * buffer, int bufferLength, 
     if (*readLength > 0)
     {
         uip_ipaddr_t * address = &UIP_IP_BUF->srcipaddr;
-        uint16_t port = UIP_IP_BUF->srcport;
+        uint16_t port = uip_htons(UIP_IP_BUF->srcport);
         bool secure = (networkSocket->SocketType & NetworkSocketType_Secure) == NetworkSocketType_Secure;
 
         memcpy(buffer, uip_appdata, *readLength);
@@ -507,7 +506,7 @@ bool NetworkSocket_Read(NetworkSocket * networkSocket, uint8_t * buffer, int buf
 
 bool sendUDP(NetworkSocket * networkSocket, NetworkAddress * destAddress, const uint8_t * buffer, int bufferLength)
 {
-    uip_udp_packet_sendto(networkSocket->Socket, buffer, bufferLength, &destAddress->Address, destAddress->Port);
+    uip_udp_packet_sendto(networkSocket->Socket, buffer, bufferLength, &destAddress->Address, uip_htons(destAddress->Port));
     return true;
 }
 
