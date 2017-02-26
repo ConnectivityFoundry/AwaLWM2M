@@ -63,7 +63,7 @@ endif ()
 add_library (awa_static STATIC  ${awa_client_static_SOURCES})
 target_include_directories (awa_static PUBLIC ${awa_client_static_INCLUDE_DIRS})
 set_property (TARGET awa_static PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries (awa_static awa_common_static libb64_static libhmac_static)
+target_link_libraries (awa_static awa_common_static)
 
 # libawa_static.so
 add_library (awa_static_shared SHARED ${awa_client_static_SOURCES})

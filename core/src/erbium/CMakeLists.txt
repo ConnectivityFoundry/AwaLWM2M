@@ -32,10 +32,10 @@ set (awa_erbium_INCLUDE_DIRS
 )
 
 # TODO - remove
-set (awa_erbium_LIBS
-  libb64_static
-  libhmac_static
-)
+#set (awa_erbium_LIBS
+#  libb64_static
+#  libhmac_static
+#)
 
 if (ENABLE_GCOV)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 --coverage")

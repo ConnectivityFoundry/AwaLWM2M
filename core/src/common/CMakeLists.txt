@@ -62,10 +62,10 @@ if (WITH_TINYDTLS)
 endif ()
 
 
-set (awa_common_LIBS
-  libxml_static
-  libb64_static
-)
+#set (awa_common_LIBS
+#  libxml_static
+#  libb64_static
+#)
 
 if (WITH_LIBCOAP)
   list (APPEND awa_common_LIBS libcoap_static)
