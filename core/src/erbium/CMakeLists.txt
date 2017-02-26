@@ -31,12 +31,6 @@ set (awa_erbium_INCLUDE_DIRS
   #${CORE_SRC_DIR}/../../api/include
 )
 
-# TODO - remove
-#set (awa_erbium_LIBS
-#  libb64_static
-#  libhmac_static
-#)
-
 if (ENABLE_GCOV)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 --coverage")
   set (CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")

@@ -42,6 +42,8 @@ set (test_daemon_runner_LIBRARIES
   pthread
   awa_static
   awa_common_static
+  libxml_static
+  libb64_static
 )
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -g -std=c++11")
