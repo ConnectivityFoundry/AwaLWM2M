@@ -62,11 +62,6 @@ if (WITH_TINYDTLS)
 endif ()
 
 
-#set (awa_common_LIBS
-#  libxml_static
-#  libb64_static
-#)
-
 if (WITH_LIBCOAP)
   list (APPEND awa_common_LIBS libcoap_static)
 endif ()
@@ -82,6 +77,7 @@ if (WITH_JSON)
   )
   list (APPEND awa_common_LIBS
     libjsmn_static
+    libb64_static
   )
 endif ()
 

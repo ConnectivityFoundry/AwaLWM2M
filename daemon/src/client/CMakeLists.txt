@@ -75,7 +75,7 @@ set_source_files_properties (awa_clientd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno
 
 add_executable (awa_clientd ${awa_clientd_SOURCES})
 target_include_directories (awa_clientd PRIVATE ${awa_clientd_INCLUDE_DIRS})
-target_link_libraries (awa_clientd awa_static awa_common_static libb64_static libhmac_static)
+target_link_libraries (awa_clientd awa_static awa_common_static libb64_static libhmac_static libb64_static libxml_static)
 
 if (ENABLE_GCOV)
   target_link_libraries (awa_clientd gcov)
