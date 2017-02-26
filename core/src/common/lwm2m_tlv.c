@@ -41,8 +41,8 @@
   #define htonl(x) uip_htonl(x)
   #define ntohl(x) uip_ntohl(x)
 #endif
-#define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
-#define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
+#define htonll(x) ((1==htonl(1)) ? (uint64_t)(x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
+#define ntohll(x) ((1==ntohl(1)) ? (uint64_t)(x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 #include "lwm2m_tlv.h"
 #include "lwm2m_serdes.h"
