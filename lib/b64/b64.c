@@ -110,7 +110,7 @@ int b64Encode(char * out, int outLength, char * buffer, int len)
 static int lookupCodeIndex(char c)
 {
     int i;
-    for (i = 0; i < sizeof(codes); i++)
+    for (i = 0; i < (int)sizeof(codes); i++)
     {
         if (codes[i] == c)
             return i;

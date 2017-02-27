@@ -31,7 +31,7 @@ extern "C" {
 
 const char * pskIdentity = "";
 
-const uint8_t pskKey[] = {};
+const uint8_t pskKey[] = {0x00};
 
 
 #ifdef __cplusplus

@@ -57,24 +57,44 @@ static int DEVICE_MEMORY_TOTAL    =  42;
 // This function is called when an Execute is performed on the Reboot resource /3/X/4
 static int executeReboot(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
+    (void)inValueBuffer;
+    (void)inValueBufferLen;
     Lwm2m_Debug("Reboot resource executed\n");
     return 0;
 }
 
 static int createRebootResource(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     // Not implemented
     return 0;
 }
 
 static int executeFactoryReset(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID, uint8_t * inValueBuffer, size_t inValueBufferLen)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
+    (void)inValueBuffer;
+    (void)inValueBufferLen;
     Lwm2m_Debug("Factory Reset resource executed\n");
     return 0;
 }
 
 static int createFactoryResetResource(void * context, ObjectIDType objectID, ObjectInstanceIDType objectInstanceID, ResourceIDType resourceID)
 {
+    (void)context;
+    (void)objectID;
+    (void)objectInstanceID;
+    (void)resourceID;
     // Not implemented
     return 0;
 }
