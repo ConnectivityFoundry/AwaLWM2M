@@ -435,11 +435,11 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                 {
                     if (resourceDefinition->IsPointerArray)
                     {
-                        offset = (char *)resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                        offset = (uint8_t *)resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
                     }
                     else
                     {
-                        offset = (char *)resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                        offset = (uint8_t *)resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
                     }
 
                     if (*dataSize <= resourceDefinition->DataElementSize)
@@ -468,11 +468,11 @@ static AwaResult DefaultHandler(AwaStaticClient * client, AwaOperation operation
                 {
                     if (resourceDefinition->IsPointerArray)
                     {
-                        offset = (char *)resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
+                        offset = (uint8_t *)resourceDefinition->DataPointers + (objectInstanceID * sizeof(void*));
                     }
                     else
                     {
-                        offset = (char *)resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
+                        offset = (uint8_t *)resourceDefinition->DataPointers + (resourceDefinition->DataStepSize * objectInstanceID);
                     }
 
                     *dataPointer = offset;

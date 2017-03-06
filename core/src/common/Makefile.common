@@ -17,9 +17,18 @@ common_src = \
     lwm2m_prettyprint.c \
     lwm2m_tree_builder.c \
     lwm2m_observers.c \
-    coap_abstraction_erbium.c \
-    network_abstraction_contiki.c \
-    lwm2m_util_contiki.c
+    coap_abstraction_erbium.c 
+
+
+ifeq ($(RIOT),)
+	common_src += network_abstraction_contiki.c \
+                      lwm2m_util_contiki.c
+else
+	common_src += network_abstraction_posix.c \
+		      network_abstraction_riot.c \
+                      lwm2m_util_riot.c
+endif
+
 
 
 ifeq ($(TINYDTLS),)
