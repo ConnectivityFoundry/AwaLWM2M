@@ -11,6 +11,7 @@ set (awa_common_SOURCES
   lwm2m_endpoints.c
   lwm2m_result.c
   lwm2m_types.c
+  network_abstraction_posix.c
 )
 
 if (WITH_LIBCOAP)
