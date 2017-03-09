@@ -20,7 +20,7 @@ When making your report, be as clear and concise as possible. Use the following 
 * Describe the steps to take to uncover or reproduce the issue (if any).
 * Expected behaviour.
 * Actual behaviour.
-* Any additional infomation, log output etc.
+* Any additional information, log output etc.
 
 ----
 

@@ -519,7 +519,7 @@ static int TlvDecodeFloat(double * dest, const uint8_t * buffer, int size)
 {
     if ((dest == NULL) || (buffer == NULL))
     {
-        Lwm2m_Error("Input or ouput buffers cannot be NULL\n");
+        Lwm2m_Error("Input or output buffers cannot be NULL\n");
         return -1;
     }
 
@@ -802,7 +802,7 @@ static int TlvSerialiseResource(SerdesContext * serdesContext, Lwm2mTreeNode * n
     {
        uint8_t header[TLV_MAX_HEADER_SIZE];
        int headerLen;
-       // Add Mutliple resource instance header
+       // Add Multiple resource instance header
        headerLen = TlvEncodeHeader(&header[0], TLV_TYPE_IDENT_MULTIPLE_RESOURCE, resourceID, resourceLength);
        if (headerLen == -1)
        {
@@ -1297,4 +1297,3 @@ const SerialiserDeserialiser tlvSerDes =
     .DeserialiseObjectInstance = TlvDeserialiseObjectInstance,
     .DeserialiseResource       = TlvDeserialiseResource,
 };
-

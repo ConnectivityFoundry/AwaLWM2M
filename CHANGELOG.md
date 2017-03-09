@@ -452,7 +452,7 @@
 - Added documentation for example app, pinned 3rd party components [\#15](https://github.com/FlowM2M/AwaLWM2M/pull/15) ([cdewbery](https://github.com/cdewbery))
 - documentation update [\#13](https://github.com/FlowM2M/AwaLWM2M/pull/13) ([TonyWalsworthImg](https://github.com/TonyWalsworthImg))
 - Rework factory bootstrap [\#12](https://github.com/FlowM2M/AwaLWM2M/pull/12) ([cdewbery](https://github.com/cdewbery))
-- Intial add of static API and test framework to test static API [\#10](https://github.com/FlowM2M/AwaLWM2M/pull/10) ([seank-img](https://github.com/seank-img))
+- Initial add of static API and test framework to test static API [\#10](https://github.com/FlowM2M/AwaLWM2M/pull/10) ([seank-img](https://github.com/seank-img))
 - Updated tool tests and fixed return code when reading from a write-only resource [\#9](https://github.com/FlowM2M/AwaLWM2M/pull/9) ([rolandbewick](https://github.com/rolandbewick))
 
 **Fixed bugs:**
@@ -479,7 +479,7 @@
 
 - coap: Fix coap abstration for contiki [\#8](https://github.com/FlowM2M/AwaLWM2M/pull/8) ([seank-img](https://github.com/seank-img))
 - Fixed memory leak when freeing Execute payload. [\#7](https://github.com/FlowM2M/AwaLWM2M/pull/7) ([rolandbewick](https://github.com/rolandbewick))
-- coap: Change libcoap abstraction to use seperate AddressType [\#6](https://github.com/FlowM2M/AwaLWM2M/pull/6) ([seank-img](https://github.com/seank-img))
+- coap: Change libcoap abstraction to use separate AddressType [\#6](https://github.com/FlowM2M/AwaLWM2M/pull/6) ([seank-img](https://github.com/seank-img))
 - Fix CI scripts. [\#2](https://github.com/FlowM2M/AwaLWM2M/pull/2) ([DavidAntliff](https://github.com/DavidAntliff))
 - Fix memory leak. [\#1](https://github.com/FlowM2M/AwaLWM2M/pull/1) ([DavidAntliff](https://github.com/DavidAntliff))
 

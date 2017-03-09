@@ -133,19 +133,19 @@ bool ObjectsTree_IsObjectInstanceNode(TreeNode node);
 bool ObjectsTree_IsResourceNode(TreeNode node);
 
 /**
- * @brief Retreive IDs from an Object, Object instance or Resource node.
+ * @brief Retrieve IDs from an Object, Object instance or Resource node.
  * @param[in] currentNode
  */
 void ObjectsTree_GetIDsFromLeafNode(TreeNode node, ObjectIDType * objectID, ObjectInstanceIDType * objectInstanceID, ResourceIDType * resourceID);
 
 /**
- * @brief Retreive The path representation of an Object, Object instance or Resource node.
+ * @brief Retrieve The path representation of an Object, Object instance or Resource node.
  * @param[in] currentNode
  */
 const char * ObjectsTree_GetPath(TreeNode node, char * path, size_t pathLen);
 
 /**
- * @brief Retreive The number of children inside a parent node with the specified name.
+ * @brief Retrieve The number of children inside a parent node with the specified name.
  * @param[in] parentNode the name of the parent node.
  * @param[in] childName the name of the child nodes.
  * @return the number of children, or 0 if the parent does not exist.
@@ -153,7 +153,7 @@ const char * ObjectsTree_GetPath(TreeNode node, char * path, size_t pathLen);
 size_t ObjectsTree_GetNumChildrenWithName(const TreeNode parentNode, const char * childName);
 
 /**
- * @brief Retreive a child node from a specified parent node by ID. If it does not exist, create it.
+ * @brief Retrieve a child node from a specified parent node by ID. If it does not exist, create it.
  * @param[in] parentNode the name of the parent node.
  * @param[in] childName the name of the child node.
  * @param[in] childID the ID of the child
@@ -169,4 +169,3 @@ TreeNode ObjectsTreeInternal_AddChildNode(TreeNode parentNode, const char * tag)
 #endif
 
 #endif // OBJECTS_TREE_V2_H
-

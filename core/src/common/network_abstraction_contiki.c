@@ -111,7 +111,7 @@ uip_ipaddr_t * getHostByName(const char *hostName)
         }
         else if (status == RESOLV_STATUS_CACHED && resolved_addr != NULL )
         {
-            Lwm2m_Debug("Lookup of \"%s\" succeded!\n", hostName);
+            Lwm2m_Debug("Lookup of \"%s\" succeeded!\n", hostName);
         }
         else if (status == RESOLV_STATUS_RESOLVING)
         {
