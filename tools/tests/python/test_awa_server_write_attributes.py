@@ -54,7 +54,7 @@ class TestWriteAttributes(tools_common.AwaTest):
         expectedStderr = ""
         expectedCode = 0
 
-        result = server_write(self.config, "/3/0/15?pmin=10\&pmax=20")
+        result = server_write(self.config, "/3/0/15?pmin=10\\&pmax=20")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
@@ -66,7 +66,7 @@ class TestWriteAttributes(tools_common.AwaTest):
         expectedStderr = ""
         expectedCode = 0
 
-        result = server_write(self.config, "/3/0/15=abc?pmin=10\&pmax=20 /3/0/14?pmin=5\&pmax=10")
+        result = server_write(self.config, "/3/0/15=abc?pmin=10\\&pmax=20 /3/0/14?pmin=5\\&pmax=10")
         self.assertEqual(expectedStdout, result.stdout)
         self.assertEqual(expectedStderr, result.stderr)
         self.assertEqual(expectedCode,   result.code)
