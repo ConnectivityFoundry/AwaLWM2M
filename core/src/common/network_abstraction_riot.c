@@ -496,18 +496,17 @@ bool NetworkSocket_StartListening(NetworkSocket * networkSocket)
     if (networkSocket->SocketIPv6 != SOCKET_ERROR)
     {
 
-        // RIOT-OS does not support setsockopt, it always returns -1 and IPV6_V6ONLY is not defined
-        //int yes = 1;
-        //if (setsockopt(networkSocket->SocketIPv6, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes) != SOCKET_ERROR))
+        // RIOT-OS implements partially setsockopt, and IPV6_V6ONLY option is not supported
         {
             struct sockaddr *address = NULL;
             socklen_t addressLength = 0;
             addressLength = sizeof(struct sockaddr_in6);
             address = (struct sockaddr *)ip6Address;
 
-            //int flag = fcntl(networkSocket->SocketIPv6, F_GETFL);
-            //flag = flag | O_NONBLOCK;
-            //if (fcntl(networkSocket->SocketIPv6, F_SETFL, flag) < 0)
+            struct timeval timeout;
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 0;
+            if (setsockopt(networkSocket->SocketIPv6, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)))
             {
                 // ignore error
             }
