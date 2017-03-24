@@ -3,6 +3,7 @@ set (awa_common_SOURCES
   lwm2m_debug.c
   lwm2m_util.c
   lwm2m_util_linux.c
+  lwm2m_util_posix.c
   lwm2m_object_store.c
   lwm2m_attributes.c
   lwm2m_definition.c
