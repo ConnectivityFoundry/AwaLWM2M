@@ -458,7 +458,7 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
         pskIdentityLength = strlen(pskIdentity);
         if (id_len != (size_t)pskIdentityLength || memcmp(pskIdentity, id, id_len) != 0)
         {
-            Lwm2m_Warning("PSK for unknown id requested, exiting\n");
+            Lwm2m_Warning("PSK for unknown id requested, exiting identity=%s\n", pskIdentity);
             return dtls_alert_fatal_create(DTLS_ALERT_ILLEGAL_PARAMETER);
         }
         else if (result_length < (size_t)pskKeyLength)
