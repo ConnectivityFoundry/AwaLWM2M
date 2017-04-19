@@ -23,9 +23,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <fcntl.h>
-#ifndef RIOT
 #include <netdb.h>
-#endif
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -594,17 +592,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             }
             else
             {
-#ifdef RIOT
-                size_t size = sizeof(struct _NetworkAddress);
-                networkAddress = (NetworkAddress *) malloc(size);
-                if (networkAddress)
-                {
-                    memset(networkAddress, 0, size);
-                    networkAddress->Address.Sin6.sin6_family = AF_INET6;
-                    memcpy(&networkAddress->Address.Sin6.sin6_addr, hostname, sizeof(struct in6_addr));
-                    networkAddress->Address.Sin6.sin6_port = htons(port);
-                }
-#else
                 struct hostent *resolvedAddress = gethostbyname(hostname);
                 if (resolvedAddress)
                 {
@@ -632,7 +619,6 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
                         }
                     }
                 }
-#endif
             }
             if (networkAddress)
             {
