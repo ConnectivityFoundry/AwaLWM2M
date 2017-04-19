@@ -75,3 +75,4 @@ TEST_FILES:= \
 .PHONY: tests
 tests:
 	cd tests && ./run_tests.sh $(TEST_FILES) --with-xunit --xunit-file=tools_tests.xml
+
