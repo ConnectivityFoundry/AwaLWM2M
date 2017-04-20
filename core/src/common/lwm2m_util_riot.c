@@ -22,9 +22,45 @@
 
 #include "xtimer.h"
 #include "lwm2m_util.h"
+#include "net/sock/dns.h"
+#include "net/sock/util.h"
+
+sock_udp_ep_t sock_dns_server;
 
 // Get the system tick count in milliseconds
 uint64_t Lwm2mCore_GetTickCountMs(void)
 {
     return xtimer_now_usec64() / 1000;
+}
+
+bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
+{
+    (void)addressLength;
+    int res;
+    uint8_t buffer[16];
+
+    if (address == NULL || addr == NULL)
+        return false;
+
+    sock_udp_str2ep(&sock_dns_server, POSIX_DNS_SERVER);
+    res = sock_dns_query((char*)address, buffer, AF_UNSPEC);
+    if (res <= 0)
+        return false;
+
+    if (res == 4)
+    {
+        addr->Addr.Sa.sa_family = AF_INET;
+        addr->Size = 4;
+        memcpy(&addr->Addr.Sin, buffer, addr->Size);
+    }
+    else if (res == 6)
+    {
+        addr->Addr.Sa.sa_family = AF_INET6;
+        addr->Size = 16;
+        memcpy(&addr->Addr.Sin6, buffer, addr->Size);
+    }
+    else
+        return false;
+
+    return true;
 }

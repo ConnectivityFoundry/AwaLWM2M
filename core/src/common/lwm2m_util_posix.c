@@ -116,67 +116,6 @@ const char * Lwm2mCore_DebugPrintAddress(AddressType * addr)
     return Lwm2mCore_DebugPrintSockAddr(&addr->Addr.Sa);
 }
 
-bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
-{
-#ifdef RIOT /* RIOT does not implement DNS */
-    (void)address;
-    (void)addressLength;
-    (void)addr;
-    return false;
-#else
-    bool result = false;
-    struct addrinfo *res, *ainfo;
-    struct addrinfo hints;
-    static char addrstr[256];
-    int error;
-
-    memset(addrstr, 0, sizeof(addrstr));
-    if (addressLength > 0)
-    {
-        memcpy(addrstr, address, addressLength);
-    }
-    else
-    {
-        memcpy(addrstr, "localhost", 9);
-    }
-
-    memset ((char *)&hints, 0, sizeof(hints));
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_family = AF_UNSPEC;
-
-    error = getaddrinfo(addrstr, NULL, &hints, &res);
-
-    if (error != 0)
-    {
-        Lwm2m_Error("getaddrinfo: %s\n", gai_strerror(error));
-    }
-    else
-    {
-        for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next)
-        {
-            if  (ainfo->ai_family == AF_INET6)
-            {
-                addr->Addr.Sa.sa_family = ainfo->ai_family;
-                addr->Size = ainfo->ai_addrlen;
-                memcpy(&addr->Addr.Sin6, ainfo->ai_addr, addr->Size);
-                result = true;
-                break;
-            }
-            else if  (ainfo->ai_family == AF_INET)
-            {
-                addr->Addr.Sa.sa_family = ainfo->ai_family;
-                addr->Size = ainfo->ai_addrlen;
-                memcpy(&addr->Addr.Sin, ainfo->ai_addr, addr->Size);
-                result = true;
-                break;
-            }
-        }
-        freeaddrinfo(res);
-    }
-    return result;
-#endif
-}
-
 static int comparePorts(in_port_t x, in_port_t y)
 {
     int result;

@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <netdb.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
