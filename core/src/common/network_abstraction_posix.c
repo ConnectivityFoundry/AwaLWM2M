@@ -592,24 +592,24 @@ NetworkAddress * NetworkAddress_New(const char * uri, int uriLength)
             }
             else
             {
-                struct hostent *resolvedAddress = gethostbyname(hostname);
-                if (resolvedAddress)
+                AddressType resolvedAddress;
+                if (Lwm2mCore_ResolveAddressByName((unsigned char*)hostname, strlen(hostname), &resolvedAddress))
                 {
                     size_t size = sizeof(struct _NetworkAddress);
                     networkAddress = (NetworkAddress *) malloc(size);
                     if (networkAddress)
                     {
                         memset(networkAddress, 0, size);
-                        if (resolvedAddress->h_addrtype == AF_INET)
+                        if (resolvedAddress.Addr.Sa.sa_family == AF_INET)
                         {
                             networkAddress->Address.Sin.sin_family = AF_INET;
-                            memcpy(&networkAddress->Address.Sin.sin_addr, *(resolvedAddress->h_addr_list), sizeof(struct in_addr));
+                            memcpy(&networkAddress->Address.Sin.sin_addr, &resolvedAddress.Addr.Sin.sin_addr, sizeof(struct in_addr));
                             networkAddress->Address.Sin.sin_port = htons(port);
                         }
-                        else if (resolvedAddress->h_addrtype == AF_INET6)
+                        else if (resolvedAddress.Addr.Sa.sa_family == AF_INET6)
                         {
                             networkAddress->Address.Sin6.sin6_family = AF_INET6;
-                            memcpy(&networkAddress->Address.Sin6.sin6_addr, *(resolvedAddress->h_addr_list), sizeof(struct in6_addr));
+                            memcpy(&networkAddress->Address.Sin6.sin6_addr, &resolvedAddress.Addr.Sin6.sin6_addr, sizeof(struct in6_addr));
                             networkAddress->Address.Sin6.sin6_port = htons(port);
                         }
                         else
