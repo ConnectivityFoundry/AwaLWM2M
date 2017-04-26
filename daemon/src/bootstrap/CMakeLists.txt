@@ -34,7 +34,7 @@ set_source_files_properties (awa_bootstrapd_cmdline.c PROPERTIES COMPILE_FLAGS -
 
 add_executable (awa_bootstrapd ${awa_bootstrapd_SOURCES})
 target_include_directories (awa_bootstrapd PRIVATE ${awa_bootstrapd_INCLUDE_DIRS})
-target_link_libraries (awa_bootstrapd awa_bootstrap_server_static awa_common_static)
+target_link_libraries (awa_bootstrapd awa_bootstrap_server_static awa_common_static libb64_static libxml_static)
 
 if (ENABLE_GCOV)
   target_link_libraries (awa_bootstrapd gcov)

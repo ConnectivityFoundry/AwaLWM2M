@@ -501,7 +501,7 @@ static LWM2MSecurityInfo * GetSecurityInfoForAddress(Lwm2mContextType * context,
         {
             if (!securityInfo->AddressResolved)
             {
-                securityInfo->AddressResolved = coap_ResolveAddressByURI(securityInfo->ServerURI, &securityInfo->address);
+                securityInfo->AddressResolved = coap_ResolveAddressByURI((unsigned char *)securityInfo->ServerURI, &securityInfo->address);
             }
 
             if (securityInfo->AddressResolved && Lwm2mCore_CompareAddresses(address, &securityInfo->address) == 0)

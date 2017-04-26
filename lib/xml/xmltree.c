@@ -146,7 +146,7 @@ bool Tree_DetachNode(TreeNode node)
             // Detach the node from its parent's children and move all the children down to fill its place, then decrease the parent's child count
             _parent->Children[_node->ChildID - 1] = NULL;
 
-            int i;
+            unsigned int i;
             for (i = _node->ChildID-1; i < _parent->ChildCount-1; i++)
             {
                 _parent->Children[i] = _parent->Children[i+1];
@@ -227,7 +227,7 @@ TreeNode TreeNode_CopyTreeNode(TreeNode node)
             if (((_treeNode)node)->Name)
                 newNode->Name = strdup(((_treeNode)node)->Name);
             if (((_treeNode)node)->Value)
-                newNode->Value = strdup(((_treeNode)node)->Value);
+                newNode->Value = (uint8_t*)strdup((const char*)((_treeNode)node)->Value);
         }
     }
 
@@ -594,6 +594,7 @@ TreeNode TreeNode_ParseXML(uint8_t* doc, uint32_t length, bool wholeDoc)
 
 void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName, const char **atts)
 {
+    (void)atts;
     TreeNode newNode = TreeNode_Create();
     if (newNode)
     {
@@ -619,12 +620,15 @@ void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName
 
 void HTTP_xmlDOMBuilder_EndElementHandler(void *userData, const char *nodeName)
 {
+    (void)userData;
+    (void)nodeName;
     // Return back up the tree
     currentTreeNode = TreeNode_GetParent(currentTreeNode);
 }
 
 void HTTP_xmlDOMBuilder_CharDataHandler(void *userData, const char *s, int len)
 {
+    (void)userData;
     if (currentTreeNode)
     {
         if (s)

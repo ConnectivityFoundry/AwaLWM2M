@@ -77,7 +77,7 @@ set_source_files_properties (awa_serverd_cmdline.c PROPERTIES COMPILE_FLAGS -Wno
 
 add_executable (awa_serverd ${awa_serverd_SOURCES})
 target_include_directories (awa_serverd PRIVATE ${awa_serverd_INCLUDE_DIRS})
-target_link_libraries (awa_serverd awa_server_static awa_common_static)
+target_link_libraries (awa_serverd awa_server_static awa_common_static libb64_static libxml_static)
 
 if (ENABLE_GCOV)
    target_link_libraries (awa_serverd gcov)

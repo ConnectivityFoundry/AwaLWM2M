@@ -1,5 +1,5 @@
 /************************************************************************************************************************
- Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -20,22 +20,47 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
+#include "xtimer.h"
+#include "lwm2m_util.h"
+#include "net/sock/dns.h"
+#include "net/sock/util.h"
 
-#ifndef LWM2M_CLIENT_CERT_H_
-#define LWM2M_CLIENT_CERT_H_
+sock_udp_ep_t sock_dns_server;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdint.h>
-
-const unsigned char clientCert[] = { 0x00
-};
-
-
-#ifdef __cplusplus
+// Get the system tick count in milliseconds
+uint64_t Lwm2mCore_GetTickCountMs(void)
+{
+    return xtimer_now_usec64() / 1000;
 }
-#endif
 
-#endif /* LWM2M_CLIENT_CERT_H_ */
+bool Lwm2mCore_ResolveAddressByName(unsigned char * address, int addressLength, AddressType * addr)
+{
+    (void)addressLength;
+    int res;
+    uint8_t buffer[16];
+
+    if (address == NULL || addr == NULL)
+        return false;
+
+    sock_udp_str2ep(&sock_dns_server, POSIX_DNS_SERVER);
+    res = sock_dns_query((char*)address, buffer, AF_UNSPEC);
+    if (res <= 0)
+        return false;
+
+    if (res == 4)
+    {
+        addr->Addr.Sa.sa_family = AF_INET;
+        addr->Size = 4;
+        memcpy(&addr->Addr.Sin, buffer, addr->Size);
+    }
+    else if (res == 6)
+    {
+        addr->Addr.Sa.sa_family = AF_INET6;
+        addr->Size = 16;
+        memcpy(&addr->Addr.Sin6, buffer, addr->Size);
+    }
+    else
+        return false;
+
+    return true;
+}

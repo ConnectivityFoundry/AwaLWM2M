@@ -1,7 +1,7 @@
-ServerURI=coap://127.0.0.1:5683
+ServerURI=coaps://[fe80::cc0b:b7ff:fedd:b435]:5683
 SecurityMode=0
-PublicKey=[PublicKey]
-SecretKey=[SecretKey]
+PublicKey=[i2INAfu1MUCPTVi6oyw-IQ]
+SecretKey=[F6B9B62548E26E52B5FC710389B9CBD53D6C2C7A21651C5AAEB6A5071DFDCA19]
 ServerID=1
 HoldOffTime=30
 ShortServerID=1

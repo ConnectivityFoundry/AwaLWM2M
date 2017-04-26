@@ -1,5 +1,5 @@
 /************************************************************************************************************************
- Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies.
+ Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -20,22 +20,31 @@
  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************************************************/
 
-
-#ifndef LWM2M_CLIENT_CERT_H_
-#define LWM2M_CLIENT_CERT_H_
+#ifndef NETWORK_ABSTRACTION_POSIX_H_
+#define NETWORK_ABSTRACTION_POSIX_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "network_abstraction.h"
 
-const unsigned char clientCert[] = { 0x00
-};
+NetworkAddress * NetworkAddress_FromIPAddress(const char * ipAddress, uint16_t port);
+NetworkSocket * NetworkSocket_New(const char * ipAddress, NetworkSocketType socketType, uint16_t port);
+bool NetworkSocket_Send(NetworkSocket * networkSocket, NetworkAddress * destAddress, uint8_t * buffer, int bufferLength);
 
+int NetworkAddress_Compare(NetworkAddress * address1, NetworkAddress * address2);
+
+bool NetworkAddress_IsSecure(const NetworkAddress * address);
+NetworkSocketError NetworkSocket_GetError(NetworkSocket * networkSocket);
+int NetworkSocket_GetFileDescriptor(NetworkSocket * networkSocket);
+void NetworkSocket_Free(NetworkSocket ** networkSocket);
+void NetworkSocket_SetCertificate(NetworkSocket * networkSocket, const uint8_t * cert, int certLength, AwaCertificateFormat format);
+void NetworkSocket_SetPSK(NetworkSocket * networkSocket, const char * identity, const uint8_t * key, int keyLength);
+void NetworkAddress_SetAddressType(NetworkAddress * address, AddressType * addressType);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LWM2M_CLIENT_CERT_H_ */
+#endif /* NETWORK_ABSTRACTION_POSIX_H_ */
