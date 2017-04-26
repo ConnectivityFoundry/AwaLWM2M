@@ -142,7 +142,7 @@ char* charhistoryBuffer_lookBack(XMLParser_Context xmlParser, unsigned int count
 {
     char *result = NULL;
     if(xmlParser && count > 0) {
-        if(xmlParser->HistoryBuffLen >= (int)count)
+        if(xmlParser->HistoryBuffLen >= count)
         {
             result = &xmlParser->CharHistoryBuffer[CHARHISTORY_LENGTH-count];               // '-1' because array indexing is 0-based
         }

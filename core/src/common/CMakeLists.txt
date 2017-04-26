@@ -1,9 +1,9 @@
 set (awa_common_SOURCES
   lwm2m_list.c
+  network_abstraction_linux.c
   lwm2m_debug.c
   lwm2m_util.c
   lwm2m_util_linux.c
-  lwm2m_util_posix.c
   lwm2m_object_store.c
   lwm2m_attributes.c
   lwm2m_definition.c
@@ -11,7 +11,6 @@ set (awa_common_SOURCES
   lwm2m_endpoints.c
   lwm2m_result.c
   lwm2m_types.c
-  network_abstraction_posix.c
 )
 
 if (WITH_LIBCOAP)
@@ -63,6 +62,11 @@ if (WITH_TINYDTLS)
 endif ()
 
 
+set (awa_common_LIBS
+  libxml_static
+  libb64_static
+)
+
 if (WITH_LIBCOAP)
   list (APPEND awa_common_LIBS libcoap_static)
 endif ()
@@ -78,7 +82,6 @@ if (WITH_JSON)
   )
   list (APPEND awa_common_LIBS
     libjsmn_static
-    libb64_static
   )
 endif ()
 

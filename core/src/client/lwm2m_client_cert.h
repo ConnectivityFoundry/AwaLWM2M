@@ -30,7 +30,7 @@ extern "C" {
 
 #include <stdint.h>
 
-const unsigned char clientCert[] = { 0x00
+const unsigned char clientCert[] = {
 };
 
 

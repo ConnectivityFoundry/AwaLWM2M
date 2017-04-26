@@ -354,12 +354,11 @@ static int CertificateVerify(gnutls_session_t session)
 
 static int DecryptCallBack(struct dtls_context_t *context, session_t *session, uint8 *recieveBuffer, size_t receiveBufferLegth)
 {
-    (void)session;
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
     if (dtlsSession && dtlsSession->BufferLength > 0)
     {
-        if (receiveBufferLegth < (size_t)dtlsSession->BufferLength)
+        if (receiveBufferLegth < dtlsSession->BufferLength)
         {
             result =  receiveBufferLegth;
         }
@@ -379,12 +378,11 @@ static int DecryptCallBack(struct dtls_context_t *context, session_t *session, u
 }
 static int EncryptCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength)
 {
-    (void)session;
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
     if (dtlsSession && dtlsSession->BufferLength > 0)
     {
-        if (sendBufferLength < (size_t)dtlsSession->BufferLength)
+        if (sendBufferLength < dtlsSession->BufferLength)
         {
             result =  sendBufferLength;
         }
@@ -405,7 +403,6 @@ static int EncryptCallBack(struct dtls_context_t *context, session_t *session, u
 
 static int EventCallBack(struct dtls_context_t *context, session_t *session, dtls_alert_level_t level, unsigned short code)
 {
-    (void)level;
     if (code == DTLS_EVENT_CONNECTED)
     {
         DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
@@ -430,8 +427,6 @@ static int EventCallBack(struct dtls_context_t *context, session_t *session, dtl
 static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtls_credentials_type_t type, const unsigned char *id,
         size_t id_len, unsigned char *result, size_t result_length)
 {
-    (void)ctx;
-    (void)session;
     switch (type)
     {
     case DTLS_PSK_HINT:
@@ -446,7 +441,7 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
             return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
         }
         int pskIdentityLength = strlen(pskIdentity);
-        if (result_length < (size_t)pskIdentityLength)
+        if (result_length < pskIdentityLength)
         {
             Lwm2m_Warning("cannot set psk_identity -- buffer too small\n");
             return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
@@ -456,14 +451,14 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
         return pskIdentityLength;
     case DTLS_PSK_KEY:
         pskIdentityLength = strlen(pskIdentity);
-        if (id_len != (size_t)pskIdentityLength || memcmp(pskIdentity, id, id_len) != 0)
+        if (id_len != pskIdentityLength || memcmp(pskIdentity, id, id_len) != 0)
         {
-            Lwm2m_Warning("PSK for unknown id requested, exiting identity=%s\n", pskIdentity);
+            Lwm2m_Warning("PSK for unknown id requested, exiting\n");
             return dtls_alert_fatal_create(DTLS_ALERT_ILLEGAL_PARAMETER);
         }
-        else if (result_length < (size_t)pskKeyLength)
+        else if (result_length < pskKeyLength)
         {
-            Lwm2m_Warning("cannot set psk -- buffer too small %u %u\n", result_length, pskKeyLength);
+            Lwm2m_Warning("cannot set psk -- buffer too small\n");
             return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
         }
 
@@ -479,7 +474,6 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
 
 static int SSLSendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength)
 {
-    (void)session;
     int result;
     DTLS_Session * dtlsSession = (DTLS_Session *)dtls_get_app_data(context);
     if (dtlsSession && NetworkSend)
@@ -507,9 +501,5 @@ static int CertificateVerify(struct dtls_context_t *ctx, const session_t *sessio
 
 static int DummySendCallBack(struct dtls_context_t *context, session_t *session, uint8 * sendBuffer, size_t sendBufferLength)
 {
-    (void)context;
-    (void)session;
-    (void)sendBuffer;
-    (void)sendBufferLength;
     return 0;
 }
