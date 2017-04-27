@@ -463,7 +463,7 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
         }
         else if (result_length < (size_t)pskKeyLength)
         {
-            Lwm2m_Warning("cannot set psk -- buffer too small %u %u\n", result_length, pskKeyLength);
+            Lwm2m_Warning("cannot set psk -- buffer too small\n");
             return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
         }
 
