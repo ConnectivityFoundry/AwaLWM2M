@@ -458,12 +458,12 @@ static int PSKCallBack(struct dtls_context_t *ctx, const session_t *session, dtl
         pskIdentityLength = strlen(pskIdentity);
         if (id_len != (size_t)pskIdentityLength || memcmp(pskIdentity, id, id_len) != 0)
         {
-            Lwm2m_Warning("PSK for unknown id requested, exiting identity=%s\n", pskIdentity);
+            Lwm2m_Warning("PSK for unknown id requested, exiting\n");
             return dtls_alert_fatal_create(DTLS_ALERT_ILLEGAL_PARAMETER);
         }
         else if (result_length < (size_t)pskKeyLength)
         {
-            Lwm2m_Warning("cannot set psk -- buffer too small %u %u\n", result_length, pskKeyLength);
+            Lwm2m_Warning("cannot set psk -- buffer too small\n");
             return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
         }
 
