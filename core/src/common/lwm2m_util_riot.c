@@ -25,6 +25,8 @@
 #include "net/sock/dns.h"
 #include "net/sock/util.h"
 
+#define POSIX_DNS_SERVER "53"
+
 sock_udp_ep_t sock_dns_server;
 
 // Get the system tick count in milliseconds
